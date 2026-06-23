@@ -1,0 +1,312 @@
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
+
+export default function AuthScreen({ navigation }) {
+  const [activeTab, setActiveTab] = useState('login'); // 'register' or 'login'
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#05050C" />
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+            <Ionicons name="chevron-back" size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {/* Hero Image with Text */}
+          <View style={styles.heroContainer}>
+            <Image 
+              source={activeTab === 'login' ? require('../assets/auth_hero_with_text.jpg') : require('../assets/register_hero_with_text.jpg')} 
+              style={styles.heroImage} 
+              resizeMode="contain" 
+            />
+          </View>
+
+          {/* Custom Tabs */}
+          <View style={styles.tabContainer}>
+            <TouchableOpacity 
+              style={[styles.tabButton, activeTab === 'register' && styles.tabActive]}
+              onPress={() => setActiveTab('register')}
+              activeOpacity={0.8}
+            >
+              <Feather name="user-plus" size={16} color={activeTab === 'register' ? '#FFF' : '#888899'} style={styles.tabIcon} />
+              <Text style={[styles.tabText, activeTab === 'register' && styles.tabTextActive]}>
+                Create account
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.tabButton, activeTab === 'login' && styles.tabActive]}
+              onPress={() => setActiveTab('login')}
+              activeOpacity={0.8}
+            >
+              <Feather name="log-in" size={16} color={activeTab === 'login' ? '#FFF' : '#888899'} style={styles.tabIcon} />
+              <Text style={[styles.tabText, activeTab === 'login' && styles.tabTextActive]}>
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Form */}
+          {activeTab === 'register' && (
+            <View style={styles.inputContainer}>
+              <Feather name="user" size={18} color="#888899" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Your name"
+                placeholderTextColor="#555566"
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
+          )}
+
+          <View style={styles.inputContainer}>
+            <Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Your phone number"
+              placeholderTextColor="#555566"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
+          </View>
+
+          {activeTab === 'register' && (
+            <View style={styles.inputContainer}>
+              <Feather name="mail" size={18} color="#888899" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Your email"
+                placeholderTextColor="#555566"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+          )}
+
+          <View style={styles.inputContainer}>
+            <Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Your password"
+              placeholderTextColor="#555566"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+              <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+            </TouchableOpacity>
+          </View>
+
+          {activeTab === 'register' && (
+            <View style={styles.inputContainer}>
+              <Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm password"
+                placeholderTextColor="#555566"
+                secureTextEntry={!showConfirmPassword}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+                <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {activeTab === 'login' && (
+            <TouchableOpacity 
+              style={styles.forgotPasswordContainer} 
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ForgotPassword')}
+            >
+              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Main Button */}
+          <TouchableOpacity 
+            style={[styles.loginButton, activeTab === 'register' && { marginTop: 8 }]} 
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('StepThree')}
+          >
+            <Text style={styles.loginButtonText}>{activeTab === 'login' ? 'Login' : 'Create Account'}</Text>
+            <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <MaterialCommunityIcons name="shield-check-outline" size={16} color="#22C55E" />
+            <Text style={styles.footerText}>Your data is reliably protected</Text>
+          </View>
+          
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#05050C',
+  },
+  header: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#0A0A16',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#1A1A2E',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  heroContainer: {
+    alignItems: 'center',
+    marginTop: -10,
+    marginBottom: 20,
+  },
+  heroImage: {
+    width: '100%',
+    height: 320,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#0A0A16',
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: '#1A1A2E',
+  },
+  tabButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  tabActive: {
+    backgroundColor: '#3B0764',
+  },
+  tabIcon: {
+    marginRight: 8,
+  },
+  tabText: {
+    color: '#888899',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  tabTextActive: {
+    color: '#FFFFFF',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0A0A16',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#1A1A2E',
+    height: 56,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 15,
+  },
+  eyeIcon: {
+    padding: 4,
+  },
+  forgotPasswordContainer: {
+    alignSelf: 'flex-end',
+    marginBottom: 24,
+  },
+  forgotPasswordText: {
+    color: '#A855F7',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  loginButton: {
+    backgroundColor: '#6D28D9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    borderRadius: 16,
+    marginBottom: 24,
+    marginTop: 8,
+  },
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#1A1A2E',
+  },
+  dividerText: {
+    color: '#555566',
+    paddingHorizontal: 12,
+    fontSize: 13,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+  },
+  footerText: {
+    color: '#555566',
+    fontSize: 12,
+    marginLeft: 6,
+  },
+});
