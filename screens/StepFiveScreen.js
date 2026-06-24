@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, StatusBar, Platform, Image, ScrollView } from 'react-native';
+import React, { useState, Suspense } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, StatusBar, Platform, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { Canvas } from '@react-three/fiber/native';
+import { useGLTF } from '@react-three/drei/native';
+
+function CharacterModel() {
+  // Load the GLB file
+  const { scene } = useGLTF(require('../assets/models/1defoltpersonaj.glb'));
+  // Adjust scale and position based on the specific model's dimensions
+  return (
+    <primitive object={scene} scale={2} position={[0, -3, 0]} />
+  );
+}
 
 const T = {
   uz: {
@@ -139,6 +150,17 @@ export default function StepFiveScreen({ navigation, route }) {
         <View style={styles.previewContainer}>
           <Image source={require('../assets/character_bg.png')} style={styles.previewBg} resizeMode="cover" />
           
+          <View style={styles.canvasContainer}>
+            <Canvas>
+              <ambientLight intensity={1.5} />
+              <directionalLight position={[10, 10, 5]} intensity={1.5} />
+              <directionalLight position={[-10, 10, -5]} intensity={0.5} />
+              <Suspense fallback={null}>
+                <CharacterModel />
+              </Suspense>
+            </Canvas>
+          </View>
+
           <TouchableOpacity style={styles.arrowLeft} activeOpacity={0.7}>
             <MaterialCommunityIcons name="chevron-left" size={32} color="#FFF" />
           </TouchableOpacity>
@@ -294,6 +316,14 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  canvasContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 5,
+  },
   arrowLeft: {
     position: 'absolute',
     left: 15,
@@ -306,6 +336,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#A855F7',
+    zIndex: 10,
   },
   arrowRight: {
     position: 'absolute',
@@ -319,6 +350,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#A855F7',
+    zIndex: 10,
   },
   tabsContainer: {
     flexDirection: 'row',
