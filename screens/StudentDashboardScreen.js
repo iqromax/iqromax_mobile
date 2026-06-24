@@ -236,13 +236,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
           {/* Start Exercise Button */}
-          <View style={styles.startButton} pointerEvents="box-none">
-            <ImageBackground source={require('../assets/start_btn_new.png')} style={styles.startButtonBg} resizeMode="stretch">
-              <TouchableOpacity activeOpacity={0.7} style={styles.startButtonTouchable}>
-                <Text style={styles.startButtonText}>{t.startExercise}</Text>
-              </TouchableOpacity>
-            </ImageBackground>
-          </View>
+          <TouchableOpacity activeOpacity={0.7} style={styles.startButton}>
+            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} resizeMode="stretch" />
+            <View style={styles.startButtonTouchable}>
+              <Text style={styles.startButtonText}>{t.startExercise}</Text>
+            </View>
+          </TouchableOpacity>
         </View>
         </View>
 
