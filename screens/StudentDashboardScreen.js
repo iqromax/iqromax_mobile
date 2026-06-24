@@ -343,7 +343,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
       {/* Exercise Tab Content */}
       <View style={[styles.mainContent, { display: activeTab === 'exercise' ? 'flex' : 'none' }]}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 15 }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 0 }}>
           <View style={styles.exHeaderRow}>
             <TouchableOpacity style={styles.exBackButton} activeOpacity={0.7} onPress={() => setActiveTab('home')}>
               <Ionicons name="arrow-back" size={20} color="#FFF" />
