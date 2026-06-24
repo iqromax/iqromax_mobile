@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, TextInput, FlatList, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, TextInput, FlatList, ScrollView, Platform } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { COUNTRIES } from '../data/countries';
 
@@ -158,6 +158,7 @@ export default function StepThreeScreen({ navigation }) {
           style={[styles.button, !selectedCountry && styles.buttonDisabled]} 
           activeOpacity={0.8}
           disabled={!selectedCountry}
+          onPress={() => navigation.navigate('StepFour')}
         >
           <Text style={styles.buttonText}>CONTINUE</Text>
           <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
@@ -171,6 +172,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#05050C',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, ScrollView, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, ScrollView, StatusBar, ImageBackground, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const ROLES = [
@@ -8,6 +8,9 @@ const ROLES = [
     title: 'Student',
     subtitle: 'Practice and develop yourself',
     image: require('../assets/role_student.png'),
+    bgUnselected: require('../assets/student_card_unselected.png'),
+    bgSelected: require('../assets/student_card_selected.png'),
+    aspectRatio: 1024 / 479,
     color: '#32CD32', // Green
   },
   {
@@ -15,6 +18,9 @@ const ROLES = [
     title: 'Parent',
     subtitle: "Track and support your child's achievements",
     image: require('../assets/role_parent.png'),
+    bgUnselected: require('../assets/parent_card_unselected.png'),
+    bgSelected: require('../assets/parent_card_selected.png'),
+    aspectRatio: 1024 / 479,
     color: '#A855F7', // Purple
   },
   {
@@ -22,6 +28,9 @@ const ROLES = [
     title: 'Teacher',
     subtitle: 'Manage and develop your students',
     image: require('../assets/role_teacher.png'),
+    bgUnselected: require('../assets/teacher_card_unselected.png'),
+    bgSelected: require('../assets/teacher_card_selected.png'),
+    aspectRatio: 1024 / 448,
     color: '#3B82F6', // Blue
   },
 ];
@@ -32,7 +41,7 @@ export default function StepTwoScreen({ navigation }) {
   const handleNext = () => {
     if (selectedRole) {
       // Proceed to AuthScreen
-      navigation.navigate('AuthScreen');
+      navigation.navigate('AuthScreen', { role: selectedRole });
     }
   };
 
@@ -57,6 +66,30 @@ export default function StepTwoScreen({ navigation }) {
         <View style={styles.rolesContainer}>
           {ROLES.map((role) => {
             const isSelected = selectedRole === role.id;
+
+            if (role.bgUnselected) {
+              const bgSource = isSelected ? role.bgSelected : role.bgUnselected;
+              return (
+                <TouchableOpacity
+                  key={role.id}
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedRole(role.id)}
+                >
+                  <ImageBackground
+                    source={bgSource}
+                    style={[styles.fullCardBackground, { aspectRatio: role.aspectRatio }]}
+                    imageStyle={{ borderRadius: 16 }}
+                    resizeMode="stretch"
+                  >
+                    <View style={styles.fullCardTextContainer}>
+                      <Text style={styles.roleTitle}>{role.title}</Text>
+                      <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
+                    </View>
+                  </ImageBackground>
+                </TouchableOpacity>
+              );
+            }
+
             return (
               <TouchableOpacity
                 key={role.id}
@@ -94,7 +127,7 @@ export default function StepTwoScreen({ navigation }) {
           disabled={!selectedRole}
         >
           <Text style={styles.nextButtonText}>NEXT</Text>
-          <MaterialCommunityIcons name="chevron-right" size={24} color="#000" />
+          <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -105,6 +138,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#05050C',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   headerCenter: {
     alignItems: 'center',
@@ -114,26 +148,27 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 12,
+    letterSpacing: 1,
   },
   pagination: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#1A1A2E',
-    marginHorizontal: 4,
+    backgroundColor: '#333344',
   },
   activeDot: {
-    width: 20,
+    width: 24,
     backgroundColor: '#A855F7',
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 120, // leave space for absolute footer
   },
   title: {
     color: '#FFFFFF',
@@ -145,6 +180,17 @@ const styles = StyleSheet.create({
   },
   rolesContainer: {
     gap: 16,
+  },
+  fullCardBackground: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  fullCardTextContainer: {
+    flex: 1,
+    paddingLeft: 180, // Move text further right
+    justifyContent: 'center',
+    paddingRight: 24, // Keep it from touching the right edge/checkmark
   },
   roleCard: {
     flexDirection: 'row',
@@ -170,14 +216,14 @@ const styles = StyleSheet.create({
   },
   roleTitle: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 6,
   },
   roleSubtitle: {
     color: '#888899',
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 15,
+    lineHeight: 20,
     paddingRight: 24, // Leave space for checkmark
   },
   checkIcon: {
@@ -191,12 +237,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footer: {
-    paddingHorizontal: 20,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
     paddingBottom: 30,
-    paddingTop: 10,
+    backgroundColor: '#05050C',
   },
   nextButton: {
-    backgroundColor: '#FFC107', // Yellow
+    backgroundColor: '#FACC15', // Matches StepOneScreen
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -208,7 +258,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     color: '#000000',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     marginRight: 4,
   },

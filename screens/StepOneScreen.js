@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Dimensions, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, Platform } from 'react-native';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#05050C',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   contentContainer: {
     flex: 1,

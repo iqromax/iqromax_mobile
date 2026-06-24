@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
 
-export default function AuthScreen({ navigation }) {
+export default function AuthScreen({ navigation, route }) {
+  const { role = 'student' } = route.params || {};
   const [activeTab, setActiveTab] = useState('login'); // 'register' or 'login'
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -11,6 +12,20 @@ export default function AuthScreen({ navigation }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleAuthAction = () => {
+    if (activeTab === 'register') {
+      if (!name.trim() || !phone.trim() || !email.trim() || !password || !confirmPassword) {
+        // Simple validation check
+        return;
+      }
+    } else {
+      if (!phone.trim() || !password) {
+        return;
+      }
+    }
+    navigation.navigate('StepThree');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -29,7 +44,11 @@ export default function AuthScreen({ navigation }) {
           {/* Hero Image with Text */}
           <View style={styles.heroContainer}>
             <Image 
-              source={activeTab === 'login' ? require('../assets/auth_hero_with_text.jpg') : require('../assets/register_hero_with_text.jpg')} 
+              source={
+                activeTab === 'login' 
+                  ? require('../assets/auth_hero_with_text.jpg') 
+                  : (role === 'parent' ? require('../assets/auth_hero_parent.jpg') : (role === 'teacher' ? require('../assets/auth_hero_teacher.jpg') : require('../assets/register_hero_with_text.jpg')))
+              } 
               style={styles.heroImage} 
               resizeMode="contain" 
             />
@@ -145,9 +164,14 @@ export default function AuthScreen({ navigation }) {
 
           {/* Main Button */}
           <TouchableOpacity 
-            style={[styles.loginButton, activeTab === 'register' && { marginTop: 8 }]} 
+            style={[
+              styles.loginButton, 
+              activeTab === 'register' && { marginTop: 8 },
+              (activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password)) && { opacity: 0.5 }
+            ]} 
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('StepThree')}
+            onPress={handleAuthAction}
+            disabled={activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password)}
           >
             <Text style={styles.loginButtonText}>{activeTab === 'login' ? 'Login' : 'Create Account'}</Text>
             <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
@@ -176,6 +200,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#05050C',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
     paddingVertical: 10,
