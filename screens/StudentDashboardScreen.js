@@ -537,7 +537,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
           </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.opsScroll} contentContainerStyle={styles.opsScrollContent}>
+          <View style={styles.opsRow}>
             {/* Oddiy */}
             <TouchableOpacity 
               style={[styles.opsCard, selectedOperation === 'oddiy' && styles.opsCardSelected]}
@@ -610,7 +610,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsAralashDesc}</Text>
             </TouchableOpacity>
 
-          </ScrollView>
+          </View>
         </View>
         </ScrollView>
         </View>
@@ -1571,19 +1571,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 2,
   },
-  opsScroll: {
-    // ScrollView styles
-  },
-  opsScrollContent: {
+  opsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
     paddingRight: 16,
-    gap: 12,
   },
   opsCard: {
-    width: 140,
-    height: 140,
+    flex: 1,
+    height: 110,
     backgroundColor: '#0f1020',
     borderRadius: 12,
-    padding: 12,
+    padding: 6,
+    marginHorizontal: 3,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -1600,23 +1600,23 @@ const styles = StyleSheet.create({
   },
   opsCheckmarkBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    top: 4,
+    right: 4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
     backgroundColor: '#A855F7',
     justifyContent: 'center',
     alignItems: 'center',
   },
   opsCardIconWrapper: {
-    height: 40,
+    height: 30,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   opsFormulaIcon: {
-    fontSize: 24,
+    fontSize: 18,
     color: '#9CA3AF',
     fontStyle: 'italic',
     fontFamily: 'serif',
@@ -1626,9 +1626,9 @@ const styles = StyleSheet.create({
   },
   opsCardTitle: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 11,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 2,
     textAlign: 'center',
   },
   opsCardTitleSelected: {
@@ -1636,8 +1636,8 @@ const styles = StyleSheet.create({
   },
   opsCardDesc: {
     color: '#9CA3AF',
-    fontSize: 12,
+    fontSize: 9,
     textAlign: 'center',
-    lineHeight: 16,
+    lineHeight: 11,
   },
 });
