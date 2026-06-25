@@ -1,6 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Image, Animated, ImageBackground, ScrollView, Platform } from 'react-native';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Image, Animated, ImageBackground, ScrollView, Platform, UIManager, LayoutAnimation } from 'react-native';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { Canvas } from '@react-three/fiber/native';
+import { useGLTF, OrbitControls } from '@react-three/drei/native';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',
@@ -17,18 +23,19 @@ const COIN_TRANSLATIONS = {
 };
 
 const DASHBOARD_TRANSLATIONS = {
-  en: { title: "Math Master", subtitle: "Level 24", desc: "Great for learning math, conquer the world with this!", clothes: "CLOTHES", accessories: "ACCESSORIES", levelText: "LEVEL", toNextLevel: "To next level", startExercise: "START EXERCISE", stats: "STATISTICS", seeAll: "SEE ALL >", logic: "LOGIC", logicDesc: "Great!", speed: "SPEED", speedDesc: "Good", accuracy: "ACCURACY", accuracyDesc: "Excellent!", streak: "STREAK", streakDesc: "Days", navHome: "HOME", navExercise: "EXERCISE", navInventory: "INVENTORY", navRanking: "RANKING", navProfile: "PROFILE", missions: "MISSIONS", exerciseSubtitle: "Choose the exercise type that suits you and continue learning!", infoTitle: "About Simple Math", infoDesc: "The simple math exercise develops the skill of performing arithmetic operations quickly and correctly.", infoOpsLabel: "Operations:", infoOps: ["addition", "subtraction", "multiplication", "division"], infoExampleLabel: "Example:", examplesCountTitle: "NUMBER OF EXAMPLES", examplesCountSubtitle: "Choose from 7 to 25 examples", exampleWord: "examples", opsTitle: "OPERATIONS", opsSubtitle: "Choose the operation type", opsOddiy: "Simple", opsOddiyDesc: "Addition, subtraction, multiplication, division", opsF5: "Formula 5", opsF5Desc: "Formulas up to 5", opsF10: "Formula 10", opsF10Desc: "Formulas up to 10", opsAralash: "Mixed", opsAralashDesc: "All operations mixed" },
-  ru: { title: "Мастер математики", subtitle: "Уровень 24", desc: "Отлично для изучения математики, завоюйте мир с этим!", clothes: "ОДЕЖДА", accessories: "АКСЕССУАРЫ", levelText: "УРОВЕНЬ", toNextLevel: "До след. уровня", startExercise: "НАЧАТЬ ТРЕНИРОВКУ", stats: "СТАТИСТИКА", seeAll: "ВСЕ >", logic: "ЛОГИКА", logicDesc: "Отлично!", speed: "СКОРОСТЬ", speedDesc: "Хорошо", accuracy: "ТОЧНОСТЬ", accuracyDesc: "Превосходно!", streak: "СЕРИЯ", streakDesc: "Дней", navHome: "ГЛАВНАЯ", navExercise: "ТРЕНИРОВКА", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИИ", exerciseSubtitle: "Выберите подходящий тип упражнений и продолжайте обучение!", infoTitle: "О простом счете", infoDesc: "Упражнение на простой счет развивает навык быстрого и правильного выполнения арифметических операций.", infoOpsLabel: "Операции:", infoOps: ["сложение", "вычитание", "умножение", "деление"], infoExampleLabel: "Пример:", examplesCountTitle: "КОЛИЧЕСТВО ПРИМЕРОВ", examplesCountSubtitle: "Выберите от 7 до 25 примеров", exampleWord: "примеров", opsTitle: "ОПЕРАЦИИ", opsSubtitle: "Выберите тип операций", opsOddiy: "Простые", opsOddiyDesc: "Сложение, вычитание, умножение, деление", opsF5: "Формула 5", opsF5Desc: "Формулы до 5", opsF10: "Формула 10", opsF10Desc: "Формулы до 10", opsAralash: "Вперемешку", opsAralashDesc: "Все операции вперемешку" },
-  uz: { title: "Matematika Ustasi", subtitle: "24-daraja", desc: "Matematika o'rganishda zo'r, bu bilan dunyoni egallang!", clothes: "KIYIMLAR", accessories: "AKSESSUARLAR", levelText: "LEVEL", toNextLevel: "Keyingi levelgacha yana", startExercise: "MASHQNI BOSHLASH", stats: "STATISTIKALAR", seeAll: "BARCHASI >", logic: "MANTIQ", logicDesc: "Zor!", speed: "TEZLIK", speedDesc: "Yaxshi", accuracy: "ANIQLIK", accuracyDesc: "A'lo!", streak: "SERIYA", streakDesc: "Kun", navHome: "BOSH SAHIFA", navExercise: "MASHQ", navInventory: "INVENTAR", navRanking: "REYTING", navProfile: "PROFIL", missions: "MISSIYALAR", exerciseSubtitle: "O'zingizga mos mashq turini tanlang va o'rganishni davom eting!", infoTitle: "Oddiy hisob haqida", infoDesc: "Oddiy hisob mashqi arifmetik amallarni tez va to'g'ri bajarish ko'nikmasini rivojlantiradi.", infoOpsLabel: "Amallar:", infoOps: ["qo'shish", "ayirish", "ko'paytirish", "bo'lish"], infoExampleLabel: "Misol:", examplesCountTitle: "MISOLLAR SONI", examplesCountSubtitle: "7 dan 25 gacha misol tanlang", exampleWord: "misol", opsTitle: "AMALLAR", opsSubtitle: "Amallar turini tanlang", opsOddiy: "Oddiy", opsOddiyDesc: "Qo'shish, ayirish, ko'paytirish, bo'lish", opsF5: "Formula 5", opsF5Desc: "5 gacha bo'lgan formulalar", opsF10: "Formula 10", opsF10Desc: "10 gacha bo'lgan formulalar", opsAralash: "Aralash", opsAralashDesc: "Barcha amallar aralash holda" },
-  ar: { title: "سيد الرياضيات", subtitle: "مستوى 24", desc: "رائع لتعلم الرياضيات، اغز العالم بهذا!", clothes: "ملابس", accessories: "إكسسوارات", levelText: "مستوى", toNextLevel: "للمستوى التالي", startExercise: "ابدأ التمرين", stats: "الإحصائيات", seeAll: "عرض الكل >", logic: "المنطق", logicDesc: "رائع!", speed: "السرعة", speedDesc: "جيد", accuracy: "الدقة", accuracyDesc: "ممتاز!", streak: "سلسلة", streakDesc: "أيام", navHome: "الرئيسية", navExercise: "تمرين", navInventory: "مخزون", navRanking: "تصنيف", navProfile: "ملف شخصي", missions: "المهام", exerciseSubtitle: "اختر نوع التمرين الذي يناسبك واستمر في التعلم!", infoTitle: "حول الحساب البسيط", infoDesc: "تمرين الحساب البسيط يطور مهارة إجراء العمليات الحسابية بسرعة وبشكل صحيح.", infoOpsLabel: "العمليات:", infoOps: ["جمع", "طرح", "ضرب", "قسمة"], infoExampleLabel: "مثال:", examplesCountTitle: "عدد الأمثلة", examplesCountSubtitle: "اختر من 7 إلى 25 مثالًا", exampleWord: "أمثلة", opsTitle: "العمليات", opsSubtitle: "اختر نوع العملية", opsOddiy: "بسيط", opsOddiyDesc: "جمع، طرح، ضرب، قسمة", opsF5: "صيغة 5", opsF5Desc: "صيغ حتى 5", opsF10: "صيغة 10", opsF10Desc: "صيغ حتى 10", opsAralash: "مختلط", opsAralashDesc: "جميع العمليات مختلطة" },
-  tr: { title: "Matematik Ustası", subtitle: "Seviye 24", desc: "Matematik öğrenmek için harika, bununla dünyayı fethet!", clothes: "GİYSİLER", accessories: "AKSESUARLAR", levelText: "SEVİYE", toNextLevel: "Sonraki seviyeye", startExercise: "EGZERSİZE BAŞLA", stats: "İSTATİSTİKLER", seeAll: "TÜMÜ >", logic: "MANTIK", logicDesc: "Harika!", speed: "HIZ", speedDesc: "İyi", accuracy: "DOĞRULUK", accuracyDesc: "Mükemmel!", streak: "SERİ", streakDesc: "Gün", navHome: "ANA SAYFA", navExercise: "EGZERSİZ", navInventory: "ENVANTER", navRanking: "SIRALAMA", navProfile: "PROFİL", missions: "GÖREVLER", exerciseSubtitle: "Size uygun egzersiz türünü seçin ve öğrenmeye devam edin!", infoTitle: "Basit Matematik Hakkında", infoDesc: "Basit matematik egzersizi aritmetik işlemleri hızlı ve doğru bir şekilde yapma becerisini geliştirir.", infoOpsLabel: "İşlemler:", infoOps: ["toplama", "çıkarma", "çarpma", "bölme"], infoExampleLabel: "Örnek:", examplesCountTitle: "ÖRNEK SAYISI", examplesCountSubtitle: "7 ile 25 arası örnek seçin", exampleWord: "örnek", opsTitle: "İŞLEMLER", opsSubtitle: "İşlem türünü seçin", opsOddiy: "Basit", opsOddiyDesc: "Toplama, çıkarma, çarpma, bölme", opsF5: "Formül 5", opsF5Desc: "5'e kadar formüller", opsF10: "Formül 10", opsF10Desc: "10'a kadar formüller", opsAralash: "Karışık", opsAralashDesc: "Tüm işlemler karışık" },
-  zh: { title: "数学大师", subtitle: "24级", desc: "非常适合学习数学，用它征服世界！", clothes: "服装", accessories: "配饰", levelText: "等级", toNextLevel: "距离下一级还有", startExercise: "开始练习", stats: "统计数据", seeAll: "全部 >", logic: "逻辑", logicDesc: "太棒了！", speed: "速度", speedDesc: "很好", accuracy: "准确度", accuracyDesc: "极好！", streak: "连胜", streakDesc: "天", navHome: "首页", navExercise: "练习", navInventory: "库存", navRanking: "排名", navProfile: "个人资料", missions: "任务", exerciseSubtitle: "选择适合您的练习类型并继续学习！", infoTitle: "关于简单算术", infoDesc: "简单算术练习培养快速正确执行算术运算的技能。", infoOpsLabel: "运算:", infoOps: ["加法", "减法", "乘法", "除法"], infoExampleLabel: "例子:", examplesCountTitle: "例子数量", examplesCountSubtitle: "选择7到25个例子", exampleWord: "个例子", opsTitle: "运算", opsSubtitle: "选择运算类型", opsOddiy: "简单", opsOddiyDesc: "加、减、乘、除", opsF5: "公式5", opsF5Desc: "最高为5的公式", opsF10: "公式10", opsF10Desc: "最高为10的公式", opsAralash: "混合", opsAralashDesc: "所有运算混合" },
-  ky: { title: "Математика чебери", subtitle: "24-деңгээл", desc: "Математика үйрөнүү үчүн сонун, муну менен дүйнөнү багындыр!", clothes: "КИЙИМДЕР", accessories: "АКСЕССУАРЛАР", levelText: "ДЕҢГЭЭЛ", toNextLevel: "Кийинки деңгээлге чейин", startExercise: "КӨНҮГҮҮНҮ БАШТОО", stats: "СТАТИСТИКА", seeAll: "БАРДЫГЫ >", logic: "ЛОГИКА", logicDesc: "Жакшы!", speed: "ЫЛДАМДЫК", speedDesc: "Жакшы", accuracy: "ТАКТЫК", accuracyDesc: "Эң жакшы!", streak: "СЕРИЯ", streakDesc: "Күн", navHome: "БАШКЫ БЕТ", navExercise: "КӨНҮГҮҮ", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИЯЛАР", exerciseSubtitle: "Сизге туура келген көнүгүү түрүн тандап, үйрөнүүнү улантыңыз!", infoTitle: "Жөнөкөй эсеп жөнүндө", infoDesc: "Жөнөкөй эсеп көнүгүүсү арифметикалык амалдарды тез жана туура аткаруу көндүмүн өнүктүрөт.", infoOpsLabel: "Амалдар:", infoOps: ["кошуу", "кемитүү", "көбөйтүү", "бөлүү"], infoExampleLabel: "Мисал:", examplesCountTitle: "МИСАЛДАР САНЫ", examplesCountSubtitle: "7ден 25ке чейин мисал тандаңыз", exampleWord: "мисал", opsTitle: "АМАЛДАР", opsSubtitle: "Амалдын түрүн тандаңыз", opsOddiy: "Жөнөкөй", opsOddiyDesc: "Кошуу, кемитүү, көбөйтүү, бөлүү", opsF5: "Формула 5", opsF5Desc: "5ке чейинки формулалар", opsF10: "Формула 10", opsF10Desc: "10го чейинки формулалар", opsAralash: "Аралаш", opsAralashDesc: "Бардык амалдар аралаш" },
-  kk: { title: "Математика шебері", subtitle: "24-деңгей", desc: "Математика үйрену үшін керемет, осымен әлемді бағындыр!", clothes: "КИІМДЕР", accessories: "АКСЕССУАРЛАР", levelText: "ДЕҢГЕЙ", toNextLevel: "Келесі деңгейге дейін", startExercise: "ЖАТТЫҒУДЫ БАСТАУ", stats: "СТАТИСТИКА", seeAll: "БАРЛЫҒЫ >", logic: "ЛОГИКА", logicDesc: "Керемет!", speed: "ЖЫЛДАМДЫҚ", speedDesc: "Жақсы", accuracy: "ДӘЛДІК", accuracyDesc: "Өте жақсы!", streak: "СЕРИЯ", streakDesc: "Күн", navHome: "БАСҚЫ БЕТ", navExercise: "ЖАТТЫҒУ", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИЯЛАР", exerciseSubtitle: "Өзіңізге сәйкес келетін жаттығу түрін тандап, оқуды жалғастырыңыз!", infoTitle: "Қарапайым есеп туралы", infoDesc: "Қарапайым есеп жаттығуы арифметикалық амалдарды жылдам әрі дұрыс орындау дағдысын дамытады.", infoOpsLabel: "Амалдар:", infoOps: ["қосу", "азайту", "көбейту", "бөлу"], infoExampleLabel: "Мысал:", examplesCountTitle: "МЫСАЛДАР САНЫ", examplesCountSubtitle: "7-ден 25-ке дейін мысал таңдаңыз", exampleWord: "мысал", opsTitle: "АМАЛДАР", opsSubtitle: "Амал түрін таңдаңыз", opsOddiy: "Қарапайым", opsOddiyDesc: "Қосу, азайту, көбейту, бөлу", opsF5: "Формула 5", opsF5Desc: "5-ке дейінгі формулалар", opsF10: "Формула 10", opsF10Desc: "10-ға дейінгі формулалар", opsAralash: "Аралас", opsAralashDesc: "Барлық амалдар аралас" },
-  tg: { title: "Устоди математика", subtitle: "Сатҳи 24", desc: "Барои омӯзиши математика олӣ аст, бо ин ҷаҳонро фатҳ кунед!", clothes: "ЛИБОСҲО", accessories: "ЛАВОЗИМОТ", levelText: "САТҲ", toNextLevel: "То сатҳи навбатӣ", startExercise: "ОҒОЗИ МАШҚ", stats: "СТАТИСТИКА", seeAll: "ҲАМА >", logic: "МАНТИҚ", logicDesc: "Олӣ!", speed: "СУРЪАТ", speedDesc: "Хуб", accuracy: "ДАҚИҚӢ", accuracyDesc: "Аъло!", streak: "СЕРИЯ", streakDesc: "Рӯз", navHome: "АСОСӢ", navExercise: "МАШҚ", navInventory: "ИНВЕНТАР", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛ", missions: "МИССИЯҲО", exerciseSubtitle: "Навъи машқи ба шумо мувофиқро интихоб кунед ва омӯзишро давом диҳед!", infoTitle: "Дар бораи ҳисоби оддӣ", infoDesc: "Машқи ҳисоби оддӣ маҳорати зуд ва дуруст иҷро кардани амалҳои арифметикиро инкишоф медиҳад.", infoOpsLabel: "Амалҳо:", infoOps: ["ҷамъ", "тарҳ", "зарб", "тақсим"], infoExampleLabel: "Мисол:", examplesCountTitle: "МИҚДОРИ МИСОЛҲО", examplesCountSubtitle: "Аз 7 то 25 мисол интихоб кунед", exampleWord: "мисол", opsTitle: "АМАЛҲО", opsSubtitle: "Намуди амалро интихоб кунед", opsOddiy: "Оддӣ", opsOddiyDesc: "Ҷамъ, тарҳ, зарб, тақсим", opsF5: "Формулаи 5", opsF5Desc: "Формулаҳо то 5", opsF10: "Формулаи 10", opsF10Desc: "Формулаҳо то 10", opsAralash: "Омехта", opsAralashDesc: "Ҳамаи амалҳо омехта" },
-  ja: { title: "数学マスター", subtitle: "レベル 24", desc: "数学の学習に最適です。これで世界を征服しましょう！", clothes: "服", accessories: "アクセサリー", levelText: "レベル", toNextLevel: "次のレベルまで", startExercise: "練習を始める", stats: "統計", seeAll: "すべて >", logic: "論理", logicDesc: "素晴らしい！", speed: "スピード", speedDesc: "良い", accuracy: "正確さ", accuracyDesc: "優秀！", streak: "連続", streakDesc: "日", navHome: "ホーム", navExercise: "練習", navInventory: "在庫", navRanking: "ランキング", navProfile: "プロフィール", missions: "ミッション", exerciseSubtitle: "自分に合ったエクササイズタイプを選んで、学習を続けましょう！", infoTitle: "簡単な計算について", infoDesc: "簡単な計算の練習は、算術演算を素早く正確に実行するスキルを養います。", infoOpsLabel: "演算:", infoOps: ["加算", "減算", "乗算", "除算"], infoExampleLabel: "例:", examplesCountTitle: "例の数", examplesCountSubtitle: "7から25の例を選択してください", exampleWord: "例", opsTitle: "操作", opsSubtitle: "操作タイプを選択してください", opsOddiy: "シンプル", opsOddiyDesc: "加算、減算、乗算、除算", opsF5: "式5", opsF5Desc: "5までの式", opsF10: "式10", opsF10Desc: "10までの式", opsAralash: "混合", opsAralashDesc: "すべての操作が混在" },
-  ko: { title: "수학 마스터", subtitle: "레벨 24", desc: "수학 학습에 좋습니다. 이것으로 세상을 정복하세요!", clothes: "옷", accessories: "액세서리", levelText: "레벨", toNextLevel: "다음 레벨까지", startExercise: "연습 시작", stats: "통계", seeAll: "모두 보기 >", logic: "논리", logicDesc: "훌륭해요!", speed: "속도", speedDesc: "좋음", accuracy: "정확도", accuracyDesc: "매우 우수함!", streak: "연속", streakDesc: "일", navHome: "홈", navExercise: "운동", navInventory: "인벤토리", navRanking: "순위", navProfile: "프로필", missions: "임무", exerciseSubtitle: "자신에게 맞는 운동 유형을 선택하고 계속 학습하세요!", infoTitle: "간단한 계산에 대하여", infoDesc: "간단한 계산 연습은 산술 연산을 빠르고 정확하게 수행하는 능력을 기릅니다.", infoOpsLabel: "연산:", infoOps: ["덧셈", "뺄셈", "곱셈", "나눗셈"], infoExampleLabel: "예:", examplesCountTitle: "예제 수", examplesCountSubtitle: "7에서 25개의 예제를 선택하세요", exampleWord: "예제", opsTitle: "연산", opsSubtitle: "연산 유형을 선택하세요", opsOddiy: "단순", opsOddiyDesc: "덧셈, 뺄셈, 곱셈, 나눗셈", opsF5: "공식 5", opsF5Desc: "5까지의 공식", opsF10: "공식 10", opsF10Desc: "10까지의 공식", opsAralash: "혼합", opsAralashDesc: "모든 연산 혼합" },
+  en: { title: "Math Master", subtitle: "Level 24", desc: "Great for learning math, conquer the world with this!", clothes: "CLOTHES", accessories: "ACCESSORIES", levelText: "LEVEL", toNextLevel: "To next level", startExercise: "START EXERCISE", stats: "STATISTICS", seeAll: "SEE ALL >", logic: "LOGIC", logicDesc: "Great!", speed: "SPEED", speedDesc: "Good", accuracy: "ACCURACY", accuracyDesc: "Excellent!", streak: "STREAK", streakDesc: "Days", navHome: "HOME", navExercise: "EXERCISE", navInventory: "INVENTORY", navRanking: "RANKING", navProfile: "PROFILE", missions: "MISSIONS", exerciseSubtitle: "Choose the exercise type that suits you and continue learning!", infoTitle: "About Simple Math", infoDesc: "The simple math exercise develops the skill of performing arithmetic operations quickly and correctly.", infoOpsLabel: "Operations:", infoOps: ["addition", "subtraction", "multiplication", "division"], infoExampleLabel: "Example:", examplesCountTitle: "NUMBER OF EXAMPLES", examplesCountSubtitle: "Choose from 7 to 25 examples", exampleWord: "examples", opsTitle: "OPERATIONS", opsSubtitle: "Choose the operation type", opsOddiy: "Simple", opsOddiyDesc: "Addition, subtraction, multiplication, division", opsF5: "Formula 5", opsF5Desc: "Formulas up to 5", opsF10: "Formula 10", opsF10Desc: "Formulas up to 10", opsAralash: "Mixed", opsAralashDesc: "All operations mixed", speedSelectTitle: "SPEED", speedSelectSubtitle: "Choose exercise speed", secondWord: "seconds", characters: "CHARACTERS", all: "ALL", abacusInfoTitle: "ABOUT ABACUS", abacusInfoDesc: "1 upper bead means 5, 4 lower beads mean 1 each.", abacusLearnRules: "Learn rules", abacusDifficulty: "DIFFICULTY LEVEL", abacusBeginner: "Beginner", abacusIntermediate: "Intermediate", abacusAdvanced: "Advanced", abacusOpsTitle: "OPERATIONS", abacusAddSub: "Addition & Subtraction", abacusMult: "Multiplication", abacusDiv: "Division", speedInfoTitle: "ABOUT SPEED MATH", speedInfoDesc: "Test your speed and accuracy by calculating against time!", speedListItem1: "Time-limited examples", speedListItem2: "Fast answer = more points", speedListItem3: "Accuracy is important!", speedExamplesTitle: "NUMBER OF EXAMPLES", speedExamplesSubtitle: "Choose 7 to 25 examples", speedTimeTitle: "TIME LIMIT", speedTimeSubtitle: "Choose from 0.5 to 2 seconds", speedOpsTitle: "OPERATIONS", speedOpsSubtitle: "Choose operation type", speedKopaytirish: "Multiplication", speedBolish: "Division", speedAralash: "Mixed", speedAllOps: "All operations", speedSecLabel: "seconds" , battleTabTitle: "BATTLE", battleYou: "YOU", battleOpponent: "Opponent", battleRating: "Rating", battleLevel: "Level" , bmOddiy: "Simple Battle", bmOddiyDesc: "Fast calculation with equals", bmReyting: "Rating Battle", bmReytingDesc: "With strong opponents for rating points", bmTurnir: "Tournament Battle", bmTurnirDesc: "Participate in tournaments and win prizes", bmDost: "Battle with Friend", bmDostDesc: "Invite your friend and compete" , bmDailyMission: "DAILY BATTLE MISSION", bmDailyMissionDesc: "Participate in 3 battles", bmDailyBonus: "DAILY BONUS" , bestResults: "BEST RESULTS", bestVictories: "Victories", bestStreak: "Winning streak", bestTime: "Fastest time" , quickOpponent: "QUICK OPPONENT", refresh: "Refresh" , startBattle: "START BATTLE", startBattleSubtext: "Choose an opponent and achieve victory!" , rankingTitle: "RANKING", rankingSubtitle: "The strongest mathematicians", platinumTarget: "to Platinum V", xpRemaining: "XP remaining" },
+  ru: { title: "Мастер математики", subtitle: "Уровень 24", desc: "Отлично для изучения математики, завоюйте мир с этим!", clothes: "ОДЕЖДА", accessories: "АКСЕССУАРЫ", levelText: "УРОВЕНЬ", toNextLevel: "До след. уровня", startExercise: "НАЧАТЬ ТРЕНИРОВКУ", stats: "СТАТИСТИКА", seeAll: "ВСЕ >", logic: "ЛОГИКА", logicDesc: "Отлично!", speed: "СКОРОСТЬ", speedDesc: "Хорошо", accuracy: "ТОЧНОСТЬ", accuracyDesc: "Превосходно!", streak: "СЕРИЯ", streakDesc: "Дней", navHome: "ГЛАВНАЯ", navExercise: "ТРЕНИРОВКА", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИИ", exerciseSubtitle: "Выберите подходящий тип упражнений и продолжайте обучение!", infoTitle: "О простом счете", infoDesc: "Упражнение на простой счет развивает навык быстрого и правильного выполнения арифметических операций.", infoOpsLabel: "Операции:", infoOps: ["сложение", "вычитание", "умножение", "деление"], infoExampleLabel: "Пример:", examplesCountTitle: "КОЛИЧЕСТВО ПРИМЕРОВ", examplesCountSubtitle: "Выберите от 7 до 25 примеров", exampleWord: "примеров", opsTitle: "ОПЕРАЦИИ", opsSubtitle: "Выберите тип операций", opsOddiy: "Простые", opsOddiyDesc: "Сложение, вычитание, умножение, деление", opsF5: "Формула 5", opsF5Desc: "Формулы до 5", opsF10: "Формула 10", opsF10Desc: "Формулы до 10", opsAralash: "Вперемешку", opsAralashDesc: "Все операции вперемешку", speedSelectTitle: "СКОРОСТЬ", speedSelectSubtitle: "Выберите скорость тренировки", secondWord: "секунд", characters: "ПЕРСОНАЖИ", all: "ВCЕ", abacusInfoTitle: "ОБ АБАКУСЕ", abacusInfoDesc: "1 верхняя косточка равна 5, 4 нижние — по 1.", abacusLearnRules: "Изучить правила", abacusDifficulty: "УРОВЕНЬ СЛОЖНОСТИ", abacusBeginner: "Новичок", abacusIntermediate: "Средний", abacusAdvanced: "Сложный", abacusOpsTitle: "ОПЕРАЦИИ", abacusAddSub: "Сложение и вычитание", abacusMult: "Умножение", abacusDiv: "Деление", speedInfoTitle: "О СКОРОСТНОМ СЧЕТЕ", speedInfoDesc: "Проверьте скорость и точность, решая примеры на время!", speedListItem1: "Примеры на время", speedListItem2: "Быстрый ответ = больше баллов", speedListItem3: "Точность важна!", speedExamplesTitle: "КОЛИЧЕСТВО ПРИМЕРОВ", speedExamplesSubtitle: "Выберите от 7 до 25 примеров", speedTimeTitle: "ЛИМИТ ВРЕМЕНИ", speedTimeSubtitle: "Выберите от 0.5 до 2 секунд", speedOpsTitle: "ОПЕРАЦИИ", speedOpsSubtitle: "Выберите тип операций", speedKopaytirish: "Умножение", speedBolish: "Деление", speedAralash: "Смешанно", speedAllOps: "Все операции", speedSecLabel: "секунд" , battleTabTitle: "БИТВА", battleYou: "ВЫ", battleOpponent: "Соперник", battleRating: "Рейтинг", battleLevel: "Уровень" , bmOddiy: "Простая Битва", bmOddiyDesc: "Быстрый счет с равными", bmReyting: "Рейтинговая Битва", bmReytingDesc: "С сильными противниками за очки", bmTurnir: "Турнирная Битва", bmTurnirDesc: "Участвуйте в турнирах и выигрывайте призы", bmDost: "Битва с Другом", bmDostDesc: "Пригласите друга и соревнуйтесь" , bmDailyMission: "ЕЖЕДНЕВНАЯ МИССИЯ", bmDailyMissionDesc: "Участвуйте в 3 битвах", bmDailyBonus: "ЕЖЕДНЕВНЫЙ БОНУС" , bestResults: "ЛУЧШИЕ РЕЗУЛЬТАТЫ", bestVictories: "Победы", bestStreak: "Серия побед", bestTime: "Лучшее время" , quickOpponent: "БЫСТРЫЙ ПРОТИВНИК", refresh: "Обновить" , startBattle: "НАЧАТЬ БИТВУ", startBattleSubtext: "Выберите противника и одержите победу!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Сильнейшие математики", platinumTarget: "до Platinum V", xpRemaining: "XP осталось" },
+  uz: { title: "Matematika Ustasi", subtitle: "24-daraja", desc: "Matematika o'rganishda zo'r, bu bilan dunyoni egallang!", clothes: "KIYIMLAR", accessories: "AKSESSUARLAR", levelText: "LEVEL", toNextLevel: "Keyingi levelgacha yana", startExercise: "MASHQNI BOSHLASH", stats: "STATISTIKALAR", seeAll: "BARCHASI >", logic: "MANTIQ", logicDesc: "Zor!", speed: "TEZLIK", speedDesc: "Yaxshi", accuracy: "ANIQLIK", accuracyDesc: "A'lo!", streak: "SERIYA", streakDesc: "Kun", navHome: "BOSH SAHIFA", navExercise: "MASHQ", navInventory: "INVENTAR", navRanking: "REYTING", navProfile: "PROFIL", missions: "MISSIYALAR", exerciseSubtitle: "O'zingizga mos mashq turini tanlang va o'rganishni davom eting!", infoTitle: "Oddiy hisob haqida", infoDesc: "Oddiy hisob mashqi arifmetik amallarni tez va to'g'ri bajarish ko'nikmasini rivojlantiradi.", infoOpsLabel: "Amallar:", infoOps: ["qo'shish", "ayirish", "ko'paytirish", "bo'lish"], infoExampleLabel: "Misol:", examplesCountTitle: "HADLAR SONI", examplesCountSubtitle: "7 dan 25 hadgacha tanlang", exampleWord: "had", opsTitle: "AMALLAR", opsSubtitle: "Amallar turini tanlang", opsOddiy: "Oddiy", opsOddiyDesc: "Qo'shish, ayirish, ko'paytirish, bo'lish", opsF5: "Formula 5", opsF5Desc: "5 gacha bo'lgan formulalar", opsF10: "Formula 10", opsF10Desc: "10 gacha bo'lgan formulalar", opsAralash: "Aralash", opsAralashDesc: "Barcha amallar aralash holda", speedSelectTitle: "TEZLIK", speedSelectSubtitle: "Mashq bajarish tezligini tanlang", secondWord: "sekund", characters: "PERSONAJLAR", all: "BARCHA", abacusInfoTitle: "ABAKUS (SOROBAN) HAQIDA", abacusInfoDesc: "Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.", abacusLearnRules: "Qoidalarni o'rganish", abacusDifficulty: "QIYINCHILIK DARAJASI", abacusBeginner: "Boshlang'ich", abacusIntermediate: "O'rta", abacusAdvanced: "Murakkab", abacusOpsTitle: "AMALLAR", abacusAddSub: "Qo'shish va Ayirish", abacusMult: "Ko'paytirish", abacusDiv: "Bo'lish", speedInfoTitle: "TEZKOR HISOBLASH HAQIDA", speedInfoDesc: "Vaqt bilan hisoblash orqali tezlik va aniqligingizni sinab ko'ring!", speedListItem1: "Vaqt cheklovi bilan misollar", speedListItem2: "Tez javob – ko'proq ball", speedListItem3: "Aniqlik muhim!", speedExamplesTitle: "MISOLLAR SONI", speedExamplesSubtitle: "7 dan 25 gacha misol tanlang", speedTimeTitle: "VAQT CHEKLOVI", speedTimeSubtitle: "0.5 soniyadan 2 soniyagacha vaqt tanlang", speedOpsTitle: "AMALLAR", speedOpsSubtitle: "Amallar turini tanlang", speedKopaytirish: "Ko'paytirish", speedBolish: "Bo'lish", speedAralash: "Aralash", speedAllOps: "Barcha amallar", speedSecLabel: "soniya" , battleTabTitle: "BATTLE", battleYou: "SIZ", battleOpponent: "Raqib", battleRating: "Reyting", battleLevel: "Level" , bmOddiy: "Oddiy Battle", bmOddiyDesc: "Teng kuchdagilar bilan tezkor hisoblash", bmReyting: "Reyting Battle", bmReytingDesc: "Reyting ochkolari uchun kuchli raqiblar bilan", bmTurnir: "Turnir Battle", bmTurnirDesc: "Turnirlarda qatnashing va sovrin yuting", bmDost: "Do'st bilan Battle", bmDostDesc: "Do'stingizni taklif qiling va bellashing" , bmDailyMission: "KUNLIK BATTLE MISSIYASI", bmDailyMissionDesc: "3 ta battle'da ishtirok eting", bmDailyBonus: "KUNLIK BONUS" , bestResults: "ENG YAXSHI NATIJALAR", bestVictories: "G'alabalar", bestStreak: "G'alaba seriyasi", bestTime: "Eng tez vaqt" , quickOpponent: "TEZKOR RAQIB", refresh: "Yangilash" , startBattle: "BATTLE BOSHLASH", startBattleSubtext: "Raqib tanlang va g'alabaga erishing!" , rankingTitle: "REYTING", rankingSubtitle: "Eng kuchli matematiklar", platinumTarget: "Platinum V gacha", xpRemaining: "XP qoldi" },
+  ar: { title: "سيد الرياضيات", subtitle: "مستوى 24", desc: "رائع لتعلم الرياضيات، اغز العالم بهذا!", clothes: "ملابس", accessories: "إكسسوارات", levelText: "مستوى", toNextLevel: "للمستوى التالي", startExercise: "ابدأ التمرين", stats: "الإحصائيات", seeAll: "عرض الكل >", logic: "المنطق", logicDesc: "رائع!", speed: "السرعة", speedDesc: "جيد", accuracy: "الدقة", accuracyDesc: "ممتاز!", streak: "سلسلة", streakDesc: "أيام", navHome: "الرئيسية", navExercise: "تمرين", navInventory: "مخزون", navRanking: "تصنيف", navProfile: "ملف شخصي", missions: "المهام", exerciseSubtitle: "اختر نوع التمرين الذي يناسبك واستمر في التعلم!", infoTitle: "حول الحساب البسيط", infoDesc: "تمرين الحساب البسيط يطور مهارة إجراء العمليات الحسابية بسرعة وبشكل صحيح.", infoOpsLabel: "العمليات:", infoOps: ["جمع", "طرح", "ضرب", "قسمة"], infoExampleLabel: "مثال:", examplesCountTitle: "عدد الأمثلة", examplesCountSubtitle: "اختر من 7 إلى 25 مثالًا", exampleWord: "أمثلة", opsTitle: "العمليات", opsSubtitle: "اختر نوع العملية", opsOddiy: "بسيط", opsOddiyDesc: "جمع، طرح، ضرب، قسمة", opsF5: "صيغة 5", opsF5Desc: "صيغ حتى 5", opsF10: "صيغة 10", opsF10Desc: "صيغ حتى 10", opsAralash: "مختلط", opsAralashDesc: "جميع العمليات مختلطة", speedSelectTitle: "السرعة", speedSelectSubtitle: "اختر سرعة التمرين", secondWord: "ثواني", characters: "الشخصيات", all: "الكل", abacusInfoTitle: "حول المعداد", abacusInfoDesc: "حبة علوية واحدة تعني 5، 4 حبات سفلية تعني 1 لكل منها.", abacusLearnRules: "تعلم القواعد", abacusDifficulty: "مستوى الصعوبة", abacusBeginner: "مبتدئ", abacusIntermediate: "متوسط", abacusAdvanced: "متقدم", abacusOpsTitle: "العمليات", abacusAddSub: "الجمع والطرح", abacusMult: "الضرب", abacusDiv: "القسمة", speedInfoTitle: "حول الحساب السريع", speedInfoDesc: "اختبر سرعتك ودقتك عن طريق الحساب ضد الوقت!", speedListItem1: "أمثلة محدودة بوقت", speedListItem2: "إجابة سريعة = نقاط أكثر", speedListItem3: "الدقة مهمة!", speedExamplesTitle: "عدد الأمثلة", speedExamplesSubtitle: "اختر 7 إلى 25 مثالًا", speedTimeTitle: "الحد الزمني", speedTimeSubtitle: "اختر من 0.5 إلى 2 ثانية", speedOpsTitle: "العمليات", speedOpsSubtitle: "اختر نوع العملية", speedKopaytirish: "ضرب", speedBolish: "قسمة", speedAralash: "مختلط", speedAllOps: "جميع العمليات", speedSecLabel: "ثواني" , battleTabTitle: "معركة", battleYou: "أنت", battleOpponent: "الخصم", battleRating: "تقييم", battleLevel: "مستوى" , bmOddiy: "معركة بسيطة", bmOddiyDesc: "حساب سريع مع المتكافئين", bmReyting: "معركة التقييم", bmReytingDesc: "مع خصوم أقوياء للحصول على نقاط", bmTurnir: "معركة البطولة", bmTurnirDesc: "شارك في البطولات واربح جوائز", bmDost: "معركة مع صديق", bmDostDesc: "ادع صديقك وتنافس" , bmDailyMission: "المهمة اليومية", bmDailyMissionDesc: "شارك في 3 معارك", bmDailyBonus: "مكافأة يومية" , bestResults: "أفضل النتائج", bestVictories: "انتصارات", bestStreak: "سلسلة انتصارات", bestTime: "أسرع وقت" , quickOpponent: "الخصم السريع", refresh: "تحديث" , startBattle: "بدء المعركة", startBattleSubtext: "اختر خصمًا وحقق النصر!" , rankingTitle: "التصنيف", rankingSubtitle: "أقوى علماء الرياضيات", platinumTarget: "إلى Platinum V", xpRemaining: "XP متبقي" },
+  tr: { title: "Matematik Ustası", subtitle: "Seviye 24", desc: "Matematik öğrenmek için harika, bununla dünyayı fethet!", clothes: "GİYSİLER", accessories: "AKSESUARLAR", levelText: "SEVİYE", toNextLevel: "Sonraki seviyeye", startExercise: "EGZERSİZE BAŞLA", stats: "İSTATİSTİKLER", seeAll: "TÜMÜ >", logic: "MANTIK", logicDesc: "Harika!", speed: "HIZ", speedDesc: "İyi", accuracy: "DOĞRULUK", accuracyDesc: "Mükemmel!", streak: "SERİ", streakDesc: "Gün", navHome: "ANA SAYFA", navExercise: "EGZERSİZ", navInventory: "ENVANTER", navRanking: "SIRALAMA", navProfile: "PROFİL", missions: "GÖREVLER", exerciseSubtitle: "Size uygun egzersiz türünü seçin ve öğrenmeye devam edin!", infoTitle: "Basit Matematik Hakkında", infoDesc: "Basit matematik egzersizi aritmetik işlemleri hızlı ve doğru bir şekilde yapma becerisini geliştirir.", infoOpsLabel: "İşlemler:", infoOps: ["toplama", "çıkarma", "çarpma", "bölme"], infoExampleLabel: "Örnek:", examplesCountTitle: "ÖRNEK SAYISI", examplesCountSubtitle: "7 ile 25 arası örnek seçin", exampleWord: "örnek", opsTitle: "İŞLEMLER", opsSubtitle: "İşlem türünü seçin", opsOddiy: "Basit", opsOddiyDesc: "Toplama, çıkarma, çarpma, bölme", opsF5: "Formül 5", opsF5Desc: "5'e kadar formüller", opsF10: "Formül 10", opsF10Desc: "10'a kadar formüller", opsAralash: "Karışık", opsAralashDesc: "Tüm işlemler karışık", speedSelectTitle: "HIZ", speedSelectSubtitle: "Egzersiz hızını seçin", secondWord: "saniye", characters: "KARAKTERLER", all: "TÜMÜ", abacusInfoTitle: "ABAKÜS HAKKINDA", abacusInfoDesc: "Üst sıradaki 1 boncuk 5, alt sıradaki 4 boncuk her biri 1 değerindedir.", abacusLearnRules: "Kuralları öğren", abacusDifficulty: "ZORLUK SEVİYESİ", abacusBeginner: "Başlangıç", abacusIntermediate: "Orta", abacusAdvanced: "Zor", abacusOpsTitle: "İŞLEMLER", abacusAddSub: "Toplama ve Çıkarma", abacusMult: "Çarpma", abacusDiv: "Bölme", speedInfoTitle: "HIZLI HESAPLAMA HAKKINDA", speedInfoDesc: "Zamana karşı hesaplayarak hızınızı ve doğruluğunuzu test edin!", speedListItem1: "Zaman sınırlı örnekler", speedListItem2: "Hızlı cevap = daha fazla puan", speedListItem3: "Doğruluk önemlidir!", speedExamplesTitle: "ÖRNEK SAYISI", speedExamplesSubtitle: "7 ile 25 arası örnek seçin", speedTimeTitle: "ZAMAN SINIRI", speedTimeSubtitle: "0.5 ile 2 saniye arası seçin", speedOpsTitle: "İŞLEMLER", speedOpsSubtitle: "İşlem türünü seçin", speedKopaytirish: "Çarpma", speedBolish: "Bölme", speedAralash: "Karışık", speedAllOps: "Tüm işlemler", speedSecLabel: "saniye" , battleTabTitle: "SAVAŞ", battleYou: "SEN", battleOpponent: "Rakip", battleRating: "Derece", battleLevel: "Seviye" , bmOddiy: "Basit Savaş", bmOddiyDesc: "Eşit güçtekilerle hızlı hesaplama", bmReyting: "Derece Savaşı", bmReytingDesc: "Puanlar için güçlü rakiplerle", bmTurnir: "Turnuva Savaşı", bmTurnirDesc: "Turnuvalara katılın ve ödüller kazanın", bmDost: "Arkadaşla Savaş", bmDostDesc: "Arkadaşınızı davet edin ve yarışın" , bmDailyMission: "GÜNLÜK GÖREV", bmDailyMissionDesc: "3 savaşa katılın", bmDailyBonus: "GÜNLÜK BONUS" , bestResults: "EN İYİ SONUÇLAR", bestVictories: "Zaferler", bestStreak: "Galibiyet serisi", bestTime: "En hızlı zaman" , quickOpponent: "HIZLI RAKİP", refresh: "Yenile" , startBattle: "SAVAŞA BAŞLA", startBattleSubtext: "Bir rakip seçin ve zafere ulaşın!" , rankingTitle: "SIRALAMA", rankingSubtitle: "En güçlü matematikçiler", platinumTarget: "Platinum V'e kadar", xpRemaining: "XP kaldı" },
+  zh: { title: "数学大师", subtitle: "24级", desc: "非常适合学习数学，用它征服世界！", clothes: "服装", accessories: "配饰", levelText: "等级", toNextLevel: "距离下一级还有", startExercise: "开始练习", stats: "统计数据", seeAll: "全部 >", logic: "逻辑", logicDesc: "太棒了！", speed: "速度", speedDesc: "很好", accuracy: "准确度", accuracyDesc: "极好！", streak: "连胜", streakDesc: "天", navHome: "首页", navExercise: "练习", navInventory: "库存", navRanking: "排名", navProfile: "个人资料", missions: "任务", exerciseSubtitle: "选择适合您的练习类型并继续学习！", infoTitle: "关于简单算术", infoDesc: "简单算术练习培养快速正确执行算术运算的技能。", infoOpsLabel: "运算:", infoOps: ["加法", "减法", "乘法", "除法"], infoExampleLabel: "例子:", examplesCountTitle: "例子数量", examplesCountSubtitle: "选择7到25个例子", exampleWord: "个例子", opsTitle: "运算", opsSubtitle: "选择运算类型", opsOddiy: "简单", opsOddiyDesc: "加、减、乘、除", opsF5: "公式5", opsF5Desc: "最高为5的公式", opsF10: "公式10", opsF10Desc: "最高为10的公式", opsAralash: "混合", opsAralashDesc: "所有运算混合", speedSelectTitle: "速度", speedSelectSubtitle: "选择练习速度", secondWord: "秒", characters: "角色", all: "全部", abacusInfoTitle: "关于算盘", abacusInfoDesc: "上面1颗珠子表示5，下面4颗珠子各表示1。", abacusLearnRules: "学习规则", abacusDifficulty: "难度级别", abacusBeginner: "初学者", abacusIntermediate: "中级", abacusAdvanced: "高级", abacusOpsTitle: "运算", abacusAddSub: "加法和减法", abacusMult: "乘法", abacusDiv: "除法", speedInfoTitle: "关于快速计算", speedInfoDesc: "通过计时计算测试您的速度和准确性！", speedListItem1: "限时例子", speedListItem2: "答得快=得分高", speedListItem3: "准确性很重要！", speedExamplesTitle: "例子数量", speedExamplesSubtitle: "选择7到25个例子", speedTimeTitle: "时间限制", speedTimeSubtitle: "选择0.5到2秒", speedOpsTitle: "运算", speedOpsSubtitle: "选择运算类型", speedKopaytirish: "乘法", speedBolish: "除法", speedAralash: "混合", speedAllOps: "所有运算", speedSecLabel: "秒" , battleTabTitle: "战斗", battleYou: "你", battleOpponent: "对手", battleRating: "评分", battleLevel: "等级" , bmOddiy: "简单战斗", bmOddiyDesc: "与实力相当者进行快速计算", bmReyting: "排名战斗", bmReytingDesc: "与强敌交手赚取积分", bmTurnir: "锦标赛战斗", bmTurnirDesc: "参加锦标赛赢取奖品", bmDost: "好友战斗", bmDostDesc: "邀请好友并竞争" , bmDailyMission: "每日任务", bmDailyMissionDesc: "参与3场战斗", bmDailyBonus: "每日奖励" , bestResults: "最佳结果", bestVictories: "胜利", bestStreak: "连胜", bestTime: "最快时间" , quickOpponent: "快速对手", refresh: "刷新" , startBattle: "开始战斗", startBattleSubtext: "选择对手并取得胜利！" , rankingTitle: "排名", rankingSubtitle: "最强的数学家", platinumTarget: "到 Platinum V", xpRemaining: "XP 剩余" },
+  ky: { title: "Математика чебери", subtitle: "24-деңгээл", desc: "Математика үйрөнүү үчүн сонун, муну менен дүйнөнү багындыр!", clothes: "КИЙИМДЕР", accessories: "АКСЕССУАРЛАР", levelText: "ДЕҢГЭЭЛ", toNextLevel: "Кийинки деңгээлге чейин", startExercise: "КӨНҮГҮҮНҮ БАШТОО", stats: "СТАТИСТИКА", seeAll: "БАРДЫГЫ >", logic: "ЛОГИКА", logicDesc: "Жакшы!", speed: "ЫЛДАМДЫК", speedDesc: "Жакшы", accuracy: "ТАКТЫК", accuracyDesc: "Эң жакшы!", streak: "СЕРИЯ", streakDesc: "Күн", navHome: "БАШКЫ БЕТ", navExercise: "КӨНҮГҮҮ", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИЯЛАР", exerciseSubtitle: "Сизге туура келген көнүгүү түрүн тандап, үйрөнүүнү улантыңыз!", infoTitle: "Жөнөкөй эсеп жөнүндө", infoDesc: "Жөнөкөй эсеп көнүгүүсү арифметикалык амалдарды тез жана туура аткаруу көндүмүн өнүктүрөт.", infoOpsLabel: "Амалдар:", infoOps: ["кошуу", "кемитүү", "көбөйтүү", "бөлүү"], infoExampleLabel: "Мисал:", examplesCountTitle: "МИСАЛДАР САНЫ", examplesCountSubtitle: "7ден 25ке чейин мисал тандаңыз", exampleWord: "мисал", opsTitle: "АМАЛДАР", opsSubtitle: "Амалдын түрүн тандаңыз", opsOddiy: "Жөнөкөй", opsOddiyDesc: "Кошуу, кемитүү, көбөйтүү, бөлүү", opsF5: "Формула 5", opsF5Desc: "5ке чейинки формулалар", opsF10: "Формула 10", opsF10Desc: "10го чейинки формулалар", opsAralash: "Аралаш", opsAralashDesc: "Бардык амалдар аралаш", speedSelectTitle: "ЫЛДАМДЫК", speedSelectSubtitle: "Көнүгүү ылдамдыгын тандаңыз", secondWord: "секунд", characters: "ПЕРСОНАЖДАР", all: "БАРДЫГЫ", abacusInfoTitle: "АБАКУС ЖӨНҮНДӨ", abacusInfoDesc: "Жогорку катардагы 1 мончок 5ти, төмөнкү катардагы 4 мончоктун ар бири 1ди билдирет.", abacusLearnRules: "Эрежелерди үйрөнүү", abacusDifficulty: "КЫЙЫНЧЫЛЫК ДЕҢГЭЭЛИ", abacusBeginner: "Башталгыч", abacusIntermediate: "Орто", abacusAdvanced: "Кыйын", abacusOpsTitle: "АМАЛДАР", abacusAddSub: "Кошуу жана Кемитүү", abacusMult: "Көбөйтүү", abacusDiv: "Бөлүү", speedInfoTitle: "ЫКЧАМ ЭСЕП ЖӨНҮНДӨ", speedInfoDesc: "Убакыт менен эсептеп ылдамдыгыңызды жана тактыгыңызды сынап көрүңүз!", speedListItem1: "Убакыт чектелген мисалдар", speedListItem2: "Тез жооп = көбүрөөк упай", speedListItem3: "Тактык маанилүү!", speedExamplesTitle: "МИСАЛДАР САНЫ", speedExamplesSubtitle: "7ден 25ке чейин мисал тандаңыз", speedTimeTitle: "УБАКЫТ ЧЕГИ", speedTimeSubtitle: "0.5тен 2 секундага чейин тандаңыз", speedOpsTitle: "АМАЛДАР", speedOpsSubtitle: "Амалдын түрүн тандаңыз", speedKopaytirish: "Көбөйтүү", speedBolish: "Бөлүү", speedAralash: "Аралаш", speedAllOps: "Бардык амалдар", speedSecLabel: "секунд" , battleTabTitle: "САЛМАШ", battleYou: "СИЗ", battleOpponent: "Атаандаш", battleRating: "Рейтинг", battleLevel: "Деңгээл" , bmOddiy: "Жөнөкөй салмат", bmOddiyDesc: "Тең күчтүүлөр менен тез эсептөө", bmReyting: "Рейтинг салмат", bmReytingDesc: "Упайлар үчүн күчтүү атаандаштар менен", bmTurnir: "Турнир салмат", bmTurnirDesc: "Турнирлерге катышып, байгелерди утуп алыңыз", bmDost: "Дос менен салмат", bmDostDesc: "Досуңузду чакырып, атаандашыңыз" , bmDailyMission: "КҮНДҮК МИССИЯ", bmDailyMissionDesc: "3 салматка катышыңыз", bmDailyBonus: "КҮНДҮК БОНУС" , bestResults: "ЭҢ ЖАКШЫ НАТЫЙЖАЛАР", bestVictories: "Жеңиштер", bestStreak: "Жеңиштер сериясы", bestTime: "Эң тез убакыт" , quickOpponent: "ТЕЗКАР КАРШЫЛАШ", refresh: "Жаңыртуу" , startBattle: "СОГУШТУ БАШТОО", startBattleSubtext: "Каршылашты тандап, жеңишке жет!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Эң күчтүү математиктер", platinumTarget: "Platinum V чейин", xpRemaining: "XP калды" },
+  kk: { title: "Математика шебері", subtitle: "24-деңгей", desc: "Математика үйрену үшін керемет, осымен әлемді бағындыр!", clothes: "КИІМДЕР", accessories: "АКСЕССУАРЛАР", levelText: "ДЕҢГЕЙ", toNextLevel: "Келесі деңгейге дейін", startExercise: "ЖАТТЫҒУДЫ БАСТАУ", stats: "СТАТИСТИКА", seeAll: "БАРЛЫҒЫ >", logic: "ЛОГИКА", logicDesc: "Керемет!", speed: "ЖЫЛДАМДЫҚ", speedDesc: "Жақсы", accuracy: "ДӘЛДІК", accuracyDesc: "Өте жақсы!", streak: "СЕРИЯ", streakDesc: "Күн", navHome: "БАСҚЫ БЕТ", navExercise: "ЖАТТЫҒУ", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИЯЛАР", exerciseSubtitle: "Өзіңізге сәйкес келетін жаттығу түрін тандап, оқуды жалғастырыңыз!", infoTitle: "Қарапайым есеп туралы", infoDesc: "Қарапайым есеп жаттығуы арифметикалық амалдарды жылдам әрі дұрыс орындау дағдысын дамытады.", infoOpsLabel: "Амалдар:", infoOps: ["қосу", "азайту", "көбейту", "бөлу"], infoExampleLabel: "Мысал:", examplesCountTitle: "МЫСАЛДАР САНЫ", examplesCountSubtitle: "7-ден 25-ке дейін мысал таңдаңыз", exampleWord: "мысал", opsTitle: "АМАЛДАР", opsSubtitle: "Амал түрін таңдаңыз", opsOddiy: "Қарапайым", opsOddiyDesc: "Қосу, азайту, көбейту, бөлу", opsF5: "Формула 5", opsF5Desc: "5-ке дейінгі формулалар", opsF10: "Формула 10", opsF10Desc: "10-ға дейінгі формулалар", opsAralash: "Аралас", opsAralashDesc: "Барлық амалдар аралас", speedSelectTitle: "ЖЫЛДАМДЫҚ", speedSelectSubtitle: "Жаттығу жылдамдығын таңдаңыз", secondWord: "секунд", characters: "КЕЙІПКЕРЛЕР", all: "БАРЛЫҒЫ", abacusInfoTitle: "АБАКУС ТУРАЛЫ", abacusInfoDesc: "Жоғарғы қатардағы 1 моншақ 5-ті, төменгі қатардағы 4 моншақ әрқайсысы 1-ді білдіреді.", abacusLearnRules: "Ережелерді үйрену", abacusDifficulty: "ҚИЫНДЫҚ ДЕҢГЕЙІ", abacusBeginner: "Бастауыш", abacusIntermediate: "Орташа", abacusAdvanced: "Қиын", abacusOpsTitle: "АМАЛДАР", abacusAddSub: "Қосу және Азайту", abacusMult: "Көбейту", abacusDiv: "Бөлу", speedInfoTitle: "ЖЫЛДАМ ЕСЕП ТУРАЛЫ", speedInfoDesc: "Уақытпен есептеу арқылы жылдамдық пен дәлдікті тексеріңіз!", speedListItem1: "Уақыты шектеулі мысалдар", speedListItem2: "Жылдам жауап = көбірек ұпай", speedListItem3: "Дәлдік маңызды!", speedExamplesTitle: "МЫСАЛДАР САНЫ", speedExamplesSubtitle: "7-ден 25-ке дейін мысал таңдаңыз", speedTimeTitle: "УАҚЫТ ШЕКТЕУІ", speedTimeSubtitle: "0.5-тен 2 секундқа дейін таңдаңыз", speedOpsTitle: "АМАЛДАР", speedOpsSubtitle: "Амал түрін таңдаңыз", speedKopaytirish: "Көбейту", speedBolish: "Бөлу", speedAralash: "Аралас", speedAllOps: "Барлық амалдар", speedSecLabel: "секунд" , battleTabTitle: "ЖЕКПЕ-ЖЕК", battleYou: "СІЗ", battleOpponent: "Қарсылас", battleRating: "Рейтинг", battleLevel: "Деңгей" , bmOddiy: "Қарапайым жекпе-жек", bmOddiyDesc: "Тең күштілермен жылдам есептеу", bmReyting: "Рейтинг жекпе-жек", bmReytingDesc: "Рейтинг үшін күшті қарсыластармен", bmTurnir: "Турнир жекпе-жек", bmTurnirDesc: "Турнирлерге қатысып, жүлделер ұтып алыңыз", bmDost: "Доспен жекпе-жек", bmDostDesc: "Досыңызды шақырып, жарысыңыз" , bmDailyMission: "КҮНДЕЛІКТІ МИССИЯ", bmDailyMissionDesc: "3 жекпе-жекке қатысыңыз", bmDailyBonus: "КҮНДЕЛІКТІ БОНУС" , bestResults: "ЕҢ ЖАҚСЫ НӘТИЖЕЛЕР", bestVictories: "Жеңістер", bestStreak: "Жеңістер сериясы", bestTime: "Ең жылдам уақыт" , quickOpponent: "ЖЫЛДАМ ҚАРСЫЛАС", refresh: "Жаңарту" , startBattle: "ШАЙҚАСТЫ БАСТАУ", startBattleSubtext: "Қарсыласты таңдап, жеңіске жетіңіз!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Ең мықты математиктер", platinumTarget: "Platinum V дейін", xpRemaining: "XP қалды" },
+  tg: { title: "Устоди математика", subtitle: "Сатҳи 24", desc: "Барои омӯзиши математика олӣ аст, бо ин ҷаҳонро фатҳ кунед!", clothes: "ЛИБОСҲО", accessories: "ЛАВОЗИМОТ", levelText: "САТҲ", toNextLevel: "То сатҳи навбатӣ", startExercise: "ОҒОЗИ МАШҚ", stats: "СТАТИСТИКА", seeAll: "ҲАМА >", logic: "МАНТИҚ", logicDesc: "Олӣ!", speed: "СУРЪАТ", speedDesc: "Хуб", accuracy: "ДАҚИҚӢ", accuracyDesc: "Аъло!", streak: "СЕРИЯ", streakDesc: "Рӯз", navHome: "АСОСӢ", navExercise: "МАШҚ", navInventory: "ИНВЕНТАР", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛ", missions: "МИССИЯҲО", exerciseSubtitle: "Навъи машқи ба шумо мувофиқро интихоб кунед ва омӯзишро давом диҳед!", infoTitle: "Дар бораи ҳисоби оддӣ", infoDesc: "Машқи ҳисоби оддӣ маҳорати зуд ва дуруст иҷро кардани амалҳои арифметикиро инкишоф медиҳад.", infoOpsLabel: "Амалҳо:", infoOps: ["ҷамъ", "тарҳ", "зарб", "тақсим"], infoExampleLabel: "Мисол:", examplesCountTitle: "МИҚДОРИ МИСОЛҲО", examplesCountSubtitle: "Аз 7 то 25 мисол интихоб кунед", exampleWord: "мисол", opsTitle: "АМАЛҲО", opsSubtitle: "Намуди амалро интихоб кунед", opsOddiy: "Оддӣ", opsOddiyDesc: "Ҷамъ, тарҳ, зарб, тақсим", opsF5: "Формулаи 5", opsF5Desc: "Формулаҳо то 5", opsF10: "Формулаи 10", opsF10Desc: "Формулаҳо то 10", opsAralash: "Омехта", opsAralashDesc: "Ҳамаи амалҳо омехта", speedSelectTitle: "СУРЪАТ", speedSelectSubtitle: "Суръати машқро интихоб кунед", secondWord: "сония", characters: "ПЕРСОНАЖҲО", all: "ҲАМА", abacusInfoTitle: "ДАР БОРАИ АБАКУС", abacusInfoDesc: "1 маҳтоби болоӣ ба 5, 4 маҳтоби поёнӣ ҳар кадом ба 1 баробар аст.", abacusLearnRules: "Омӯзиши қоидаҳо", abacusDifficulty: "САТҲИ МУШКИЛӢ", abacusBeginner: "Шурӯъкунанда", abacusIntermediate: "Миёна", abacusAdvanced: "Мушкил", abacusOpsTitle: "АМАЛҲО", abacusAddSub: "Ҷамъ ва Тарҳ", abacusMult: "Зарб", abacusDiv: "Тақсим", speedInfoTitle: "ДАР БОРАИ ҲИСОБИ ЗУД", speedInfoDesc: "Бо ҳисобкунӣ бар зидди вақт суръат ва дақиқии худро санҷед!", speedListItem1: "Мисолҳои маҳдуди вақт", speedListItem2: "Ҷавоби зуд = холҳои бештар", speedListItem3: "Дақиқӣ муҳим аст!", speedExamplesTitle: "МИҚДОРИ МИСОЛҲО", speedExamplesSubtitle: "Аз 7 то 25 мисол интихоб кунед", speedTimeTitle: "МАҲДУДИЯТИ ВАҚТ", speedTimeSubtitle: "Аз 0.5 то 2 сония интихоб кунед", speedOpsTitle: "АМАЛҲО", speedOpsSubtitle: "Намуди амалро интихоб кунед", speedKopaytirish: "Зарб", speedBolish: "Тақсим", speedAralash: "Омехта", speedAllOps: "Ҳамаи амалҳо", speedSecLabel: "сония" , battleTabTitle: "ҶАНГ", battleYou: "ШУМО", battleOpponent: "Ҳариф", battleRating: "Рейтинг", battleLevel: "Сатҳ" , bmOddiy: "Ҷанги оддӣ", bmOddiyDesc: "Ҳисоби зуд бо ҳамқувватҳо", bmReyting: "Ҷанги рейтинг", bmReytingDesc: "Барои холҳо бо ҳарифҳои қавӣ", bmTurnir: "Ҷанги мусобиқа", bmTurnirDesc: "Дар мусобиқаҳо иштирок кунед ва ҷоизаҳо гиред", bmDost: "Ҷанг бо дӯст", bmDostDesc: "Дӯсти худро даъват кунед ва рақобат кунед" , bmDailyMission: "ВАЗИФАИ ҲАРРӮЗА", bmDailyMissionDesc: "Дар 3 ҷанг иштирок кунед", bmDailyBonus: "БОНУСИ ҲАРРӮЗА" , bestResults: "НАТИҶАҲОИ БЕҲТАРИН", bestVictories: "Ғалабаҳо", bestStreak: "Силсилаи ғалабаҳо", bestTime: "Вақти тезтарин" , quickOpponent: "РАҚИБИ ТЕЗ", refresh: "Навсозӣ" , startBattle: "ОҒОЗИ НАБАРД", startBattleSubtext: "Рақибро интихоб кунед ва ғалаба ба даст оред!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Пурқувваттарин математикҳо", platinumTarget: "То Platinum V", xpRemaining: "XP боқимонда" },
+  ja: { title: "数学マスター", subtitle: "レベル 24", desc: "数学の学習に最適です。これで世界を征服しましょう！", clothes: "服", accessories: "アクセサリー", levelText: "レベル", toNextLevel: "次のレベルまで", startExercise: "練習を始める", stats: "統計", seeAll: "すべて >", logic: "論理", logicDesc: "素晴らしい！", speed: "スピード", speedDesc: "良い", accuracy: "正確さ", accuracyDesc: "優秀！", streak: "連続", streakDesc: "日", navHome: "ホーム", navExercise: "練習", navInventory: "在庫", navRanking: "ランキング", navProfile: "プロフィール", missions: "ミッション", exerciseSubtitle: "自分に合ったエクササイズタイプを選んで、学習を続けましょう！", infoTitle: "簡単な計算について", infoDesc: "簡単な計算の練習は、算術演算を素早く正確に実行するスキルを養います。", infoOpsLabel: "演算:", infoOps: ["加算", "減算", "乗算", "除算"], infoExampleLabel: "例:", examplesCountTitle: "例の数", examplesCountSubtitle: "7から25の例を選択してください", exampleWord: "例", opsTitle: "操作", opsSubtitle: "操作タイプを選択してください", opsOddiy: "シンプル", opsOddiyDesc: "加算、減算、乗算、除算", opsF5: "式5", opsF5Desc: "5までの式", opsF10: "式10", opsF10Desc: "10までの式", opsAralash: "混合", opsAralashDesc: "すべての操作が混在", speedSelectTitle: "スピード", speedSelectSubtitle: "練習の速度を選択してください", secondWord: "秒", characters: "キャラクター", all: "すべて", abacusInfoTitle: "そろばんについて", abacusInfoDesc: "上の珠1つは5を、下の珠4つはそれぞれ1を表します。", abacusLearnRules: "ルールを学ぶ", abacusDifficulty: "難易度", abacusBeginner: "初心者", abacusIntermediate: "中級", abacusAdvanced: "上級", abacusOpsTitle: "操作", abacusAddSub: "加算と減算", abacusMult: "乗算", abacusDiv: "除算", speedInfoTitle: "スピード計算について", speedInfoDesc: "時間と競争してスピードと正確さをテストしましょう！", speedListItem1: "時間制限のある例", speedListItem2: "早い回答 = 高得点", speedListItem3: "正確さが重要！", speedExamplesTitle: "例の数", speedExamplesSubtitle: "7から25の例を選択", speedTimeTitle: "制限時間", speedTimeSubtitle: "0.5〜2秒から選択", speedOpsTitle: "操作", speedOpsSubtitle: "操作タイプを選択", speedKopaytirish: "乗算", speedBolish: "除算", speedAralash: "混合", speedAllOps: "すべての操作", speedSecLabel: "秒" , battleTabTitle: "バトル", battleYou: "あなた", battleOpponent: "対戦相手", battleRating: "評価", battleLevel: "レベル" , bmOddiy: "シンプルなバトル", bmOddiyDesc: "同等の相手と高速計算", bmReyting: "レーティングバトル", bmReytingDesc: "ポイントのための強い相手と", bmTurnir: "トーナメントバトル", bmTurnirDesc: "トーナメントに参加して賞品を獲得", bmDost: "友達とバトル", bmDostDesc: "友達を招待して競う" , bmDailyMission: "デイリーミッション", bmDailyMissionDesc: "3回のバトルに参加する", bmDailyBonus: "デイリーボーナス" , bestResults: "最高の結果", bestVictories: "勝利", bestStreak: "連勝", bestTime: "最速タイム" , quickOpponent: "クイック対戦相手", refresh: "更新" , startBattle: "バトル開始", startBattleSubtext: "対戦相手を選んで勝利を掴もう！" , rankingTitle: "ランキング", rankingSubtitle: "最強の数学者たち", platinumTarget: "Platinum V まで", xpRemaining: "XP 残り" },
+  ko: { title: "수학 마스터", subtitle: "레벨 24", desc: "수학 학습에 좋습니다. 이것으로 세상을 정복하세요!", clothes: "옷", accessories: "액세서리", levelText: "레벨", toNextLevel: "다음 레벨까지", startExercise: "연습 시작", stats: "통계", seeAll: "모두 보기 >", logic: "논리", logicDesc: "훌륭해요!", speed: "속도", speedDesc: "좋음", accuracy: "정확도", accuracyDesc: "매우 우수함!", streak: "연속", streakDesc: "일", navHome: "홈", navExercise: "운동", navInventory: "인벤토리", navRanking: "순위", navProfile: "프로필", missions: "임무", exerciseSubtitle: "자신에게 맞는 운동 유형을 선택하고 계속 학습하세요!", infoTitle: "간단한 계산에 대하여", infoDesc: "간단한 계산 연습은 산술 연산을 빠르고 정확하게 수행하는 능력을 기릅니다.", infoOpsLabel: "연산:", infoOps: ["덧셈", "뺄셈", "곱셈", "나눗셈"], infoExampleLabel: "예:", examplesCountTitle: "예제 수", examplesCountSubtitle: "7에서 25개의 예제를 선택하세요", exampleWord: "예제", opsTitle: "연산", opsSubtitle: "연산 유형을 선택하세요", opsOddiy: "단순", opsOddiyDesc: "덧셈, 뺄셈, 곱셈, 나눗셈", opsF5: "공식 5", opsF5Desc: "5까지의 공식", opsF10: "공식 10", opsF10Desc: "10까지의 공식", opsAralash: "혼합", opsAralashDesc: "모든 연산 혼합", speedSelectTitle: "속도", speedSelectSubtitle: "운동 속도를 선택하세요", secondWord: "초", characters: "캐릭터", all: "모두", abacusInfoTitle: "주판에 대하여", abacusInfoDesc: "위쪽 알 1개는 5를 의미하고 아래쪽 알 4개는 각각 1을 의미합니다.", abacusLearnRules: "규칙 배우기", abacusDifficulty: "난이도", abacusBeginner: "초급", abacusIntermediate: "중급", abacusAdvanced: "고급", abacusOpsTitle: "연산", abacusAddSub: "덧셈과 뺄셈", abacusMult: "곱셈", abacusDiv: "나눗셈", speedInfoTitle: "스피드 계산에 대하여", speedInfoDesc: "시간에 맞서 계산하여 속도와 정확성을 테스트하세요!", speedListItem1: "시간 제한 예제", speedListItem2: "빠른 답변 = 더 많은 점수", speedListItem3: "정확성이 중요합니다!", speedExamplesTitle: "예제 수", speedExamplesSubtitle: "7에서 25개 예제 선택", speedTimeTitle: "시간 제한", speedTimeSubtitle: "0.5초에서 2초 사이 선택", speedOpsTitle: "연산", speedOpsSubtitle: "연산 유형 선택", speedKopaytirish: "곱셈", speedBolish: "나눗셈", speedAralash: "혼합", speedAllOps: "모든 연산", speedSecLabel: "초" , battleTabTitle: "전투", battleYou: "당신", battleOpponent: "상대", battleRating: "평가", battleLevel: "레벨" , bmOddiy: "단순한 전투", bmOddiyDesc: "동등한 상대와 빠른 계산", bmReyting: "등급 전투", bmReytingDesc: "점수를 위한 강력한 상대와 함께", bmTurnir: "토너먼트 전투", bmTurnirDesc: "토너먼트에 참가하고 상품을 받으세요", bmDost: "친구와 전투", bmDostDesc: "친구를 초대하고 경쟁하세요" , bmDailyMission: "일일 미션", bmDailyMissionDesc: "3번의 전투에 참여하세요", bmDailyBonus: "일일 보너스" , bestResults: "최고의 결과", bestVictories: "승리", bestStreak: "연승", bestTime: "가장 빠른 시간" , quickOpponent: "빠른 상대", refresh: "새로고침" , startBattle: "배틀 시작", startBattleSubtext: "상대를 선택하고 승리하세요!" , rankingTitle: "랭킹", rankingSubtitle: "최강의 수학자들", platinumTarget: "Platinum V 까지", xpRemaining: "XP 남음" },
 };
+
 
 const EXERCISE_TYPES_TRANSLATIONS = {
   uz: { title: "MASHQ TURLARI", calcTitle: "Oddiy hisob", calcDesc: "Qo'shish, ayirish, ko'paytirish, bo'lish", abacusTitle: "Abakus", abacusDesc: "Serotan yordamida hisoblash", speedTitle: "Tezkor hisob", speedDesc: "Vaqt bilan hisoblash", battleTitle: "Battle", battleDesc: "Boshqa o'yinchilarga qarshi" },
@@ -44,16 +51,131 @@ const EXERCISE_TYPES_TRANSLATIONS = {
   ko: { title: "연습 유형", calcTitle: "기본 수학", calcDesc: "덧셈, 뺄셈, 곱셈, 나눗셈", abacusTitle: "주판", abacusDesc: "주판을 사용하여 계산", speedTitle: "스피드 수학", speedDesc: "시간에 맞서 계산", battleTitle: "배틀", battleDesc: "다른 플레이어와 대결" },
 };
 
+// Preload models for quick dashboard rendering
+useGLTF.preload(require('../assets/models/adult_male_optimized.glb'));
+useGLTF.preload(require('../assets/models/athletic_man_optimized.glb'));
+useGLTF.preload(require('../assets/models/mannequin_clothing_optimized.glb'));
+useGLTF.preload(require('../assets/models/businessman_optimized.glb'));
+useGLTF.preload(require('../assets/models/fashion_model_optimized.glb'));
+useGLTF.preload(require('../assets/models/casual_outfit_optimized.glb'));
+useGLTF.preload(require('../assets/models/stylized_girl_optimized.glb'));
+useGLTF.preload(require('../assets/models/beige_trench_coat_optimized.glb'));
+
+function CharacterModel({ characterIndex }) {
+  const models = {
+    0: require('../assets/models/athletic_man_optimized.glb'),
+    1: require('../assets/models/adult_male_optimized.glb'),
+    2: require('../assets/models/mannequin_clothing_optimized.glb'),
+    3: require('../assets/models/businessman_optimized.glb'),
+    4: require('../assets/models/fashion_model_optimized.glb'),
+    5: require('../assets/models/casual_outfit_optimized.glb'),
+    6: require('../assets/models/stylized_girl_optimized.glb'),
+    7: require('../assets/models/beige_trench_coat_optimized.glb')
+  };
+  
+  const modelPath = models[characterIndex] || models[0];
+  const { scene } = useGLTF(modelPath);
+
+  let yPos = -0.2; // Standard position for all characters
+  if (characterIndex === 1) yPos = 1.2; // Maks is positioned lower by default, so we move him up
+
+  return (
+    <>
+      <primitive object={scene} scale={5.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
+      <OrbitControls 
+        enableZoom={false} 
+        enablePan={false} 
+        minPolarAngle={Math.PI / 2} 
+        maxPolarAngle={Math.PI / 2} 
+        target={[0, 0, 0]}
+      />
+    </>
+  );
+}
+
 export default function StudentDashboardScreen({ navigation, route }) {
-  const { language = 'uz' } = route.params || {};
+  const { language = 'uz', selectedChar = 0 } = route.params || {};
+  const [activeAvatarIndex, setActiveAvatarIndex] = useState(selectedChar);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  const toggleDropdown = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+  
+  const baseAvatarsList = [
+    { id: 0, img: require('../assets/avatar_alex.jpg') },
+    { id: 1, img: require('../assets/avatar_maks.png') },
+    { id: 2, img: require('../assets/avatar_david.jpg') },
+    { id: 3, img: require('../assets/avatar_kevin.png') },
+    { id: 4, img: require('../assets/avatar_lily.jpg') },
+    { id: 5, img: require('../assets/avatar_maya.jpg') },
+    { id: 6, img: require('../assets/avatar_sophia.png') },
+    { id: 7, img: require('../assets/avatar_emma.jpg') }
+  ];
+
+  const selectedAvatarObj = baseAvatarsList.find(a => a.id === activeAvatarIndex);
+  const avatarsList = selectedAvatarObj 
+    ? [selectedAvatarObj, ...baseAvatarsList.filter(a => a.id !== activeAvatarIndex)]
+    : baseAvatarsList;
+
+  const leaderboardData = [
+    { id: 1, name: 'IQROMAX', xp: '1248', avatar: selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png') },
+    { id: 2, name: 'MathKing', xp: '1150', avatar: require('../assets/avatar_david.jpg') },
+    { id: 3, name: 'FastBrain', xp: '1120', avatar: require('../assets/avatar_lily.jpg') },
+    { id: 4, name: 'AbacusPro', xp: '1085', avatar: require('../assets/opponent_4.png') },
+    { id: 5, name: 'LogicStar', xp: '1060', avatar: require('../assets/avatar_maks.png') },
+    { id: 6, name: 'NumberMaster', xp: '1045', avatar: require('../assets/avatar_kevin.png') },
+    { id: 7, name: 'BrainStorm', xp: '980', avatar: require('../assets/avatar_sophia.png') },
+    { id: 8, name: 'SpeedMath', xp: '945', avatar: require('../assets/avatar_emma.jpg') },
+  ];
+
   const t = DASHBOARD_TRANSLATIONS[language] || DASHBOARD_TRANSLATIONS['en'];
   const ext = EXERCISE_TYPES_TRANSLATIONS[language] || EXERCISE_TYPES_TRANSLATIONS['en'];
   const coinText = COIN_TRANSLATIONS[language] || COIN_TRANSLATIONS['en'];
   const [activeTab, setActiveTab] = useState('home');
+  const [activeExerciseType, setActiveExerciseType] = useState('calc');
   const [isExamplesPickerOpen, setIsExamplesPickerOpen] = useState(false);
   const [selectedExamples, setSelectedExamples] = useState(15);
   const [selectedOperation, setSelectedOperation] = useState('oddiy');
   const exampleNumbers = Array.from({ length: 19 }, (_, i) => i + 7);
+  
+  const [isSpeedPickerOpen, setIsSpeedPickerOpen] = useState(false);
+  const [selectedSpeed, setSelectedSpeed] = useState(1);
+  const speedOptions = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.5, 2, 2.5, 3];
+
+  const [abacusDifficulty, setAbacusDifficulty] = useState('orta');
+  const [abacusExamplesCount, setAbacusExamplesCount] = useState(30);
+  const [abacusOperations, setAbacusOperations] = useState(['add']);
+
+  const [speedSecExamples, setSpeedSecExamples] = useState(15);
+  const [isSpeedSecExamplesOpen, setIsSpeedSecExamplesOpen] = useState(false);
+  const [speedSecTime, setSpeedSecTime] = useState(1.0);
+  const [isSpeedSecTimeOpen, setIsSpeedSecTimeOpen] = useState(false);
+  const [speedSecOperation, setSpeedSecOperation] = useState('kopaytirish');
+  const [activeBattleMode, setActiveBattleMode] = useState('oddiy');
+  const [bonusTimeLeft, setBonusTimeLeft] = useState(13 * 3600 + 45 * 60 + 22);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setBonusTimeLeft(prev => prev > 0 ? prev - 1 : 0);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatBonusTime = (totalSeconds) => {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const formatSpeed = (s) => {
+    const mins = Math.floor(s / 60);
+    const secs = Math.floor(s % 60);
+    const ms = Math.round((s % 1) * 1000);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')} ( ${s} ${t.secondWord || 'sekund'} )`;
+  };
 
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
@@ -171,6 +293,63 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <View style={styles.scrollMask} />
 
           <View style={styles.contentOverlay}>
+            
+            {/* Left Panel Container */}
+            <View style={styles.leftPanelContainer}>
+              <Text style={styles.leftPanelTitle}>{t.characters || 'PERSONAJLAR'}</Text>
+              
+              <View style={styles.leftPanel}>
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.avatarList}>
+                  {avatarsList.map((avatar, index) => {
+                    const isSelected = activeAvatarIndex === avatar.id;
+                    if (!isDropdownOpen && index !== 0) return null; // Hide non-selected ones if closed
+                    
+                    return (
+                      <TouchableOpacity 
+                        key={avatar.id} 
+                        style={[
+                          styles.avatarItem, 
+                          isSelected && styles.avatarItemSelected,
+                          index !== 0 && { marginTop: 4 } // Slight spacing for dropdown items
+                        ]}
+                        onPress={() => {
+                          if (index === 0) {
+                            toggleDropdown();
+                          } else {
+                            setActiveAvatarIndex(avatar.id);
+                            toggleDropdown();
+                          }
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <Image source={avatar.img} style={styles.avatarImage} resizeMode="cover" />
+                        {index === 0 && (
+                          <View style={styles.dropdownIconContainer}>
+                            <Feather name={isDropdownOpen ? "chevron-up" : "chevron-down"} size={14} color="#FFF" />
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    )
+                  })}
+                </ScrollView>
+                <TouchableOpacity style={styles.barchaButton} activeOpacity={0.8}>
+                  <Text style={styles.barchaText}>{t.all || 'BARCHA'}</Text>
+                  <Feather name="chevron-right" size={12} color="#FFF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Canvas Container */}
+            <View style={{ position: 'absolute', top: -50, bottom: -20, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
+              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto">
+                <ambientLight intensity={1.5} />
+                <directionalLight position={[10, 10, 5]} intensity={1.5} />
+                <directionalLight position={[-10, 10, -5]} intensity={0.5} />
+                <Suspense fallback={null}>
+                  <CharacterModel characterIndex={activeAvatarIndex} />
+                </Suspense>
+              </Canvas>
+            </View>
             
             <View style={styles.rightPanel}>
             {/* Announcement Card */}
@@ -365,9 +544,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <View style={styles.exerciseTypesRow}>
           
           {/* Card 1 */}
-          <TouchableOpacity style={styles.exerciseCard} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.exerciseCard} 
+            activeOpacity={0.8}
+            onPress={() => setActiveExerciseType('calc')}
+          >
             <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
-              <View style={styles.exerciseCardContent}>
+              <View style={[styles.exerciseCardContent, activeExerciseType === 'calc' && { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.calcTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.calcDesc}</Text>
@@ -378,12 +561,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
             </ImageBackground>
+            {activeExerciseType === 'calc' && (
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', borderRadius: 10, shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+            )}
           </TouchableOpacity>
 
           {/* Card 2 */}
-          <TouchableOpacity style={styles.exerciseCard} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.exerciseCard} 
+            activeOpacity={0.8}
+            onPress={() => setActiveExerciseType('abacus')}
+          >
             <ImageBackground source={require('../assets/card_abacus.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
-              <View style={styles.exerciseCardContent}>
+              <View style={[styles.exerciseCardContent, activeExerciseType === 'abacus' && { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.abacusTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.abacusDesc}</Text>
@@ -394,12 +584,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
             </ImageBackground>
+            {activeExerciseType === 'abacus' && (
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#3B82F6', borderRadius: 10, shadowColor: '#3B82F6', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+            )}
           </TouchableOpacity>
 
           {/* Card 3 */}
-          <TouchableOpacity style={styles.exerciseCard} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.exerciseCard} 
+            activeOpacity={0.8}
+            onPress={() => setActiveExerciseType('speed')}
+          >
             <ImageBackground source={require('../assets/card_speed.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
-              <View style={styles.exerciseCardContent}>
+              <View style={[styles.exerciseCardContent, activeExerciseType === 'speed' && { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.speedTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.speedDesc}</Text>
@@ -410,12 +607,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
             </ImageBackground>
+            {activeExerciseType === 'speed' && (
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#22C55E', borderRadius: 10, shadowColor: '#22C55E', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+            )}
           </TouchableOpacity>
 
           {/* Card 4 */}
-          <TouchableOpacity style={styles.exerciseCard} activeOpacity={0.8}>
+          <TouchableOpacity 
+            style={styles.exerciseCard} 
+            activeOpacity={0.8}
+            onPress={() => setActiveExerciseType('battle')}
+          >
             <ImageBackground source={require('../assets/card_battle.jpg')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
-              <View style={styles.exerciseCardContent}>
+              <View style={[styles.exerciseCardContent, activeExerciseType === 'battle' && { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.battleTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.battleDesc}</Text>
@@ -426,13 +630,126 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
             </ImageBackground>
+            {activeExerciseType === 'battle' && (
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#D97706', borderRadius: 10, shadowColor: '#D97706', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+            )}
           </TouchableOpacity>
         </View>
         </View>
 
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 280, paddingBottom: 120, paddingHorizontal: 20 }}>
+        
+        {activeExerciseType === 'abacus' && (
+          <View style={{ marginTop: 10 }}>
+            {/* ABAKUS INFO CARD */}
+            <View style={[styles.infoCardContainer, { marginTop: 10, backgroundColor: '#0A0A16', padding: 20, aspectRatio: 'auto', borderWidth: 1.5, borderColor: 'rgba(168, 85, 247, 0.3)', borderRadius: 16 }]}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <Text style={[styles.infoTitle, { marginBottom: 0 }]}>{t.abacusInfoTitle || 'ABAKUS (SOROBAN) HAQIDA'}</Text>
+                <MaterialCommunityIcons name="information-outline" size={20} color="#9CA3AF" />
+              </View>
+              
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1, height: 120 }}>
+                   <Image source={require('../assets/abacus_info.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                </View>
+                <View style={{ flex: 1, paddingLeft: 15 }}>
+                  <Text style={[styles.infoDesc, { fontSize: 13, lineHeight: 20, color: '#D1D5DB' }]}>
+                    {t.abacusInfoDesc || 'Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.'}
+                  </Text>
+                  
+                  <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }} activeOpacity={0.7}>
+                    <Text style={{ color: '#A855F7', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>
+                      {t.abacusLearnRules || "Qoidalarni o'rganish"}
+                    </Text>
+                    <MaterialCommunityIcons name="chevron-right" size={16} color="#A855F7" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+            <Text style={styles.abacusSectionTitle}>{t.abacusDifficulty || 'QIYINCHILIK DARAJASI'}</Text>
+            <View style={styles.abacusCardRow}>
+              {[
+                { id: 'boshlangich', emoji: '🟢', title: t.abacusBeginner || "Boshlang'ich", stars: 1, totalStars: 3 },
+                { id: 'orta', emoji: '📚', title: t.abacusIntermediate || "O'rta", stars: 2, totalStars: 3 },
+                { id: 'murakkab', emoji: '🔥', title: t.abacusAdvanced || "Murakkab", stars: 3, totalStars: 3 },
+                { id: 'yuqori', emoji: '👑', title: "Yuqori", stars: 3, totalStars: 3 },
+                { id: 'ustoz', emoji: '🏵️', title: "Ustoz", stars: 4, totalStars: 4 }
+              ].map(diff => (
+                <TouchableOpacity 
+                  key={diff.id} 
+                  style={[styles.abacusDiffCard, abacusDifficulty === diff.id && styles.abacusDiffCardSelected]}
+                  activeOpacity={0.8}
+                  onPress={() => setAbacusDifficulty(diff.id)}
+                >
+                  <View style={[styles.abacusCheckbox, abacusDifficulty === diff.id && { backgroundColor: 'transparent', borderColor: 'transparent' }]} />
+                  <Text style={styles.abacusDiffEmoji}>{diff.emoji}</Text>
+                  <Text style={[styles.abacusDiffTitle, abacusDifficulty === diff.id && styles.abacusDiffTitleSelected]} numberOfLines={1} adjustsFontSizeToFit>{diff.title}</Text>
+                  <View style={styles.abacusStarsRow}>
+                    {Array.from({ length: diff.totalStars }).map((_, i) => (
+                      <MaterialCommunityIcons key={i} name={i < diff.stars ? "star" : "star-outline"} size={12} color={i < diff.stars ? "#FBBF24" : "#4B5563"} />
+                    ))}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.abacusSectionTitle}>MISOLLAR SONI</Text>
+            <View style={styles.abacusCardRow}>
+              {[10, 20, 30, 50, 100].map(count => (
+                <TouchableOpacity 
+                  key={count} 
+                  style={[styles.abacusCountCard, abacusExamplesCount === count && styles.abacusCountCardSelected]}
+                  activeOpacity={0.8}
+                  onPress={() => setAbacusExamplesCount(count)}
+                >
+                  <Text style={[styles.abacusCountNum, abacusExamplesCount === count && styles.abacusCountNumSelected]}>{count}</Text>
+                  <Text style={[styles.abacusCountLabel, abacusExamplesCount === count && styles.abacusCountLabelSelected]}>misol</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.abacusSectionTitle}>AMALLAR</Text>
+            <View style={styles.abacusCardRow}>
+              {[
+                { id: 'add', title: "Qo'shish", symbol: "+", style: styles.abacusOpAdd },
+                { id: 'sub', title: "Ayirish", symbol: "-", style: styles.abacusOpSub },
+                { id: 'mul', title: "Ko'paytirish", symbol: "×", style: styles.abacusOpMul },
+                { id: 'div', title: "Bo'lish", symbol: "÷", style: styles.abacusOpDiv }
+              ].map(op => {
+                const isSelected = abacusOperations.includes(op.id);
+                return (
+                  <TouchableOpacity 
+                    key={op.id} 
+                    style={[styles.abacusOpCard, isSelected && styles.abacusOpCardSelected]}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                      if (isSelected && abacusOperations.length > 1) {
+                        setAbacusOperations(abacusOperations.filter(id => id !== op.id));
+                      } else if (!isSelected) {
+                        setAbacusOperations([...abacusOperations, op.id]);
+                      }
+                    }}
+                  >
+                    {!isSelected && <View style={styles.abacusCheckbox} />}
+                    {isSelected && (
+                      <View style={styles.abacusOpCheckCircle}>
+                        <MaterialCommunityIcons name="check" size={14} color="#FFF" />
+                      </View>
+                    )}
+                    <Text style={styles.abacusOpTitle} numberOfLines={1} adjustsFontSizeToFit>{op.title}</Text>
+                    <Text style={[styles.abacusOpSymbol, op.style]}>{op.symbol}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
+
+        {/* CALC ONLY CONFIGURATION */}
+        {activeExerciseType === 'calc' && (
+          <>
         {/* INFO CARD SECTION */}
-        <View style={styles.infoCardContainer}>
+        <View style={[styles.infoCardContainer, { marginTop: 0, marginBottom: 15 }]}>
           <ImageBackground source={require('../assets/info_card_bg.png')} style={styles.infoCardBg} imageStyle={{ borderRadius: 16 }} resizeMode="contain">
             <View style={styles.infoCardContent}>
               <View style={styles.infoTextContainer}>
@@ -464,154 +781,916 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </ImageBackground>
         </View>
 
-        {/* NUMBER OF EXAMPLES SECTION */}
-        <View style={styles.examplesContainer}>
-          <View style={styles.examplesHeader}>
-            <View style={styles.examplesIconBox}>
-              <MaterialCommunityIcons name="format-list-bulleted" size={24} color="#A855F7" />
+            {/* NUMBER OF EXAMPLES SECTION */}
+            <View style={styles.examplesContainer}>
+              <View style={styles.examplesHeader}>
+                <View style={styles.examplesIconBox}>
+                  <MaterialCommunityIcons name="format-list-bulleted" size={24} color="#A855F7" />
+                </View>
+                <View style={styles.examplesHeaderTextContainer}>
+                  <Text style={styles.examplesTitle}>{t.examplesCountTitle}</Text>
+                  <Text style={styles.examplesSubtitle}>{t.examplesCountSubtitle}</Text>
+                </View>
+              </View>
+
+              {!isExamplesPickerOpen ? (
+                <TouchableOpacity 
+                  style={styles.examplesSelectorClosed} 
+                  activeOpacity={0.8}
+                  onPress={() => setIsExamplesPickerOpen(true)}
+                >
+                  <Text style={styles.examplesSelectorValueText}>{selectedExamples} <Text style={styles.examplesSelectorLabelText}>{t.exampleWord}</Text></Text>
+                  <MaterialCommunityIcons name="chevron-down" size={24} color="#A855F7" />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.examplesPickerExpanded}>
+                  <ScrollView 
+                    style={styles.examplesPickerScroll} 
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={40}
+                    decelerationRate="fast"
+                    onMomentumScrollEnd={(e) => {
+                      const offsetY = e.nativeEvent.contentOffset.y;
+                      const index = Math.round(offsetY / 40);
+                      if (exampleNumbers[index]) {
+                        setSelectedExamples(exampleNumbers[index]);
+                      }
+                    }}
+                  >
+                    <View style={{ height: 40 }} />
+                    {exampleNumbers.map((num) => {
+                      const isSelected = selectedExamples === num;
+                      return (
+                        <TouchableOpacity 
+                          key={num} 
+                          style={[styles.examplesPickerItem, isSelected && styles.examplesPickerItemSelected]}
+                          onPress={() => {
+                            setSelectedExamples(num);
+                            setIsExamplesPickerOpen(false);
+                          }}
+                        >
+                          <Text style={[styles.examplesPickerItemText, isSelected && styles.examplesPickerItemTextSelected]}>
+                            {num} {isSelected && <Text style={styles.examplesPickerItemLabel}>{t.exampleWord}</Text>}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    <View style={{ height: 40 }} />
+                  </ScrollView>
+                </View>
+              )}
             </View>
-            <View style={styles.examplesHeaderTextContainer}>
-              <Text style={styles.examplesTitle}>{t.examplesCountTitle}</Text>
-              <Text style={styles.examplesSubtitle}>{t.examplesCountSubtitle}</Text>
+
+            {/* OPERATIONS SECTION */}
+            <View style={styles.opsContainer}>
+              <View style={styles.opsHeader}>
+                <View style={styles.opsIconBox}>
+                  <MaterialCommunityIcons name="calculator-variant" size={24} color="#A855F7" />
+                </View>
+                <View style={styles.opsHeaderTextContainer}>
+                  <Text style={styles.opsTitle}>{t.opsTitle}</Text>
+                  <Text style={styles.opsSubtitle}>{t.opsSubtitle}</Text>
+                </View>
+              </View>
+
+              <View style={styles.opsRow}>
+                {/* Oddiy */}
+                <TouchableOpacity 
+                  style={[styles.opsCard, selectedOperation === 'oddiy' && styles.opsCardSelected]}
+                  onPress={() => setSelectedOperation('oddiy')}
+                  activeOpacity={0.8}
+                >
+                  {selectedOperation === 'oddiy' && (
+                    <View style={styles.opsCheckmarkBadge}>
+                      <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                    </View>
+                  )}
+                  <View style={styles.opsCardIconWrapper}>
+                    <MaterialCommunityIcons name="plus" size={32} color={selectedOperation === 'oddiy' ? '#A855F7' : '#9CA3AF'} />
+                  </View>
+                  <Text style={[styles.opsCardTitle, selectedOperation === 'oddiy' && styles.opsCardTitleSelected]}>{t.opsOddiy}</Text>
+                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsOddiyDesc}</Text>
+                </TouchableOpacity>
+
+                {/* Formula 5 */}
+                <TouchableOpacity 
+                  style={[styles.opsCard, selectedOperation === 'f5' && styles.opsCardSelected]}
+                  onPress={() => setSelectedOperation('f5')}
+                  activeOpacity={0.8}
+                >
+                  {selectedOperation === 'f5' && (
+                    <View style={styles.opsCheckmarkBadge}>
+                      <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                    </View>
+                  )}
+                  <View style={styles.opsCardIconWrapper}>
+                    <Text style={[styles.opsFormulaIcon, selectedOperation === 'f5' && styles.opsFormulaIconSelected]}>f(x)</Text>
+                  </View>
+                  <Text style={[styles.opsCardTitle, selectedOperation === 'f5' && styles.opsCardTitleSelected]}>{t.opsF5}</Text>
+                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsF5Desc}</Text>
+                </TouchableOpacity>
+
+                {/* Formula 10 */}
+                <TouchableOpacity 
+                  style={[styles.opsCard, selectedOperation === 'f10' && styles.opsCardSelected]}
+                  onPress={() => setSelectedOperation('f10')}
+                  activeOpacity={0.8}
+                >
+                  {selectedOperation === 'f10' && (
+                    <View style={styles.opsCheckmarkBadge}>
+                      <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                    </View>
+                  )}
+                  <View style={styles.opsCardIconWrapper}>
+                    <Text style={[styles.opsFormulaIcon, selectedOperation === 'f10' && styles.opsFormulaIconSelected]}>f(x)</Text>
+                  </View>
+                  <Text style={[styles.opsCardTitle, selectedOperation === 'f10' && styles.opsCardTitleSelected]}>{t.opsF10}</Text>
+                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsF10Desc}</Text>
+                </TouchableOpacity>
+
+                {/* Aralash */}
+                <TouchableOpacity 
+                  style={[styles.opsCard, selectedOperation === 'aralash' && styles.opsCardSelected]}
+                  onPress={() => setSelectedOperation('aralash')}
+                  activeOpacity={0.8}
+                >
+                  {selectedOperation === 'aralash' && (
+                    <View style={styles.opsCheckmarkBadge}>
+                      <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                    </View>
+                  )}
+                  <View style={styles.opsCardIconWrapper}>
+                    <MaterialCommunityIcons name="shuffle-variant" size={28} color={selectedOperation === 'aralash' ? '#A855F7' : '#9CA3AF'} />
+                  </View>
+                  <Text style={[styles.opsCardTitle, selectedOperation === 'aralash' && styles.opsCardTitleSelected]}>{t.opsAralash}</Text>
+                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsAralashDesc}</Text>
+                </TouchableOpacity>
+
+              </View>
+            </View>
+
+            {/* SPEED SECTION */}
+            <View style={styles.examplesContainer}>
+              <View style={styles.examplesHeader}>
+                <View style={styles.examplesIconBox}>
+                  <MaterialCommunityIcons name="lightning-bolt" size={24} color="#A855F7" />
+                </View>
+                <View style={styles.examplesHeaderTextContainer}>
+                  <Text style={styles.examplesTitle}>{t.speedSelectTitle || 'TEZLIK'}</Text>
+                  <Text style={styles.examplesSubtitle}>{t.speedSelectSubtitle || 'Mashq bajarish tezligini tanlang'}</Text>
+                </View>
+              </View>
+
+              {!isSpeedPickerOpen ? (
+                <TouchableOpacity 
+                  style={styles.examplesSelectorClosed} 
+                  activeOpacity={0.8}
+                  onPress={() => setIsSpeedPickerOpen(true)}
+                >
+                  <Text style={styles.examplesSelectorValueText}>
+                    {formatSpeed(selectedSpeed)} <Text style={styles.examplesSelectorLabelText}>( {selectedSpeed} {t.secondWord || 'sekund'} )</Text>
+                  </Text>
+                  <MaterialCommunityIcons name="chevron-down" size={24} color="#A855F7" />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.examplesPickerExpanded}>
+                  <ScrollView 
+                    style={styles.examplesPickerScroll} 
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={40}
+                    decelerationRate="fast"
+                    onMomentumScrollEnd={(e) => {
+                      const offsetY = e.nativeEvent.contentOffset.y;
+                      const index = Math.round(offsetY / 40);
+                      if (speedOptions[index]) {
+                        setSelectedSpeed(speedOptions[index]);
+                      }
+                    }}
+                  >
+                    <View style={{ height: 40 }} />
+                    {speedOptions.map((s) => {
+                      const isSelected = selectedSpeed === s;
+                      return (
+                        <TouchableOpacity 
+                          key={s.toString()} 
+                          style={[styles.examplesPickerItem, isSelected && styles.examplesPickerItemSelected]}
+                          onPress={() => {
+                            setSelectedSpeed(s);
+                            setIsSpeedPickerOpen(false);
+                          }}
+                        >
+                          <Text style={[styles.examplesPickerItemText, isSelected && styles.examplesPickerItemTextSelected]}>
+                            {formatSpeed(s)} {isSelected && <Text style={styles.examplesPickerItemLabel}>( {s} {t.secondWord || 'sekund'} )</Text>}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    <View style={{ height: 40 }} />
+                  </ScrollView>
+                </View>
+              )}
+            </View>
+          </>
+        )}
+
+        {/* SPEED CONFIGURATION */}
+        {activeExerciseType === 'speed' && (
+          <View style={{ marginTop: 10 }}>
+            {/* SPEED INFO CARD */}
+            <View style={[styles.infoCardContainer, { marginTop: 10, backgroundColor: '#06130A', padding: 20, aspectRatio: 'auto', borderWidth: 1.5, borderColor: 'rgba(34, 197, 94, 0.3)', borderRadius: 16 }]}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <Text style={[styles.infoTitle, { marginBottom: 0, color: '#F8FAFC' }]}>{t.speedInfoTitle || 'TEZKOR HISOBLASH HAQIDA'}</Text>
+              </View>
+              
+              <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 120 }}>
+                <View style={{ flex: 1, paddingRight: 110 }}>
+                  <Text style={[styles.infoDesc, { fontSize: 13, lineHeight: 20, color: '#D1D5DB', marginBottom: 15 }]}>
+                    {t.speedInfoDesc || "Vaqt bilan hisoblash orqali tezlik va aniqligingizni sinab ko'ring!"}
+                  </Text>
+                  
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                    <Text style={{ fontSize: 16, marginRight: 8 }}>⏱️</Text>
+                    <Text style={{ color: '#E2E8F0', fontSize: 12, flexShrink: 1 }}>{t.speedListItem1 || 'Vaqt cheklovi bilan misollar'}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                    <Text style={{ fontSize: 16, marginRight: 8 }}>⚡</Text>
+                    <Text style={{ color: '#E2E8F0', fontSize: 12, flexShrink: 1 }}>{t.speedListItem2 || "Tez javob – ko'proq ball"}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 16, marginRight: 8 }}>🎯</Text>
+                    <Text style={{ color: '#E2E8F0', fontSize: 12, flexShrink: 1 }}>{t.speedListItem3 || 'Aniqlik muhim!'}</Text>
+                  </View>
+                </View>
+
+                {/* ABSOLUTE POSITIONED IMAGE SO CARD HEIGHT IS NOT AFFECTED */}
+                <View style={{ position: 'absolute', right: -30, top: -70, width: 220, height: 320 }}>
+                   <Image source={require('../assets/speed_info.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                </View>
+              </View>
+            </View>
+
+            {/* SPEED MISOL SONI */}
+            <View style={[styles.examplesContainer, { backgroundColor: '#0A0A16', marginTop: 15, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+              <View style={styles.examplesHeader}>
+                <View style={[styles.examplesIconBox, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+                  <MaterialCommunityIcons name="calculator" size={24} color="#A855F7" />
+                </View>
+                <View style={styles.examplesHeaderTextContainer}>
+                  <Text style={[styles.examplesTitle, { color: '#F8FAFC' }]}>{t.speedExamplesTitle || 'MISOLLAR SONI'}</Text>
+                  <Text style={[styles.examplesSubtitle, { color: '#6B7280' }]}>{t.speedExamplesSubtitle || '7 dan 25 gacha misol tanlang'}</Text>
+                </View>
+              </View>
+
+              {!isSpeedSecExamplesOpen ? (
+                <TouchableOpacity 
+                  style={[styles.examplesSelectorClosed, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]} 
+                  activeOpacity={0.8}
+                  onPress={() => setIsSpeedSecExamplesOpen(true)}
+                >
+                  <Text style={[styles.examplesSelectorValueText, { color: '#F8FAFC' }]}>{speedSecExamples} <Text style={[styles.examplesSelectorLabelText, { color: '#9CA3AF' }]}>{t.exampleWord || 'misol'}</Text></Text>
+                  <MaterialCommunityIcons name="chevron-down" size={24} color="#9CA3AF" />
+                </TouchableOpacity>
+              ) : (
+                <View style={[styles.examplesPickerExpanded, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
+                  <ScrollView 
+                    style={styles.examplesPickerScroll} 
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={40}
+                    decelerationRate="fast"
+                    onMomentumScrollEnd={(e) => {
+                      const offsetY = e.nativeEvent.contentOffset.y;
+                      const index = Math.round(offsetY / 40);
+                      if (exampleNumbers[index]) setSpeedSecExamples(exampleNumbers[index]);
+                    }}
+                  >
+                    <View style={{ height: 40 }} />
+                    {exampleNumbers.map((num) => {
+                      const isSelected = speedSecExamples === num;
+                      return (
+                        <TouchableOpacity 
+                          key={num.toString()} 
+                          style={[styles.examplesPickerItem, isSelected && { backgroundColor: 'rgba(168, 85, 247, 0.2)' }]}
+                          onPress={() => {
+                            setSpeedSecExamples(num);
+                            setIsSpeedSecExamplesOpen(false);
+                          }}
+                        >
+                          <Text style={[styles.examplesPickerItemText, { color: '#9CA3AF' }, isSelected && { color: '#A855F7', fontWeight: 'bold' }]}>
+                            {num} {isSelected && <Text style={{ color: '#9CA3AF', fontSize: 14 }}>( {t.exampleWord || 'misol'} )</Text>}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    <View style={{ height: 40 }} />
+                  </ScrollView>
+                </View>
+              )}
+            </View>
+
+            {/* SPEED VAQT CHEKLOVI */}
+            <View style={[styles.examplesContainer, { backgroundColor: '#0A0A16', marginTop: 15, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+              <View style={styles.examplesHeader}>
+                <View style={[styles.examplesIconBox, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+                  <MaterialCommunityIcons name="timer-outline" size={24} color="#A855F7" />
+                </View>
+                <View style={styles.examplesHeaderTextContainer}>
+                  <Text style={[styles.examplesTitle, { color: '#F8FAFC' }]}>{t.speedTimeTitle || 'VAQT CHEKLOVI'}</Text>
+                  <Text style={[styles.examplesSubtitle, { color: '#6B7280' }]}>{t.speedTimeSubtitle || '0.5 soniyadan 2 soniyagacha vaqt tanlang'}</Text>
+                </View>
+              </View>
+
+              {!isSpeedSecTimeOpen ? (
+                <TouchableOpacity 
+                  style={[styles.examplesSelectorClosed, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]} 
+                  activeOpacity={0.8}
+                  onPress={() => setIsSpeedSecTimeOpen(true)}
+                >
+                  <Text style={[styles.examplesSelectorValueText, { color: '#F8FAFC' }]}>{speedSecTime.toFixed(1)} <Text style={[styles.examplesSelectorLabelText, { color: '#9CA3AF' }]}>{t.speedSecLabel || 'soniya'}</Text></Text>
+                  <MaterialCommunityIcons name="chevron-down" size={24} color="#9CA3AF" />
+                </TouchableOpacity>
+              ) : (
+                <View style={[styles.examplesPickerExpanded, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
+                  <ScrollView 
+                    style={styles.examplesPickerScroll} 
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={40}
+                    decelerationRate="fast"
+                    onMomentumScrollEnd={(e) => {
+                      const offsetY = e.nativeEvent.contentOffset.y;
+                      const index = Math.round(offsetY / 40);
+                      const opts = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0];
+                      if (opts[index]) setSpeedSecTime(opts[index]);
+                    }}
+                  >
+                    <View style={{ height: 40 }} />
+                    {[0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0].map((num) => {
+                      const isSelected = speedSecTime === num;
+                      return (
+                        <TouchableOpacity 
+                          key={num.toString()} 
+                          style={[styles.examplesPickerItem, isSelected && { backgroundColor: 'rgba(168, 85, 247, 0.2)' }]}
+                          onPress={() => {
+                            setSpeedSecTime(num);
+                            setIsSpeedSecTimeOpen(false);
+                          }}
+                        >
+                          <Text style={[styles.examplesPickerItemText, { color: '#9CA3AF' }, isSelected && { color: '#A855F7', fontWeight: 'bold' }]}>
+                            {num.toFixed(1)} {isSelected && <Text style={{ color: '#9CA3AF', fontSize: 14 }}>( {t.speedSecLabel || 'soniya'} )</Text>}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                    <View style={{ height: 40 }} />
+                  </ScrollView>
+                </View>
+              )}
+            </View>
+
+            {/* SPEED AMALLAR */}
+            <View style={[styles.examplesContainer, { backgroundColor: '#0A0A16', marginTop: 15, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
+              <View style={styles.examplesHeader}>
+                <View style={[styles.examplesIconBox, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
+                  <MaterialCommunityIcons name="calculator-variant" size={24} color="#A855F7" />
+                </View>
+                <View style={styles.examplesHeaderTextContainer}>
+                  <Text style={[styles.examplesTitle, { color: '#F8FAFC' }]}>{t.speedOpsTitle || 'AMALLAR'}</Text>
+                  <Text style={[styles.examplesSubtitle, { color: '#6B7280' }]}>{t.speedOpsSubtitle || 'Amallar turini tanlang'}</Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
+                <TouchableOpacity 
+                  style={[{ flex: 1, backgroundColor: '#05050C', borderRadius: 12, padding: 15, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', marginRight: 5 }, speedSecOperation === 'kopaytirish' && { borderColor: '#A855F7', backgroundColor: 'rgba(168, 85, 247, 0.1)', shadowColor: '#A855F7', shadowOpacity: 0.5, shadowRadius: 8, elevation: 5 }]}
+                  activeOpacity={0.8}
+                  onPress={() => setSpeedSecOperation('kopaytirish')}
+                >
+                  <MaterialCommunityIcons name="close" size={32} color={speedSecOperation === 'kopaytirish' ? '#A855F7' : '#9CA3AF'} style={{ marginBottom: 5 }} />
+                  <Text style={[{ fontSize: 13, color: '#9CA3AF', fontWeight: '500' }, speedSecOperation === 'kopaytirish' && { color: '#F8FAFC', fontWeight: 'bold' }]}>{t.speedKopaytirish || "Ko'paytirish"}</Text>
+                  {speedSecOperation === 'kopaytirish' && (
+                    <View style={{ position: 'absolute', top: 5, right: 5, backgroundColor: '#A855F7', borderRadius: 10, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+                      <MaterialCommunityIcons name="check" size={14} color="#FFF" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[{ flex: 1, backgroundColor: '#05050C', borderRadius: 12, padding: 15, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', marginHorizontal: 5 }, speedSecOperation === 'bolish' && { borderColor: '#A855F7', backgroundColor: 'rgba(168, 85, 247, 0.1)', shadowColor: '#A855F7', shadowOpacity: 0.5, shadowRadius: 8, elevation: 5 }]}
+                  activeOpacity={0.8}
+                  onPress={() => setSpeedSecOperation('bolish')}
+                >
+                  <MaterialCommunityIcons name="division" size={32} color={speedSecOperation === 'bolish' ? '#A855F7' : '#9CA3AF'} style={{ marginBottom: 5 }} />
+                  <Text style={[{ fontSize: 13, color: '#9CA3AF', fontWeight: '500' }, speedSecOperation === 'bolish' && { color: '#F8FAFC', fontWeight: 'bold' }]}>{t.speedBolish || "Bo'lish"}</Text>
+                  {speedSecOperation === 'bolish' && (
+                    <View style={{ position: 'absolute', top: 5, right: 5, backgroundColor: '#A855F7', borderRadius: 10, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+                      <MaterialCommunityIcons name="check" size={14} color="#FFF" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[{ flex: 1, backgroundColor: '#05050C', borderRadius: 12, padding: 15, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)', marginLeft: 5 }, speedSecOperation === 'aralash' && { borderColor: '#A855F7', backgroundColor: 'rgba(168, 85, 247, 0.1)', shadowColor: '#A855F7', shadowOpacity: 0.5, shadowRadius: 8, elevation: 5 }]}
+                  activeOpacity={0.8}
+                  onPress={() => setSpeedSecOperation('aralash')}
+                >
+                  <MaterialCommunityIcons name="shuffle-variant" size={32} color={speedSecOperation === 'aralash' ? '#A855F7' : '#9CA3AF'} style={{ marginBottom: 5 }} />
+                  <Text style={[{ fontSize: 13, color: '#9CA3AF', fontWeight: '500' }, speedSecOperation === 'aralash' && { color: '#F8FAFC', fontWeight: 'bold' }]}>{t.speedAralash || "Aralash"}</Text>
+                  <Text style={{ fontSize: 9, color: '#6B7280', marginTop: 2 }}>{t.speedAllOps || "Barcha amallar"}</Text>
+                  {speedSecOperation === 'aralash' && (
+                    <View style={{ position: 'absolute', top: 5, right: 5, backgroundColor: '#A855F7', borderRadius: 10, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+                      <MaterialCommunityIcons name="check" size={14} color="#FFF" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
+        )}
 
-          {!isExamplesPickerOpen ? (
-            <TouchableOpacity 
-              style={styles.examplesSelectorClosed} 
-              activeOpacity={0.8}
-              onPress={() => setIsExamplesPickerOpen(true)}
-            >
-              <Text style={styles.examplesSelectorValueText}>{selectedExamples} <Text style={styles.examplesSelectorLabelText}>{t.exampleWord}</Text></Text>
-              <MaterialCommunityIcons name="chevron-down" size={24} color="#A855F7" />
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.examplesPickerExpanded}>
-              <ScrollView 
-                style={styles.examplesPickerScroll} 
-                showsVerticalScrollIndicator={false}
-                snapToInterval={40}
-                decelerationRate="fast"
-                onMomentumScrollEnd={(e) => {
-                  const offsetY = e.nativeEvent.contentOffset.y;
-                  const index = Math.round(offsetY / 40);
-                  if (exampleNumbers[index]) {
-                    setSelectedExamples(exampleNumbers[index]);
-                  }
-                }}
+        {/* BATTLE ONLY CONFIGURATION */}
+        {activeExerciseType === 'battle' && (
+          <View style={{ marginTop: 25, marginBottom: 15 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: -22, zIndex: 10 }}>
+              <MaterialCommunityIcons name="sword-cross" size={24} color="#FFF" style={{ marginRight: 8 }} />
+              <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}>{t.battleTabTitle || 'BATTLE'}</Text>
+            </View>
+
+            <View style={styles.battleCardContainer}>
+              <ImageBackground source={require('../assets/battle_vs_bg.png')} style={styles.battleCardBg} imageStyle={{ borderRadius: 16 }} resizeMode="stretch">
+                <View style={styles.battleCardOverlay}>
+                  
+                  {/* Left Player (You) */}
+                  <View style={styles.battleLeftPlayer}>
+                    <Text style={styles.battlePlayerLabelYou}>{t.battleYou || 'SIZ'}</Text>
+                    <Text style={styles.battlePlayerNameYou}>{t.title ? t.title.replace(' ', '\n') : ''}</Text>
+                    <View style={styles.battleLevelBadgeYou}>
+                      <Text style={styles.battleLevelTextYou}>{t.battleLevel || 'Level'} 24</Text>
+                    </View>
+                    <View style={styles.battleTrophyRow}>
+                      <MaterialCommunityIcons name="trophy" size={14} color="#F59E0B" style={{ marginRight: 4 }} />
+                      <Text style={styles.battleTrophyTextYou}>1 250</Text>
+                    </View>
+                    <Text style={styles.battleReytingText}>{t.battleRating || 'Reyting'}</Text>
+                  </View>
+
+                  {/* Right Player (Opponent) */}
+                  <View style={styles.battleRightPlayer}>
+                    <Text style={styles.battlePlayerLabelOpp}>{t.battleOpponent || 'Raqib'}</Text>
+                    <Text style={styles.battlePlayerNameOpp}>IQ{'\n'}Warrior</Text>
+                    <View style={styles.battleLevelBadgeOpp}>
+                      <Text style={styles.battleLevelTextOpp}>{t.battleLevel || 'Level'} 22</Text>
+                    </View>
+                    <View style={styles.battleTrophyRow}>
+                      <MaterialCommunityIcons name="trophy" size={14} color="#F59E0B" style={{ marginRight: 4 }} />
+                      <Text style={styles.battleTrophyTextOpp}>1 180</Text>
+                    </View>
+                    <Text style={styles.battleReytingText}>{t.battleRating || 'Reyting'}</Text>
+                  </View>
+
+                </View>
+              </ImageBackground>
+            </View>
+
+            {/* BATTLE MODES */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 5, marginTop: -15, width: '100%' }}>
+              {/* Card 1: Oddiy */}
+              <TouchableOpacity 
+                activeOpacity={0.8}
+                onPress={() => setActiveBattleMode('oddiy')}
+                style={[
+                  styles.battleModeCard, 
+                  activeBattleMode === 'oddiy' && styles.battleModeCardActive
+                ]}
               >
-                <View style={{ height: 40 }} />
-                {exampleNumbers.map((num) => {
-                  const isSelected = selectedExamples === num;
-                  return (
-                    <TouchableOpacity 
-                      key={num} 
-                      style={[styles.examplesPickerItem, isSelected && styles.examplesPickerItemSelected]}
-                      onPress={() => {
-                        setSelectedExamples(num);
-                        setIsExamplesPickerOpen(false);
-                      }}
-                    >
-                      <Text style={[styles.examplesPickerItemText, isSelected && styles.examplesPickerItemTextSelected]}>
-                        {num} {isSelected && <Text style={styles.examplesPickerItemLabel}>{t.exampleWord}</Text>}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-                <View style={{ height: 40 }} />
-              </ScrollView>
+                <Image source={require('../assets/battle_mode_oddiy.png')} style={styles.battleModeIcon} resizeMode="contain" />
+                <Text style={styles.battleModeTitle} numberOfLines={2}>{t.bmOddiy || 'Oddiy Battle'}</Text>
+                <Text style={styles.battleModeDesc} numberOfLines={3}>{t.bmOddiyDesc || 'Teng kuchdagilar bilan tezkor hisoblash'}</Text>
+                <View style={styles.battleModeEnergyBadge}>
+                  <MaterialCommunityIcons name="lightning-bolt" size={10} color="#F59E0B" />
+                  <Text style={styles.battleModeEnergyText}>1</Text>
+                </View>
+              </TouchableOpacity>
+              
+              {/* Card 2: Reyting */}
+              <TouchableOpacity 
+                activeOpacity={0.8}
+                onPress={() => setActiveBattleMode('reyting')}
+                style={[
+                  styles.battleModeCard, 
+                  activeBattleMode === 'reyting' && styles.battleModeCardActive
+                ]}
+              >
+                <Image source={require('../assets/battle_mode_reyting.jpg')} style={styles.battleModeIcon} resizeMode="contain" />
+                <Text style={styles.battleModeTitle} numberOfLines={2}>{t.bmReyting || 'Reyting Battle'}</Text>
+                <Text style={styles.battleModeDesc} numberOfLines={3}>{t.bmReytingDesc || 'Reyting ochkolari uchun kuchli raqiblar bilan'}</Text>
+                <View style={styles.battleModeEnergyBadge}>
+                  <MaterialCommunityIcons name="lightning-bolt" size={10} color="#F59E0B" />
+                  <Text style={styles.battleModeEnergyText}>2</Text>
+                </View>
+              </TouchableOpacity>
+              
+              {/* Card 3: Turnir */}
+              <TouchableOpacity 
+                activeOpacity={0.8}
+                onPress={() => setActiveBattleMode('turnir')}
+                style={[
+                  styles.battleModeCard, 
+                  activeBattleMode === 'turnir' && styles.battleModeCardActive
+                ]}
+              >
+                <Image source={require('../assets/battle_mode_turnir.png')} style={styles.battleModeIcon} resizeMode="contain" />
+                <Text style={styles.battleModeTitle} numberOfLines={2}>{t.bmTurnir || 'Turnir Battle'}</Text>
+                <Text style={styles.battleModeDesc} numberOfLines={3}>{t.bmTurnirDesc || 'Turnirlarda qatnashing va sovrin yuting'}</Text>
+                <View style={styles.battleModeEnergyBadge}>
+                  <MaterialCommunityIcons name="lightning-bolt" size={10} color="#F59E0B" />
+                  <Text style={styles.battleModeEnergyText}>2</Text>
+                </View>
+              </TouchableOpacity>
+              
+              {/* Card 4: Do'st bilan */}
+              <TouchableOpacity 
+                activeOpacity={0.8}
+                onPress={() => setActiveBattleMode('dost')}
+                style={[
+                  styles.battleModeCard, 
+                  activeBattleMode === 'dost' && styles.battleModeCardActive
+                ]}
+              >
+                <Image source={require('../assets/battle_mode_dost.jpg')} style={styles.battleModeIcon} resizeMode="contain" />
+                <Text style={styles.battleModeTitle} numberOfLines={2}>{t.bmDost || "Do'st bilan Battle"}</Text>
+                <Text style={styles.battleModeDesc} numberOfLines={3}>{t.bmDostDesc || "Do'stingizni taklif qiling va bellashing"}</Text>
+                <View style={styles.battleModeEnergyBadge}>
+                  <MaterialCommunityIcons name="lightning-bolt" size={10} color="#F59E0B" />
+                  <Text style={styles.battleModeEnergyText}>0</Text>
+                </View>
+              </TouchableOpacity>
             </View>
-          )}
-        </View>
 
-        {/* OPERATIONS SECTION */}
-        <View style={styles.opsContainer}>
-          <View style={styles.opsHeader}>
-            <View style={styles.opsIconBox}>
-              <MaterialCommunityIcons name="calculator-variant" size={24} color="#A855F7" />
+            {/* DAILY MISSION AND BONUS ROW */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, width: '100%' }}>
+              
+              {/* Box 1: Mission */}
+              <View style={[styles.dailyBoxCard, { marginRight: 8 }]}>
+                <Text style={styles.dailyBoxTitle}>{t.bmDailyMission || 'KUNLIK BATTLE MISSIYASI'}</Text>
+                
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, flex: 1 }}>
+                  <Image source={require('../assets/target_icon.png')} style={{ width: 32, height: 32, marginRight: 10 }} resizeMode="contain" />
+                  <Text style={{ color: '#FFF', fontSize: 11, fontFamily: 'Inter_600SemiBold', flex: 1, lineHeight: 16 }}>
+                    {t.bmDailyMissionDesc || "3 ta battle'da ishtirok eting"}
+                  </Text>
+                </View>
+
+                {/* Progress Bar */}
+                <View style={{ marginTop: 15, marginBottom: 5 }}>
+                  <View style={{ height: 6, backgroundColor: '#1A1B2D', borderRadius: 3, width: '100%' }}>
+                    <View style={{ height: 6, backgroundColor: '#A855F7', borderRadius: 3, width: '33%' }} />
+                  </View>
+                  <Text style={{ color: '#9CA3AF', fontSize: 10, textAlign: 'center', marginTop: 6, fontFamily: 'Inter_500Medium' }}>1 / 3</Text>
+                </View>
+              </View>
+
+              {/* Box 2: Bonus */}
+              <View style={styles.dailyBoxCard}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={styles.dailyBoxTitle}>{t.bmDailyBonus || 'KUNLIK BONUS'}</Text>
+                  <Text style={{ color: '#A855F7', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{formatBonusTime(bonusTimeLeft)}</Text>
+                </View>
+                
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, justifyContent: 'space-between', flex: 1 }}>
+                  {/* Coin */}
+                  <View style={{ alignItems: 'center' }}>
+                    <Image source={require('../assets/coin_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} resizeMode="cover" />
+                    <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x100</Text>
+                    <MaterialCommunityIcons name="check" size={14} color="#10B981" style={{ marginTop: 2 }} />
+                  </View>
+                  
+                  <MaterialCommunityIcons name="arrow-right" size={12} color="#6B7280" style={{ marginBottom: 20 }} />
+                  
+                  {/* XP */}
+                  <View style={{ alignItems: 'center' }}>
+                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} resizeMode="cover" />
+                    <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x50</Text>
+                    <MaterialCommunityIcons name="check" size={14} color="#10B981" style={{ marginTop: 2 }} />
+                  </View>
+
+                  <MaterialCommunityIcons name="arrow-right" size={12} color="#6B7280" style={{ marginBottom: 20 }} />
+
+                  {/* Chest */}
+                  <View style={{ alignItems: 'center' }}>
+                    <Image source={require('../assets/chest_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 6 }} resizeMode="cover" />
+                    <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x1</Text>
+                    <Text style={{ color: '#9CA3AF', fontSize: 8, fontFamily: 'Inter_400Regular', marginTop: 2 }}>7 kun</Text>
+                  </View>
+                </View>
+              </View>
             </View>
-            <View style={styles.opsHeaderTextContainer}>
-              <Text style={styles.opsTitle}>{t.opsTitle}</Text>
-              <Text style={styles.opsSubtitle}>{t.opsSubtitle}</Text>
+
+            {/* BEST RESULTS SECTION */}
+            <View style={styles.bestResultsCard}>
+              <Text style={styles.bestResultsTitle}>{t.bestResults || 'ENG YAXSHI NATIJALAR'}</Text>
+              
+              <View style={styles.bestResultsRow}>
+                {/* Victories */}
+                <View style={styles.bestResultItem}>
+                  <Image source={require('../assets/best_victories.png')} style={styles.bestResultIcon} resizeMode="contain" />
+                  <Text style={styles.bestResultLabel}>{t.bestVictories || "G'alabalar"}</Text>
+                  <Text style={styles.bestResultValue}>12</Text>
+                </View>
+
+                {/* Vertical Divider */}
+                <View style={styles.bestResultDivider} />
+
+                {/* Winning Streak */}
+                <View style={styles.bestResultItem}>
+                  <Image source={require('../assets/best_streak.png')} style={styles.bestResultIcon} resizeMode="contain" />
+                  <Text style={styles.bestResultLabel}>{t.bestStreak || "G'alaba seriyasi"}</Text>
+                  <Text style={styles.bestResultValue}>5</Text>
+                </View>
+
+                {/* Vertical Divider */}
+                <View style={styles.bestResultDivider} />
+
+                {/* Fastest Time */}
+                <View style={styles.bestResultItem}>
+                  <Image source={require('../assets/best_time.png')} style={styles.bestResultIcon} resizeMode="contain" />
+                  <Text style={styles.bestResultLabel}>{t.bestTime || "Eng tez vaqt"}</Text>
+                  <Text style={styles.bestResultValue}>18.4s</Text>
+                </View>
+              </View>
             </View>
+
+            {/* QUICK OPPONENT SECTION */}
+            <View style={{ marginTop: 10, marginBottom: 20 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, paddingHorizontal: 4 }}>
+                <Text style={styles.quickOpponentTitle}>{t.quickOpponent || 'TEZKOR RAQIB'}</Text>
+              </View>
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 10, width: '100%' }}>
+                {/* Opponent 1 */}
+                <View style={styles.opponentCard}>
+                  <View style={styles.opponentHeader}>
+                    <Image source={require('../assets/opponent_1.png')} style={styles.opponentAvatar} resizeMode="contain" />
+                    <View style={styles.opponentInfo}>
+                      <Text style={styles.opponentName} numberOfLines={1}>Brain King</Text>
+                      <Text style={styles.opponentLevel}>Level 23</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                        <MaterialCommunityIcons name="trophy" size={8} color="#F59E0B" />
+                        <Text style={styles.opponentRating}>1 310</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.opponentBattleBtn}>
+                    <Text style={styles.opponentBattleText}>BATTLE</Text>
+                    <View style={styles.opponentEnergyBadge}>
+                      <MaterialCommunityIcons name="lightning-bolt" size={8} color="#F59E0B" />
+                      <Text style={styles.opponentEnergyText}>1</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Opponent 2 */}
+                <View style={styles.opponentCard}>
+                  <View style={styles.opponentHeader}>
+                    <Image source={require('../assets/opponent_2.png')} style={styles.opponentAvatar} resizeMode="contain" />
+                    <View style={styles.opponentInfo}>
+                      <Text style={styles.opponentName} numberOfLines={1}>Speed Genius</Text>
+                      <Text style={styles.opponentLevel}>Level 21</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                        <MaterialCommunityIcons name="trophy" size={8} color="#F59E0B" />
+                        <Text style={styles.opponentRating}>1 160</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.opponentBattleBtn}>
+                    <Text style={styles.opponentBattleText}>BATTLE</Text>
+                    <View style={styles.opponentEnergyBadge}>
+                      <MaterialCommunityIcons name="lightning-bolt" size={8} color="#F59E0B" />
+                      <Text style={styles.opponentEnergyText}>1</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Opponent 3 */}
+                <View style={styles.opponentCard}>
+                  <View style={styles.opponentHeader}>
+                    <Image source={require('../assets/opponent_3.png')} style={styles.opponentAvatar} resizeMode="contain" />
+                    <View style={styles.opponentInfo}>
+                      <Text style={styles.opponentName} numberOfLines={1}>IQ Champion</Text>
+                      <Text style={styles.opponentLevel}>Level 20</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                        <MaterialCommunityIcons name="trophy" size={8} color="#F59E0B" />
+                        <Text style={styles.opponentRating}>1 050</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.opponentBattleBtn}>
+                    <Text style={styles.opponentBattleText}>BATTLE</Text>
+                    <View style={styles.opponentEnergyBadge}>
+                      <MaterialCommunityIcons name="lightning-bolt" size={8} color="#F59E0B" />
+                      <Text style={styles.opponentEnergyText}>1</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Opponent 4 */}
+                <View style={styles.opponentCard}>
+                  <View style={styles.opponentHeader}>
+                    <Image source={require('../assets/opponent_4.png')} style={styles.opponentAvatar} resizeMode="contain" />
+                    <View style={styles.opponentInfo}>
+                      <Text style={styles.opponentName} numberOfLines={1}>Math Hero</Text>
+                      <Text style={styles.opponentLevel}>Level 19</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                        <MaterialCommunityIcons name="trophy" size={8} color="#F59E0B" />
+                        <Text style={styles.opponentRating}>980</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.opponentBattleBtn}>
+                    <Text style={styles.opponentBattleText}>BATTLE</Text>
+                    <View style={styles.opponentEnergyBadge}>
+                      <MaterialCommunityIcons name="lightning-bolt" size={8} color="#F59E0B" />
+                      <Text style={styles.opponentEnergyText}>1</Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+              </View>
+            </View>
+
           </View>
+        )}
 
-          <View style={styles.opsRow}>
-            {/* Oddiy */}
-            <TouchableOpacity 
-              style={[styles.opsCard, selectedOperation === 'oddiy' && styles.opsCardSelected]}
-              onPress={() => setSelectedOperation('oddiy')}
-              activeOpacity={0.8}
-            >
-              {selectedOperation === 'oddiy' && (
-                <View style={styles.opsCheckmarkBadge}>
-                  <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
-                </View>
-              )}
-              <View style={styles.opsCardIconWrapper}>
-                <MaterialCommunityIcons name="plus" size={32} color={selectedOperation === 'oddiy' ? '#A855F7' : '#9CA3AF'} />
-              </View>
-              <Text style={[styles.opsCardTitle, selectedOperation === 'oddiy' && styles.opsCardTitleSelected]}>{t.opsOddiy}</Text>
-              <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsOddiyDesc}</Text>
-            </TouchableOpacity>
-
-            {/* Formula 5 */}
-            <TouchableOpacity 
-              style={[styles.opsCard, selectedOperation === 'f5' && styles.opsCardSelected]}
-              onPress={() => setSelectedOperation('f5')}
-              activeOpacity={0.8}
-            >
-              {selectedOperation === 'f5' && (
-                <View style={styles.opsCheckmarkBadge}>
-                  <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
-                </View>
-              )}
-              <View style={styles.opsCardIconWrapper}>
-                <Text style={[styles.opsFormulaIcon, selectedOperation === 'f5' && styles.opsFormulaIconSelected]}>f(x)</Text>
-              </View>
-              <Text style={[styles.opsCardTitle, selectedOperation === 'f5' && styles.opsCardTitleSelected]}>{t.opsF5}</Text>
-              <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsF5Desc}</Text>
-            </TouchableOpacity>
-
-            {/* Formula 10 */}
-            <TouchableOpacity 
-              style={[styles.opsCard, selectedOperation === 'f10' && styles.opsCardSelected]}
-              onPress={() => setSelectedOperation('f10')}
-              activeOpacity={0.8}
-            >
-              {selectedOperation === 'f10' && (
-                <View style={styles.opsCheckmarkBadge}>
-                  <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
-                </View>
-              )}
-              <View style={styles.opsCardIconWrapper}>
-                <Text style={[styles.opsFormulaIcon, selectedOperation === 'f10' && styles.opsFormulaIconSelected]}>f(x)</Text>
-              </View>
-              <Text style={[styles.opsCardTitle, selectedOperation === 'f10' && styles.opsCardTitleSelected]}>{t.opsF10}</Text>
-              <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsF10Desc}</Text>
-            </TouchableOpacity>
-
-            {/* Aralash */}
-            <TouchableOpacity 
-              style={[styles.opsCard, selectedOperation === 'aralash' && styles.opsCardSelected]}
-              onPress={() => setSelectedOperation('aralash')}
-              activeOpacity={0.8}
-            >
-              {selectedOperation === 'aralash' && (
-                <View style={styles.opsCheckmarkBadge}>
-                  <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
-                </View>
-              )}
-              <View style={styles.opsCardIconWrapper}>
-                <MaterialCommunityIcons name="shuffle-variant" size={28} color={selectedOperation === 'aralash' ? '#A855F7' : '#9CA3AF'} />
-              </View>
-              <Text style={[styles.opsCardTitle, selectedOperation === 'aralash' && styles.opsCardTitleSelected]}>{t.opsAralash}</Text>
-              <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsAralashDesc}</Text>
-            </TouchableOpacity>
-
-          </View>
-        </View>
+        {/* START EXERCISE BUTTON */}
+        {activeExerciseType === 'battle' ? (
+          <TouchableOpacity 
+            style={styles.battleModeStartBtn}
+            activeOpacity={0.8}
+            onPress={() => {
+              // handle start exercise logic here later
+            }}
+          >
+            <View style={styles.battleStartIconContainer}>
+              <Image source={require('../assets/battle_mode_oddiy.png')} style={{ width: 44, height: 44 }} resizeMode="contain" />
+            </View>
+            <View style={styles.battleStartTextContainer}>
+              <Text style={styles.battleStartTitle}>{t.startBattle || "BATTLE BOSHLASH"}</Text>
+              <Text style={styles.battleStartSubtext}>{t.startBattleSubtext || "Raqib tanlang va g'alabaga erishing!"}</Text>
+            </View>
+            <View style={styles.battleStartArrowContainer}>
+              <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity 
+            style={[styles.startExerciseBtn, (activeExerciseType === 'abacus' || activeExerciseType === 'speed') && { marginTop: 35 }]}
+            activeOpacity={0.8}
+            onPress={() => {
+              // handle start exercise logic here later
+            }}
+          >
+            <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FFF" style={styles.startBtnIcon} />
+            <Text style={styles.startExerciseBtnText}>{t.startExercise}</Text>
+          </TouchableOpacity>
+        )}
+        
+        <View style={{ height: 40 }} />
         </ScrollView>
+        </View>
+
+        {/* RANKING TAB CONTENT */}
+        <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+{/* Top Header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+              <TouchableOpacity style={styles.rankingBackBtn} onPress={() => setActiveTab('home')}>
+                <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
+              </TouchableOpacity>
+              
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <MaterialCommunityIcons name="trophy" size={20} color="#F59E0B" />
+                  <Text style={styles.rankingTopTitle}>{t.rankingTitle || "REYTING"}</Text>
+                </View>
+                <Text style={styles.rankingTopSubtitle}>{t.rankingSubtitle || "Eng kuchli matematiklar"}</Text>
+              </View>
+              <View style={{ width: 44 }} />
+{/* Dummy view for centering */}
+            </View>
+
+{/* Golden Frame Card */}
+            <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} resizeMode="stretch">
+{/* Left: Avatar with wreath */}
+              <View style={styles.rankingFrameLeft}>
+                 <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={styles.rankingAvatar} />
+              </View>
+
+{/* Middle: User Info */}
+              <View style={styles.rankingFrameMiddle}>
+                <Text style={styles.rankingUserName}>IQROMAX</Text>
+                <View style={styles.rankingUserPosition}>
+                  <MaterialCommunityIcons name="trophy" size={16} color="#F59E0B" />
+                  <Text style={styles.rankingPositionNumber}>#1</Text>
+                </View>
+                <View style={styles.rankingUserXpBadge}>
+                  <Text style={styles.rankingUserXpText}>1248 XP</Text>
+                </View>
+              </View>
+
+{/* Right: Badge and Progress */}
+              <View style={styles.rankingFrameRight}>
+                <View style={styles.rankingBadgeRow}>
+                  <Image source={require('../assets/ranking_badge.png')} style={styles.rankingBadgeIcon} resizeMode="contain" />
+                  <View>
+                    <Text style={styles.rankingBadgeText}>GOLD III</Text>
+                    <View style={{ flexDirection: 'row', marginTop: 2 }}>
+                      <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
+                      <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
+                      <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
+                      <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
+                      <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
+                    </View>
+                  </View>
+                </View>
+
+{/* Progress Bar */}
+                <View style={styles.rankingProgressContainer}>
+                  <View style={styles.rankingProgressBarBg}>
+                    <View style={[styles.rankingProgressBarFill, { width: '78%' }]} />
+                  </View>
+                  <Text style={styles.rankingProgressPercent}>78%</Text>
+                </View>
+
+                <Text style={styles.rankingTargetText}>{t.platinumTarget || "Platinum V gacha"}</Text>
+                <Text style={styles.rankingXpLeftText}>
+                  <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold' }}>352</Text>
+                  <Text>{' '}</Text>
+                  <Text>{t.xpRemaining || "XP qoldi"}</Text>
+                </Text>
+
+              </View>
+            </ImageBackground>
+
+            {/* Podium Section */}
+            <View style={styles.podiumContainer}>
+              <ImageBackground source={require('../assets/ranking_podium.png')} style={styles.podiumImage} resizeMode="contain">
+                
+                {/* 2nd Place (Left) */}
+                <View style={styles.podiumSecond}>
+                   <Image source={require('../assets/avatar_david.jpg')} style={styles.podiumAvatar} />
+                </View>
+
+                {/* 1st Place (Center) */}
+                <View style={styles.podiumFirst}>
+                   <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={styles.podiumAvatarFirst} />
+                </View>
+
+                {/* 3rd Place (Right) */}
+                <View style={styles.podiumThird}>
+                   <Image source={require('../assets/avatar_lily.jpg')} style={styles.podiumAvatar} />
+                </View>
+
+              </ImageBackground>
+
+              {/* User Info Under Podium */}
+              <View style={styles.podiumInfoRow}>
+                {/* 2nd Place Info */}
+                <View style={[styles.podiumInfoBox, { marginTop: -45, marginLeft: 5 }]}>
+                  <Text style={styles.podiumInfoName}>MathKing</Text>
+                  <View style={styles.podiumInfoXpBadge}>
+                    <Text style={styles.podiumInfoXpText}>1150 XP</Text>
+                  </View>
+                </View>
+
+                {/* 1st Place Info */}
+                <View style={[styles.podiumInfoBox, { marginTop: -30 }]}>
+                  <Text style={[styles.podiumInfoName, { color: '#F59E0B' }]}>IQROMAX</Text>
+                  <View style={styles.podiumInfoXpBadge}>
+                    <Text style={styles.podiumInfoXpText}>1248 XP</Text>
+                  </View>
+                </View>
+
+                {/* 3rd Place Info */}
+                <View style={[styles.podiumInfoBox, { marginTop: -48, marginRight: 5 }]}>
+                  <Text style={styles.podiumInfoName}>FastBrain</Text>
+                  <View style={styles.podiumInfoXpBadge}>
+                    <Text style={styles.podiumInfoXpText}>1120 XP</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* Leaderboard Table */}
+            <View style={styles.leaderboardContainer}>
+              {leaderboardData.map((item, index) => (
+                <View key={item.id} style={[styles.leaderboardRow, index !== leaderboardData.length - 1 && styles.leaderboardRowBorder]}>
+                  <Text style={styles.leaderboardRank}>{item.id}</Text>
+                  <Image source={item.avatar} style={styles.leaderboardAvatar} />
+                  <Text style={styles.leaderboardName}>{item.name}</Text>
+                  <Text style={styles.leaderboardXp}>{item.xp} XP</Text>
+                </View>
+              ))}
+            </View>
+
+          </ScrollView>
         </View>
 
         {/* Stats Row 2 */}
@@ -835,13 +1914,98 @@ const styles = StyleSheet.create({
   contentOverlay: {
     height: 350, // Match the background image height
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     paddingRight: 10,
-    paddingLeft: 20,
+    paddingLeft: 10,
     paddingTop: 45, 
+  },
+  leftPanelContainer: {
+    height: '100%',
+    alignItems: 'center',
+    marginRight: 0,
+    zIndex: 10,
+  },
+  leftPanelTitle: {
+    color: '#FFF',
+    fontSize: 8,
+    fontWeight: '800',
+    marginBottom: 8,
+    textAlign: 'center',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  leftPanel: {
+    width: 75,
+    maxHeight: '85%',
+    backgroundColor: 'rgba(20, 15, 35, 0.85)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    alignItems: 'center',
+    paddingVertical: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  avatarList: {
+    alignItems: 'center',
+    paddingBottom: 10,
+  },
+  avatarItem: {
+    width: 52,
+    height: 52,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  avatarItemSelected: {
+    borderColor: '#A855F7',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  dropdownIconContainer: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    backgroundColor: 'rgba(20, 15, 35, 0.95)',
+    borderRadius: 10,
+    padding: 2,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  barchaButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(168, 85, 247, 0.2)', // Slightly purple background
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 10,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.4)',
+  },
+  barchaText: {
+    color: '#FFF',
+    fontSize: 9,
+    fontWeight: '700',
+    marginRight: 2,
   },
   rightPanel: {
     width: 135, // Set fixed width so card and buttons align perfectly
+    zIndex: 10,
   },
   glassCard: {
     backgroundColor: 'rgba(25, 20, 40, 0.7)',
@@ -1335,7 +2499,7 @@ const styles = StyleSheet.create({
 
   // INFO CARD
   infoCardContainer: {
-    marginTop: 0,
+    marginTop: 20,
     width: '100%',
     aspectRatio: 1.6, // Based on the provided image dimensions approximately
     borderRadius: 16,
@@ -1434,9 +2598,35 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
   },
   
+  // START EXERCISE BUTTON
+  startExerciseBtn: {
+    marginTop: 15,
+    backgroundColor: '#4C1D95',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    borderRadius: 16,
+    width: '100%',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  startBtnIcon: {
+    marginRight: 10,
+  },
+  startExerciseBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
+  },
+  
   // EXAMPLES SELECTOR
   examplesContainer: {
-    marginTop: 0,
+    marginTop: 15,
     backgroundColor: '#070710',
     borderRadius: 16,
     padding: 16,
@@ -1533,7 +2723,7 @@ const styles = StyleSheet.create({
 
   // OPERATIONS SECTION
   opsContainer: {
-    marginTop: 10,
+    marginTop: 15,
     backgroundColor: '#070710',
     borderRadius: 16,
     padding: 16,
@@ -1638,5 +2828,739 @@ const styles = StyleSheet.create({
     fontSize: 9,
     textAlign: 'center',
     lineHeight: 11,
+  },
+  // ABACUS SECTION STYLES
+  abacusSectionTitle: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+    textTransform: 'uppercase',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  abacusCardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 8,
+  },
+  abacusDiffCard: {
+    flex: 1,
+    backgroundColor: '#0A0A16',
+    borderWidth: 1,
+    borderColor: '#1A103C',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  abacusDiffCardSelected: {
+    borderColor: '#A855F7',
+    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+  },
+  abacusDiffEmoji: {
+    fontSize: 24,
+    marginBottom: 8,
+  },
+  abacusDiffTitle: {
+    color: '#D1D5DB',
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  abacusDiffTitleSelected: {
+    color: '#A855F7',
+    fontFamily: 'Inter_600SemiBold',
+  },
+  abacusStarsRow: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  abacusCheckbox: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 14,
+    height: 14,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: '#374151',
+  },
+  abacusCountCard: {
+    flex: 1,
+    backgroundColor: '#0A0A16',
+    borderWidth: 1,
+    borderColor: '#1A103C',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  abacusCountCardSelected: {
+    borderColor: '#A855F7',
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+  },
+  abacusCountNum: {
+    color: '#E5E7EB',
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  abacusCountNumSelected: {
+    color: '#A855F7',
+  },
+  abacusCountLabel: {
+    color: '#6B7280',
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
+    marginTop: 2,
+  },
+  abacusCountLabelSelected: {
+    color: '#A855F7',
+  },
+  abacusOpCard: {
+    flex: 1,
+    backgroundColor: '#0A0A16',
+    borderWidth: 1,
+    borderColor: '#1A103C',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    position: 'relative',
+  },
+  abacusOpCardSelected: {
+    borderColor: '#A855F7',
+  },
+  abacusOpTitle: {
+    color: '#E5E7EB',
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 6,
+  },
+  abacusOpSymbol: {
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+  },
+  abacusOpAdd: { color: '#22C55E' },
+  abacusOpSub: { color: '#EF4444' },
+  abacusOpMul: { color: '#F59E0B' },
+  abacusOpDiv: { color: '#3B82F6' },
+  abacusOpCheckCircle: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    backgroundColor: '#A855F7',
+    borderRadius: 12,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // BATTLE SECTION STYLES
+  battleCardContainer: {
+    width: '100%',
+    aspectRatio: 1.85, // Fixed aspect ratio to prevent squashing (taller)
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  battleCardBg: {
+    width: '100%',
+    height: '100%',
+  },
+  battleCardOverlay: {
+    flex: 1,
+    position: 'relative',
+  },
+  battleLeftPlayer: {
+    position: 'absolute',
+    top: '25%', // Reverted back
+    left: '24%',
+    alignItems: 'flex-start',
+  },
+  battleRightPlayer: {
+    position: 'absolute',
+    top: '25%', // Reverted back
+    left: '60%',
+    alignItems: 'flex-start',
+  },
+  battlePlayerLabelYou: {
+    color: '#38BDF8', // Light Blue
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
+  battlePlayerLabelOpp: {
+    color: '#EF4444', // Red
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 2,
+  },
+  battlePlayerNameYou: {
+    color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 4,
+    maxWidth: 90,
+  },
+  battlePlayerNameOpp: {
+    color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 4,
+    maxWidth: 90,
+  },
+  battleLevelBadgeYou: {
+    backgroundColor: '#1E1B4B',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 6,
+  },
+  battleLevelBadgeOpp: {
+    backgroundColor: '#1E1B4B',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginBottom: 6,
+  },
+  battleLevelTextYou: {
+    color: '#D8B4FE',
+    fontSize: 8,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  battleLevelTextOpp: {
+    color: '#D8B4FE',
+    fontSize: 8,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  battleTrophyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  battleTrophyTextYou: {
+    color: '#FFF',
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+  },
+  battleTrophyTextOpp: {
+    color: '#FFF',
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+  },
+  battleReytingText: {
+    color: '#9CA3AF',
+    fontSize: 8,
+    fontFamily: 'Inter_500Medium',
+  },
+
+  // BATTLE MODES STYLES
+  battleModeCard: {
+    backgroundColor: '#05050C',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    padding: 6,
+    width: '23.5%', // Ensure 4 items fit in a row without scrolling
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  battleModeCardActive: {
+    borderColor: '#A855F7',
+    backgroundColor: 'rgba(168, 85, 247, 0.05)',
+    shadowColor: '#A855F7',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  battleModeIcon: {
+    width: 35,
+    height: 35,
+    marginBottom: 6,
+  },
+  battleModeTitle: {
+    color: '#F8FAFC',
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  battleModeDesc: {
+    color: '#9CA3AF',
+    fontSize: 7,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    marginBottom: 6,
+    minHeight: 25, // Ensure uniform height for all cards
+  },
+  battleModeEnergyBadge: {
+    backgroundColor: '#1E1B4B',
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: 'auto', // Pushes badge to the bottom
+  },
+  battleModeEnergyText: {
+    color: '#FFF',
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    marginLeft: 2,
+  },
+
+  // DAILY BOXES STYLES
+  dailyBoxCard: {
+    backgroundColor: '#05050C',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    padding: 12,
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  dailyBoxTitle: {
+    color: '#F8FAFC',
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+  },
+
+  // BEST RESULTS STYLES
+  bestResultsCard: {
+    backgroundColor: '#05050C',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    padding: 15,
+    marginTop: 5,
+    marginBottom: 20,
+    width: '100%',
+  },
+  bestResultsTitle: {
+    color: '#F8FAFC',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 15,
+  },
+  bestResultsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  bestResultItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  bestResultIcon: {
+    width: 36,
+    height: 36,
+    marginBottom: 8,
+  },
+  bestResultLabel: {
+    color: '#9CA3AF',
+    fontSize: 9,
+    fontFamily: 'Inter_400Regular',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  bestResultValue: {
+    color: '#F8FAFC',
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+  },
+  bestResultDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+
+  // QUICK OPPONENT STYLES
+  quickOpponentTitle: {
+    color: '#F8FAFC',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  quickOpponentRefresh: {
+    color: '#A855F7',
+    fontSize: 11,
+    fontFamily: 'Inter_600SemiBold',
+    marginLeft: 4,
+  },
+  opponentCard: {
+    backgroundColor: '#05050C',
+    borderRadius: 12, // Improved border corners
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.25)', // Made border even more visible
+    paddingHorizontal: 4,
+    paddingTop: 12,
+    paddingBottom: 6, // Reduced to make button stick to bottom
+    width: '24%', // Fit 4 in a row
+    justifyContent: 'space-between',
+    minHeight: 135,
+  },
+  opponentHeader: {
+    flexDirection: 'column', // Avatar on top, text below for larger sizes to fit
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  opponentAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginBottom: 4,
+  },
+  opponentInfo: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  opponentName: {
+    color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+  },
+  opponentLevel: {
+    color: '#9CA3AF',
+    fontSize: 8,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 2,
+  },
+  opponentRating: {
+    color: '#EAB308',
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    marginLeft: 2,
+  },
+  opponentBattleBtn: {
+    backgroundColor: '#166534',
+    borderRadius: 6,
+    paddingVertical: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 0, // Button sticks to the bottom border
+  },
+  opponentBattleText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 1,
+  },
+  opponentEnergyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  opponentEnergyText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+    marginLeft: 2,
+  },
+
+  // START BATTLE BUTTON STYLES
+  battleModeStartBtn: {
+    backgroundColor: '#F59E0B', // Rich Orange Base
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#FDE68A', // Light glow border
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    marginTop: -5, // Lifted button upwards
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  battleStartIconContainer: {
+    marginRight: 15,
+  },
+  battleStartTextContainer: {
+    flex: 1,
+  },
+  battleStartTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: 'Inter_800ExtraBold',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  battleStartSubtext: {
+    color: '#FFF',
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    marginTop: 2,
+    opacity: 0.95,
+  },
+  battleStartArrowContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  // RANKING TAB STYLES
+  rankingBackBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#111827',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  rankingTopTitle: {
+    color: '#F59E0B',
+    fontSize: 20,
+    fontFamily: 'Inter_800ExtraBold',
+    marginLeft: 8,
+  },
+  rankingTopSubtitle: {
+    color: '#D1D5DB',
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    marginTop: 4,
+  },
+  rankingGoldenFrame: {
+    width: '100%',
+    height: 130, // Reduced height for the frame
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rankingFrameLeft: {
+    width: 115, // Adjusted to match the new height
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rankingAvatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    marginTop: -28, // Shifted even further upwards
+    marginLeft: 34,
+  },
+  rankingFrameMiddle: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingLeft: 26, // Shifted even further right
+  },
+  rankingUserName: {
+    color: '#FFF',
+    fontSize: 14, // Slightly reduced
+    fontFamily: 'Inter_800ExtraBold',
+    letterSpacing: 0.5,
+  },
+  rankingUserPosition: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  rankingPositionNumber: {
+    color: '#F59E0B',
+    fontSize: 18, // Slightly reduced
+    fontFamily: 'Inter_800ExtraBold',
+    marginLeft: 6,
+  },
+  rankingUserXpBadge: {
+    backgroundColor: '#4C1D95',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginTop: 6,
+  },
+  rankingUserXpText: {
+    color: '#FFF',
+    fontSize: 10, // Slightly reduced
+    fontFamily: 'Inter_700Bold',
+  },
+  rankingFrameRight: {
+    flex: 1.2,
+    justifyContent: 'center',
+    paddingRight: 15,
+  },
+  rankingBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  rankingBadgeIcon: {
+    width: 28,
+    height: 28,
+    marginRight: 6,
+  },
+  rankingBadgeText: {
+    color: '#FDE68A',
+    fontSize: 11,
+    fontFamily: 'Inter_800ExtraBold',
+  },
+  rankingProgressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  rankingProgressBarBg: {
+    flex: 1,
+    height: 6,
+    backgroundColor: '#374151',
+    borderRadius: 3,
+    marginRight: 8,
+    overflow: 'hidden',
+  },
+  rankingProgressBarFill: {
+    height: '100%',
+    backgroundColor: '#F59E0B',
+    borderRadius: 3,
+  },
+  rankingProgressPercent: {
+    color: '#FFF',
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+  },
+  rankingTargetText: {
+    color: '#D1D5DB',
+    fontSize: 9,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 2,
+  },
+  rankingXpLeftText: {
+    color: '#9CA3AF',
+    fontSize: 9,
+    fontFamily: 'Inter_500Medium',
+  },
+
+  // PODIUM STYLES
+  podiumContainer: {
+    marginTop: -25, // Negative margin to pull the whole block upwards
+    width: '100%',
+    alignItems: 'center',
+  },
+  podiumImage: {
+    width: '100%',
+    height: 240,
+    position: 'relative',
+  },
+  podiumFirst: {
+    position: 'absolute',
+    top: '19%', // Shifted further downwards
+    left: '50%',
+    marginLeft: -33, // half of width
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  podiumAvatarFirst: {
+    width: '100%',
+    height: '100%',
+  },
+  podiumSecond: {
+    position: 'absolute',
+    top: '35%', // Shifted further upwards
+    left: '11%',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  podiumThird: {
+    position: 'absolute',
+    top: '33%', // Shifted further upwards
+    right: '11%',
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  podiumAvatar: {
+    width: '100%',
+    height: '100%',
+  },
+  podiumInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10,
+    marginTop: -30, // overlap with the bottom of the podium
+  },
+  podiumInfoBox: {
+    alignItems: 'center',
+    width: '30%',
+  },
+  podiumInfoName: {
+    color: '#E5E7EB',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 6,
+  },
+  podiumInfoXpBadge: {
+    backgroundColor: '#3730A3',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  podiumInfoXpText: {
+    color: '#DDD6FE',
+    fontSize: 10,
+    fontFamily: 'Inter_800ExtraBold',
+  },
+
+  // LEADERBOARD STYLES
+  leaderboardContainer: {
+    marginTop: 40,
+    width: '100%',
+    backgroundColor: '#080B13',
+    borderRadius: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  leaderboardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+  },
+  leaderboardRowBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  leaderboardRank: {
+    color: '#FFF',
+    fontSize: 15,
+    fontFamily: 'Inter_700Bold',
+    width: 24,
+    textAlign: 'center',
+  },
+  leaderboardAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    marginHorizontal: 16,
+  },
+  leaderboardName: {
+    flex: 1,
+    color: '#E5E7EB',
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
+  },
+  leaderboardXp: {
+    color: '#C084FC',
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
   },
 });

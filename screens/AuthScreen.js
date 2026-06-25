@@ -1,6 +1,42 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated } from 'react-native';
 import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
+
+const CustomAnimatedInput = ({ icon, rightIcon, ...props }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const borderAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(borderAnim, {
+      toValue: isFocused ? 1 : 0,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }, [isFocused]);
+
+  const borderColor = borderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#1A1A2E', '#A855F7'] // From dark to purple
+  });
+  
+  const borderWidth = borderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.5] // Subtle thickness increase
+  });
+
+  return (
+    <Animated.View style={[styles.inputContainer, { borderColor, borderWidth }]}>
+      {icon}
+      <TextInput
+        style={styles.input}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        {...props}
+      />
+      {rightIcon}
+    </Animated.View>
+  );
+};
 
 export default function AuthScreen({ navigation, route }) {
   const { role = 'student' } = route.params || {};
@@ -81,75 +117,64 @@ export default function AuthScreen({ navigation, route }) {
 
           {/* Form */}
           {activeTab === 'register' && (
-            <View style={styles.inputContainer}>
-              <Feather name="user" size={18} color="#888899" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Your name"
-                placeholderTextColor="#555566"
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
+            <CustomAnimatedInput
+              icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
+              placeholder="Your name"
+              placeholderTextColor="#555566"
+              value={name}
+              onChangeText={setName}
+            />
           )}
 
-          <View style={styles.inputContainer}>
-            <Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Your phone number"
-              placeholderTextColor="#555566"
-              keyboardType="phone-pad"
-              value={phone}
-              onChangeText={setPhone}
-            />
-          </View>
+          <CustomAnimatedInput
+            icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
+            placeholder="Your phone number"
+            placeholderTextColor="#555566"
+            keyboardType="phone-pad"
+            value={phone}
+            onChangeText={setPhone}
+          />
 
           {activeTab === 'register' && (
-            <View style={styles.inputContainer}>
-              <Feather name="mail" size={18} color="#888899" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Your email"
-                placeholderTextColor="#555566"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
+            <CustomAnimatedInput
+              icon={<Feather name="mail" size={18} color="#888899" style={styles.inputIcon} />}
+              placeholder="Your email"
+              placeholderTextColor="#555566"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
+            />
           )}
 
-          <View style={styles.inputContainer}>
-            <Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />
-            <TextInput
-              style={styles.input}
-              placeholder="Your password"
-              placeholderTextColor="#555566"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-              <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
-            </TouchableOpacity>
-          </View>
-
-          {activeTab === 'register' && (
-            <View style={styles.inputContainer}>
-              <Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm password"
-                placeholderTextColor="#555566"
-                secureTextEntry={!showConfirmPassword}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-              />
-              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-                <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+          <CustomAnimatedInput
+            icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
+            placeholder="Your password"
+            placeholderTextColor="#555566"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            rightIcon={
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
               </TouchableOpacity>
-            </View>
+            }
+          />
+
+          {activeTab === 'register' && (
+            <CustomAnimatedInput
+              icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
+              placeholder="Confirm password"
+              placeholderTextColor="#555566"
+              secureTextEntry={!showConfirmPassword}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              rightIcon={
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+                  <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+                </TouchableOpacity>
+              }
+            />
           )}
 
           {activeTab === 'login' && (
