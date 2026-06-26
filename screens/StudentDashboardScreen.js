@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Image, Animated, ImageBackground, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert } from 'react-native';
+import { Image, ImageBackground } from 'expo-image';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);

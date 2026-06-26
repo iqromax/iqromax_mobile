@@ -1,5 +1,6 @@
 import React, { useState, Suspense, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, StatusBar, Platform, Image, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, StatusBar, Platform, ScrollView, ActivityIndicator } from 'react-native';
+import { Image, ImageBackground } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { Canvas, useFrame } from '@react-three/fiber/native';
