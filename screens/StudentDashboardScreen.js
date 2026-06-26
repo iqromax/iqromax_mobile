@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Image, Animated, ImageBackground, ScrollView, Platform, UIManager, LayoutAnimation } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Image, Animated, ImageBackground, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert } from 'react-native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -23,17 +23,17 @@ const COIN_TRANSLATIONS = {
 };
 
 const DASHBOARD_TRANSLATIONS = {
-  en: { title: "Math Master", subtitle: "Level 24", desc: "Great for learning math, conquer the world with this!", clothes: "CLOTHES", accessories: "ACCESSORIES", levelText: "LEVEL", toNextLevel: "To next level", startExercise: "START EXERCISE", stats: "STATISTICS", seeAll: "SEE ALL >", logic: "LOGIC", logicDesc: "Great!", speed: "SPEED", speedDesc: "Good", accuracy: "ACCURACY", accuracyDesc: "Excellent!", streak: "STREAK", streakDesc: "Days", navHome: "HOME", navExercise: "EXERCISE", navInventory: "INVENTORY", navRanking: "RANKING", navProfile: "PROFILE", missions: "MISSIONS", exerciseSubtitle: "Choose the exercise type that suits you and continue learning!", infoTitle: "About Simple Math", infoDesc: "The simple math exercise develops the skill of performing arithmetic operations quickly and correctly.", infoOpsLabel: "Operations:", infoOps: ["addition", "subtraction", "multiplication", "division"], infoExampleLabel: "Example:", examplesCountTitle: "NUMBER OF EXAMPLES", examplesCountSubtitle: "Choose from 7 to 25 examples", exampleWord: "examples", opsTitle: "OPERATIONS", opsSubtitle: "Choose the operation type", opsOddiy: "Simple", opsOddiyDesc: "Addition, subtraction, multiplication, division", opsF5: "Formula 5", opsF5Desc: "Formulas up to 5", opsF10: "Formula 10", opsF10Desc: "Formulas up to 10", opsAralash: "Mixed", opsAralashDesc: "All operations mixed", speedSelectTitle: "SPEED", speedSelectSubtitle: "Choose exercise speed", secondWord: "seconds", characters: "CHARACTERS", all: "ALL", abacusInfoTitle: "ABOUT ABACUS", abacusInfoDesc: "1 upper bead means 5, 4 lower beads mean 1 each.", abacusLearnRules: "Learn rules", abacusDifficulty: "DIFFICULTY LEVEL", abacusBeginner: "Beginner", abacusIntermediate: "Intermediate", abacusAdvanced: "Advanced", abacusOpsTitle: "OPERATIONS", abacusAddSub: "Addition & Subtraction", abacusMult: "Multiplication", abacusDiv: "Division", speedInfoTitle: "ABOUT SPEED MATH", speedInfoDesc: "Test your speed and accuracy by calculating against time!", speedListItem1: "Time-limited examples", speedListItem2: "Fast answer = more points", speedListItem3: "Accuracy is important!", speedExamplesTitle: "NUMBER OF EXAMPLES", speedExamplesSubtitle: "Choose 7 to 25 examples", speedTimeTitle: "TIME LIMIT", speedTimeSubtitle: "Choose from 0.5 to 2 seconds", speedOpsTitle: "OPERATIONS", speedOpsSubtitle: "Choose operation type", speedKopaytirish: "Multiplication", speedBolish: "Division", speedAralash: "Mixed", speedAllOps: "All operations", speedSecLabel: "seconds" , battleTabTitle: "BATTLE", battleYou: "YOU", battleOpponent: "Opponent", battleRating: "Rating", battleLevel: "Level" , bmOddiy: "Simple Battle", bmOddiyDesc: "Fast calculation with equals", bmReyting: "Rating Battle", bmReytingDesc: "With strong opponents for rating points", bmTurnir: "Tournament Battle", bmTurnirDesc: "Participate in tournaments and win prizes", bmDost: "Battle with Friend", bmDostDesc: "Invite your friend and compete" , bmDailyMission: "DAILY BATTLE MISSION", bmDailyMissionDesc: "Participate in 3 battles", bmDailyBonus: "DAILY BONUS" , bestResults: "BEST RESULTS", bestVictories: "Victories", bestStreak: "Winning streak", bestTime: "Fastest time" , quickOpponent: "QUICK OPPONENT", refresh: "Refresh" , startBattle: "START BATTLE", startBattleSubtext: "Choose an opponent and achieve victory!" , rankingTitle: "RANKING", rankingSubtitle: "The strongest mathematicians", platinumTarget: "to Platinum V", xpRemaining: "XP remaining" },
-  ru: { title: "Мастер математики", subtitle: "Уровень 24", desc: "Отлично для изучения математики, завоюйте мир с этим!", clothes: "ОДЕЖДА", accessories: "АКСЕССУАРЫ", levelText: "УРОВЕНЬ", toNextLevel: "До след. уровня", startExercise: "НАЧАТЬ ТРЕНИРОВКУ", stats: "СТАТИСТИКА", seeAll: "ВСЕ >", logic: "ЛОГИКА", logicDesc: "Отлично!", speed: "СКОРОСТЬ", speedDesc: "Хорошо", accuracy: "ТОЧНОСТЬ", accuracyDesc: "Превосходно!", streak: "СЕРИЯ", streakDesc: "Дней", navHome: "ГЛАВНАЯ", navExercise: "ТРЕНИРОВКА", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИИ", exerciseSubtitle: "Выберите подходящий тип упражнений и продолжайте обучение!", infoTitle: "О простом счете", infoDesc: "Упражнение на простой счет развивает навык быстрого и правильного выполнения арифметических операций.", infoOpsLabel: "Операции:", infoOps: ["сложение", "вычитание", "умножение", "деление"], infoExampleLabel: "Пример:", examplesCountTitle: "КОЛИЧЕСТВО ПРИМЕРОВ", examplesCountSubtitle: "Выберите от 7 до 25 примеров", exampleWord: "примеров", opsTitle: "ОПЕРАЦИИ", opsSubtitle: "Выберите тип операций", opsOddiy: "Простые", opsOddiyDesc: "Сложение, вычитание, умножение, деление", opsF5: "Формула 5", opsF5Desc: "Формулы до 5", opsF10: "Формула 10", opsF10Desc: "Формулы до 10", opsAralash: "Вперемешку", opsAralashDesc: "Все операции вперемешку", speedSelectTitle: "СКОРОСТЬ", speedSelectSubtitle: "Выберите скорость тренировки", secondWord: "секунд", characters: "ПЕРСОНАЖИ", all: "ВCЕ", abacusInfoTitle: "ОБ АБАКУСЕ", abacusInfoDesc: "1 верхняя косточка равна 5, 4 нижние — по 1.", abacusLearnRules: "Изучить правила", abacusDifficulty: "УРОВЕНЬ СЛОЖНОСТИ", abacusBeginner: "Новичок", abacusIntermediate: "Средний", abacusAdvanced: "Сложный", abacusOpsTitle: "ОПЕРАЦИИ", abacusAddSub: "Сложение и вычитание", abacusMult: "Умножение", abacusDiv: "Деление", speedInfoTitle: "О СКОРОСТНОМ СЧЕТЕ", speedInfoDesc: "Проверьте скорость и точность, решая примеры на время!", speedListItem1: "Примеры на время", speedListItem2: "Быстрый ответ = больше баллов", speedListItem3: "Точность важна!", speedExamplesTitle: "КОЛИЧЕСТВО ПРИМЕРОВ", speedExamplesSubtitle: "Выберите от 7 до 25 примеров", speedTimeTitle: "ЛИМИТ ВРЕМЕНИ", speedTimeSubtitle: "Выберите от 0.5 до 2 секунд", speedOpsTitle: "ОПЕРАЦИИ", speedOpsSubtitle: "Выберите тип операций", speedKopaytirish: "Умножение", speedBolish: "Деление", speedAralash: "Смешанно", speedAllOps: "Все операции", speedSecLabel: "секунд" , battleTabTitle: "БИТВА", battleYou: "ВЫ", battleOpponent: "Соперник", battleRating: "Рейтинг", battleLevel: "Уровень" , bmOddiy: "Простая Битва", bmOddiyDesc: "Быстрый счет с равными", bmReyting: "Рейтинговая Битва", bmReytingDesc: "С сильными противниками за очки", bmTurnir: "Турнирная Битва", bmTurnirDesc: "Участвуйте в турнирах и выигрывайте призы", bmDost: "Битва с Другом", bmDostDesc: "Пригласите друга и соревнуйтесь" , bmDailyMission: "ЕЖЕДНЕВНАЯ МИССИЯ", bmDailyMissionDesc: "Участвуйте в 3 битвах", bmDailyBonus: "ЕЖЕДНЕВНЫЙ БОНУС" , bestResults: "ЛУЧШИЕ РЕЗУЛЬТАТЫ", bestVictories: "Победы", bestStreak: "Серия побед", bestTime: "Лучшее время" , quickOpponent: "БЫСТРЫЙ ПРОТИВНИК", refresh: "Обновить" , startBattle: "НАЧАТЬ БИТВУ", startBattleSubtext: "Выберите противника и одержите победу!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Сильнейшие математики", platinumTarget: "до Platinum V", xpRemaining: "XP осталось" },
-  uz: { title: "Matematika Ustasi", subtitle: "24-daraja", desc: "Matematika o'rganishda zo'r, bu bilan dunyoni egallang!", clothes: "KIYIMLAR", accessories: "AKSESSUARLAR", levelText: "LEVEL", toNextLevel: "Keyingi levelgacha yana", startExercise: "MASHQNI BOSHLASH", stats: "STATISTIKALAR", seeAll: "BARCHASI >", logic: "MANTIQ", logicDesc: "Zor!", speed: "TEZLIK", speedDesc: "Yaxshi", accuracy: "ANIQLIK", accuracyDesc: "A'lo!", streak: "SERIYA", streakDesc: "Kun", navHome: "BOSH SAHIFA", navExercise: "MASHQ", navInventory: "INVENTAR", navRanking: "REYTING", navProfile: "PROFIL", missions: "MISSIYALAR", exerciseSubtitle: "O'zingizga mos mashq turini tanlang va o'rganishni davom eting!", infoTitle: "Oddiy hisob haqida", infoDesc: "Oddiy hisob mashqi arifmetik amallarni tez va to'g'ri bajarish ko'nikmasini rivojlantiradi.", infoOpsLabel: "Amallar:", infoOps: ["qo'shish", "ayirish", "ko'paytirish", "bo'lish"], infoExampleLabel: "Misol:", examplesCountTitle: "HADLAR SONI", examplesCountSubtitle: "7 dan 25 hadgacha tanlang", exampleWord: "had", opsTitle: "AMALLAR", opsSubtitle: "Amallar turini tanlang", opsOddiy: "Oddiy", opsOddiyDesc: "Qo'shish, ayirish, ko'paytirish, bo'lish", opsF5: "Formula 5", opsF5Desc: "5 gacha bo'lgan formulalar", opsF10: "Formula 10", opsF10Desc: "10 gacha bo'lgan formulalar", opsAralash: "Aralash", opsAralashDesc: "Barcha amallar aralash holda", speedSelectTitle: "TEZLIK", speedSelectSubtitle: "Mashq bajarish tezligini tanlang", secondWord: "sekund", characters: "PERSONAJLAR", all: "BARCHA", abacusInfoTitle: "ABAKUS (SOROBAN) HAQIDA", abacusInfoDesc: "Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.", abacusLearnRules: "Qoidalarni o'rganish", abacusDifficulty: "QIYINCHILIK DARAJASI", abacusBeginner: "Boshlang'ich", abacusIntermediate: "O'rta", abacusAdvanced: "Murakkab", abacusOpsTitle: "AMALLAR", abacusAddSub: "Qo'shish va Ayirish", abacusMult: "Ko'paytirish", abacusDiv: "Bo'lish", speedInfoTitle: "TEZKOR HISOBLASH HAQIDA", speedInfoDesc: "Vaqt bilan hisoblash orqali tezlik va aniqligingizni sinab ko'ring!", speedListItem1: "Vaqt cheklovi bilan misollar", speedListItem2: "Tez javob – ko'proq ball", speedListItem3: "Aniqlik muhim!", speedExamplesTitle: "MISOLLAR SONI", speedExamplesSubtitle: "7 dan 25 gacha misol tanlang", speedTimeTitle: "VAQT CHEKLOVI", speedTimeSubtitle: "0.5 soniyadan 2 soniyagacha vaqt tanlang", speedOpsTitle: "AMALLAR", speedOpsSubtitle: "Amallar turini tanlang", speedKopaytirish: "Ko'paytirish", speedBolish: "Bo'lish", speedAralash: "Aralash", speedAllOps: "Barcha amallar", speedSecLabel: "soniya" , battleTabTitle: "BATTLE", battleYou: "SIZ", battleOpponent: "Raqib", battleRating: "Reyting", battleLevel: "Level" , bmOddiy: "Oddiy Battle", bmOddiyDesc: "Teng kuchdagilar bilan tezkor hisoblash", bmReyting: "Reyting Battle", bmReytingDesc: "Reyting ochkolari uchun kuchli raqiblar bilan", bmTurnir: "Turnir Battle", bmTurnirDesc: "Turnirlarda qatnashing va sovrin yuting", bmDost: "Do'st bilan Battle", bmDostDesc: "Do'stingizni taklif qiling va bellashing" , bmDailyMission: "KUNLIK BATTLE MISSIYASI", bmDailyMissionDesc: "3 ta battle'da ishtirok eting", bmDailyBonus: "KUNLIK BONUS" , bestResults: "ENG YAXSHI NATIJALAR", bestVictories: "G'alabalar", bestStreak: "G'alaba seriyasi", bestTime: "Eng tez vaqt" , quickOpponent: "TEZKOR RAQIB", refresh: "Yangilash" , startBattle: "BATTLE BOSHLASH", startBattleSubtext: "Raqib tanlang va g'alabaga erishing!" , rankingTitle: "REYTING", rankingSubtitle: "Eng kuchli matematiklar", platinumTarget: "Platinum V gacha", xpRemaining: "XP qoldi" },
-  ar: { title: "سيد الرياضيات", subtitle: "مستوى 24", desc: "رائع لتعلم الرياضيات، اغز العالم بهذا!", clothes: "ملابس", accessories: "إكسسوارات", levelText: "مستوى", toNextLevel: "للمستوى التالي", startExercise: "ابدأ التمرين", stats: "الإحصائيات", seeAll: "عرض الكل >", logic: "المنطق", logicDesc: "رائع!", speed: "السرعة", speedDesc: "جيد", accuracy: "الدقة", accuracyDesc: "ممتاز!", streak: "سلسلة", streakDesc: "أيام", navHome: "الرئيسية", navExercise: "تمرين", navInventory: "مخزون", navRanking: "تصنيف", navProfile: "ملف شخصي", missions: "المهام", exerciseSubtitle: "اختر نوع التمرين الذي يناسبك واستمر في التعلم!", infoTitle: "حول الحساب البسيط", infoDesc: "تمرين الحساب البسيط يطور مهارة إجراء العمليات الحسابية بسرعة وبشكل صحيح.", infoOpsLabel: "العمليات:", infoOps: ["جمع", "طرح", "ضرب", "قسمة"], infoExampleLabel: "مثال:", examplesCountTitle: "عدد الأمثلة", examplesCountSubtitle: "اختر من 7 إلى 25 مثالًا", exampleWord: "أمثلة", opsTitle: "العمليات", opsSubtitle: "اختر نوع العملية", opsOddiy: "بسيط", opsOddiyDesc: "جمع، طرح، ضرب، قسمة", opsF5: "صيغة 5", opsF5Desc: "صيغ حتى 5", opsF10: "صيغة 10", opsF10Desc: "صيغ حتى 10", opsAralash: "مختلط", opsAralashDesc: "جميع العمليات مختلطة", speedSelectTitle: "السرعة", speedSelectSubtitle: "اختر سرعة التمرين", secondWord: "ثواني", characters: "الشخصيات", all: "الكل", abacusInfoTitle: "حول المعداد", abacusInfoDesc: "حبة علوية واحدة تعني 5، 4 حبات سفلية تعني 1 لكل منها.", abacusLearnRules: "تعلم القواعد", abacusDifficulty: "مستوى الصعوبة", abacusBeginner: "مبتدئ", abacusIntermediate: "متوسط", abacusAdvanced: "متقدم", abacusOpsTitle: "العمليات", abacusAddSub: "الجمع والطرح", abacusMult: "الضرب", abacusDiv: "القسمة", speedInfoTitle: "حول الحساب السريع", speedInfoDesc: "اختبر سرعتك ودقتك عن طريق الحساب ضد الوقت!", speedListItem1: "أمثلة محدودة بوقت", speedListItem2: "إجابة سريعة = نقاط أكثر", speedListItem3: "الدقة مهمة!", speedExamplesTitle: "عدد الأمثلة", speedExamplesSubtitle: "اختر 7 إلى 25 مثالًا", speedTimeTitle: "الحد الزمني", speedTimeSubtitle: "اختر من 0.5 إلى 2 ثانية", speedOpsTitle: "العمليات", speedOpsSubtitle: "اختر نوع العملية", speedKopaytirish: "ضرب", speedBolish: "قسمة", speedAralash: "مختلط", speedAllOps: "جميع العمليات", speedSecLabel: "ثواني" , battleTabTitle: "معركة", battleYou: "أنت", battleOpponent: "الخصم", battleRating: "تقييم", battleLevel: "مستوى" , bmOddiy: "معركة بسيطة", bmOddiyDesc: "حساب سريع مع المتكافئين", bmReyting: "معركة التقييم", bmReytingDesc: "مع خصوم أقوياء للحصول على نقاط", bmTurnir: "معركة البطولة", bmTurnirDesc: "شارك في البطولات واربح جوائز", bmDost: "معركة مع صديق", bmDostDesc: "ادع صديقك وتنافس" , bmDailyMission: "المهمة اليومية", bmDailyMissionDesc: "شارك في 3 معارك", bmDailyBonus: "مكافأة يومية" , bestResults: "أفضل النتائج", bestVictories: "انتصارات", bestStreak: "سلسلة انتصارات", bestTime: "أسرع وقت" , quickOpponent: "الخصم السريع", refresh: "تحديث" , startBattle: "بدء المعركة", startBattleSubtext: "اختر خصمًا وحقق النصر!" , rankingTitle: "التصنيف", rankingSubtitle: "أقوى علماء الرياضيات", platinumTarget: "إلى Platinum V", xpRemaining: "XP متبقي" },
-  tr: { title: "Matematik Ustası", subtitle: "Seviye 24", desc: "Matematik öğrenmek için harika, bununla dünyayı fethet!", clothes: "GİYSİLER", accessories: "AKSESUARLAR", levelText: "SEVİYE", toNextLevel: "Sonraki seviyeye", startExercise: "EGZERSİZE BAŞLA", stats: "İSTATİSTİKLER", seeAll: "TÜMÜ >", logic: "MANTIK", logicDesc: "Harika!", speed: "HIZ", speedDesc: "İyi", accuracy: "DOĞRULUK", accuracyDesc: "Mükemmel!", streak: "SERİ", streakDesc: "Gün", navHome: "ANA SAYFA", navExercise: "EGZERSİZ", navInventory: "ENVANTER", navRanking: "SIRALAMA", navProfile: "PROFİL", missions: "GÖREVLER", exerciseSubtitle: "Size uygun egzersiz türünü seçin ve öğrenmeye devam edin!", infoTitle: "Basit Matematik Hakkında", infoDesc: "Basit matematik egzersizi aritmetik işlemleri hızlı ve doğru bir şekilde yapma becerisini geliştirir.", infoOpsLabel: "İşlemler:", infoOps: ["toplama", "çıkarma", "çarpma", "bölme"], infoExampleLabel: "Örnek:", examplesCountTitle: "ÖRNEK SAYISI", examplesCountSubtitle: "7 ile 25 arası örnek seçin", exampleWord: "örnek", opsTitle: "İŞLEMLER", opsSubtitle: "İşlem türünü seçin", opsOddiy: "Basit", opsOddiyDesc: "Toplama, çıkarma, çarpma, bölme", opsF5: "Formül 5", opsF5Desc: "5'e kadar formüller", opsF10: "Formül 10", opsF10Desc: "10'a kadar formüller", opsAralash: "Karışık", opsAralashDesc: "Tüm işlemler karışık", speedSelectTitle: "HIZ", speedSelectSubtitle: "Egzersiz hızını seçin", secondWord: "saniye", characters: "KARAKTERLER", all: "TÜMÜ", abacusInfoTitle: "ABAKÜS HAKKINDA", abacusInfoDesc: "Üst sıradaki 1 boncuk 5, alt sıradaki 4 boncuk her biri 1 değerindedir.", abacusLearnRules: "Kuralları öğren", abacusDifficulty: "ZORLUK SEVİYESİ", abacusBeginner: "Başlangıç", abacusIntermediate: "Orta", abacusAdvanced: "Zor", abacusOpsTitle: "İŞLEMLER", abacusAddSub: "Toplama ve Çıkarma", abacusMult: "Çarpma", abacusDiv: "Bölme", speedInfoTitle: "HIZLI HESAPLAMA HAKKINDA", speedInfoDesc: "Zamana karşı hesaplayarak hızınızı ve doğruluğunuzu test edin!", speedListItem1: "Zaman sınırlı örnekler", speedListItem2: "Hızlı cevap = daha fazla puan", speedListItem3: "Doğruluk önemlidir!", speedExamplesTitle: "ÖRNEK SAYISI", speedExamplesSubtitle: "7 ile 25 arası örnek seçin", speedTimeTitle: "ZAMAN SINIRI", speedTimeSubtitle: "0.5 ile 2 saniye arası seçin", speedOpsTitle: "İŞLEMLER", speedOpsSubtitle: "İşlem türünü seçin", speedKopaytirish: "Çarpma", speedBolish: "Bölme", speedAralash: "Karışık", speedAllOps: "Tüm işlemler", speedSecLabel: "saniye" , battleTabTitle: "SAVAŞ", battleYou: "SEN", battleOpponent: "Rakip", battleRating: "Derece", battleLevel: "Seviye" , bmOddiy: "Basit Savaş", bmOddiyDesc: "Eşit güçtekilerle hızlı hesaplama", bmReyting: "Derece Savaşı", bmReytingDesc: "Puanlar için güçlü rakiplerle", bmTurnir: "Turnuva Savaşı", bmTurnirDesc: "Turnuvalara katılın ve ödüller kazanın", bmDost: "Arkadaşla Savaş", bmDostDesc: "Arkadaşınızı davet edin ve yarışın" , bmDailyMission: "GÜNLÜK GÖREV", bmDailyMissionDesc: "3 savaşa katılın", bmDailyBonus: "GÜNLÜK BONUS" , bestResults: "EN İYİ SONUÇLAR", bestVictories: "Zaferler", bestStreak: "Galibiyet serisi", bestTime: "En hızlı zaman" , quickOpponent: "HIZLI RAKİP", refresh: "Yenile" , startBattle: "SAVAŞA BAŞLA", startBattleSubtext: "Bir rakip seçin ve zafere ulaşın!" , rankingTitle: "SIRALAMA", rankingSubtitle: "En güçlü matematikçiler", platinumTarget: "Platinum V'e kadar", xpRemaining: "XP kaldı" },
+  en: { title: "Math Master", subtitle: "Level 24", desc: "Great for learning math, conquer the world with this!", clothes: "CLOTHES", accessories: "ACCESSORIES", levelText: "LEVEL", toNextLevel: "To next level", startExercise: "START EXERCISE", stats: "STATISTICS", seeAll: "SEE ALL >", logic: "LOGIC", logicDesc: "Great!", speed: "SPEED", speedDesc: "Good", accuracy: "ACCURACY", accuracyDesc: "Excellent!", streak: "STREAK", streakDesc: "Days", navHome: "HOME", navExercise: "EXERCISE", navInventory: "INVENTORY", navRanking: "RANKING", navProfile: "PROFILE", missions: "MISSIONS", exerciseSubtitle: "Choose the exercise type that suits you and continue learning!", infoTitle: "About Simple Math", infoDesc: "The simple math exercise develops the skill of performing arithmetic operations quickly and correctly.", infoOpsLabel: "Operations:", infoOps: ["addition", "subtraction", "multiplication", "division"], infoExampleLabel: "Example:", examplesCountTitle: "NUMBER OF EXAMPLES", examplesCountSubtitle: "Choose from 7 to 25 examples", exampleWord: "examples", opsTitle: "OPERATIONS", opsSubtitle: "Choose the operation type", opsOddiy: "Simple", opsOddiyDesc: "Addition, subtraction, multiplication, division", opsF5: "Formula 5", opsF5Desc: "Formulas up to 5", opsF10: "Formula 10", opsF10Desc: "Formulas up to 10", opsAralash: "Mixed", opsAralashDesc: "All operations mixed", speedSelectTitle: "SPEED", speedSelectSubtitle: "Choose exercise speed", secondWord: "seconds", characters: "CHARACTERS", all: "ALL", abacusInfoTitle: "ABOUT ABACUS", abacusInfoDesc: "1 upper bead means 5, 4 lower beads mean 1 each.", abacusLearnRules: "Learn rules", abacusDifficulty: "DIFFICULTY LEVEL", abacusBeginner: "Beginner", abacusIntermediate: "Intermediate", abacusAdvanced: "Advanced", abacusOpsTitle: "OPERATIONS", abacusAddSub: "Addition & Subtraction", abacusMult: "Multiplication", abacusDiv: "Division", speedInfoTitle: "ABOUT SPEED MATH", speedInfoDesc: "Test your speed and accuracy by calculating against time!", speedListItem1: "Time-limited examples", speedListItem2: "Fast answer = more points", speedListItem3: "Accuracy is important!", speedExamplesTitle: "NUMBER OF EXAMPLES", speedExamplesSubtitle: "Choose 7 to 25 examples", speedTimeTitle: "TIME LIMIT", speedTimeSubtitle: "Choose from 0.5 to 2 seconds", speedOpsTitle: "OPERATIONS", speedOpsSubtitle: "Choose operation type", speedKopaytirish: "Multiplication", speedBolish: "Division", speedAralash: "Mixed", speedAllOps: "All operations", speedSecLabel: "seconds" , battleTabTitle: "BATTLE", battleYou: "YOU", battleOpponent: "Opponent", battleRating: "Rating", battleLevel: "Level" , bmOddiy: "Simple Battle", bmOddiyDesc: "Fast calculation with equals", bmReyting: "Rating Battle", bmReytingDesc: "With strong opponents for rating points", bmTurnir: "Tournament Battle", bmTurnirDesc: "Participate in tournaments and win prizes", bmDost: "Battle with Friend", bmDostDesc: "Invite your friend and compete" , bmDailyMission: "DAILY BATTLE MISSION", bmDailyMissionDesc: "Participate in 3 battles", bmDailyBonus: "DAILY BONUS" , bestResults: "BEST RESULTS", bestVictories: "Victories", bestStreak: "Winning streak", bestTime: "Fastest time" , quickOpponent: "QUICK OPPONENT", refresh: "Refresh" , startBattle: "START BATTLE", startBattleSubtext: "Choose an opponent and achieve victory!" , rankingTitle: "RANKING", rankingSubtitle: "The strongest mathematicians", platinumTarget: "to Platinum V", xpRemaining: "XP remaining", searchPlaceholder: "Search user...", statRating: "Rating", statSpeed: "Speed", statAccuracy: "Accuracy", statStreak: "Streak", statExercises: "Exercises", statAchievements: "Achievements", statXP: "XP", statCoin: "Coin", achievementsTitle: "ACHIEVEMENTS", achv14Days: "14 day streak", achvTop10: "Top 10", achvGold3: "Gold III", achvGeneric: "Achievement", activityTitle: "ACTIVITY HISTORY", activitySeeAll: "See all >", actSimple: "Simple math", actBattle: "Battle", actFast: "Fast math", actAbacus: "Abacus", actToday: "Today", actYesterday: "Yesterday", actWin: "Victory", collectionTitle: "My collection", collAvatars: "Avatars", collFrames: "Frames", collBgs: "Backgrounds", collChars: "Characters", collBtn: "GO TO INVENTORY >" },
+  ru: { title: "Мастер математики", subtitle: "Уровень 24", desc: "Отлично для изучения математики, завоюйте мир с этим!", clothes: "ОДЕЖДА", accessories: "АКСЕССУАРЫ", levelText: "УРОВЕНЬ", toNextLevel: "До след. уровня", startExercise: "НАЧАТЬ ТРЕНИРОВКУ", stats: "СТАТИСТИКА", seeAll: "ВСЕ >", logic: "ЛОГИКА", logicDesc: "Отлично!", speed: "СКОРОСТЬ", speedDesc: "Хорошо", accuracy: "ТОЧНОСТЬ", accuracyDesc: "Превосходно!", streak: "СЕРИЯ", streakDesc: "Дней", navHome: "ГЛАВНАЯ", navExercise: "ТРЕНИРОВКА", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИИ", exerciseSubtitle: "Выберите подходящий тип упражнений и продолжайте обучение!", infoTitle: "О простом счете", infoDesc: "Упражнение на простой счет развивает навык быстрого и правильного выполнения арифметических операций.", infoOpsLabel: "Операции:", infoOps: ["сложение", "вычитание", "умножение", "деление"], infoExampleLabel: "Пример:", examplesCountTitle: "КОЛИЧЕСТВО ПРИМЕРОВ", examplesCountSubtitle: "Выберите от 7 до 25 примеров", exampleWord: "примеров", opsTitle: "ОПЕРАЦИИ", opsSubtitle: "Выберите тип операций", opsOddiy: "Простые", opsOddiyDesc: "Сложение, вычитание, умножение, деление", opsF5: "Формула 5", opsF5Desc: "Формулы до 5", opsF10: "Формула 10", opsF10Desc: "Формулы до 10", opsAralash: "Вперемешку", opsAralashDesc: "Все операции вперемешку", speedSelectTitle: "СКОРОСТЬ", speedSelectSubtitle: "Выберите скорость тренировки", secondWord: "секунд", characters: "ПЕРСОНАЖИ", all: "ВCЕ", abacusInfoTitle: "ОБ АБАКУСЕ", abacusInfoDesc: "1 верхняя косточка равна 5, 4 нижние — по 1.", abacusLearnRules: "Изучить правила", abacusDifficulty: "УРОВЕНЬ СЛОЖНОСТИ", abacusBeginner: "Новичок", abacusIntermediate: "Средний", abacusAdvanced: "Сложный", abacusOpsTitle: "ОПЕРАЦИИ", abacusAddSub: "Сложение и вычитание", abacusMult: "Умножение", abacusDiv: "Деление", speedInfoTitle: "О СКОРОСТНОМ СЧЕТЕ", speedInfoDesc: "Проверьте скорость и точность, решая примеры на время!", speedListItem1: "Примеры на время", speedListItem2: "Быстрый ответ = больше баллов", speedListItem3: "Точность важна!", speedExamplesTitle: "КОЛИЧЕСТВО ПРИМЕРОВ", speedExamplesSubtitle: "Выберите от 7 до 25 примеров", speedTimeTitle: "ЛИМИТ ВРЕМЕНИ", speedTimeSubtitle: "Выберите от 0.5 до 2 секунд", speedOpsTitle: "ОПЕРАЦИИ", speedOpsSubtitle: "Выберите тип операций", speedKopaytirish: "Умножение", speedBolish: "Деление", speedAralash: "Смешанно", speedAllOps: "Все операции", speedSecLabel: "секунд" , battleTabTitle: "БИТВА", battleYou: "ВЫ", battleOpponent: "Соперник", battleRating: "Рейтинг", battleLevel: "Уровень" , bmOddiy: "Простая Битва", bmOddiyDesc: "Быстрый счет с равными", bmReyting: "Рейтинговая Битва", bmReytingDesc: "С сильными противниками за очки", bmTurnir: "Турнирная Битва", bmTurnirDesc: "Участвуйте в турнирах и выигрывайте призы", bmDost: "Битва с Другом", bmDostDesc: "Пригласите друга и соревнуйтесь" , bmDailyMission: "ЕЖЕДНЕВНАЯ МИССИЯ", bmDailyMissionDesc: "Участвуйте в 3 битвах", bmDailyBonus: "ЕЖЕДНЕВНЫЙ БОНУС" , bestResults: "ЛУЧШИЕ РЕЗУЛЬТАТЫ", bestVictories: "Победы", bestStreak: "Серия побед", bestTime: "Лучшее время" , quickOpponent: "БЫСТРЫЙ ПРОТИВНИК", refresh: "Обновить" , startBattle: "НАЧАТЬ БИТВУ", startBattleSubtext: "Выберите противника и одержите победу!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Сильнейшие математики", platinumTarget: "до Platinum V", xpRemaining: "XP осталось", searchPlaceholder: "Поиск пользователя...", statRating: "Рейтинг", statSpeed: "Скорость", statAccuracy: "Точность", statStreak: "Серия", statExercises: "Упражнения", statAchievements: "Достижения", statXP: "Опыт", statCoin: "Монеты", achievementsTitle: "ДОСТИЖЕНИЯ", achv14Days: "14 дней подряд", achvTop10: "Топ 10", achvGold3: "Золото III", achvGeneric: "Достижение", activityTitle: "ИСТОРИЯ АКТИВНОСТИ", activitySeeAll: "Смотреть все >", actSimple: "Простой счет", actBattle: "Битва", actFast: "Быстрый счет", actAbacus: "Абакус", actToday: "Сегодня", actYesterday: "Вчера", actWin: "Победа", collectionTitle: "Моя коллекция", collAvatars: "Аватары", collFrames: "Рамки", collBgs: "Фоны", collChars: "Персонажи", collBtn: "ПЕРЕЙТИ В ИНВЕНТАРЬ >" },
+  uz: { title: "Matematika Ustasi", subtitle: "24-daraja", desc: "Matematika o'rganishda zo'r, bu bilan dunyoni egallang!", clothes: "KIYIMLAR", accessories: "AKSESSUARLAR", levelText: "LEVEL", toNextLevel: "Keyingi levelgacha yana", startExercise: "MASHQNI BOSHLASH", stats: "STATISTIKALAR", seeAll: "BARCHASI >", logic: "MANTIQ", logicDesc: "Zor!", speed: "TEZLIK", speedDesc: "Yaxshi", accuracy: "ANIQLIK", accuracyDesc: "A'lo!", streak: "SERIYA", streakDesc: "Kun", navHome: "BOSH SAHIFA", navExercise: "MASHQ", navInventory: "INVENTAR", navRanking: "REYTING", navProfile: "PROFIL", missions: "MISSIYALAR", exerciseSubtitle: "O'zingizga mos mashq turini tanlang va o'rganishni davom eting!", infoTitle: "Oddiy hisob haqida", infoDesc: "Oddiy hisob mashqi arifmetik amallarni tez va to'g'ri bajarish ko'nikmasini rivojlantiradi.", infoOpsLabel: "Amallar:", infoOps: ["qo'shish", "ayirish", "ko'paytirish", "bo'lish"], infoExampleLabel: "Misol:", examplesCountTitle: "HADLAR SONI", examplesCountSubtitle: "7 dan 25 hadgacha tanlang", exampleWord: "had", opsTitle: "AMALLAR", opsSubtitle: "Amallar turini tanlang", opsOddiy: "Oddiy", opsOddiyDesc: "Qo'shish, ayirish, ko'paytirish, bo'lish", opsF5: "Formula 5", opsF5Desc: "5 gacha bo'lgan formulalar", opsF10: "Formula 10", opsF10Desc: "10 gacha bo'lgan formulalar", opsAralash: "Aralash", opsAralashDesc: "Barcha amallar aralash holda", speedSelectTitle: "TEZLIK", speedSelectSubtitle: "Mashq bajarish tezligini tanlang", secondWord: "soniya", characters: "PERSONAJLAR", all: "BARCHA", abacusInfoTitle: "ABAKUS (SOROBAN) HAQIDA", abacusInfoDesc: "Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.", abacusLearnRules: "Qoidalarni o'rganish", abacusDifficulty: "QIYINCHILIK DARAJASI", abacusBeginner: "Boshlang'ich", abacusIntermediate: "O'rta", abacusAdvanced: "Murakkab", abacusOpsTitle: "AMALLAR", abacusAddSub: "Qo'shish va Ayirish", abacusMult: "Ko'paytirish", abacusDiv: "Bo'lish", speedInfoTitle: "TEZKOR HISOBLASH HAQIDA", speedInfoDesc: "Vaqt bilan hisoblash orqali tezlik va aniqligingizni sinab ko'ring!", speedListItem1: "Vaqt cheklovi bilan misollar", speedListItem2: "Tez javob – ko'proq ball", speedListItem3: "Aniqlik muhim!", speedExamplesTitle: "MISOLLAR SONI", speedExamplesSubtitle: "7 dan 25 gacha misol tanlang", speedTimeTitle: "VAQT CHEKLOVI", speedTimeSubtitle: "0.5 soniyadan 2 soniyagacha vaqt tanlang", speedOpsTitle: "AMALLAR", speedOpsSubtitle: "Amallar turini tanlang", speedKopaytirish: "Ko'paytirish", speedBolish: "Bo'lish", speedAralash: "Aralash", speedAllOps: "Barcha amallar", speedSecLabel: "soniya" , battleTabTitle: "BATTLE", battleYou: "SIZ", battleOpponent: "Raqib", battleRating: "Reyting", battleLevel: "Level" , bmOddiy: "Oddiy Battle", bmOddiyDesc: "Teng kuchdagilar bilan tezkor hisoblash", bmReyting: "Reyting Battle", bmReytingDesc: "Reyting ochkolari uchun kuchli raqiblar bilan", bmTurnir: "Turnir Battle", bmTurnirDesc: "Turnirlarda qatnashing va sovrin yuting", bmDost: "Do'st bilan Battle", bmDostDesc: "Do'stingizni taklif qiling va bellashing" , bmDailyMission: "KUNLIK BATTLE MISSIYASI", bmDailyMissionDesc: "3 ta battle'da ishtirok eting", bmDailyBonus: "KUNLIK BONUS" , bestResults: "ENG YAXSHI NATIJALAR", bestVictories: "G'alabalar", bestStreak: "G'alaba seriyasi", bestTime: "Eng tez vaqt" , quickOpponent: "TEZKOR RAQIB", refresh: "Yangilash" , startBattle: "BATTLE BOSHLASH", startBattleSubtext: "Raqib tanlang va g'alabaga erishing!" , rankingTitle: "REYTING", rankingSubtitle: "Eng kuchli matematiklar", platinumTarget: "Platinum V gacha", xpRemaining: "XP qoldi", searchPlaceholder: "Foydalanuvchi qidirish...", statRating: "Reyting", statSpeed: "Tezlik", statAccuracy: "Aniqlik", statStreak: "Streak", statExercises: "Mashq", statAchievements: "Yutuq", statXP: "XP", statCoin: "Coin", achievementsTitle: "YUTUQLAR", achv14Days: "14 kunlik seriya", achvTop10: "Top 10", achvGold3: "Gold III", achvGeneric: "Yutuq", activityTitle: "FAOLIYAT TARIXI", activitySeeAll: "Barchasini ko'rish >", actSimple: "Oddiy hisob", actBattle: "Battle", actFast: "Tezkor hisob", actAbacus: "Abakus", actToday: "Bugun", actYesterday: "Kecha", actWin: "G'alaba", collectionTitle: "Mening kolleksiyam", collAvatars: "Avatarlar", collFrames: "Ramkalar", collBgs: "Fonlar", collChars: "Personajlar", collBtn: "INVENTARGA O'TISH >" },
+  ar: { title: "سيد الرياضيات", subtitle: "مستوى 24", desc: "رائع لتعلم الرياضيات، اغز العالم بهذا!", clothes: "ملابس", accessories: "إكسسوارات", levelText: "مستوى", toNextLevel: "للمستوى التالي", startExercise: "ابدأ التمرين", stats: "الإحصائيات", seeAll: "عرض الكل >", logic: "المنطق", logicDesc: "رائع!", speed: "السرعة", speedDesc: "جيد", accuracy: "الدقة", accuracyDesc: "ممتاز!", streak: "سلسلة", streakDesc: "أيام", navHome: "الرئيسية", navExercise: "تمرين", navInventory: "مخزون", navRanking: "تصنيف", navProfile: "ملف شخصي", missions: "المهام", exerciseSubtitle: "اختر نوع التمرين الذي يناسبك واستمر في التعلم!", infoTitle: "حول الحساب البسيط", infoDesc: "تمرين الحساب البسيط يطور مهارة إجراء العمليات الحسابية بسرعة وبشكل صحيح.", infoOpsLabel: "العمليات:", infoOps: ["جمع", "طرح", "ضرب", "قسمة"], infoExampleLabel: "مثال:", examplesCountTitle: "عدد الأمثلة", examplesCountSubtitle: "اختر من 7 إلى 25 مثالًا", exampleWord: "أمثلة", opsTitle: "العمليات", opsSubtitle: "اختر نوع العملية", opsOddiy: "بسيط", opsOddiyDesc: "جمع، طرح، ضرب، قسمة", opsF5: "صيغة 5", opsF5Desc: "صيغ حتى 5", opsF10: "صيغة 10", opsF10Desc: "صيغ حتى 10", opsAralash: "مختلط", opsAralashDesc: "جميع العمليات مختلطة", speedSelectTitle: "السرعة", speedSelectSubtitle: "اختر سرعة التمرين", secondWord: "ثواني", characters: "الشخصيات", all: "الكل", abacusInfoTitle: "حول المعداد", abacusInfoDesc: "حبة علوية واحدة تعني 5، 4 حبات سفلية تعني 1 لكل منها.", abacusLearnRules: "تعلم القواعد", abacusDifficulty: "مستوى الصعوبة", abacusBeginner: "مبتدئ", abacusIntermediate: "متوسط", abacusAdvanced: "متقدم", abacusOpsTitle: "العمليات", abacusAddSub: "الجمع والطرح", abacusMult: "الضرب", abacusDiv: "القسمة", speedInfoTitle: "حول الحساب السريع", speedInfoDesc: "اختبر سرعتك ودقتك عن طريق الحساب ضد الوقت!", speedListItem1: "أمثلة محدودة بوقت", speedListItem2: "إجابة سريعة = نقاط أكثر", speedListItem3: "الدقة مهمة!", speedExamplesTitle: "عدد الأمثلة", speedExamplesSubtitle: "اختر 7 إلى 25 مثالًا", speedTimeTitle: "الحد الزمني", speedTimeSubtitle: "اختر من 0.5 إلى 2 ثانية", speedOpsTitle: "العمليات", speedOpsSubtitle: "اختر نوع العملية", speedKopaytirish: "ضرب", speedBolish: "قسمة", speedAralash: "مختلط", speedAllOps: "جميع العمليات", speedSecLabel: "ثواني" , battleTabTitle: "معركة", battleYou: "أنت", battleOpponent: "الخصم", battleRating: "تقييم", battleLevel: "مستوى" , bmOddiy: "معركة بسيطة", bmOddiyDesc: "حساب سريع مع المتكافئين", bmReyting: "معركة التقييم", bmReytingDesc: "مع خصوم أقوياء للحصول على نقاط", bmTurnir: "معركة البطولة", bmTurnirDesc: "شارك في البطولات واربح جوائز", bmDost: "معركة مع صديق", bmDostDesc: "ادع صديقك وتنافس" , bmDailyMission: "المهمة اليومية", bmDailyMissionDesc: "شارك في 3 معارك", bmDailyBonus: "مكافأة يومية" , bestResults: "أفضل النتائج", bestVictories: "انتصارات", bestStreak: "سلسلة انتصارات", bestTime: "أسرع وقت" , quickOpponent: "الخصم السريع", refresh: "تحديث" , startBattle: "بدء المعركة", startBattleSubtext: "اختر خصمًا وحقق النصر!" , rankingTitle: "التصنيف", rankingSubtitle: "أقوى علماء الرياضيات", platinumTarget: "إلى Platinum V", xpRemaining: "XP متبقي", searchPlaceholder: "البحث عن مستخدم...", statRating: "التقييم", statSpeed: "السرعة", statAccuracy: "الدقة", statStreak: "سلسلة", statExercises: "التمارين", statAchievements: "الإنجازات", statXP: "نقاط الخبرة", statCoin: "عملات", achievementsTitle: "الإنجازات", achv14Days: "سلسلة 14 يومًا", achvTop10: "أفضل 10", achvGold3: "الذهب III", achvGeneric: "إنجاز", activityTitle: "سجل النشاط", activitySeeAll: "عرض الكل >", actSimple: "حساب بسيط", actBattle: "معركة", actFast: "حساب سريع", actAbacus: "معداد", actToday: "اليوم", actYesterday: "أمس", actWin: "انتصار", collectionTitle: "مجموعتي", collAvatars: "الصور الرمزية", collFrames: "الإطارات", collBgs: "الخلفيات", collChars: "الشخصيات", collBtn: "الذهاب إلى المخزون >" },
+  tr: { title: "Matematik Ustası", subtitle: "Seviye 24", desc: "Matematik öğrenmek için harika, bununla dünyayı fethet!", clothes: "GİYSİLER", accessories: "AKSESUARLAR", levelText: "SEVİYE", toNextLevel: "Sonraki seviyeye", startExercise: "EGZERSİZE BAŞLA", stats: "İSTATİSTİKLER", seeAll: "TÜMÜ >", logic: "MANTIK", logicDesc: "Harika!", speed: "HIZ", speedDesc: "İyi", accuracy: "DOĞRULUK", accuracyDesc: "Mükemmel!", streak: "SERİ", streakDesc: "Gün", navHome: "ANA SAYFA", navExercise: "EGZERSİZ", navInventory: "ENVANTER", navRanking: "SIRALAMA", navProfile: "PROFİL", missions: "GÖREVLER", exerciseSubtitle: "Size uygun egzersiz türünü seçin ve öğrenmeye devam edin!", infoTitle: "Basit Matematik Hakkında", infoDesc: "Basit matematik egzersizi aritmetik işlemleri hızlı ve doğru bir şekilde yapma becerisini geliştirir.", infoOpsLabel: "İşlemler:", infoOps: ["toplama", "çıkarma", "çarpma", "bölme"], infoExampleLabel: "Örnek:", examplesCountTitle: "ÖRNEK SAYISI", examplesCountSubtitle: "7 ile 25 arası örnek seçin", exampleWord: "örnek", opsTitle: "İŞLEMLER", opsSubtitle: "İşlem türünü seçin", opsOddiy: "Basit", opsOddiyDesc: "Toplama, çıkarma, çarpma, bölme", opsF5: "Formül 5", opsF5Desc: "5'e kadar formüller", opsF10: "Formül 10", opsF10Desc: "10'a kadar formüller", opsAralash: "Karışık", opsAralashDesc: "Tüm işlemler karışık", speedSelectTitle: "HIZ", speedSelectSubtitle: "Egzersiz hızını seçin", secondWord: "saniye", characters: "KARAKTERLER", all: "TÜMÜ", abacusInfoTitle: "ABAKÜS HAKKINDA", abacusInfoDesc: "Üst sıradaki 1 boncuk 5, alt sıradaki 4 boncuk her biri 1 değerindedir.", abacusLearnRules: "Kuralları öğren", abacusDifficulty: "ZORLUK SEVİYESİ", abacusBeginner: "Başlangıç", abacusIntermediate: "Orta", abacusAdvanced: "Zor", abacusOpsTitle: "İŞLEMLER", abacusAddSub: "Toplama ve Çıkarma", abacusMult: "Çarpma", abacusDiv: "Bölme", speedInfoTitle: "HIZLI HESAPLAMA HAKKINDA", speedInfoDesc: "Zamana karşı hesaplayarak hızınızı ve doğruluğunuzu test edin!", speedListItem1: "Zaman sınırlı örnekler", speedListItem2: "Hızlı cevap = daha fazla puan", speedListItem3: "Doğruluk önemlidir!", speedExamplesTitle: "ÖRNEK SAYISI", speedExamplesSubtitle: "7 ile 25 arası örnek seçin", speedTimeTitle: "ZAMAN SINIRI", speedTimeSubtitle: "0.5 ile 2 saniye arası seçin", speedOpsTitle: "İŞLEMLER", speedOpsSubtitle: "İşlem türünü seçin", speedKopaytirish: "Çarpma", speedBolish: "Bölme", speedAralash: "Karışık", speedAllOps: "Tüm işlemler", speedSecLabel: "saniye" , battleTabTitle: "SAVAŞ", battleYou: "SEN", battleOpponent: "Rakip", battleRating: "Derece", battleLevel: "Seviye" , bmOddiy: "Basit Savaş", bmOddiyDesc: "Eşit güçtekilerle hızlı hesaplama", bmReyting: "Derece Savaşı", bmReytingDesc: "Puanlar için güçlü rakiplerle", bmTurnir: "Turnuva Savaşı", bmTurnirDesc: "Turnuvalara katılın ve ödüller kazanın", bmDost: "Arkadaşla Savaş", bmDostDesc: "Arkadaşınızı davet edin ve yarışın" , bmDailyMission: "GÜNLÜK GÖREV", bmDailyMissionDesc: "3 savaşa katılın", bmDailyBonus: "GÜNLÜK BONUS" , bestResults: "EN İYİ SONUÇLAR", bestVictories: "Zaferler", bestStreak: "Galibiyet serisi", bestTime: "En hızlı zaman" , quickOpponent: "HIZLI RAKİP", refresh: "Yenile" , startBattle: "SAVAŞA BAŞLA", startBattleSubtext: "Bir rakip seçin ve zafere ulaşın!" , rankingTitle: "SIRALAMA", rankingSubtitle: "En güçlü matematikçiler", platinumTarget: "Platinum V'e kadar", xpRemaining: "XP kaldı", searchPlaceholder: "Kullanıcı ara...", statRating: "Derece", statSpeed: "Hız", statAccuracy: "Doğruluk", statStreak: "Seri", statExercises: "Egzersizler", statAchievements: "Başarılar", statXP: "XP", statCoin: "Jeton", achievementsTitle: "BAŞARILAR", achv14Days: "14 günlük seri", achvTop10: "İlk 10", achvGold3: "Altın III", achvGeneric: "Başarı", activityTitle: "ETKİNLİK GEÇMİŞİ", activitySeeAll: "Tümünü gör >", actSimple: "Basit hesap", actBattle: "Savaş", actFast: "Hızlı hesap", actAbacus: "Abaküs", actToday: "Bugün", actYesterday: "Dün", actWin: "Zafer", collectionTitle: "Koleksiyonum", collAvatars: "Avatarlar", collFrames: "Çerçeveler", collBgs: "Arka Planlar", collChars: "Karakterler", collBtn: "ENVANTERE GİT >" },
   zh: { title: "数学大师", subtitle: "24级", desc: "非常适合学习数学，用它征服世界！", clothes: "服装", accessories: "配饰", levelText: "等级", toNextLevel: "距离下一级还有", startExercise: "开始练习", stats: "统计数据", seeAll: "全部 >", logic: "逻辑", logicDesc: "太棒了！", speed: "速度", speedDesc: "很好", accuracy: "准确度", accuracyDesc: "极好！", streak: "连胜", streakDesc: "天", navHome: "首页", navExercise: "练习", navInventory: "库存", navRanking: "排名", navProfile: "个人资料", missions: "任务", exerciseSubtitle: "选择适合您的练习类型并继续学习！", infoTitle: "关于简单算术", infoDesc: "简单算术练习培养快速正确执行算术运算的技能。", infoOpsLabel: "运算:", infoOps: ["加法", "减法", "乘法", "除法"], infoExampleLabel: "例子:", examplesCountTitle: "例子数量", examplesCountSubtitle: "选择7到25个例子", exampleWord: "个例子", opsTitle: "运算", opsSubtitle: "选择运算类型", opsOddiy: "简单", opsOddiyDesc: "加、减、乘、除", opsF5: "公式5", opsF5Desc: "最高为5的公式", opsF10: "公式10", opsF10Desc: "最高为10的公式", opsAralash: "混合", opsAralashDesc: "所有运算混合", speedSelectTitle: "速度", speedSelectSubtitle: "选择练习速度", secondWord: "秒", characters: "角色", all: "全部", abacusInfoTitle: "关于算盘", abacusInfoDesc: "上面1颗珠子表示5，下面4颗珠子各表示1。", abacusLearnRules: "学习规则", abacusDifficulty: "难度级别", abacusBeginner: "初学者", abacusIntermediate: "中级", abacusAdvanced: "高级", abacusOpsTitle: "运算", abacusAddSub: "加法和减法", abacusMult: "乘法", abacusDiv: "除法", speedInfoTitle: "关于快速计算", speedInfoDesc: "通过计时计算测试您的速度和准确性！", speedListItem1: "限时例子", speedListItem2: "答得快=得分高", speedListItem3: "准确性很重要！", speedExamplesTitle: "例子数量", speedExamplesSubtitle: "选择7到25个例子", speedTimeTitle: "时间限制", speedTimeSubtitle: "选择0.5到2秒", speedOpsTitle: "运算", speedOpsSubtitle: "选择运算类型", speedKopaytirish: "乘法", speedBolish: "除法", speedAralash: "混合", speedAllOps: "所有运算", speedSecLabel: "秒" , battleTabTitle: "战斗", battleYou: "你", battleOpponent: "对手", battleRating: "评分", battleLevel: "等级" , bmOddiy: "简单战斗", bmOddiyDesc: "与实力相当者进行快速计算", bmReyting: "排名战斗", bmReytingDesc: "与强敌交手赚取积分", bmTurnir: "锦标赛战斗", bmTurnirDesc: "参加锦标赛赢取奖品", bmDost: "好友战斗", bmDostDesc: "邀请好友并竞争" , bmDailyMission: "每日任务", bmDailyMissionDesc: "参与3场战斗", bmDailyBonus: "每日奖励" , bestResults: "最佳结果", bestVictories: "胜利", bestStreak: "连胜", bestTime: "最快时间" , quickOpponent: "快速对手", refresh: "刷新" , startBattle: "开始战斗", startBattleSubtext: "选择对手并取得胜利！" , rankingTitle: "排名", rankingSubtitle: "最强的数学家", platinumTarget: "到 Platinum V", xpRemaining: "XP 剩余" },
-  ky: { title: "Математика чебери", subtitle: "24-деңгээл", desc: "Математика үйрөнүү үчүн сонун, муну менен дүйнөнү багындыр!", clothes: "КИЙИМДЕР", accessories: "АКСЕССУАРЛАР", levelText: "ДЕҢГЭЭЛ", toNextLevel: "Кийинки деңгээлге чейин", startExercise: "КӨНҮГҮҮНҮ БАШТОО", stats: "СТАТИСТИКА", seeAll: "БАРДЫГЫ >", logic: "ЛОГИКА", logicDesc: "Жакшы!", speed: "ЫЛДАМДЫК", speedDesc: "Жакшы", accuracy: "ТАКТЫК", accuracyDesc: "Эң жакшы!", streak: "СЕРИЯ", streakDesc: "Күн", navHome: "БАШКЫ БЕТ", navExercise: "КӨНҮГҮҮ", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИЯЛАР", exerciseSubtitle: "Сизге туура келген көнүгүү түрүн тандап, үйрөнүүнү улантыңыз!", infoTitle: "Жөнөкөй эсеп жөнүндө", infoDesc: "Жөнөкөй эсеп көнүгүүсү арифметикалык амалдарды тез жана туура аткаруу көндүмүн өнүктүрөт.", infoOpsLabel: "Амалдар:", infoOps: ["кошуу", "кемитүү", "көбөйтүү", "бөлүү"], infoExampleLabel: "Мисал:", examplesCountTitle: "МИСАЛДАР САНЫ", examplesCountSubtitle: "7ден 25ке чейин мисал тандаңыз", exampleWord: "мисал", opsTitle: "АМАЛДАР", opsSubtitle: "Амалдын түрүн тандаңыз", opsOddiy: "Жөнөкөй", opsOddiyDesc: "Кошуу, кемитүү, көбөйтүү, бөлүү", opsF5: "Формула 5", opsF5Desc: "5ке чейинки формулалар", opsF10: "Формула 10", opsF10Desc: "10го чейинки формулалар", opsAralash: "Аралаш", opsAralashDesc: "Бардык амалдар аралаш", speedSelectTitle: "ЫЛДАМДЫК", speedSelectSubtitle: "Көнүгүү ылдамдыгын тандаңыз", secondWord: "секунд", characters: "ПЕРСОНАЖДАР", all: "БАРДЫГЫ", abacusInfoTitle: "АБАКУС ЖӨНҮНДӨ", abacusInfoDesc: "Жогорку катардагы 1 мончок 5ти, төмөнкү катардагы 4 мончоктун ар бири 1ди билдирет.", abacusLearnRules: "Эрежелерди үйрөнүү", abacusDifficulty: "КЫЙЫНЧЫЛЫК ДЕҢГЭЭЛИ", abacusBeginner: "Башталгыч", abacusIntermediate: "Орто", abacusAdvanced: "Кыйын", abacusOpsTitle: "АМАЛДАР", abacusAddSub: "Кошуу жана Кемитүү", abacusMult: "Көбөйтүү", abacusDiv: "Бөлүү", speedInfoTitle: "ЫКЧАМ ЭСЕП ЖӨНҮНДӨ", speedInfoDesc: "Убакыт менен эсептеп ылдамдыгыңызды жана тактыгыңызды сынап көрүңүз!", speedListItem1: "Убакыт чектелген мисалдар", speedListItem2: "Тез жооп = көбүрөөк упай", speedListItem3: "Тактык маанилүү!", speedExamplesTitle: "МИСАЛДАР САНЫ", speedExamplesSubtitle: "7ден 25ке чейин мисал тандаңыз", speedTimeTitle: "УБАКЫТ ЧЕГИ", speedTimeSubtitle: "0.5тен 2 секундага чейин тандаңыз", speedOpsTitle: "АМАЛДАР", speedOpsSubtitle: "Амалдын түрүн тандаңыз", speedKopaytirish: "Көбөйтүү", speedBolish: "Бөлүү", speedAralash: "Аралаш", speedAllOps: "Бардык амалдар", speedSecLabel: "секунд" , battleTabTitle: "САЛМАШ", battleYou: "СИЗ", battleOpponent: "Атаандаш", battleRating: "Рейтинг", battleLevel: "Деңгээл" , bmOddiy: "Жөнөкөй салмат", bmOddiyDesc: "Тең күчтүүлөр менен тез эсептөө", bmReyting: "Рейтинг салмат", bmReytingDesc: "Упайлар үчүн күчтүү атаандаштар менен", bmTurnir: "Турнир салмат", bmTurnirDesc: "Турнирлерге катышып, байгелерди утуп алыңыз", bmDost: "Дос менен салмат", bmDostDesc: "Досуңузду чакырып, атаандашыңыз" , bmDailyMission: "КҮНДҮК МИССИЯ", bmDailyMissionDesc: "3 салматка катышыңыз", bmDailyBonus: "КҮНДҮК БОНУС" , bestResults: "ЭҢ ЖАКШЫ НАТЫЙЖАЛАР", bestVictories: "Жеңиштер", bestStreak: "Жеңиштер сериясы", bestTime: "Эң тез убакыт" , quickOpponent: "ТЕЗКАР КАРШЫЛАШ", refresh: "Жаңыртуу" , startBattle: "СОГУШТУ БАШТОО", startBattleSubtext: "Каршылашты тандап, жеңишке жет!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Эң күчтүү математиктер", platinumTarget: "Platinum V чейин", xpRemaining: "XP калды" },
+  ky: { title: "Математика чебери", subtitle: "24-деңгээл", desc: "Математика үйрөнүү үчүн сонун, муну менен дүйнөнү багындыр!", clothes: "КИЙИМДЕР", accessories: "АКСЕССУАРЛАР", levelText: "ДЕҢГЭЭЛ", toNextLevel: "Кийинки деңгээлге чейин", startExercise: "КӨНҮГҮҮНҮ БАШТОО", stats: "СТАТИСТИКА", seeAll: "БАРДЫГЫ >", logic: "ЛОГИКА", logicDesc: "Жакшы!", speed: "ЫЛДАМДЫК", speedDesc: "Жакшы", accuracy: "ТАКТЫК", accuracyDesc: "Эң жакшы!", streak: "СЕРИЯ", streakDesc: "Күн", navHome: "БАШКЫ БЕТ", navExercise: "КӨНҮГҮҮ", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИЯЛАР", exerciseSubtitle: "Сизге туура келген көнүгүү түрүн тандап, үйрөнүүнү улантыңыз!", infoTitle: "Жөнөкөй эсеп жөнүндө", infoDesc: "Жөнөкөй эсеп көнүгүүсү арифметикалык амалдарды тез жана туура аткаруу көндүмүн өнүктүрөт.", infoOpsLabel: "Амалдар:", infoOps: ["кошуу", "кемитүү", "көбөйтүү", "бөлүү"], infoExampleLabel: "Мисал:", examplesCountTitle: "МИСАЛДАР САНЫ", examplesCountSubtitle: "7ден 25ке чейин мисал тандаңыз", exampleWord: "мисал", opsTitle: "АМАЛДАР", opsSubtitle: "Амалдын түрүн тандаңыз", opsOddiy: "Жөнөкөй", opsOddiyDesc: "Кошуу, кемитүү, көбөйтүү, бөлүү", opsF5: "Формула 5", opsF5Desc: "5ке чейинки формулалар", opsF10: "Формула 10", opsF10Desc: "10го чейинки формулалар", opsAralash: "Аралаш", opsAralashDesc: "Бардык амалдар аралаш", speedSelectTitle: "ЫЛДАМДЫК", speedSelectSubtitle: "Көнүгүү ылдамдыгын тандаңыз", secondWord: "секунд", characters: "ПЕРСОНАЖДАР", all: "БАРДЫГЫ", abacusInfoTitle: "АБАКУС ЖӨНҮНДӨ", abacusInfoDesc: "Жогорку катардагы 1 мончок 5ти, төмөнкү катардагы 4 мончоктун ар бири 1ди билдирет.", abacusLearnRules: "Эрежелерди үйрөнүү", abacusDifficulty: "КЫЙЫНЧЫЛЫК ДЕҢГЭЭЛИ", abacusBeginner: "Башталгыч", abacusIntermediate: "Орто", abacusAdvanced: "Кыйын", abacusOpsTitle: "АМАЛДАР", abacusAddSub: "Кошуу жана Кемитүү", abacusMult: "Көбөйтүү", abacusDiv: "Бөлүү", speedInfoTitle: "ЫКЧАМ ЭСЕП ЖӨНҮНДӨ", speedInfoDesc: "Убакыт менен эсептеп ылдамдыгыңызды жана тактыгыңызды сынап көрүңүз!", speedListItem1: "Убакыт чектелген мисалдар", speedListItem2: "Тез жооп = көбүрөөк упай", speedListItem3: "Тактык маанилүү!", speedExamplesTitle: "МИСАЛДАР САНЫ", speedExamplesSubtitle: "7ден 25ке чейин мисал тандаңыз", speedTimeTitle: "УБАКЫТ ЧЕГИ", speedTimeSubtitle: "0.5тен 2 секундага чейин тандаңыз", speedOpsTitle: "АМАЛДАР", speedOpsSubtitle: "Амалдын түрүн тандаңыз", speedKopaytirish: "Көбөйтүү", speedBolish: "Бөлүү", speedAralash: "Аралаш", speedAllOps: "Бардык амалдар", speedSecLabel: "секунд" , battleTabTitle: "САЛМАШ", battleYou: "СИЗ", battleOpponent: "Атаандаш", battleRating: "Рейтинг", battleLevel: "Деңгээл" , bmOddiy: "Жөнөкөй салмат", bmOddiyDesc: "Тең күчтүүлөр менен тез эсептөө", bmReyting: "Рейтинг салмат", bmReytingDesc: "Упайлар үчүн күчтүү атаандаштар менен", bmTurnir: "Турнир салмат", bmTurnirDesc: "Турнирлерге катышып, байгелерди утуп алыңыз", bmDost: "Дос менен салмат", bmDostDesc: "Досуңузду чакырып, атаандашыңыз" , bmDailyMission: "КҮНДҮК МИССИЯ", bmDailyMissionDesc: "3 салматка катышыңыз", bmDailyBonus: "КҮНДҮК БОНУС" , bestResults: "ЭҢ ЖАКШЫ НАТЫЙЖАЛАР", bestVictories: "Жеңиштер", bestStreak: "Жеңиштер сериясы", bestTime: "Эң тез убакыт" , quickOpponent: "ТЕЗКАР КАРШЫЛАШ", refresh: "Жаңыртуу" , startBattle: "СОГУШТУ БАШТОО", startBattleSubtext: "Каршылашты тандап, жеңишке жет!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Эң күчтүү математиктер", platinumTarget: "Platinum V чейин", xpRemaining: "XP калды", searchPlaceholder: "Колдонуучуну издөө...", statRating: "Рейтинг", statSpeed: "Ылдамдык", statAccuracy: "Тактык", statStreak: "Серия", statExercises: "Көнүгүүлөр", statAchievements: "Жетишкендиктер", statXP: "XP", statCoin: "Монета", achievementsTitle: "ЖЕТИШКЕНДИКТЕР", achv14Days: "14 күндүк серия", achvTop10: "Топ 10", achvGold3: "Алтын III", achvGeneric: "Жетишкендик", activityTitle: "АКТИВДҮҮЛҮК ТАРЫХЫ", activitySeeAll: "Баарын көрүү >", actSimple: "Жөнөкөй эсеп", actBattle: "Салмат", actFast: "Тез эсеп", actAbacus: "Абакус", actToday: "Бүгүн", actYesterday: "Кечээ", actWin: "Жеңиш", collectionTitle: "Менин коллекциям", collAvatars: "Аватарлар", collFrames: "Алкактар", collBgs: "Фондор", collChars: "Персонаждар", collBtn: "ИНВЕНТАРГА ӨТҮҮ >" },
   kk: { title: "Математика шебері", subtitle: "24-деңгей", desc: "Математика үйрену үшін керемет, осымен әлемді бағындыр!", clothes: "КИІМДЕР", accessories: "АКСЕССУАРЛАР", levelText: "ДЕҢГЕЙ", toNextLevel: "Келесі деңгейге дейін", startExercise: "ЖАТТЫҒУДЫ БАСТАУ", stats: "СТАТИСТИКА", seeAll: "БАРЛЫҒЫ >", logic: "ЛОГИКА", logicDesc: "Керемет!", speed: "ЖЫЛДАМДЫҚ", speedDesc: "Жақсы", accuracy: "ДӘЛДІК", accuracyDesc: "Өте жақсы!", streak: "СЕРИЯ", streakDesc: "Күн", navHome: "БАСҚЫ БЕТ", navExercise: "ЖАТТЫҒУ", navInventory: "ИНВЕНТАРЬ", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛЬ", missions: "МИССИЯЛАР", exerciseSubtitle: "Өзіңізге сәйкес келетін жаттығу түрін тандап, оқуды жалғастырыңыз!", infoTitle: "Қарапайым есеп туралы", infoDesc: "Қарапайым есеп жаттығуы арифметикалық амалдарды жылдам әрі дұрыс орындау дағдысын дамытады.", infoOpsLabel: "Амалдар:", infoOps: ["қосу", "азайту", "көбейту", "бөлу"], infoExampleLabel: "Мысал:", examplesCountTitle: "МЫСАЛДАР САНЫ", examplesCountSubtitle: "7-ден 25-ке дейін мысал таңдаңыз", exampleWord: "мысал", opsTitle: "АМАЛДАР", opsSubtitle: "Амал түрін таңдаңыз", opsOddiy: "Қарапайым", opsOddiyDesc: "Қосу, азайту, көбейту, бөлу", opsF5: "Формула 5", opsF5Desc: "5-ке дейінгі формулалар", opsF10: "Формула 10", opsF10Desc: "10-ға дейінгі формулалар", opsAralash: "Аралас", opsAralashDesc: "Барлық амалдар аралас", speedSelectTitle: "ЖЫЛДАМДЫҚ", speedSelectSubtitle: "Жаттығу жылдамдығын таңдаңыз", secondWord: "секунд", characters: "КЕЙІПКЕРЛЕР", all: "БАРЛЫҒЫ", abacusInfoTitle: "АБАКУС ТУРАЛЫ", abacusInfoDesc: "Жоғарғы қатардағы 1 моншақ 5-ті, төменгі қатардағы 4 моншақ әрқайсысы 1-ді білдіреді.", abacusLearnRules: "Ережелерді үйрену", abacusDifficulty: "ҚИЫНДЫҚ ДЕҢГЕЙІ", abacusBeginner: "Бастауыш", abacusIntermediate: "Орташа", abacusAdvanced: "Қиын", abacusOpsTitle: "АМАЛДАР", abacusAddSub: "Қосу және Азайту", abacusMult: "Көбейту", abacusDiv: "Бөлу", speedInfoTitle: "ЖЫЛДАМ ЕСЕП ТУРАЛЫ", speedInfoDesc: "Уақытпен есептеу арқылы жылдамдық пен дәлдікті тексеріңіз!", speedListItem1: "Уақыты шектеулі мысалдар", speedListItem2: "Жылдам жауап = көбірек ұпай", speedListItem3: "Дәлдік маңызды!", speedExamplesTitle: "МЫСАЛДАР САНЫ", speedExamplesSubtitle: "7-ден 25-ке дейін мысал таңдаңыз", speedTimeTitle: "УАҚЫТ ШЕКТЕУІ", speedTimeSubtitle: "0.5-тен 2 секундқа дейін таңдаңыз", speedOpsTitle: "АМАЛДАР", speedOpsSubtitle: "Амал түрін таңдаңыз", speedKopaytirish: "Көбейту", speedBolish: "Бөлу", speedAralash: "Аралас", speedAllOps: "Барлық амалдар", speedSecLabel: "секунд" , battleTabTitle: "ЖЕКПЕ-ЖЕК", battleYou: "СІЗ", battleOpponent: "Қарсылас", battleRating: "Рейтинг", battleLevel: "Деңгей" , bmOddiy: "Қарапайым жекпе-жек", bmOddiyDesc: "Тең күштілермен жылдам есептеу", bmReyting: "Рейтинг жекпе-жек", bmReytingDesc: "Рейтинг үшін күшті қарсыластармен", bmTurnir: "Турнир жекпе-жек", bmTurnirDesc: "Турнирлерге қатысып, жүлделер ұтып алыңыз", bmDost: "Доспен жекпе-жек", bmDostDesc: "Досыңызды шақырып, жарысыңыз" , bmDailyMission: "КҮНДЕЛІКТІ МИССИЯ", bmDailyMissionDesc: "3 жекпе-жекке қатысыңыз", bmDailyBonus: "КҮНДЕЛІКТІ БОНУС" , bestResults: "ЕҢ ЖАҚСЫ НӘТИЖЕЛЕР", bestVictories: "Жеңістер", bestStreak: "Жеңістер сериясы", bestTime: "Ең жылдам уақыт" , quickOpponent: "ЖЫЛДАМ ҚАРСЫЛАС", refresh: "Жаңарту" , startBattle: "ШАЙҚАСТЫ БАСТАУ", startBattleSubtext: "Қарсыласты таңдап, жеңіске жетіңіз!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Ең мықты математиктер", platinumTarget: "Platinum V дейін", xpRemaining: "XP қалды" },
   tg: { title: "Устоди математика", subtitle: "Сатҳи 24", desc: "Барои омӯзиши математика олӣ аст, бо ин ҷаҳонро фатҳ кунед!", clothes: "ЛИБОСҲО", accessories: "ЛАВОЗИМОТ", levelText: "САТҲ", toNextLevel: "То сатҳи навбатӣ", startExercise: "ОҒОЗИ МАШҚ", stats: "СТАТИСТИКА", seeAll: "ҲАМА >", logic: "МАНТИҚ", logicDesc: "Олӣ!", speed: "СУРЪАТ", speedDesc: "Хуб", accuracy: "ДАҚИҚӢ", accuracyDesc: "Аъло!", streak: "СЕРИЯ", streakDesc: "Рӯз", navHome: "АСОСӢ", navExercise: "МАШҚ", navInventory: "ИНВЕНТАР", navRanking: "РЕЙТИНГ", navProfile: "ПРОФИЛ", missions: "МИССИЯҲО", exerciseSubtitle: "Навъи машқи ба шумо мувофиқро интихоб кунед ва омӯзишро давом диҳед!", infoTitle: "Дар бораи ҳисоби оддӣ", infoDesc: "Машқи ҳисоби оддӣ маҳорати зуд ва дуруст иҷро кардани амалҳои арифметикиро инкишоф медиҳад.", infoOpsLabel: "Амалҳо:", infoOps: ["ҷамъ", "тарҳ", "зарб", "тақсим"], infoExampleLabel: "Мисол:", examplesCountTitle: "МИҚДОРИ МИСОЛҲО", examplesCountSubtitle: "Аз 7 то 25 мисол интихоб кунед", exampleWord: "мисол", opsTitle: "АМАЛҲО", opsSubtitle: "Намуди амалро интихоб кунед", opsOddiy: "Оддӣ", opsOddiyDesc: "Ҷамъ, тарҳ, зарб, тақсим", opsF5: "Формулаи 5", opsF5Desc: "Формулаҳо то 5", opsF10: "Формулаи 10", opsF10Desc: "Формулаҳо то 10", opsAralash: "Омехта", opsAralashDesc: "Ҳамаи амалҳо омехта", speedSelectTitle: "СУРЪАТ", speedSelectSubtitle: "Суръати машқро интихоб кунед", secondWord: "сония", characters: "ПЕРСОНАЖҲО", all: "ҲАМА", abacusInfoTitle: "ДАР БОРАИ АБАКУС", abacusInfoDesc: "1 маҳтоби болоӣ ба 5, 4 маҳтоби поёнӣ ҳар кадом ба 1 баробар аст.", abacusLearnRules: "Омӯзиши қоидаҳо", abacusDifficulty: "САТҲИ МУШКИЛӢ", abacusBeginner: "Шурӯъкунанда", abacusIntermediate: "Миёна", abacusAdvanced: "Мушкил", abacusOpsTitle: "АМАЛҲО", abacusAddSub: "Ҷамъ ва Тарҳ", abacusMult: "Зарб", abacusDiv: "Тақсим", speedInfoTitle: "ДАР БОРАИ ҲИСОБИ ЗУД", speedInfoDesc: "Бо ҳисобкунӣ бар зидди вақт суръат ва дақиқии худро санҷед!", speedListItem1: "Мисолҳои маҳдуди вақт", speedListItem2: "Ҷавоби зуд = холҳои бештар", speedListItem3: "Дақиқӣ муҳим аст!", speedExamplesTitle: "МИҚДОРИ МИСОЛҲО", speedExamplesSubtitle: "Аз 7 то 25 мисол интихоб кунед", speedTimeTitle: "МАҲДУДИЯТИ ВАҚТ", speedTimeSubtitle: "Аз 0.5 то 2 сония интихоб кунед", speedOpsTitle: "АМАЛҲО", speedOpsSubtitle: "Намуди амалро интихоб кунед", speedKopaytirish: "Зарб", speedBolish: "Тақсим", speedAralash: "Омехта", speedAllOps: "Ҳамаи амалҳо", speedSecLabel: "сония" , battleTabTitle: "ҶАНГ", battleYou: "ШУМО", battleOpponent: "Ҳариф", battleRating: "Рейтинг", battleLevel: "Сатҳ" , bmOddiy: "Ҷанги оддӣ", bmOddiyDesc: "Ҳисоби зуд бо ҳамқувватҳо", bmReyting: "Ҷанги рейтинг", bmReytingDesc: "Барои холҳо бо ҳарифҳои қавӣ", bmTurnir: "Ҷанги мусобиқа", bmTurnirDesc: "Дар мусобиқаҳо иштирок кунед ва ҷоизаҳо гиред", bmDost: "Ҷанг бо дӯст", bmDostDesc: "Дӯсти худро даъват кунед ва рақобат кунед" , bmDailyMission: "ВАЗИФАИ ҲАРРӮЗА", bmDailyMissionDesc: "Дар 3 ҷанг иштирок кунед", bmDailyBonus: "БОНУСИ ҲАРРӮЗА" , bestResults: "НАТИҶАҲОИ БЕҲТАРИН", bestVictories: "Ғалабаҳо", bestStreak: "Силсилаи ғалабаҳо", bestTime: "Вақти тезтарин" , quickOpponent: "РАҚИБИ ТЕЗ", refresh: "Навсозӣ" , startBattle: "ОҒОЗИ НАБАРД", startBattleSubtext: "Рақибро интихоб кунед ва ғалаба ба даст оред!" , rankingTitle: "РЕЙТИНГ", rankingSubtitle: "Пурқувваттарин математикҳо", platinumTarget: "То Platinum V", xpRemaining: "XP боқимонда" },
-  ja: { title: "数学マスター", subtitle: "レベル 24", desc: "数学の学習に最適です。これで世界を征服しましょう！", clothes: "服", accessories: "アクセサリー", levelText: "レベル", toNextLevel: "次のレベルまで", startExercise: "練習を始める", stats: "統計", seeAll: "すべて >", logic: "論理", logicDesc: "素晴らしい！", speed: "スピード", speedDesc: "良い", accuracy: "正確さ", accuracyDesc: "優秀！", streak: "連続", streakDesc: "日", navHome: "ホーム", navExercise: "練習", navInventory: "在庫", navRanking: "ランキング", navProfile: "プロフィール", missions: "ミッション", exerciseSubtitle: "自分に合ったエクササイズタイプを選んで、学習を続けましょう！", infoTitle: "簡単な計算について", infoDesc: "簡単な計算の練習は、算術演算を素早く正確に実行するスキルを養います。", infoOpsLabel: "演算:", infoOps: ["加算", "減算", "乗算", "除算"], infoExampleLabel: "例:", examplesCountTitle: "例の数", examplesCountSubtitle: "7から25の例を選択してください", exampleWord: "例", opsTitle: "操作", opsSubtitle: "操作タイプを選択してください", opsOddiy: "シンプル", opsOddiyDesc: "加算、減算、乗算、除算", opsF5: "式5", opsF5Desc: "5までの式", opsF10: "式10", opsF10Desc: "10までの式", opsAralash: "混合", opsAralashDesc: "すべての操作が混在", speedSelectTitle: "スピード", speedSelectSubtitle: "練習の速度を選択してください", secondWord: "秒", characters: "キャラクター", all: "すべて", abacusInfoTitle: "そろばんについて", abacusInfoDesc: "上の珠1つは5を、下の珠4つはそれぞれ1を表します。", abacusLearnRules: "ルールを学ぶ", abacusDifficulty: "難易度", abacusBeginner: "初心者", abacusIntermediate: "中級", abacusAdvanced: "上級", abacusOpsTitle: "操作", abacusAddSub: "加算と減算", abacusMult: "乗算", abacusDiv: "除算", speedInfoTitle: "スピード計算について", speedInfoDesc: "時間と競争してスピードと正確さをテストしましょう！", speedListItem1: "時間制限のある例", speedListItem2: "早い回答 = 高得点", speedListItem3: "正確さが重要！", speedExamplesTitle: "例の数", speedExamplesSubtitle: "7から25の例を選択", speedTimeTitle: "制限時間", speedTimeSubtitle: "0.5〜2秒から選択", speedOpsTitle: "操作", speedOpsSubtitle: "操作タイプを選択", speedKopaytirish: "乗算", speedBolish: "除算", speedAralash: "混合", speedAllOps: "すべての操作", speedSecLabel: "秒" , battleTabTitle: "バトル", battleYou: "あなた", battleOpponent: "対戦相手", battleRating: "評価", battleLevel: "レベル" , bmOddiy: "シンプルなバトル", bmOddiyDesc: "同等の相手と高速計算", bmReyting: "レーティングバトル", bmReytingDesc: "ポイントのための強い相手と", bmTurnir: "トーナメントバトル", bmTurnirDesc: "トーナメントに参加して賞品を獲得", bmDost: "友達とバトル", bmDostDesc: "友達を招待して競う" , bmDailyMission: "デイリーミッション", bmDailyMissionDesc: "3回のバトルに参加する", bmDailyBonus: "デイリーボーナス" , bestResults: "最高の結果", bestVictories: "勝利", bestStreak: "連勝", bestTime: "最速タイム" , quickOpponent: "クイック対戦相手", refresh: "更新" , startBattle: "バトル開始", startBattleSubtext: "対戦相手を選んで勝利を掴もう！" , rankingTitle: "ランキング", rankingSubtitle: "最強の数学者たち", platinumTarget: "Platinum V まで", xpRemaining: "XP 残り" },
-  ko: { title: "수학 마스터", subtitle: "레벨 24", desc: "수학 학습에 좋습니다. 이것으로 세상을 정복하세요!", clothes: "옷", accessories: "액세서리", levelText: "레벨", toNextLevel: "다음 레벨까지", startExercise: "연습 시작", stats: "통계", seeAll: "모두 보기 >", logic: "논리", logicDesc: "훌륭해요!", speed: "속도", speedDesc: "좋음", accuracy: "정확도", accuracyDesc: "매우 우수함!", streak: "연속", streakDesc: "일", navHome: "홈", navExercise: "운동", navInventory: "인벤토리", navRanking: "순위", navProfile: "프로필", missions: "임무", exerciseSubtitle: "자신에게 맞는 운동 유형을 선택하고 계속 학습하세요!", infoTitle: "간단한 계산에 대하여", infoDesc: "간단한 계산 연습은 산술 연산을 빠르고 정확하게 수행하는 능력을 기릅니다.", infoOpsLabel: "연산:", infoOps: ["덧셈", "뺄셈", "곱셈", "나눗셈"], infoExampleLabel: "예:", examplesCountTitle: "예제 수", examplesCountSubtitle: "7에서 25개의 예제를 선택하세요", exampleWord: "예제", opsTitle: "연산", opsSubtitle: "연산 유형을 선택하세요", opsOddiy: "단순", opsOddiyDesc: "덧셈, 뺄셈, 곱셈, 나눗셈", opsF5: "공식 5", opsF5Desc: "5까지의 공식", opsF10: "공식 10", opsF10Desc: "10까지의 공식", opsAralash: "혼합", opsAralashDesc: "모든 연산 혼합", speedSelectTitle: "속도", speedSelectSubtitle: "운동 속도를 선택하세요", secondWord: "초", characters: "캐릭터", all: "모두", abacusInfoTitle: "주판에 대하여", abacusInfoDesc: "위쪽 알 1개는 5를 의미하고 아래쪽 알 4개는 각각 1을 의미합니다.", abacusLearnRules: "규칙 배우기", abacusDifficulty: "난이도", abacusBeginner: "초급", abacusIntermediate: "중급", abacusAdvanced: "고급", abacusOpsTitle: "연산", abacusAddSub: "덧셈과 뺄셈", abacusMult: "곱셈", abacusDiv: "나눗셈", speedInfoTitle: "스피드 계산에 대하여", speedInfoDesc: "시간에 맞서 계산하여 속도와 정확성을 테스트하세요!", speedListItem1: "시간 제한 예제", speedListItem2: "빠른 답변 = 더 많은 점수", speedListItem3: "정확성이 중요합니다!", speedExamplesTitle: "예제 수", speedExamplesSubtitle: "7에서 25개 예제 선택", speedTimeTitle: "시간 제한", speedTimeSubtitle: "0.5초에서 2초 사이 선택", speedOpsTitle: "연산", speedOpsSubtitle: "연산 유형 선택", speedKopaytirish: "곱셈", speedBolish: "나눗셈", speedAralash: "혼합", speedAllOps: "모든 연산", speedSecLabel: "초" , battleTabTitle: "전투", battleYou: "당신", battleOpponent: "상대", battleRating: "평가", battleLevel: "레벨" , bmOddiy: "단순한 전투", bmOddiyDesc: "동등한 상대와 빠른 계산", bmReyting: "등급 전투", bmReytingDesc: "점수를 위한 강력한 상대와 함께", bmTurnir: "토너먼트 전투", bmTurnirDesc: "토너먼트에 참가하고 상품을 받으세요", bmDost: "친구와 전투", bmDostDesc: "친구를 초대하고 경쟁하세요" , bmDailyMission: "일일 미션", bmDailyMissionDesc: "3번의 전투에 참여하세요", bmDailyBonus: "일일 보너스" , bestResults: "최고의 결과", bestVictories: "승리", bestStreak: "연승", bestTime: "가장 빠른 시간" , quickOpponent: "빠른 상대", refresh: "새로고침" , startBattle: "배틀 시작", startBattleSubtext: "상대를 선택하고 승리하세요!" , rankingTitle: "랭킹", rankingSubtitle: "최강의 수학자들", platinumTarget: "Platinum V 까지", xpRemaining: "XP 남음" },
+  ja: { title: "数学マスター", subtitle: "レベル 24", desc: "数学の学習に最適です。これで世界を征服しましょう！", clothes: "服", accessories: "アクセサリー", levelText: "レベル", toNextLevel: "次のレベルまで", startExercise: "練習を始める", stats: "統計", seeAll: "すべて >", logic: "論理", logicDesc: "素晴らしい！", speed: "スピード", speedDesc: "良い", accuracy: "正確さ", accuracyDesc: "優秀！", streak: "連続", streakDesc: "日", navHome: "ホーム", navExercise: "練習", navInventory: "在庫", navRanking: "ランキング", navProfile: "プロフィール", missions: "ミッション", exerciseSubtitle: "自分に合ったエクササイズタイプを選んで、学習を続けましょう！", infoTitle: "簡単な計算について", infoDesc: "簡単な計算の練習は、算術演算を素早く正確に実行するスキルを養います。", infoOpsLabel: "演算:", infoOps: ["加算", "減算", "乗算", "除算"], infoExampleLabel: "例:", examplesCountTitle: "例の数", examplesCountSubtitle: "7から25の例を選択してください", exampleWord: "例", opsTitle: "操作", opsSubtitle: "操作タイプを選択してください", opsOddiy: "シンプル", opsOddiyDesc: "加算、減算、乗算、除算", opsF5: "式5", opsF5Desc: "5までの式", opsF10: "式10", opsF10Desc: "10までの式", opsAralash: "混合", opsAralashDesc: "すべての操作が混在", speedSelectTitle: "スピード", speedSelectSubtitle: "練習の速度を選択してください", secondWord: "秒", characters: "キャラクター", all: "すべて", abacusInfoTitle: "そろばんについて", abacusInfoDesc: "上の珠1つは5を、下の珠4つはそれぞれ1を表します。", abacusLearnRules: "ルールを学ぶ", abacusDifficulty: "難易度", abacusBeginner: "初心者", abacusIntermediate: "中級", abacusAdvanced: "上級", abacusOpsTitle: "操作", abacusAddSub: "加算と減算", abacusMult: "乗算", abacusDiv: "除算", speedInfoTitle: "スピード計算について", speedInfoDesc: "時間と競争してスピードと正確さをテストしましょう！", speedListItem1: "時間制限のある例", speedListItem2: "早い回答 = 高得点", speedListItem3: "正確さが重要！", speedExamplesTitle: "例の数", speedExamplesSubtitle: "7から25の例を選択", speedTimeTitle: "制限時間", speedTimeSubtitle: "0.5〜2秒から選択", speedOpsTitle: "操作", speedOpsSubtitle: "操作タイプを選択", speedKopaytirish: "乗算", speedBolish: "除算", speedAralash: "混合", speedAllOps: "すべての操作", speedSecLabel: "秒" , battleTabTitle: "バトル", battleYou: "あなた", battleOpponent: "対戦相手", battleRating: "評価", battleLevel: "レベル" , bmOddiy: "シンプルなバトル", bmOddiyDesc: "同等の相手と高速計算", bmReyting: "レーティングバトル", bmReytingDesc: "ポイントのための強い相手と", bmTurnir: "トーナメントバトル", bmTurnirDesc: "トーナメントに参加して賞品を獲得", bmDost: "友達とバトル", bmDostDesc: "友達を招待して競う" , bmDailyMission: "デイリーミッション", bmDailyMissionDesc: "3回のバトルに参加する", bmDailyBonus: "デイリーボーナス" , bestResults: "最高の結果", bestVictories: "勝利", bestStreak: "連勝", bestTime: "最速タイム" , quickOpponent: "クイック対戦相手", refresh: "更新" , startBattle: "バトル開始", startBattleSubtext: "対戦相手を選んで勝利を掴もう！" , rankingTitle: "ランキング", rankingSubtitle: "最強の数学者たち", platinumTarget: "Platinum V まで", xpRemaining: "XP 残り", searchPlaceholder: "ユーザーを検索...", statRating: "評価", statSpeed: "スピード", statAccuracy: "正確さ", statStreak: "連続", statExercises: "練習", statAchievements: "実績", statXP: "XP", statCoin: "コイン", achievementsTitle: "実績", achv14Days: "14日連続", achvTop10: "トップ10", achvGold3: "ゴールド III", achvGeneric: "実績", activityTitle: "活動履歴", activitySeeAll: "すべて見る >", actSimple: "簡単な計算", actBattle: "バトル", actFast: "速算", actAbacus: "そろばん", actToday: "今日", actYesterday: "昨日", actWin: "勝利", collectionTitle: "マイコレクション", collAvatars: "アバター", collFrames: "フレーム", collBgs: "背景", collChars: "キャラクター", collBtn: "在庫へ行く >" },
+  ko: { title: "수학 마스터", subtitle: "레벨 24", desc: "수학 학습에 좋습니다. 이것으로 세상을 정복하세요!", clothes: "옷", accessories: "액세서리", levelText: "레벨", toNextLevel: "다음 레벨까지", startExercise: "연습 시작", stats: "통계", seeAll: "모두 보기 >", logic: "논리", logicDesc: "훌륭해요!", speed: "속도", speedDesc: "좋음", accuracy: "정확도", accuracyDesc: "매우 우수함!", streak: "연속", streakDesc: "일", navHome: "홈", navExercise: "운동", navInventory: "인벤토리", navRanking: "순위", navProfile: "프로필", missions: "임무", exerciseSubtitle: "자신에게 맞는 운동 유형을 선택하고 계속 학습하세요!", infoTitle: "간단한 계산에 대하여", infoDesc: "간단한 계산 연습은 산술 연산을 빠르고 정확하게 수행하는 능력을 기릅니다.", infoOpsLabel: "연산:", infoOps: ["덧셈", "뺄셈", "곱셈", "나눗셈"], infoExampleLabel: "예:", examplesCountTitle: "예제 수", examplesCountSubtitle: "7에서 25개의 예제를 선택하세요", exampleWord: "예제", opsTitle: "연산", opsSubtitle: "연산 유형을 선택하세요", opsOddiy: "단순", opsOddiyDesc: "덧셈, 뺄셈, 곱셈, 나눗셈", opsF5: "공식 5", opsF5Desc: "5까지의 공식", opsF10: "공식 10", opsF10Desc: "10까지의 공식", opsAralash: "혼합", opsAralashDesc: "모든 연산 혼합", speedSelectTitle: "속도", speedSelectSubtitle: "운동 속도를 선택하세요", secondWord: "초", characters: "캐릭터", all: "모두", abacusInfoTitle: "주판에 대하여", abacusInfoDesc: "위쪽 알 1개는 5를 의미하고 아래쪽 알 4개는 각각 1을 의미합니다.", abacusLearnRules: "규칙 배우기", abacusDifficulty: "난이도", abacusBeginner: "초급", abacusIntermediate: "중급", abacusAdvanced: "고급", abacusOpsTitle: "연산", abacusAddSub: "덧셈과 뺄셈", abacusMult: "곱셈", abacusDiv: "나눗셈", speedInfoTitle: "스피드 계산에 대하여", speedInfoDesc: "시간에 맞서 계산하여 속도와 정확성을 테스트하세요!", speedListItem1: "시간 제한 예제", speedListItem2: "빠른 답변 = 더 많은 점수", speedListItem3: "정확성이 중요합니다!", speedExamplesTitle: "예제 수", speedExamplesSubtitle: "7에서 25개 예제 선택", speedTimeTitle: "시간 제한", speedTimeSubtitle: "0.5초에서 2초 사이 선택", speedOpsTitle: "연산", speedOpsSubtitle: "연산 유형 선택", speedKopaytirish: "곱셈", speedBolish: "나눗셈", speedAralash: "혼합", speedAllOps: "모든 연산", speedSecLabel: "초" , battleTabTitle: "전투", battleYou: "당신", battleOpponent: "상대", battleRating: "평가", battleLevel: "레벨" , bmOddiy: "단순한 전투", bmOddiyDesc: "동등한 상대와 빠른 계산", bmReyting: "등급 전투", bmReytingDesc: "점수를 위한 강력한 상대와 함께", bmTurnir: "토너먼트 전투", bmTurnirDesc: "토너먼트에 참가하고 상품을 받으세요", bmDost: "친구와 전투", bmDostDesc: "친구를 초대하고 경쟁하세요" , bmDailyMission: "일일 미션", bmDailyMissionDesc: "3번의 전투에 참여하세요", bmDailyBonus: "일일 보너스" , bestResults: "최고의 결과", bestVictories: "승리", bestStreak: "연승", bestTime: "가장 빠른 시간" , quickOpponent: "빠른 상대", refresh: "새로고침" , startBattle: "배틀 시작", startBattleSubtext: "상대를 선택하고 승리하세요!" , rankingTitle: "랭킹", rankingSubtitle: "최강의 수학자들", platinumTarget: "Platinum V 까지", xpRemaining: "XP 남음", searchPlaceholder: "사용자 검색...", statRating: "평가", statSpeed: "속도", statAccuracy: "정확도", statStreak: "연속", statExercises: "연습", statAchievements: "업적", statXP: "XP", statCoin: "코인", achievementsTitle: "업적", achv14Days: "14일 연속", achvTop10: "상위 10", achvGold3: "골드 III", achvGeneric: "업적", activityTitle: "활동 기록", activitySeeAll: "모두 보기 >", actSimple: "간단한 계산", actBattle: "전투", actFast: "빠른 계산", actAbacus: "주판", actToday: "오늘", actYesterday: "어제", actWin: "승리", collectionTitle: "내 컬렉션", collAvatars: "아바타", collFrames: "프레임", collBgs: "배경", collChars: "캐릭터", collBtn: "인벤토리로 가기 >" },
 };
 
 
@@ -119,6 +119,28 @@ export default function StudentDashboardScreen({ navigation, route }) {
     ? [selectedAvatarObj, ...baseAvatarsList.filter(a => a.id !== activeAvatarIndex)]
     : baseAvatarsList;
 
+  const [leaderboardSearch, setLeaderboardSearch] = useState('');
+  const [highlightedUserId, setHighlightedUserId] = useState(null);
+  const leaderboardScrollRef = useRef(null);
+  const searchBorderAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(searchBorderAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(searchBorderAnim, {
+          toValue: 0,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, [searchBorderAnim]);
+
   const leaderboardData = [
     { id: 1, name: 'IQROMAX', xp: '1248', avatar: selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png') },
     { id: 2, name: 'MathKing', xp: '1150', avatar: require('../assets/avatar_david.jpg') },
@@ -130,10 +152,42 @@ export default function StudentDashboardScreen({ navigation, route }) {
     { id: 8, name: 'SpeedMath', xp: '945', avatar: require('../assets/avatar_emma.jpg') },
   ];
 
+  const filteredLeaderboard = leaderboardData.filter(item => {
+    const q = leaderboardSearch.trim().toLowerCase();
+    if (!q) return true;
+    const nameMatch = item.name.toLowerCase().includes(q);
+    const xpMatch = item.xp.toString().includes(q);
+    return nameMatch || xpMatch;
+  });
+
   const t = DASHBOARD_TRANSLATIONS[language] || DASHBOARD_TRANSLATIONS['en'];
   const ext = EXERCISE_TYPES_TRANSLATIONS[language] || EXERCISE_TYPES_TRANSLATIONS['en'];
   const coinText = COIN_TRANSLATIONS[language] || COIN_TRANSLATIONS['en'];
   const [activeTab, setActiveTab] = useState('home');
+
+  const yutuqScrollRef = useRef(null);
+  const [currentYutuqIndex, setCurrentYutuqIndex] = useState(0);
+
+  useEffect(() => {
+    let interval;
+    if (activeTab === 'profile') {
+      interval = setInterval(() => {
+        setCurrentYutuqIndex((prev) => {
+          const nextIndex = (prev + 1) % 12;
+          if (yutuqScrollRef.current) {
+            yutuqScrollRef.current.scrollTo({
+              x: nextIndex * 110, // card width (100) + marginRight (10)
+              animated: true,
+            });
+          }
+          return nextIndex;
+        });
+      }, 2500);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState('calc');
   const [isExamplesPickerOpen, setIsExamplesPickerOpen] = useState(false);
   const [selectedExamples, setSelectedExamples] = useState(15);
@@ -171,10 +225,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const formatSpeed = (s) => {
-    const mins = Math.floor(s / 60);
-    const secs = Math.floor(s % 60);
-    const ms = Math.round((s % 1) * 1000);
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')} ( ${s} ${t.secondWord || 'sekund'} )`;
+    return `${s} ${t.secondWord || 'soniya'}`;
   };
 
   const pulseAnim = useRef(new Animated.Value(0)).current;
@@ -257,7 +308,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {/* Stats Row: Coin and XP */}
         <View style={styles.statsRow}>
           {/* Coin Card */}
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { marginRight: 10 }]}>
             <View style={styles.statContent}>
               <Image source={require('../assets/coin.jpg')} style={styles.statImage} />
               <View>
@@ -749,7 +800,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {activeExerciseType === 'calc' && (
           <>
         {/* INFO CARD SECTION */}
-        <View style={[styles.infoCardContainer, { marginTop: 0, marginBottom: 15 }]}>
+        <View style={[styles.infoCardContainer, { marginTop: 20, marginBottom: 15 }]}>
           <ImageBackground source={require('../assets/info_card_bg.png')} style={styles.infoCardBg} imageStyle={{ borderRadius: 16 }} resizeMode="contain">
             <View style={styles.infoCardContent}>
               <View style={styles.infoTextContainer}>
@@ -948,7 +999,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   onPress={() => setIsSpeedPickerOpen(true)}
                 >
                   <Text style={styles.examplesSelectorValueText}>
-                    {formatSpeed(selectedSpeed)} <Text style={styles.examplesSelectorLabelText}>( {selectedSpeed} {t.secondWord || 'sekund'} )</Text>
+                    {formatSpeed(selectedSpeed)}
                   </Text>
                   <MaterialCommunityIcons name="chevron-down" size={24} color="#A855F7" />
                 </TouchableOpacity>
@@ -980,7 +1031,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           }}
                         >
                           <Text style={[styles.examplesPickerItemText, isSelected && styles.examplesPickerItemTextSelected]}>
-                            {formatSpeed(s)} {isSelected && <Text style={styles.examplesPickerItemLabel}>( {s} {t.secondWord || 'sekund'} )</Text>}
+                            {formatSpeed(s)}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -1558,7 +1609,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* RANKING TAB CONTENT */}
         <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 0 }} showsVerticalScrollIndicator={false}>
 {/* Top Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
               <TouchableOpacity style={styles.rankingBackBtn} onPress={() => setActiveTab('home')}>
@@ -1678,20 +1729,443 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </View>
 
-            {/* Leaderboard Table */}
+          </ScrollView>
+
+          {/* Sticky Search Bar */}
+          <View style={styles.leaderboardSearchContainer}>
+            <Animated.View style={[styles.leaderboardSearchBox, { 
+              flex: 1,
+              marginRight: 12,
+              borderColor: searchBorderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['rgba(192, 132, 252, 0.25)', 'rgba(192, 132, 252, 0.9)']
+              }),
+              shadowColor: '#C084FC',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: searchBorderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0.6]
+              }),
+              shadowRadius: 10,
+              elevation: searchBorderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 6]
+              })
+            }]}>
+              <Text style={styles.leaderboardSearchIcon}>🔍</Text>
+              <TextInput
+                style={styles.leaderboardSearchInput}
+                placeholder={t.searchPlaceholder}
+                placeholderTextColor="rgba(255,255,255,0.35)"
+                value={leaderboardSearch}
+                onChangeText={setLeaderboardSearch}
+                keyboardType="default"
+                returnKeyType="search"
+              />
+              {leaderboardSearch.length > 0 && (
+                <TouchableOpacity onPress={() => setLeaderboardSearch('')} style={styles.leaderboardSearchClear}>
+                  <Text style={styles.leaderboardSearchClearText}>✕</Text>
+                </TouchableOpacity>
+              )}
+            </Animated.View>
+
+            {/* My Profile Button */}
+            <TouchableOpacity 
+              style={styles.floatingMyProfileBtn}
+              onPress={() => {
+                setHighlightedUserId(7); // User ID 7
+                leaderboardScrollRef.current?.scrollTo({y: 350, animated: true});
+                setTimeout(() => setHighlightedUserId(null), 3000); // Remove highlight after 3 seconds
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.floatingMyProfileInner}>
+                <Feather name="user" size={24} color="#C084FC" />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Leaderboard Table - scrollable separately */}
+          <ScrollView ref={leaderboardScrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
             <View style={styles.leaderboardContainer}>
-              {leaderboardData.map((item, index) => (
-                <View key={item.id} style={[styles.leaderboardRow, index !== leaderboardData.length - 1 && styles.leaderboardRowBorder]}>
-                  <Text style={styles.leaderboardRank}>{item.id}</Text>
-                  <Image source={item.avatar} style={styles.leaderboardAvatar} />
-                  <Text style={styles.leaderboardName}>{item.name}</Text>
-                  <Text style={styles.leaderboardXp}>{item.xp} XP</Text>
+              {filteredLeaderboard.length > 0 ? (
+                filteredLeaderboard.map((item, index) => (
+                  <Animated.View key={item.id} style={[
+                    styles.leaderboardRow, 
+                    (index !== filteredLeaderboard.length - 1 && item.id !== highlightedUserId) && styles.leaderboardRowBorder,
+                    item.id === highlightedUserId && {
+                      backgroundColor: searchBorderAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['rgba(192, 132, 252, 0.05)', 'rgba(192, 132, 252, 0.2)']
+                      }),
+                      borderColor: searchBorderAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['rgba(192, 132, 252, 0.3)', 'rgba(192, 132, 252, 1)']
+                      }),
+                      borderWidth: 1.5,
+                      borderBottomWidth: 1.5, // Explicitly override bottom width
+                      borderRadius: 12,
+                      zIndex: 10,
+                      elevation: 10,
+                    }
+                  ]}>
+                    <Text style={styles.leaderboardRank}>{item.id}</Text>
+                    <Image source={item.avatar} style={styles.leaderboardAvatar} />
+                    <Text style={styles.leaderboardName}>{item.name}</Text>
+                    <Text style={styles.leaderboardXp}>{item.xp} XP</Text>
+                  </Animated.View>
+                ))
+              ) : (
+                <View style={styles.leaderboardNoResult}>
+                  <Text style={styles.leaderboardNoResultText}>Hech narsa topilmadi</Text>
                 </View>
-              ))}
+              )}
+            </View>
+          </ScrollView>
+
+        </View>
+
+        {/* PROFILE TAB CONTENT */}
+        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight - 5 : 30 }}>
+          <View style={styles.profileHeader}>
+            <View style={styles.profileHeaderRight}>
+              <View style={[styles.profileStatBoxXp, { flex: 1 }]}>
+                <Image source={require('../assets/xp_icon.jpg')} style={styles.profileStatIconLeft} />
+                <View style={styles.profileStatTextWrapper}>
+                  <Text style={styles.profileStatValueTop}>128 560</Text>
+                </View>
+              </View>
+              <View style={[styles.profileStatBox, { flex: 1 }]}>
+                <Image source={require('../assets/lightning_energy.png')} style={styles.profileStatIconEnergy} />
+                <Text style={styles.profileStatValueMid}>2/10</Text>
+                <TouchableOpacity style={styles.profileStatPlusBtn}>
+                  <Text style={styles.profileStatPlusText}>+</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={[styles.profileStatBox, { flex: 1, marginRight: 0 }]}>
+                <Image source={require('../assets/s_coin.png')} style={styles.profileStatIconCoin} />
+                <Text style={styles.profileStatValueMid}>12 450</Text>
+                <TouchableOpacity style={styles.profileStatPlusBtn}>
+                  <Text style={styles.profileStatPlusText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          {/* Main Card Section */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 16 }}>
+              {/* Card 1: Info Card */}
+              <View style={[styles.profileInfoCardContainer, { flex: 1.5, marginRight: 10 }]}>
+                <ImageBackground 
+                  source={require('../assets/space_bg.jpg')} 
+                  style={styles.profileInfoCardBg}
+                  imageStyle={styles.profileInfoCardBgImage}
+                >
+                  <View style={styles.profileInfoCardContent}>
+                    {/* Left: Avatar & Frame */}
+                    <View style={styles.profileAvatarContainer}>
+                      <Image source={require('../assets/avatar_maks.png')} style={styles.profileBigAvatar} />
+                      <Image source={require('../assets/gold_frame.png')} style={styles.profileGoldFrame} />
+                    </View>
+
+                    {/* Right: Info */}
+                    <View style={styles.profileDetailsContainer}>
+                      <Text style={styles.profileMainName} numberOfLines={1}>IQROMAX</Text>
+                      
+                      <View style={styles.profileDetailRow}>
+                        <Text style={styles.profileDetailIcon}>🇺🇿</Text>
+                        <Text style={styles.profileDetailText} numberOfLines={1}>Uzbekistan</Text>
+                      </View>
+
+                      <View style={styles.profileDetailRow}>
+                        <Image source={require('../assets/gold_star.png')} style={styles.profileStarIconSm} />
+                        <Text style={styles.profileDetailTextGold} numberOfLines={1}>GOLD III</Text>
+                      </View>
+
+                      <View style={styles.profileDetailRow}>
+                        <Text style={styles.profileDetailIcon}>🏆</Text>
+                        <Text style={styles.profileDetailText} numberOfLines={1}>#1 Reyting</Text>
+                      </View>
+                    </View>
+                  </View>
+                </ImageBackground>
+              </View>
+
+              {/* Card 2: Progress Card */}
+              <View style={[styles.profileProgressCard, { flex: 1 }]}>
+                <View style={styles.profileProgressHeaderRow}>
+                  <Image source={require('../assets/gold_star.png')} style={styles.profileStarIconMd} />
+                  <Text style={styles.profileProgressTitle} numberOfLines={1}>GOLD III</Text>
+                </View>
+
+                <View style={styles.profileProgressBarContainer}>
+                  <View style={styles.profileProgressBarTrack}>
+                    <View style={[styles.profileProgressBarFill, { width: '78%' }]} />
+                  </View>
+                  <Text style={styles.profileProgressPercent}>78%</Text>
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.profileProgressSubtitle} numberOfLines={1}>Platinum V gacha</Text>
+                  <Text style={styles.profileProgressXpLeft} numberOfLines={1}><Text style={styles.profileProgressXpHighlight}>352 XP</Text> qoldi</Text>
+                </View>
+
+                <TouchableOpacity style={styles.profileBatafsilBtn}>
+                  <Text style={styles.profileBatafsilText}>BATAFSIL</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={16} color="#F59E0B" style={styles.profileBatafsilIcon} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+            {/* STATISTIKA SECTION */}
+            <View style={styles.statSectionContainer}>
+              <View style={styles.statSectionHeader}>
+                <Image source={require('../assets/stat_icon_1.png')} style={styles.statSectionTitleIcon} />
+                <Text style={styles.statSectionTitle}>{t.stats}</Text>
+              </View>
+
+              <View style={styles.statGridContainer}>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_2.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>1248</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statRating}</Text>
+                </View>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_3.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>0.8s</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statSpeed}</Text>
+                </View>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_4.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>95%</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statAccuracy}</Text>
+                </View>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_5.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>14</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statStreak}</Text>
+                </View>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_6.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>256</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statExercises}</Text>
+                </View>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_7.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>18</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statAchievements}</Text>
+                </View>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_8.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>128560</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statXP}</Text>
+                </View>
+                <View style={styles.gridStatCard}>
+                  <Image source={require('../assets/stat_icon_9.png')} style={styles.gridStatCardIcon} />
+                  <Text style={styles.gridStatCardValue}>12450</Text>
+                  <Text style={styles.gridStatCardLabel}>{t.statCoin}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* YUTUQLAR SECTION */}
+            <View style={styles.yutuqSectionContainer}>
+              <View style={styles.yutuqHeaderRow}>
+                <View style={styles.yutuqHeaderLeft}>
+                  <Text style={styles.yutuqCrownIcon}>👑</Text>
+                  <Text style={styles.yutuqSectionTitle}>{t.achievementsTitle}</Text>
+                </View>
+                
+                <View style={styles.yutuqPaginationDots}>
+                  {[0, 1, 2, 3, 4].map((dotIndex) => (
+                    <View 
+                      key={dotIndex} 
+                      style={[
+                        styles.yutuqDot, 
+                        (currentYutuqIndex % 5) === dotIndex && styles.yutuqDotActive
+                      ]} 
+                    />
+                  ))}
+                </View>
+
+                <TouchableOpacity style={styles.yutuqViewAllBtn}>
+                  <Text style={styles.yutuqViewAllText}>{t.seeAll}</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={16} color="#c084fc" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView 
+                ref={yutuqScrollRef}
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={styles.yutuqCarouselContainer}
+              >
+                {/* 12 Achievement Cards */}
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_1.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 1</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_2.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 2</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_3.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achv14Days}</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_4.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvTop10}</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_5.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGold3}</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_6.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 6</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_7.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 7</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_8.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 8</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_9.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 9</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_10.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 10</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_11.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 11</Text>
+                </View>
+                <View style={styles.yutuqCard}>
+                  <Image source={require('../assets/yutuq_12.png')} style={styles.yutuqCardIcon} />
+                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 12</Text>
+                </View>
+              </ScrollView>
+            </View>
+
+            {/* FAOLIYAT VA KOLLEKSIYA */}
+            <View style={styles.activityCollectionRow}>
+              {/* FAOLIYAT TARIXI CARD */}
+              <View style={styles.activityCard}>
+                <View style={styles.activityHeader}>
+                  <View style={styles.activityHeaderLeft}>
+                    <Image source={require('../assets/yangi_1.png')} style={styles.activityHeaderIcon} />
+                    <Text style={styles.activityHeaderTitle}>{t.activityTitle}</Text>
+                  </View>
+                  <TouchableOpacity>
+                    <Text style={styles.activityHeaderLink}>{t.activitySeeAll}</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.activityList}>
+                  <View style={styles.activityItem}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_2.png')} style={styles.activityItemIcon} />
+                      <View>
+                        <Text style={styles.activityItemTitle}>{t.actSimple}</Text>
+                        <Text style={styles.activityItemSub}>{t.actToday}, 12:30</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.activityItemValueGreen}>95%</Text>
+                  </View>
+
+                  <View style={styles.activityItem}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_3.png')} style={styles.activityItemIcon} />
+                      <View>
+                        <Text style={styles.activityItemTitle}>{t.actBattle}</Text>
+                        <Text style={styles.activityItemSub}>{t.actToday}, 11:45</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.activityItemValueGreen}>{t.actWin}</Text>
+                  </View>
+
+                  <View style={styles.activityItem}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_4.png')} style={styles.activityItemIcon} />
+                      <View>
+                        <Text style={styles.activityItemTitle}>{t.actFast}</Text>
+                        <Text style={styles.activityItemSub}>{t.actToday}, 10:15</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.activityItemValueGreen}>92%</Text>
+                  </View>
+
+                  <View style={[styles.activityItem, { borderBottomWidth: 0, paddingBottom: 0, marginBottom: 0 }]}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_5.png')} style={styles.activityItemIcon} />
+                      <View>
+                        <Text style={styles.activityItemTitle}>{t.actAbacus}</Text>
+                        <Text style={styles.activityItemSub}>{t.actYesterday}, 21:20</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.activityItemValueGreen}>88%</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* MENING KOLLEKSIYAM CARD */}
+              <View style={styles.collectionCard}>
+                <View style={styles.activityHeader}>
+                  <View style={styles.activityHeaderLeft}>
+                    <Image source={require('../assets/yangi_6.png')} style={styles.activityHeaderIcon} />
+                    <Text style={styles.activityHeaderTitle}>{t.collectionTitle}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.collectionList}>
+                  <View style={styles.collectionItem}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_7.png')} style={styles.collectionItemIcon} />
+                      <Text style={styles.activityItemTitle}>{t.collAvatars}</Text>
+                    </View>
+                    <Text style={styles.collectionItemValue}>18</Text>
+                  </View>
+
+                  <View style={styles.collectionItem}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_8.png')} style={styles.collectionItemIcon} />
+                      <Text style={styles.activityItemTitle}>{t.collFrames}</Text>
+                    </View>
+                    <Text style={styles.collectionItemValue}>12</Text>
+                  </View>
+
+                  <View style={styles.collectionItem}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_9.png')} style={styles.collectionItemIcon} />
+                      <Text style={styles.activityItemTitle}>{t.collBgs}</Text>
+                    </View>
+                    <Text style={styles.collectionItemValue}>8</Text>
+                  </View>
+
+                  <View style={styles.collectionItem}>
+                    <View style={styles.activityItemLeft}>
+                      <Image source={require('../assets/yangi_10.png')} style={styles.collectionItemIcon} />
+                      <Text style={styles.activityItemTitle}>{t.collChars}</Text>
+                    </View>
+                    <Text style={styles.collectionItemValue}>3</Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity style={styles.inventoryBtn}>
+                  <Text style={styles.inventoryBtnText}>{t.collBtn}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
           </ScrollView>
         </View>
+
 
         {/* Stats Row 2 */}
         <View style={styles.navBarContainer}>
@@ -3050,6 +3524,39 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Inter_700Bold',
   },
+  leaderboardContainer: {
+    marginTop: 12,
+    width: '100%',
+    backgroundColor: '#080B13',
+    borderRadius: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.15)',
+  },
+  floatingMyProfileBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#05050C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(192, 132, 252, 0.4)',
+    shadowColor: '#C084FC',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  floatingMyProfileInner: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: '#C084FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   battleReytingText: {
     color: '#9CA3AF',
     fontSize: 8,
@@ -3520,8 +4027,55 @@ const styles = StyleSheet.create({
   },
 
   // LEADERBOARD STYLES
+  leaderboardSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    paddingTop: 12,
+    marginTop: -320,
+    backgroundColor: '#05050C',
+    width: '100%',
+  },
+  leaderboardSearchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0F1320',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.25)',
+  },
+  leaderboardSearchIcon: {
+    fontSize: 16,
+    marginRight: 8,
+  },
+  leaderboardSearchInput: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+    padding: 0,
+  },
+  leaderboardSearchClear: {
+    padding: 4,
+  },
+  leaderboardSearchClearText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+  },
+  leaderboardNoResult: {
+    paddingVertical: 30,
+    alignItems: 'center',
+  },
+  leaderboardNoResultText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+    fontFamily: 'Inter_400Regular',
+  },
   leaderboardContainer: {
-    marginTop: 40,
+    marginTop: 12,
     width: '100%',
     backgroundColor: '#080B13',
     borderRadius: 16,
@@ -3562,5 +4116,525 @@ const styles = StyleSheet.create({
     color: '#C084FC',
     fontSize: 14,
     fontFamily: 'Inter_600SemiBold',
+  },
+  
+  // PROFILE STYLES
+  profileHeader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profileHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  profileStatBoxXp: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.4)',
+    borderRadius: 8,
+    paddingHorizontal: 4,
+    marginRight: 6,
+    height: 32,
+  },
+  profileStatBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    marginRight: 6,
+    height: 32,
+  },
+  profileStatIconLeft: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
+    marginLeft: -10,
+    marginRight: 6,
+    borderRadius: 6,
+  },
+  profileStatIconEnergy: {
+    width: 24,
+    height: 28,
+    resizeMode: 'contain',
+    marginRight: 6,
+    marginLeft: 2,
+  },
+  profileStatIconCoin: {
+    width: 28,
+    height: 28,
+    resizeMode: 'contain',
+    marginRight: 6,
+  },
+  profileStatTextWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileStatValueTop: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+    marginRight: 4,
+  },
+  profileStatValueBot: {
+    color: '#E5E7EB',
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    marginTop: 0,
+  },
+  profileStatValueMid: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  profileStatPlusBtn: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    backgroundColor: '#3D250E',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileStatPlusText: {
+    color: '#F59E0B',
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    marginTop: -2,
+  },
+  
+  // PROFILE CARDS
+  profileInfoCardContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#6b21a8',
+    marginBottom: 16,
+  },
+  profileInfoCardBg: {
+    flex: 1,
+    padding: 10,
+    paddingLeft: 12,
+  },
+  profileInfoCardBgImage: {
+    opacity: 0.8,
+  },
+  profileInfoCardContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  profileAvatarContainer: {
+    width: 95,
+    height: 95,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  profileBigAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    zIndex: 1,
+  },
+  profileGoldFrame: {
+    position: 'absolute',
+    width: 105,
+    height: 105,
+    resizeMode: 'contain',
+    zIndex: 2,
+  },
+  profileDetailsContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  profileMainName: {
+    color: '#FFF',
+    fontSize: 14,
+    fontFamily: 'Inter_800ExtraBold',
+    marginBottom: 6,
+    letterSpacing: 0.5,
+  },
+  profileDetailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  profileDetailIcon: {
+    fontSize: 10,
+    marginRight: 4,
+  },
+  profileStarIconSm: {
+    width: 12,
+    height: 12,
+    resizeMode: 'contain',
+    marginRight: 4,
+  },
+  profileDetailText: {
+    color: '#E5E7EB',
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
+  },
+  profileDetailTextGold: {
+    color: '#FCD34D',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+  },
+
+  // PROFILE PROGRESS CARD
+  profileProgressCard: {
+    backgroundColor: '#0a0a0a',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#b45309',
+    padding: 10,
+    marginBottom: 16,
+  },
+  profileProgressHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  profileStarIconMd: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
+    marginRight: 6,
+  },
+  profileProgressTitle: {
+    color: '#FCD34D',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  profileProgressBarContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  profileProgressBarTrack: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#1f2937',
+    borderRadius: 4,
+    marginRight: 6,
+    overflow: 'hidden',
+  },
+  profileProgressBarFill: {
+    height: '100%',
+    backgroundColor: '#F59E0B',
+    borderRadius: 4,
+  },
+  profileProgressPercent: {
+    color: '#E5E7EB',
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    width: 24,
+  },
+  profileProgressSubtitle: {
+    color: '#D1D5DB',
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 2,
+  },
+  profileProgressXpLeft: {
+    color: '#D1D5DB',
+    fontSize: 10,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 10,
+  },
+  profileProgressXpHighlight: {
+    color: '#FCD34D',
+    fontFamily: 'Inter_700Bold',
+  },
+  profileBatafsilBtn: {
+    width: '100%',
+    height: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: 8,
+  },
+  profileBatafsilText: {
+    color: '#FCD34D',
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+    marginRight: 2,
+  },
+
+  // STATISTIKA SECTION
+  statSectionContainer: {
+    marginTop: 10,
+    marginBottom: 40,
+  },
+  statSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  statSectionTitleIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    marginRight: 8,
+  },
+  statSectionTitle: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
+  },
+  statGridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  gridStatCard: {
+    width: '23.5%',
+    backgroundColor: '#0a0a14',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#1f1f38',
+    paddingVertical: 8,
+    paddingHorizontal: 2,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  gridStatCardIcon: {
+    width: 26,
+    height: 26,
+    resizeMode: 'contain',
+    marginBottom: 6,
+  },
+  gridStatCardValue: {
+    color: '#FFF',
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 2,
+  },
+  gridStatCardLabel: {
+    color: '#9CA3AF',
+    fontSize: 8,
+    fontFamily: 'Inter_500Medium',
+  },
+
+  // YUTUQLAR SECTION
+  yutuqSectionContainer: {
+    marginBottom: 40,
+  },
+  yutuqHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  yutuqHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  yutuqCrownIcon: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  yutuqSectionTitle: {
+    color: '#FFF',
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 1,
+  },
+  yutuqPaginationDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  yutuqDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#374151',
+    marginHorizontal: 3,
+  },
+  yutuqDotActive: {
+    backgroundColor: '#a855f7',
+  },
+  yutuqViewAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  yutuqViewAllText: {
+    color: '#c084fc',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    marginRight: 2,
+  },
+  yutuqCarouselContainer: {
+    paddingRight: 20,
+  },
+  yutuqCard: {
+    width: 100,
+    height: 120,
+    backgroundColor: '#0a0a14',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#1f1f38',
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
+  yutuqCardIcon: {
+    width: 80,
+    height: 80,
+    resizeMode: 'contain',
+    marginBottom: 4,
+  },
+  yutuqCardLabel: {
+    color: '#E5E7EB',
+    fontSize: 11,
+    fontFamily: 'Inter_500Medium',
+    textAlign: 'center',
+  },
+
+  // ACTIVITY & COLLECTION SECTION
+  activityCollectionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 100, // padding at the bottom of the scroll view
+  },
+  activityCard: {
+    flex: 1.1,
+    backgroundColor: '#0a0a14',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#1f1f38',
+    padding: 8,
+    marginRight: 8,
+  },
+  collectionCard: {
+    flex: 0.9,
+    backgroundColor: '#0a0a14',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: '#1f1f38',
+    padding: 8,
+  },
+  activityHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  activityHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  activityHeaderIcon: {
+    width: 14,
+    height: 14,
+    resizeMode: 'contain',
+    marginRight: 4,
+  },
+  activityHeaderTitle: {
+    color: '#FFF',
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+  },
+  activityHeaderLink: {
+    color: '#c084fc',
+    fontSize: 8,
+    fontFamily: 'Inter_500Medium',
+    marginLeft: 4,
+  },
+  activityList: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  activityItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1f1f38',
+    paddingBottom: 8,
+    // removed marginBottom: 8 to let space-between handle spacing
+  },
+  activityItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  activityItemIcon: {
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
+    marginRight: 6,
+  },
+  activityItemTitle: {
+    color: '#E5E7EB',
+    fontSize: 9,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 1,
+  },
+  activityItemSub: {
+    color: '#9CA3AF',
+    fontSize: 7,
+    fontFamily: 'Inter_400Regular',
+  },
+  activityItemValueGreen: {
+    color: '#4ade80', // neon green
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+  },
+  collectionList: {
+    flex: 1,
+    marginBottom: 12,
+  },
+  collectionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#05050C',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#1f1f38',
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    marginBottom: 6,
+  },
+  collectionItemIcon: {
+    width: 18,
+    height: 18,
+    resizeMode: 'contain',
+    marginRight: 6,
+  },
+  collectionItemValue: {
+    color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+  },
+  inventoryBtn: {
+    backgroundColor: '#3b0764',
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inventoryBtnText: {
+    color: '#E5E7EB',
+    fontSize: 9,
+    fontFamily: 'Inter_700Bold',
+    letterSpacing: 0.5,
   },
 });

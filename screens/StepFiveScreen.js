@@ -248,10 +248,14 @@ export default function StepFiveScreen({ navigation, route }) {
 
           <View style={styles.canvasContainer}>
             {isFocused && (
-              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }}>
-                <ambientLight intensity={1.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1.5} />
-                <directionalLight position={[-10, 10, -5]} intensity={0.5} />
+              <Canvas 
+                style={{ flex: 1, backgroundColor: 'transparent' }}
+                gl={{ preserveDrawingBuffer: true, alpha: true, antialias: true }}
+              >
+                <ambientLight intensity={1.5} color="#ffffff" />
+                <hemisphereLight intensity={1} color="#ffffff" groundColor="#000000" />
+                <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
+                <directionalLight position={[-10, 10, -5]} intensity={0.5} color="#ffffff" />
                 
                 <Suspense fallback={null}>
                   <CharacterModel onLoad={() => setModelLoaded(true)} characterIndex={selectedChar} />
