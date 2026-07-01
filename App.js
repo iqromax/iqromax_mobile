@@ -88,7 +88,7 @@ export default function App() {
     return (
       <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center' }}>
         <Image source={require('./assets/icon.png')} style={{ width: 150, height: 150, marginBottom: 30 }} resizeMode="contain" />
-        <ActivityIndicator size="large" color="#3cc51f" />
+        <ActivityIndicator size="large" color="#FFC107" />
       </View>
     );
   }
