@@ -7,7 +7,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Canvas } from '@react-three/fiber/native';
-import { useGLTF, OrbitControls } from '@react-three/drei/native';
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',
@@ -398,6 +398,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <hemisphereLight intensity={1} color="#ffffff" groundColor="#000000" />
                 <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
                 <directionalLight position={[-10, 10, -5]} intensity={0.5} color="#ffffff" />
+                <Environment preset="city" />
                 <Suspense fallback={null}>
                   <CharacterModel characterIndex={activeAvatarIndex} />
                 </Suspense>

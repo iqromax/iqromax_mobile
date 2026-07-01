@@ -4,7 +4,7 @@ import { Image, ImageBackground } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { Canvas, useFrame } from '@react-three/fiber/native';
-import { useGLTF, OrbitControls } from '@react-three/drei/native';
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 
 // Preload 3D models for much faster rendering
 useGLTF.preload(require('../assets/models/adult_male_optimized.glb'));
@@ -257,7 +257,7 @@ export default function StepFiveScreen({ navigation, route }) {
                 <hemisphereLight intensity={1} color="#ffffff" groundColor="#000000" />
                 <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
                 <directionalLight position={[-10, 10, -5]} intensity={0.5} color="#ffffff" />
-                
+                <Environment preset="city" />
                 <Suspense fallback={null}>
                   <CharacterModel onLoad={() => setModelLoaded(true)} characterIndex={selectedChar} />
                 </Suspense>
