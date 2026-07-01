@@ -1,5 +1,6 @@
 import { Asset } from 'expo-asset';
 import React, { useState, useEffect } from 'react';
+import { View, Image, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import StepOneScreen from './screens/StepOneScreen';
@@ -84,7 +85,12 @@ export default function App() {
   });
 
   if (!fontsLoaded || !assetsLoaded) {
-    return null;
+    return (
+      <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center' }}>
+        <Image source={require('./assets/icon.png')} style={{ width: 150, height: 150, marginBottom: 30 }} resizeMode="contain" />
+        <ActivityIndicator size="large" color="#3cc51f" />
+      </View>
+    );
   }
 
   return (
