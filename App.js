@@ -84,7 +84,7 @@ export default function App() {
     Inter_900Black,
   });
 
-  if (!fontsLoaded || !assetsLoaded) {
+  if (!fontsLoaded) {
     return (
       <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center' }}>
         <Image source={require('./assets/icon.png')} style={{ width: 150, height: 150, marginBottom: 30 }} resizeMode="contain" />
