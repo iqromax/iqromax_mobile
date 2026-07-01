@@ -393,10 +393,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Canvas Container */}
             <View style={{ position: 'absolute', top: -50, bottom: -20, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
-              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto">
-                <ambientLight intensity={1.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1.5} />
-                <directionalLight position={[-10, 10, -5]} intensity={0.5} />
+              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
+                <ambientLight intensity={1.5} color="#ffffff" />
+                <hemisphereLight intensity={1} color="#ffffff" groundColor="#000000" />
+                <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
+                <directionalLight position={[-10, 10, -5]} intensity={0.5} color="#ffffff" />
                 <Suspense fallback={null}>
                   <CharacterModel characterIndex={activeAvatarIndex} />
                 </Suspense>
@@ -467,7 +468,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
           {/* Start Exercise Button */}
-          <TouchableOpacity activeOpacity={0.7} style={styles.startButton}>
+          <TouchableOpacity 
+            activeOpacity={0.7} 
+            style={styles.startButton}
+            onPress={() => setActiveTab('exercise')}
+          >
             <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} resizeMode="stretch" />
             <View style={styles.startButtonTouchable}>
               <Text style={styles.startButtonText}>{t.startExercise}</Text>
