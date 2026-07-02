@@ -80,7 +80,7 @@ export default function StepTwoScreen({ navigation }) {
                     source={bgSource}
                     style={[styles.fullCardBackground, { aspectRatio: role.aspectRatio }]}
                     imageStyle={{ borderRadius: 16 }}
-                    contentFit="stretch"
+                    contentFit="fill"
                     transition={200}
                   >
                     <View style={[styles.fullCardTextContainer, role.id === 'parent' && { paddingLeft: 195 }]}>
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: Platform.OS === 'android' ? 5 : 20,
   },
   stepText: {
     color: '#FFFFFF',

@@ -86,7 +86,7 @@ export default function StepThreeScreen({ navigation }) {
             <Image 
               source={require('../assets/hero_card.png')} 
               style={styles.heroCardImage} 
-              contentFit="stretch" 
+              contentFit="fill" 
               transition={200}
             />
 
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
+    paddingVertical: Platform.OS === 'android' ? 5 : 15,
     paddingHorizontal: 20,
     justifyContent: 'center',
   },
@@ -219,12 +219,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: Platform.OS === 'android' ? 0 : 10,
   },
   heroCardImage: {
     width: '100%',
     height: 190,
-    marginTop: 10,
+    marginTop: Platform.OS === 'android' ? 0 : 10,
     marginBottom: 20,
     borderRadius: 16,
   },

@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
+    paddingVertical: Platform.OS === 'android' ? 5 : 15,
     paddingHorizontal: 20,
     justifyContent: 'center',
   },

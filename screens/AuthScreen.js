@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
-    paddingVertical: 10,
+    paddingVertical: Platform.OS === 'android' ? 0 : 10,
     paddingHorizontal: 15,
   },
   backButton: {
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
   },
   heroContainer: {
     alignItems: 'center',
-    marginTop: -10,
+    marginTop: Platform.OS === 'android' ? -30 : -10,
     marginBottom: 20,
   },
   heroImage: {
