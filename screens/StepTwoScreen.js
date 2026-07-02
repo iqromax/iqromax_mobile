@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, ScrollView, StatusBar, ImageBackground, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, StatusBar, Platform } from 'react-native';
+import { Image, ImageBackground } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const ROLES = [
@@ -20,7 +21,7 @@ const ROLES = [
     image: require('../assets/role_parent.png'),
     bgUnselected: require('../assets/parent_card_unselected.png'),
     bgSelected: require('../assets/parent_card_selected.png'),
-    aspectRatio: 1024 / 479,
+    aspectRatio: 1024 / 448,
     color: '#A855F7', // Purple
   },
   {
@@ -79,9 +80,10 @@ export default function StepTwoScreen({ navigation }) {
                     source={bgSource}
                     style={[styles.fullCardBackground, { aspectRatio: role.aspectRatio }]}
                     imageStyle={{ borderRadius: 16 }}
-                    resizeMode="stretch"
+                    contentFit="stretch"
+                    transition={200}
                   >
-                    <View style={styles.fullCardTextContainer}>
+                    <View style={[styles.fullCardTextContainer, role.id === 'parent' && { paddingLeft: 195 }]}>
                       <Text style={styles.roleTitle}>{role.title}</Text>
                       <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
                     </View>
@@ -100,7 +102,7 @@ export default function StepTwoScreen({ navigation }) {
                 activeOpacity={0.8}
                 onPress={() => setSelectedRole(role.id)}
               >
-                <Image source={role.image} style={styles.roleImage} resizeMode="contain" />
+                <Image source={role.image} style={styles.roleImage} contentFit="contain" transition={200} />
                 
                 <View style={styles.roleTextContainer}>
                   <Text style={styles.roleTitle}>{role.title}</Text>
@@ -123,7 +125,11 @@ export default function StepTwoScreen({ navigation }) {
         <TouchableOpacity 
           style={[styles.nextButton, !selectedRole && styles.nextButtonDisabled]}
           activeOpacity={0.8}
-          onPress={handleNext}
+          onPress={() => {
+            requestAnimationFrame(() => {
+              handleNext();
+            });
+          }}
           disabled={!selectedRole}
         >
           <Text style={styles.nextButtonText}>NEXT</Text>
@@ -168,7 +174,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 120, // leave space for absolute footer
+    paddingBottom: 20,
   },
   title: {
     color: '#FFFFFF',
@@ -237,10 +243,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 20,
     paddingBottom: 30,
     backgroundColor: '#05050C',

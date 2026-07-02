@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
@@ -26,7 +27,8 @@ export default function StepOneScreen({ navigation }) {
           <Image 
             source={require('../assets/hero.png')} 
             style={styles.heroImage}
-            resizeMode="contain"
+            contentFit="contain"
+            transition={200}
           />
         </View>
 
@@ -60,7 +62,15 @@ export default function StepOneScreen({ navigation }) {
 
       {/* Next Button */}
       <View style={styles.bottomContainer}>
-        <TouchableOpacity style={styles.button} activeOpacity={0.8} onPress={() => navigation.navigate('StepTwo')}>
+        <TouchableOpacity 
+          style={styles.button} 
+          activeOpacity={0.8} 
+          onPress={() => {
+            requestAnimationFrame(() => {
+              navigation.navigate('StepTwo');
+            });
+          }}
+        >
           <Text style={styles.buttonText}>NEXT</Text>
           <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
         </TouchableOpacity>
@@ -78,12 +88,12 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: 100, // leave space for absolute button
     paddingTop: 20,
   },
   header: {
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 30,
+    marginBottom: 20,
   },
   stepText: {
     color: '#FFFFFF',
@@ -112,8 +122,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   heroImage: {
-    width: width * 0.95,
-    height: width * 1.15,
+    width: '100%',
+    height: '100%',
     zIndex: 1,
   },
   featuresContainer: {
@@ -155,10 +165,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 20,
     paddingBottom: 30,
     backgroundColor: '#05050C',

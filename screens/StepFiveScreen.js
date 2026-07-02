@@ -245,7 +245,7 @@ export default function StepFiveScreen({ navigation, route }) {
 
         {/* Character Preview Area */}
         <View style={styles.previewContainer}>
-          <Image source={require('../assets/character_bg.png')} style={styles.previewBg} resizeMode="cover" />
+          <Image source={require('../assets/character_bg.png')} style={styles.previewBg} contentFit="cover" />
 
           <View style={styles.canvasContainer}>
             {isFocused && (
@@ -253,11 +253,10 @@ export default function StepFiveScreen({ navigation, route }) {
                 style={{ flex: 1, backgroundColor: 'transparent' }}
                 gl={{ preserveDrawingBuffer: true, alpha: true, antialias: true }}
               >
-                <ambientLight intensity={1.5} color="#ffffff" />
-                <hemisphereLight intensity={1} color="#ffffff" groundColor="#000000" />
-                <directionalLight position={[10, 10, 5]} intensity={1.5} color="#ffffff" />
-                <directionalLight position={[-10, 10, -5]} intensity={0.5} color="#ffffff" />
-                <Environment preset="city" />
+                <ambientLight intensity={2} color="#ffffff" />
+                <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                 <Suspense fallback={null}>
                   <CharacterModel onLoad={() => setModelLoaded(true)} characterIndex={selectedChar} />
                 </Suspense>
@@ -377,7 +376,9 @@ export default function StepFiveScreen({ navigation, route }) {
           style={styles.button} 
           activeOpacity={0.8}
           onPress={() => {
-            navigation.navigate('StudentDashboard', { language, selectedChar, gender });
+            requestAnimationFrame(() => {
+              navigation.navigate('StudentDashboard', { language, selectedChar, gender });
+            });
           }}
         >
           <Text style={styles.buttonText}>{t.next}</Text>
@@ -433,7 +434,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingBottom: 80,
+    paddingBottom: 0,
   },
   mainTitle: {
     color: '#FFF',
@@ -505,6 +506,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#A855F7',
     zIndex: 10,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
   tabsContainer: {
     flexDirection: 'row',
@@ -605,10 +610,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 20,
     paddingBottom: 30,
     backgroundColor: '#05050C',

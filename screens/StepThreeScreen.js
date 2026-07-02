@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, TextInput, FlatList, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, TextInput, FlatList, ScrollView, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { COUNTRIES } from '../data/countries';
 
@@ -85,7 +86,8 @@ export default function StepThreeScreen({ navigation }) {
             <Image 
               source={require('../assets/hero_card.png')} 
               style={styles.heroCardImage} 
-              resizeMode="stretch" 
+              contentFit="stretch" 
+              transition={200}
             />
 
             <View style={styles.searchContainer}>
@@ -158,7 +160,11 @@ export default function StepThreeScreen({ navigation }) {
           style={[styles.button, !selectedCountry && styles.buttonDisabled]} 
           activeOpacity={0.8}
           disabled={!selectedCountry}
-          onPress={() => navigation.navigate('StepFour')}
+          onPress={() => {
+            requestAnimationFrame(() => {
+              navigation.navigate('StepFour');
+            });
+          }}
         >
           <Text style={styles.buttonText}>CONTINUE</Text>
           <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
@@ -211,9 +217,9 @@ const styles = StyleSheet.create({
     width: 24,
     backgroundColor: '#A855F7',
   },
-  listContent: {
+  scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100, // Space for bottom button
+    paddingTop: 10,
   },
   heroCardImage: {
     width: '100%',
@@ -336,10 +342,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 20,
     paddingBottom: 30,
     backgroundColor: '#05050C',

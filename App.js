@@ -22,61 +22,11 @@ export default function App() {
   const [assetsLoaded, setAssetsLoaded] = useState(false);
 
   useEffect(() => {
-    async function loadAssets() {
-      try {
-        await Asset.loadAsync([
-          require('./assets/avatar_alex.jpg'),
-          require('./assets/avatar_david.jpg'),
-          require('./assets/avatar_emma.jpg'),
-          require('./assets/avatar_kevin.png'),
-          require('./assets/avatar_lily.jpg'),
-          require('./assets/avatar_maks.png'),
-          require('./assets/avatar_maya.jpg'),
-          require('./assets/avatar_sophia.png'),
-          require('./assets/character_bg.png'),
-          require('./assets/info_card_bg.png'),
-          require('./assets/space_bg.jpg'),
-          require('./assets/yangi_1.png'),
-          require('./assets/yangi_2.png'),
-          require('./assets/yangi_3.png'),
-          require('./assets/yangi_4.png'),
-          require('./assets/yangi_5.png'),
-          require('./assets/yangi_6.png'),
-          require('./assets/yangi_7.png'),
-          require('./assets/yangi_8.png'),
-          require('./assets/yangi_9.png'),
-          require('./assets/yangi_10.png'),
-          require('./assets/yutuq_1.png'),
-          require('./assets/yutuq_2.png'),
-          require('./assets/yutuq_3.png'),
-          require('./assets/yutuq_4.png'),
-          require('./assets/yutuq_5.png'),
-          require('./assets/yutuq_6.png'),
-          require('./assets/yutuq_7.png'),
-          require('./assets/yutuq_8.png'),
-          require('./assets/yutuq_9.png'),
-          require('./assets/yutuq_10.png'),
-          require('./assets/yutuq_11.png'),
-          require('./assets/yutuq_12.png'),
-          require('./assets/lightning_energy.png'),
-          require('./assets/s_coin.png'),
-          require('./assets/gold_frame.png'),
-          require('./assets/gold_star.png'),
-          require('./assets/stat_icon_1.png'),
-          require('./assets/stat_icon_2.png'),
-          require('./assets/stat_icon_3.png'),
-          require('./assets/stat_icon_4.png')
-        ]);
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        setAssetsLoaded(true);
-      }
-    }
-    loadAssets();
+    // Assets are now lazily loaded when components render to speed up startup time
+    setAssetsLoaded(true);
   }, []);
 
-  let [fontsLoaded] = useFonts({
+  let [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -84,7 +34,7 @@ export default function App() {
     Inter_900Black,
   });
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded && !fontError) {
     return (
       <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center' }}>
         <Image source={require('./assets/icon.png')} style={{ width: 150, height: 150, marginBottom: 30 }} resizeMode="contain" />

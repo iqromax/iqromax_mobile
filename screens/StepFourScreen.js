@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, ScrollView, Image, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, ScrollView, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 
 const LANGUAGES = [
@@ -73,7 +74,8 @@ export default function StepFourScreen({ navigation }) {
           <Image 
             source={require('../assets/language_hero.jpg')} 
             style={styles.heroImage} 
-            resizeMode="contain" 
+            contentFit="contain" 
+            transition={200}
           />
         </View>
 
@@ -117,8 +119,9 @@ export default function StepFourScreen({ navigation }) {
           activeOpacity={0.8}
           disabled={!selectedLanguage}
           onPress={() => {
-            // Next step: Character Selection (Step Five)
-            navigation.navigate('StepFive', { language: selectedLanguage });
+            requestAnimationFrame(() => {
+              navigation.navigate('StepFive', { language: selectedLanguage });
+            });
           }}
         >
           <Text style={styles.buttonText}>{t.continue}</Text>
@@ -174,7 +177,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100, // Space for bottom button
   },
   heroContainer: {
     alignItems: 'center',
@@ -252,10 +254,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bottomContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     padding: 20,
     paddingBottom: 30,
     backgroundColor: '#05050C',
