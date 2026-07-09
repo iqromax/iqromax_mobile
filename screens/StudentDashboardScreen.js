@@ -1617,48 +1617,51 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <View style={{ flex: 1, display: activeTab === 'inventory' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
           <ScrollView style={{ flexShrink: 1 }} showsVerticalScrollIndicator={false}>
             {/* Inventory Global Header */}
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 15 : 20, paddingBottom: 15, alignItems: 'center', gap: 15 }}
+            <View 
+              style={{ 
+                flexDirection: 'row', 
+                paddingHorizontal: 15, 
+                paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 20, 
+                paddingBottom: 15, 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+              }}
             >
               {/* 1. Profile Widget */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderWidth: 1, borderColor: '#1E3A8A', borderRadius: 12, padding: 8, paddingRight: 15 }}>
-                <Image source={require('../assets/level_shield.png')} style={{ width: 45, height: 45, marginRight: 10 }} resizeMode="contain" />
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderWidth: 1, borderColor: '#1E3A8A', borderRadius: 12, padding: 8, paddingRight: 32, paddingLeft: 10 }}>
+                <View style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
+                  <Image source={require('../assets/avatar_maks.png')} style={{ width: 30, height: 30, borderRadius: 15, zIndex: 1 }} />
+                  <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 44, height: 44, resizeMode: 'contain', zIndex: 2 }} />
+                </View>
                 <View>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
-                    <Text style={{ fontSize: 12, marginRight: 5 }}>🇺🇿</Text>
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>IQROMAX</Text>
+                    <Text style={{ fontSize: 12, marginRight: 4 }}>🇺🇿</Text>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>IQROMAX</Text>
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Ionicons name="trophy" size={14} color="#FBBF24" style={{ marginRight: 5 }} />
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>1 248</Text>
+                    <Ionicons name="trophy" size={13} color="#FBBF24" style={{ marginRight: 4 }} />
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>1 248</Text>
                   </View>
                 </View>
               </View>
 
-              {/* 2. XP Widget */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 20, 20, 0.5)', borderWidth: 1, borderColor: '#374151', borderRadius: 12, padding: 8, paddingHorizontal: 12 }}>
-                <View style={{ backgroundColor: '#A855F7', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 4, marginRight: 10 }}>
-                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 12 }}>XP</Text>
+              {/* Grouped Right Side: Energy & Coins */}
+              <View style={{ flexDirection: 'row', gap: 6 }}>
+                {/* 2. Energy Widget */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 15, 5, 0.5)', borderWidth: 1, borderColor: '#D97706', borderRadius: 10, padding: 6, paddingHorizontal: 8 }}>
+                  <Ionicons name="flash" size={14} color="#F59E0B" style={{ marginRight: 5 }} />
+                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>2</Text>
+                  <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 14 }}>+</Text>
                 </View>
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>7 850 <Text style={{ color: '#9CA3AF' }}>/ 10 000</Text></Text>
-              </View>
 
-              {/* 3. Energy Widget */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 15, 5, 0.5)', borderWidth: 1, borderColor: '#D97706', borderRadius: 12, padding: 8, paddingHorizontal: 15 }}>
-                <Ionicons name="flash" size={18} color="#F59E0B" style={{ marginRight: 8 }} />
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 16, marginRight: 15 }}>2</Text>
-                <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 18 }}>+</Text>
+                {/* 3. Coins Widget */}
+                <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 15, 5, 0.5)', borderWidth: 1, borderColor: '#D97706', borderRadius: 10, padding: 6, paddingHorizontal: 8 }}>
+                  <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, marginRight: 5 }} resizeMode="contain" />
+                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>12k</Text>
+                  <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 14 }}>+</Text>
+                </View>
               </View>
-
-              {/* 4. Coins Widget */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 15, 5, 0.5)', borderWidth: 1, borderColor: '#D97706', borderRadius: 12, padding: 8, paddingHorizontal: 15 }}>
-                <Image source={require('../assets/s_coin.png')} style={{ width: 20, height: 20, marginRight: 8 }} resizeMode="contain" />
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 16, marginRight: 15 }}>12 450</Text>
-                <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 18 }}>+</Text>
-              </View>
-            </ScrollView>
+            </View>
           </ScrollView>
         </View>
 

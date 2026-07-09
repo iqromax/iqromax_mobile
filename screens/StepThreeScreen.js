@@ -79,7 +79,7 @@ export default function StepThreeScreen({ navigation }) {
       <FlatList
         data={filteredCountries}
         keyExtractor={(item) => item.code}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
           <>
