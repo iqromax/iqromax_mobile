@@ -253,6 +253,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
     outputRange: ['rgba(31, 31, 61, 1)', 'rgba(168, 85, 247, 1)'], // Pulses from dark border to bright purple
   });
 
+  const [inventorySubTab, setInventorySubTab] = useState('personaj'); // 'personaj', 'avatar', 'ramka', 'fon'
+
   // Count-up animation for Level 24
   const [levelNumber, setLevelNumber] = useState(0);
   useEffect(() => {
@@ -1628,10 +1630,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
               }}
             >
               {/* 1. Profile Widget */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderWidth: 1, borderColor: '#1E3A8A', borderRadius: 12, padding: 8, paddingRight: 32, paddingLeft: 10 }}>
-                <View style={{ width: 44, height: 44, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
-                  <Image source={require('../assets/avatar_maks.png')} style={{ width: 30, height: 30, borderRadius: 15, zIndex: 1 }} />
-                  <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 44, height: 44, resizeMode: 'contain', zIndex: 2 }} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderRadius: 12, padding: 8, paddingRight: 32, paddingLeft: 10 }}>
+                <View style={{ width: 60, height: 60, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
+                  <Image source={require('../assets/avatar_maks.png')} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
+                  <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 60, height: 60, resizeMode: 'contain', zIndex: 2 }} />
                 </View>
                 <View>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
@@ -1662,11 +1664,322 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
             </View>
-          </ScrollView>
-        </View>
 
-        {/* RANKING TAB CONTENT */}
-        <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
+            {/* Inventory Scroll Content */}
+            <ScrollView 
+              style={{ flex: 1 }} 
+              contentContainerStyle={{ paddingBottom: 40 }}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Tab Title & Stats button */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 10, position: 'relative', height: 40 }}>
+                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 1 }}>
+                  {language === 'uz' ? 'INVENTAR' : 'INVENTORY'}
+                </Text>
+                <TouchableOpacity 
+                  style={{ 
+                    flexDirection: 'row', 
+                    alignItems: 'center', 
+                    backgroundColor: '#0F111E', 
+                    borderWidth: 1, 
+                    borderColor: '#1F2937', 
+                    borderRadius: 8, 
+                    paddingVertical: 6, 
+                    paddingHorizontal: 12, 
+                    position: 'absolute', 
+                    right: 15,
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <MaterialCommunityIcons name="chart-bar" size={14} color="#A855F7" style={{ marginRight: 6 }} />
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 10, letterSpacing: 0.5 }}>
+                    {language === 'uz' ? 'STATISTIKA' : 'STATISTICS'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Showcase Container */}
+              <View style={{ height: 350, position: 'relative', marginHorizontal: 15, borderRadius: 16, overflow: 'hidden', marginBottom: 15 }}>
+                {/* Background image from character selection */}
+                <Image 
+                  source={require('../assets/character_bg.png')} 
+                  style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: 16 }} 
+                  contentFit="cover" 
+                />
+
+                {/* 3D Model Render */}
+                <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 1 }} pointerEvents="none">
+                  <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="none" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
+                    <ambientLight intensity={2} color="#ffffff" />
+                    <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                    <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                    <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
+                    <Suspense fallback={null}>
+                      <CharacterModel characterIndex={activeAvatarIndex} />
+                    </Suspense>
+                  </Canvas>
+                </View>
+
+                {/* Left Absolute Overlay: Active Character Details */}
+                <View style={{ position: 'absolute', top: 15, left: 15, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', borderRadius: 12, padding: 10, width: 115, zIndex: 3 }}>
+                  <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8, letterSpacing: 0.5, marginBottom: 4 }}>
+                    {language === 'uz' ? 'AKTIV PERSONAJ' : 'ACTIVE CHARACTER'}
+                  </Text>
+                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, marginBottom: 4 }} numberOfLines={1}>
+                    {activeAvatarIndex === 0 ? 'Alex' : activeAvatarIndex === 1 ? 'Tech Genius' : activeAvatarIndex === 2 ? 'Creative Mind' : activeAvatarIndex === 3 ? 'Mental Warrior' : activeAvatarIndex === 4 ? 'Lily' : activeAvatarIndex === 5 ? 'Maya' : activeAvatarIndex === 6 ? 'Emma' : 'Sophia'}
+                  </Text>
+                  <View style={{ alignSelf: 'flex-start', backgroundColor: activeAvatarIndex === 1 || activeAvatarIndex === 2 ? '#581C87' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? '#1E3A8A' : '#1F2937', borderRadius: 4, paddingVertical: 2, paddingHorizontal: 6, marginBottom: 6 }}>
+                    <Text style={{ color: activeAvatarIndex === 1 || activeAvatarIndex === 2 ? '#D8B4FE' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 8 }}>
+                      {activeAvatarIndex === 1 || activeAvatarIndex === 2 ? 'EPIC' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? 'RARE' : 'COMMON'}
+                    </Text>
+                  </View>
+                  <Ionicons name="information-circle-outline" size={14} color="#9CA3AF" />
+                </View>
+
+                {/* Right Absolute Overlay: Equipped items stack */}
+                <View style={{ position: 'absolute', top: 15, right: 15, gap: 8, zIndex: 3 }}>
+                  {/* Avatar card */}
+                  <View style={{ width: 68, height: 60, borderRadius: 10, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <View style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 2 }}>AVATAR</Text>
+                    <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={{ width: 22, height: 22, borderRadius: 11 }} />
+                    <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
+                  </View>
+
+                  {/* Frame card */}
+                  <View style={{ width: 68, height: 60, borderRadius: 10, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <View style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 2 }}>RAMKA</Text>
+                    <Image source={require('../assets/gold_frame.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                    <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
+                  </View>
+
+                  {/* Background card */}
+                  <View style={{ width: 68, height: 60, borderRadius: 10, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <View style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 2 }}>FON</Text>
+                    <Image source={require('../assets/space_bg.jpg')} style={{ width: 24, height: 16, borderRadius: 2 }} />
+                    <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
+                  </View>
+                </View>
+
+                {/* Bottom Left Absolute Overlay: Level Progress */}
+                <View style={{ position: 'absolute', bottom: 15, left: 15, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', borderRadius: 12, padding: 8, width: 120, zIndex: 3 }}>
+                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 11 }}>LEVEL 24</Text>
+                  <View style={{ height: 4, backgroundColor: '#1A1B2D', borderRadius: 2, width: '100%', marginVertical: 4 }}>
+                    <View style={{ height: 4, backgroundColor: '#EAB308', borderRadius: 2, width: '78%' }} />
+                  </View>
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 8 }}>7 850 / 10 000</Text>
+                </View>
+              </View>
+
+              {/* Sub-navigation tabs (PERSONAJ, AVATAR, RAMKA, FON) */}
+              <View style={{ flexDirection: 'row', paddingHorizontal: 15, gap: 6, marginBottom: 15 }}>
+                {[
+                  { key: 'personaj', label: language === 'uz' ? 'PERSONAJ' : 'CHARACTER', icon: 'face-man-profile' },
+                  { key: 'avatar', label: 'AVATAR', icon: 'emoticon-outline' },
+                  { key: 'ramka', label: language === 'uz' ? 'RAMKA' : 'FRAME', icon: 'crop-square' },
+                  { key: 'fon', label: language === 'uz' ? 'FON' : 'BG', icon: 'image-outline' },
+                ].map((item) => {
+                  const isActive = inventorySubTab === item.key;
+                  return (
+                    <TouchableOpacity
+                      key={item.key}
+                      style={{
+                        flex: 1,
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                        backgroundColor: isActive ? 'rgba(234, 179, 8, 0.15)' : '#0F111E',
+                        borderWidth: 1,
+                        borderColor: isActive ? '#EAB308' : '#1F2937',
+                      }}
+                      onPress={() => setInventorySubTab(item.key)}
+                      activeOpacity={0.8}
+                    >
+                      <MaterialCommunityIcons name={item.icon} size={14} color={isActive ? '#EAB308' : '#9CA3AF'} style={{ marginRight: 4 }} />
+                      <Text style={{ color: isActive ? '#EAB308' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Category Grid Section */}
+              {inventorySubTab === 'personaj' && (
+                <View style={{ paddingHorizontal: 15 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase' }}>
+                      {language === 'uz' ? 'PERSONAJLAR' : 'CHARACTERS'}
+                    </Text>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10 }}>
+                      {language === 'uz' ? 'Ochilgan: 3 / 8' : 'Unlocked: 3 / 8'}
+                    </Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                    {[
+                      { id: 1, name: 'Tech Genius', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_maks.png') },
+                      { id: 2, name: 'Creative Mind', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_david.jpg') },
+                      { id: 3, name: 'Mental Warrior', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_kevin.png') },
+                      { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg') },
+                      { id: 4, name: 'Ochish uchun', rarity: 'COMMON', locked: true, price: '5 800', type: 'coin', avatar: require('../assets/avatar_lily.jpg') },
+                      { id: 5, name: 'Ochish uchun', rarity: 'RARE', locked: true, price: '15 000', type: 'coin', avatar: require('../assets/avatar_maya.jpg') },
+                      { id: 6, name: 'Ochish uchun', rarity: 'EPIC', locked: true, price: '180', type: 'gem', avatar: require('../assets/avatar_emma.jpg') },
+                      { id: 7, name: 'Ochish uchun', rarity: 'EPIC', locked: true, price: '200', type: 'gem', avatar: require('../assets/avatar_sophia.png') },
+                    ].map((item) => {
+                      const isSelected = activeAvatarIndex === item.id;
+                      return (
+                        <TouchableOpacity
+                          key={item.id}
+                          style={{
+                            width: '23%',
+                            aspectRatio: 0.72,
+                            backgroundColor: '#0F111E',
+                            borderWidth: 1,
+                            borderColor: isSelected ? '#EAB308' : '#1F2937',
+                            borderRadius: 10,
+                            padding: 4,
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: 8,
+                            position: 'relative',
+                          }}
+                          onPress={() => {
+                            if (!item.locked) {
+                              setActiveAvatarIndex(item.id);
+                            }
+                          }}
+                          activeOpacity={item.locked ? 1 : 0.7}
+                        >
+                          {/* Checked badge */}
+                          {isSelected && (
+                            <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EAB308', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
+                              <MaterialCommunityIcons name="check" size={10} color="#000" />
+                            </View>
+                          )}
+
+                          {/* Image */}
+                          <View style={{ width: '100%', height: '52%', borderRadius: 6, overflow: 'hidden', marginTop: 4, opacity: item.locked ? 0.4 : 1, position: 'relative' }}>
+                            <Image source={item.avatar} style={{ width: '100%', height: '100%' }} />
+                            {item.locked && (
+                              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                                <Ionicons name="lock-closed" size={12} color="#9CA3AF" />
+                              </View>
+                            )}
+                          </View>
+
+                          <View style={{ width: '100%', alignItems: 'center', paddingBottom: 4 }}>
+                            <Text style={{ color: isSelected ? '#EAB308' : '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 7, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>
+                              {item.name}
+                            </Text>
+
+                            {item.locked ? (
+                              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                {item.type === 'coin' ? (
+                                  <Image source={require('../assets/s_coin.png')} style={{ width: 8, height: 8, marginRight: 2 }} />
+                                ) : (
+                                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#A855F7', marginRight: 2 }} />
+                                )}
+                                <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 7 }}>{item.price}</Text>
+                              </View>
+                            ) : (
+                              <View style={{ backgroundColor: item.rarity === 'EPIC' ? '#581C87' : item.rarity === 'RARE' ? '#1E3A8A' : '#1F2937', borderRadius: 3, paddingVertical: 1, paddingHorizontal: 3 }}>
+                                <Text style={{ color: item.rarity === 'EPIC' ? '#D8B4FE' : item.rarity === 'RARE' ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 6 }}>
+                                  {item.rarity}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+              )}
+
+              {/* SKINLAR footer section */}
+              <View style={{ marginTop: 15, paddingHorizontal: 15 }}>
+                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase', marginBottom: 10 }}>
+                  {language === 'uz' ? 'SKINLAR' : 'SKINS'}
+                </Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  {/* Kiyim kechak */}
+                  <TouchableOpacity 
+                    style={{ 
+                      width: '31%', 
+                      aspectRatio: 1.4, 
+                      borderRadius: 12, 
+                      backgroundColor: 'rgba(217, 119, 6, 0.1)', 
+                      borderWidth: 1, 
+                      borderColor: 'rgba(217, 119, 6, 0.3)', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialCommunityIcons name="tshirt-crew" size={24} color="#D97706" style={{ marginBottom: 4 }} />
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
+                      {language === 'uz' ? 'KIYIM-KECHAK' : 'CLOTHES'}
+                    </Text>
+                    <Text style={{ color: '#D97706', fontFamily: 'Inter_600SemiBold', fontSize: 8, marginTop: 2 }}>
+                      8 / 24
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Rukzak */}
+                  <TouchableOpacity 
+                    style={{ 
+                      width: '31%', 
+                      aspectRatio: 1.4, 
+                      borderRadius: 12, 
+                      backgroundColor: 'rgba(30, 58, 138, 0.1)', 
+                      borderWidth: 1, 
+                      borderColor: 'rgba(30, 58, 138, 0.3)', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialCommunityIcons name="bag-personal" size={24} color="#2563EB" style={{ marginBottom: 4 }} />
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
+                      {language === 'uz' ? 'RUKZAK' : 'BACKPACK'}
+                    </Text>
+                    <Text style={{ color: '#2563EB', fontFamily: 'Inter_600SemiBold', fontSize: 8, marginTop: 2 }}>
+                      5 / 18
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Efektlar */}
+                  <TouchableOpacity 
+                    style={{ 
+                      width: '31%', 
+                      aspectRatio: 1.4, 
+                      borderRadius: 12, 
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+                      borderWidth: 1, 
+                      borderColor: 'rgba(16, 185, 129, 0.3)', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                    }}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialCommunityIcons name="creation" size={24} color="#10B981" style={{ marginBottom: 4 }} />
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
+                      {language === 'uz' ? 'EFEKTLAR' : 'EFFECTS'}
+                    </Text>
+                    <Text style={{ color: '#10B981', fontFamily: 'Inter_600SemiBold', fontSize: 8, marginTop: 2 }}>
+                      4 / 10
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
           <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 0 }} showsVerticalScrollIndicator={false}>
 {/* Top Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
