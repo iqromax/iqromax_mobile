@@ -62,7 +62,7 @@ useGLTF.preload(require('../assets/models/casual_outfit_optimized.glb'));
 useGLTF.preload(require('../assets/models/stylized_girl_optimized.glb'));
 useGLTF.preload(require('../assets/models/beige_trench_coat_optimized.glb'));
 
-function CharacterModel({ characterIndex }) {
+function CharacterModel({ characterIndex, yOffset = 0 }) {
   const models = {
     0: require('../assets/models/athletic_man_optimized.glb'),
     1: require('../assets/models/adult_male_optimized.glb'),
@@ -77,8 +77,8 @@ function CharacterModel({ characterIndex }) {
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
 
-  let yPos = -0.2; // Standard position for all characters
-  if (characterIndex === 1) yPos = 1.2; // Maks is positioned lower by default, so we move him up
+  let yPos = -0.2 + yOffset; // Standard position for all characters
+  if (characterIndex === 1) yPos = 1.2 + yOffset; // Maks is positioned lower by default, so we move him up
 
   return (
     <>
@@ -1617,7 +1617,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* INVENTORY TAB CONTENT */}
         <View style={{ flex: 1, display: activeTab === 'inventory' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
-          <ScrollView style={{ flexShrink: 1 }} showsVerticalScrollIndicator={false}>
+          <View style={{ flex: 0 }}>
             {/* Inventory Global Header */}
             <View 
               style={{ 
@@ -1664,13 +1664,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
             </View>
-
-            {/* Inventory Scroll Content */}
-            <ScrollView 
-              style={{ flex: 1 }} 
-              contentContainerStyle={{ paddingBottom: 40 }}
-              showsVerticalScrollIndicator={false}
-            >
               {/* Tab Title & Stats button */}
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 10, position: 'relative', height: 40 }}>
                 <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 1 }}>
@@ -1708,14 +1701,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 />
 
                 {/* 3D Model Render */}
-                <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 1 }} pointerEvents="none">
-                  <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="none" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
+                <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
+                  <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
                     <ambientLight intensity={2} color="#ffffff" />
                     <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
                     <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
                     <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                     <Suspense fallback={null}>
-                      <CharacterModel characterIndex={activeAvatarIndex} />
+                      <CharacterModel characterIndex={activeAvatarIndex} yOffset={0.5} />
                     </Suspense>
                   </Canvas>
                 </View>
@@ -1807,6 +1800,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   );
                 })}
               </View>
+            </View>
+
+            {/* Scrollable part for items grid and skins */}
+            <ScrollView 
+              style={{ flex: 1 }} 
+              contentContainerStyle={{ paddingBottom: 40 }} 
+              showsVerticalScrollIndicator={false}
+            >
 
               {/* Category Grid Section */}
               {inventorySubTab === 'personaj' && (
@@ -1837,14 +1838,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           key={item.id}
                           style={{
                             width: '23%',
-                            aspectRatio: 0.72,
+                            aspectRatio: 0.75,
                             backgroundColor: '#0F111E',
                             borderWidth: 1,
                             borderColor: isSelected ? '#EAB308' : '#1F2937',
                             borderRadius: 10,
                             padding: 4,
                             alignItems: 'center',
-                            justifyContent: 'space-between',
+                            justifyContent: 'flex-start',
                             marginBottom: 8,
                             position: 'relative',
                           }}
@@ -1863,17 +1864,17 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           )}
 
                           {/* Image */}
-                          <View style={{ width: '100%', height: '52%', borderRadius: 6, overflow: 'hidden', marginTop: 4, opacity: item.locked ? 0.4 : 1, position: 'relative' }}>
-                            <Image source={item.avatar} style={{ width: '100%', height: '100%' }} />
+                          <View style={{ width: 56, height: 56, borderRadius: 28, overflow: 'hidden', marginTop: 6, opacity: item.locked ? 0.4 : 1, position: 'relative', alignSelf: 'center', backgroundColor: '#151624', borderWidth: 1, borderColor: isSelected ? '#EAB308' : '#22253B', justifyContent: 'center', alignItems: 'center' }}>
+                            <Image source={item.avatar} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                             {item.locked && (
-                              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
                                 <Ionicons name="lock-closed" size={12} color="#9CA3AF" />
                               </View>
                             )}
                           </View>
 
-                          <View style={{ width: '100%', alignItems: 'center', paddingBottom: 4 }}>
-                            <Text style={{ color: isSelected ? '#EAB308' : '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 7, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>
+                          <View style={{ width: '100%', alignItems: 'center', marginTop: 6 }}>
+                            <Text style={{ color: isSelected ? '#EAB308' : '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9, textAlign: 'center', marginBottom: 3 }} numberOfLines={1}>
                               {item.name}
                             </Text>
 
@@ -1884,11 +1885,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                 ) : (
                                   <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#A855F7', marginRight: 2 }} />
                                 )}
-                                <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 7 }}>{item.price}</Text>
+                                <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{item.price}</Text>
                               </View>
                             ) : (
-                              <View style={{ backgroundColor: item.rarity === 'EPIC' ? '#581C87' : item.rarity === 'RARE' ? '#1E3A8A' : '#1F2937', borderRadius: 3, paddingVertical: 1, paddingHorizontal: 3 }}>
-                                <Text style={{ color: item.rarity === 'EPIC' ? '#D8B4FE' : item.rarity === 'RARE' ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 6 }}>
+                              <View style={{ backgroundColor: item.rarity === 'EPIC' ? '#581C87' : item.rarity === 'RARE' ? '#1E3A8A' : '#1F2937', borderRadius: 3, paddingVertical: 1, paddingHorizontal: 4 }}>
+                                <Text style={{ color: item.rarity === 'EPIC' ? '#D8B4FE' : item.rarity === 'RARE' ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 7 }}>
                                   {item.rarity}
                                 </Text>
                               </View>
@@ -1907,79 +1908,48 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {language === 'uz' ? 'SKINLAR' : 'SKINS'}
                 </Text>
 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  {/* Kiyim kechak */}
-                  <TouchableOpacity 
-                    style={{ 
-                      width: '31%', 
-                      aspectRatio: 1.4, 
-                      borderRadius: 12, 
-                      backgroundColor: 'rgba(217, 119, 6, 0.1)', 
-                      borderWidth: 1, 
-                      borderColor: 'rgba(217, 119, 6, 0.3)', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <MaterialCommunityIcons name="tshirt-crew" size={24} color="#D97706" style={{ marginBottom: 4 }} />
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
-                      {language === 'uz' ? 'KIYIM-KECHAK' : 'CLOTHES'}
-                    </Text>
-                    <Text style={{ color: '#D97706', fontFamily: 'Inter_600SemiBold', fontSize: 8, marginTop: 2 }}>
-                      8 / 24
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* Rukzak */}
-                  <TouchableOpacity 
-                    style={{ 
-                      width: '31%', 
-                      aspectRatio: 1.4, 
-                      borderRadius: 12, 
-                      backgroundColor: 'rgba(30, 58, 138, 0.1)', 
-                      borderWidth: 1, 
-                      borderColor: 'rgba(30, 58, 138, 0.3)', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <MaterialCommunityIcons name="bag-personal" size={24} color="#2563EB" style={{ marginBottom: 4 }} />
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
-                      {language === 'uz' ? 'RUKZAK' : 'BACKPACK'}
-                    </Text>
-                    <Text style={{ color: '#2563EB', fontFamily: 'Inter_600SemiBold', fontSize: 8, marginTop: 2 }}>
-                      5 / 18
-                    </Text>
-                  </TouchableOpacity>
-
-                  {/* Efektlar */}
-                  <TouchableOpacity 
-                    style={{ 
-                      width: '31%', 
-                      aspectRatio: 1.4, 
-                      borderRadius: 12, 
-                      backgroundColor: 'rgba(16, 185, 129, 0.1)', 
-                      borderWidth: 1, 
-                      borderColor: 'rgba(16, 185, 129, 0.3)', 
-                      alignItems: 'center', 
-                      justifyContent: 'center',
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <MaterialCommunityIcons name="creation" size={24} color="#10B981" style={{ marginBottom: 4 }} />
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
-                      {language === 'uz' ? 'EFEKTLAR' : 'EFFECTS'}
-                    </Text>
-                    <Text style={{ color: '#10B981', fontFamily: 'Inter_600SemiBold', fontSize: 8, marginTop: 2 }}>
-                      4 / 10
-                    </Text>
-                  </TouchableOpacity>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {[
+                    { label: language === 'uz' ? 'USTKI KIYIM' : 'TOP WEAR',     icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: '8 / 24' },
+                    { label: language === 'uz' ? 'SHIM' : 'PANTS',               icon: 'human-handsdown', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.35)',  count: '6 / 15' },
+                    { label: language === 'uz' ? 'OYOQ KIYIM' : 'SHOES',         icon: 'shoe-sneaker',    color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.35)', count: '4 / 12' },
+                    { label: language === 'uz' ? 'AKSESSUARLAR' : 'ACCESSORIES', icon: 'glasses',         color: '#EAB308', bg: 'rgba(234,179,8,0.1)',   border: 'rgba(234,179,8,0.35)',  count: '3 / 10' },
+                    { label: language === 'uz' ? 'RYUKZAKLAR' : 'BACKPACKS',     icon: 'bag-personal',    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.35)', count: '5 / 18' },
+                  ].map((item, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={{
+                        width: '31%',
+                        paddingVertical: 12,
+                        borderRadius: 12,
+                        backgroundColor: item.bg,
+                        borderWidth: 1,
+                        borderColor: item.border,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <MaterialCommunityIcons name={item.icon} size={22} color={item.color} />
+                      <View style={{ height: 5 }} />
+                      <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 8, textAlign: 'center' }}>
+                        {item.label}
+                      </Text>
+                      <View style={{ height: 4 }} />
+                      <View style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: 5, paddingHorizontal: 7, paddingVertical: 2 }}>
+                        <Text style={{ color: item.color, fontFamily: 'Inter_700Bold', fontSize: 8 }}>
+                          {item.count}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
-            </ScrollView>
-          </View>
+              </ScrollView>
+            </View>
+
+        {/* RANKING TAB CONTENT */}
+        <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
           <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 0 }} showsVerticalScrollIndicator={false}>
 {/* Top Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
