@@ -11,6 +11,7 @@ import StepFourScreen from './screens/StepFourScreen';
 import StepFiveScreen from './screens/StepFiveScreen';
 import StudentDashboardScreen from './screens/StudentDashboardScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import OddiyHisobGameScreen from './screens/OddiyHisobGameScreen';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black } from '@expo-google-fonts/inter';
@@ -55,6 +56,7 @@ export default function App() {
           <Stack.Screen name="StepFive" component={StepFiveScreen} />
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} />
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name="OddiyHisobGame" component={OddiyHisobGameScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
