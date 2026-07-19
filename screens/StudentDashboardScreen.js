@@ -2200,17 +2200,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
             style={[styles.startExerciseBtn, (activeExerciseType === 'abacus' || activeExerciseType === 'speed') && { marginTop: 35 }]}
             activeOpacity={0.8}
             onPress={() => {
-              navigation.navigate('OddiyHisobGame', {
-                examplesCount: selectedExamples,
-                operation: selectedOperation,
-                speed: selectedSpeed,
-                digits: selectedDigits,
-                language: language,
-              });
+              if (activeExerciseType === 'abacus') {
+                // TODO: Navigate to an Abacus screen when it is ready
+              } else {
+                navigation.navigate('OddiyHisobGame', {
+                  examplesCount: selectedExamples,
+                  operation: selectedOperation,
+                  speed: selectedSpeed,
+                  digits: selectedDigits,
+                  language: language,
+                });
+              }
             }}
           >
             <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FFF" style={styles.startBtnIcon} />
-            <Text style={styles.startExerciseBtnText}>{t.startExercise}</Text>
+            <Text style={styles.startExerciseBtnText}>
+              {activeExerciseType === 'abacus' ? (t.startAbacus || "ABAKUSNI OCHISH") : t.startExercise}
+            </Text>
           </TouchableOpacity>
         )}
         
