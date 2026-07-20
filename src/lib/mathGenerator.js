@@ -325,28 +325,67 @@ export const MentalMathGenerator = {
     };
   },
   // Ko'paytirish
-  generateMul: (digits) => {
-    // Both numbers will use the selected digits count
-    const n1 = MentalMathGenerator.getNumByDigits(digits);
-    const n2 = MentalMathGenerator.getNumByDigits(digits);
+  generateMul: (level) => {
+    let n1, n2;
+    switch (level) {
+      case 1: 
+        n1 = Math.floor(Math.random() * 9) + 2;
+        n2 = Math.floor(Math.random() * 9) + 2;
+        break;
+      case 2: 
+        n1 = Math.floor(Math.random() * 90) + 10;
+        n2 = Math.floor(Math.random() * 9) + 2;
+        break;
+      case 3: 
+        n1 = Math.floor(Math.random() * 90) + 10;
+        n2 = Math.floor(Math.random() * 90) + 10;
+        break;
+      case 4: 
+        n1 = Math.floor(Math.random() * 900) + 100;
+        n2 = Math.floor(Math.random() * 9) + 2;
+        break;
+      default:
+        n1 = Math.floor(Math.random() * 900) + 100;
+        n2 = Math.floor(Math.random() * 90) + 10;
+    }
     return {
       display: `${n1} × ${n2}`,
       answer: n1 * n2,
       section: 'multiply',
-      difficulty: digits,
+      difficulty: level,
     };
   },
   // Bo'lish (Qoldiqsiz ishlashi uchun maxsus tayyorlangan)
-  generateDiv: (digits) => {
-    // Both divisor and answer will use the selected digits count to form the dividend
-    const divisor = MentalMathGenerator.getNumByDigits(digits);
-    const answer = MentalMathGenerator.getNumByDigits(digits);
-    const dividend = divisor * answer;
+  generateDiv: (level) => {
+    let divisor;
+    let answer;
+    switch (level) {
+      case 1:
+        divisor = Math.floor(Math.random() * 8) + 2; 
+        answer = Math.floor(Math.random() * 9) + 2;
+        break;
+      case 2:
+        divisor = Math.floor(Math.random() * 8) + 2;
+        answer = Math.floor(Math.random() * 90) + 10;
+        break;
+      case 3:
+        divisor = Math.floor(Math.random() * 90) + 10;
+        answer = Math.floor(Math.random() * 9) + 2;
+        break;
+      case 4:
+        divisor = Math.floor(Math.random() * 90) + 10;
+        answer = Math.floor(Math.random() * 90) + 10;
+        break;
+      default:
+        divisor = Math.floor(Math.random() * 90) + 10;
+        answer = Math.floor(Math.random() * 900) + 100;
+    }
+    const dividend = divisor * answer; 
     return {
       display: `${dividend} ÷ ${divisor}`,
       answer: answer,
       section: 'divide',
-      difficulty: digits,
+      difficulty: level,
     };
   },
   // Aralash (Tasodifiy barcha amallar qatnashadi)

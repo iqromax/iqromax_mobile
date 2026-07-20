@@ -95,18 +95,18 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 400,
+          duration: 150,
           useNativeDriver: true,
         }),
         Animated.spring(scaleAnim, {
           toValue: 1,
-          friction: 5,
-          tension: 40,
+          friction: 6,
+          tension: 100,
           useNativeDriver: true,
         }),
         Animated.timing(translateYAnim, {
           toValue: 0,
-          duration: 500,
+          duration: 250,
           easing: Easing.out(Easing.back(1.5)),
           useNativeDriver: true,
         })
