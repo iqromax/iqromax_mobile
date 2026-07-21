@@ -238,11 +238,11 @@ app.delete('/api/admin/users/:id', async (req, res) => {
 });
 
 // Serve admin panel static files in production
-app.use(express.static(path.join(__dirname, '../../admin_panel/dist')));
+app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 
 // Fallback to admin panel for unhandled routes
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../../admin_panel/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
