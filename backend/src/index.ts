@@ -241,7 +241,7 @@ app.delete('/api/admin/users/:id', async (req, res) => {
 app.use(express.static(path.join(__dirname, '../../admin_panel/dist')));
 
 // Fallback to admin panel for unhandled routes
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../../admin_panel/dist/index.html'));
 });
 
