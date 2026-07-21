@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import http from 'http';
+import path from 'path';
 import { Server } from 'socket.io';
 
 dotenv.config();
@@ -234,6 +235,14 @@ app.delete('/api/admin/users/:id', async (req, res) => {
     console.error('Delete user error:', error);
     res.status(500).json({ error: 'Failed to delete user' });
   }
+});
+
+// Serve admin panel static files in production
+app.use(express.static(path.join(__dirname, '../../admin_panel/dist')));
+
+// Fallback to admin panel for unhandled routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../admin_panel/dist/index.html'));
 });
 
 const PORT = process.env.PORT || 5000;

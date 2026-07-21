@@ -26,7 +26,7 @@ const Students = () => {
     const fetchStudents = async (showLoading = true) => {
       if (showLoading) setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5000/api/admin/users?role=Student');
+        const response = await fetch('/api/admin/users?role=Student');
         if (response.ok) {
           const data = await response.json();
           if (isMounted) setStudents(data);
@@ -63,7 +63,7 @@ const Students = () => {
   const handleDelete = async (id: string, name: string) => {
     if (window.confirm(`Haqiqatan ham ${name} o'quvchini o'chirmoqchimisiz?`)) {
       try {
-        const response = await fetch(`http://localhost:5000/api/admin/users/${id}`, {
+        const response = await fetch(`/api/admin/users/${id}`, {
           method: 'DELETE'
         });
         if (response.ok) {
@@ -81,7 +81,7 @@ const Students = () => {
     e.preventDefault();
     if (!editingUser) return;
     try {
-      const response = await fetch(`http://localhost:5000/api/admin/users/${editingUser.id}`, {
+      const response = await fetch(`/api/admin/users/${editingUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(editingUser)
