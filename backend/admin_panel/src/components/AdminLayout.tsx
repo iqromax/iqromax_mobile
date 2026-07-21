@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Users, Search, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus } from 'lucide-react';
+import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {

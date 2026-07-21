@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { 
   Users, UserCheck, DollarSign, FileText, 
@@ -265,7 +265,7 @@ const Dashboard = () => {
                   <YAxis stroke="#4B4B6B" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `${val/1000}K`} />
                   <Tooltip content={<CustomTooltip />} cursor={{ fill: '#1A1A2F', opacity: 0.4 }} />
                   <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {revenueData.map((entry, index) => (
+                    {revenueData.map((_entry, index) => (
                       <Cell key={`cell-${index}`} fill={index === revenueData.length - 1 ? '#A855F7' : '#7C3AED'} />
                     ))}
                   </Bar>
