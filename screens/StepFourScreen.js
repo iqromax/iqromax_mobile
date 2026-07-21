@@ -45,7 +45,7 @@ const LOCALIZED_LANGUAGES = {
   ko: { en: "영어", ru: "러시아어", uz: "우즈베크어", ar: "아랍어", tr: "튀르키예어", zh: "중국어", ky: "키르기스어", kk: "카자흐어", tg: "타지크어", ja: "일본어", ko: "한국어" },
 };
 
-export default function StepFourScreen({ navigation }) {
+export default function StepFourScreen({ navigation, route }) {
   const [selectedLanguage, setSelectedLanguage] = useState('uz');
   const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS['en'];
   const localizedNames = LOCALIZED_LANGUAGES[selectedLanguage] || LOCALIZED_LANGUAGES['en'];
@@ -120,7 +120,10 @@ export default function StepFourScreen({ navigation }) {
           disabled={!selectedLanguage}
           onPress={() => {
             requestAnimationFrame(() => {
-              navigation.navigate('StepFive', { language: selectedLanguage });
+              navigation.navigate('StepFive', { 
+                ...route.params,
+                language: selectedLanguage 
+              });
             });
           }}
         >

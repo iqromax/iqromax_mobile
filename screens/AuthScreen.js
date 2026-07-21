@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated, Alert, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../src/config/api';
 
 const CustomAnimatedInput = ({ icon, rightIcon, ...props }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -48,19 +50,113 @@ export default function AuthScreen({ navigation, route }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAuthAction = () => {
+  const handleAuthAction = async () => {
     if (activeTab === 'register') {
       if (!name.trim() || !phone.trim() || !email.trim() || !password || !confirmPassword) {
-        // Simple validation check
+        Alert.alert('Xatolik', 'Iltimos, barcha maydonlarni to\'ldiring!');
         return;
       }
-    } else {
-      if (!phone.trim() || !password) {
+      if (password !== confirmPassword) {
+        Alert.alert('Xatolik', 'Parollar mos kelmadi!');
         return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${API_URL}/auth/send-otp`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: email.trim(), name: name.trim() }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Move to OTP screen
+          navigation.navigate('OtpScreen', {
+            role,
+            name: name.trim(),
+            phone: phone.trim(),
+            email: email.trim(),
+            password: password,
+          });
+        } else {
+          Alert.alert('Xatolik', data.error || 'Server xatosi yuz berdi');
+        }
+      } catch (error) {
+        Alert.alert('Xatolik', 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.');
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+
+    } else {
+      // Login logic
+      if (!phone.trim() || !password) {
+        Alert.alert('Xatolik', 'Iltimos, telefon raqami va parolni kiriting!');
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phone.trim(), password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Detect character index if possible
+          let charIndex = 0;
+          let gender = 'boys';
+          const boysChars = ["Max", "Sam", "Leo", "Ray"];
+          const girlsChars = ["Mia", "Zoe", "Eva", "Lily"];
+          
+          if (data.user && data.user.character) {
+             if (boysChars.includes(data.user.character)) {
+               charIndex = boysChars.indexOf(data.user.character);
+               gender = 'boys';
+             } else if (girlsChars.includes(data.user.character)) {
+               charIndex = girlsChars.indexOf(data.user.character);
+               gender = 'girls';
+             }
+          }
+
+          // Save session
+          try {
+            await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
+          } catch (e) {
+            console.error('AsyncStorage error', e);
+          }
+
+          // Reset navigation and go to StudentDashboard with full user data
+          navigation.reset({
+            index: 0,
+            routes: [{ 
+              name: 'StudentDashboard', 
+              params: { 
+                user: data.user,
+                language: data.user.language || 'uz',
+                selectedChar: charIndex,
+                gender: gender
+              } 
+            }]
+          });
+        } else {
+          Alert.alert('Xatolik', data.error || 'Tizimga kirishda xatolik yuz berdi');
+        }
+      } catch (error) {
+        Alert.alert('Xatolik', "Tarmoqqa ulanib bo'lmadi. Internetni tekshiring.");
+        console.error('Login error:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
-    navigation.navigate('StepThree');
   };
 
   return (
@@ -192,14 +288,20 @@ export default function AuthScreen({ navigation, route }) {
             style={[
               styles.loginButton, 
               activeTab === 'register' && { marginTop: 8 },
-              (activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password)) && { opacity: 0.5 }
+              ((activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password)) || isLoading) && { opacity: 0.5 }
             ]} 
             activeOpacity={0.8}
             onPress={handleAuthAction}
-            disabled={activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password)}
+            disabled={activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password) || isLoading}
           >
-            <Text style={styles.loginButtonText}>{activeTab === 'login' ? 'Login' : 'Create Account'}</Text>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+            {isLoading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <>
+                <Text style={styles.loginButtonText}>{activeTab === 'login' ? 'Login' : 'Create Account'}</Text>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+              </>
+            )}
           </TouchableOpacity>
 
           {/* Divider */}

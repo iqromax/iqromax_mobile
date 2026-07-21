@@ -1,10 +1,12 @@
-import React, { useState, Suspense, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, StatusBar, Platform, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useState, Suspense, useRef, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, StatusBar, Platform, ScrollView, ActivityIndicator, Alert, Modal } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image, ImageBackground } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
+import { API_URL } from '../src/config/api';
 
 // Preload 3D models for much faster rendering
 useGLTF.preload(require('../assets/models/adult_male_optimized.glb'));
@@ -201,6 +203,9 @@ export default function StepFiveScreen({ navigation, route }) {
   const [gender, setGender] = useState('boys');
   const [selectedChar, setSelectedChar] = useState(0);
   const [modelLoaded, setModelLoaded] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const handlePrev = () => {
     if (gender === 'boys') {
@@ -218,6 +223,60 @@ export default function StepFiveScreen({ navigation, route }) {
       setSelectedChar(prev => (prev === 7 ? 4 : prev + 1));
     }
     setModelLoaded(false);
+  };
+
+  const handleFinish = async () => {
+    const { role, name, phone, email, password, country } = route.params || {};
+    
+    // Determine character name
+    const charList = gender === 'boys' ? t.boysChars : t.girlsChars;
+    const charIndex = gender === 'boys' ? selectedChar : selectedChar - 4;
+    const characterName = charList[charIndex];
+
+    // If missing register data, just go to dashboard (might be simple login path for now)
+    if (!name || !email) {
+      navigation.navigate('StudentDashboard', { language, selectedChar, gender });
+      return;
+    }
+
+    setIsRegistering(true);
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          role,
+          name,
+          phone,
+          email,
+          password,
+          country,
+          language,
+          character: characterName
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Success
+        setUserData(data.user);
+        
+        try {
+          await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
+        } catch (e) {
+          console.error('AsyncStorage error', e);
+        }
+
+        setShowSuccessModal(true);
+      } else {
+        Alert.alert('Xatolik', data.error || 'Ro\'yxatdan o\'tishda xatolik yuz berdi');
+      }
+    } catch (error) {
+      Alert.alert('Xatolik', 'Tarmoq xatosi. Iltimos tekshirib qayta urinib ko\'ring.');
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   return (
@@ -373,18 +432,54 @@ export default function StepFiveScreen({ navigation, route }) {
       {/* Bottom Fixed Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity 
-          style={styles.button} 
+          style={[styles.button, isRegistering && { opacity: 0.7 }]} 
           activeOpacity={0.8}
+          disabled={isRegistering}
           onPress={() => {
             requestAnimationFrame(() => {
-              navigation.navigate('StudentDashboard', { language, selectedChar, gender });
+              handleFinish();
             });
           }}
         >
-          <Text style={styles.buttonText}>{t.next}</Text>
-          <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
+          {isRegistering ? (
+             <ActivityIndicator color="#000" />
+          ) : (
+            <>
+              <Text style={styles.buttonText}>{t.next}</Text>
+              <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
+            </>
+          )}
         </TouchableOpacity>
       </View>
+
+      {/* Success Modal */}
+      <Modal visible={showSuccessModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalIconContainer}>
+              <MaterialCommunityIcons name="check-decagram" size={60} color="#A855F7" />
+            </View>
+            <Text style={styles.modalTitle}>Tabriklaymiz!</Text>
+            <Text style={styles.modalMessage}>Muvaffaqiyatli ro'yxatdan o'tdingiz.</Text>
+            {userData && (
+              <View style={styles.idContainer}>
+                <Text style={styles.idLabel}>Sizning ID raqamingiz:</Text>
+                <Text style={styles.idValue}>{userData.customId}</Text>
+              </View>
+            )}
+            <TouchableOpacity 
+              style={styles.modalButton} 
+              activeOpacity={0.8}
+              onPress={() => {
+                setShowSuccessModal(false);
+                navigation.navigate('StudentDashboard', { language, selectedChar, gender, user: userData });
+              }}
+            >
+              <Text style={styles.modalButtonText}>Boshlash</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -629,5 +724,83 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 12, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: '#12121D',
+    borderRadius: 24,
+    padding: 30,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#2D1B69',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+  modalIconContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.3)',
+  },
+  modalTitle: {
+    color: '#FFF',
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    color: '#9CA3AF',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  idContainer: {
+    backgroundColor: '#0A0A14',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#A855F7',
+    alignItems: 'center',
+    marginBottom: 30,
+    width: '100%',
+  },
+  idLabel: {
+    color: '#888899',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  idValue: {
+    color: '#FFF',
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: 2,
+  },
+  modalButton: {
+    backgroundColor: '#FACC15',
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

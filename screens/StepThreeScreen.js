@@ -8,7 +8,7 @@ const { width } = Dimensions.get('window');
 
 const ALPHABET = ['ALL', ...Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i)), '#'];
 
-export default function StepThreeScreen({ navigation }) {
+export default function StepThreeScreen({ navigation, route }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLetter, setSelectedLetter] = useState('ALL');
   const [selectedCountry, setSelectedCountry] = useState('UZ');
@@ -162,7 +162,10 @@ export default function StepThreeScreen({ navigation }) {
           disabled={!selectedCountry}
           onPress={() => {
             requestAnimationFrame(() => {
-              navigation.navigate('StepFour');
+              navigation.navigate('StepFour', {
+                ...route.params,
+                country: selectedCountry
+              });
             });
           }}
         >
