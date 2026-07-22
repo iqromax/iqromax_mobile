@@ -33,13 +33,27 @@ const transporter = nodemailer.createTransport({
 // Helper: Generate OTP
 const generateOTP = () => Math.floor(1000 + Math.random() * 9000).toString();
 
+const EMAIL_TRANSLATIONS: Record<string, any> = {
+  en: { subject: 'IQROMAX - Verify your email address', hello: 'Hello', defaultName: 'Student', body: 'Thank you for registering at IQROMAX! Please use the verification code below to confirm your email address. This code will expire in exactly <strong>1 minute</strong>.', ignore: 'If you did not request this code, please ignore this email.' },
+  ru: { subject: 'IQROMAX - Подтвердите ваш email', hello: 'Здравствуйте', defaultName: 'Студент', body: 'Спасибо за регистрацию в IQROMAX! Пожалуйста, используйте код подтверждения ниже, чтобы подтвердить свой адрес электронной почты. Этот код истекает ровно через <strong>1 минуту</strong>.', ignore: 'Если вы не запрашивали этот код, проигнорируйте это письмо.' },
+  uz: { subject: 'IQROMAX - Emailingizni tasdiqlang', hello: 'Salom', defaultName: 'O\'quvchi', body: 'IQROMAX da ro\'yxatdan o\'tganingiz uchun tashakkur! Email manzilingizni tasdiqlash uchun quyidagi tasdiqlash kodidan foydalaning. Ushbu kod aynan <strong>1 daqiqadan</strong> so\'ng o\'z kuchini yo\'qotadi.', ignore: 'Agar siz ushbu kodni so\'ramagan bo\'lsangiz, iltimos, ushbu xatni e\'tiborsiz qoldiring.' },
+  ar: { subject: 'IQROMAX - تأكيد بريدك الإلكتروني', hello: 'مرحباً', defaultName: 'طالب', body: 'شكرًا لتسجيلك في IQROMAX! يرجى استخدام رمز التحقق أدناه لتأكيد عنوان بريدك الإلكتروني. ستنتهي صلاحية هذا الرمز بعد <strong>دقيقة واحدة</strong> بالضبط.', ignore: 'إذا لم تطلب هذا الرمز، يرجى تجاهل هذا البريد الإلكتروني.' },
+  tr: { subject: 'IQROMAX - E-postanızı doğrulayın', hello: 'Merhaba', defaultName: 'Öğrenci', body: 'IQROMAX\'a kayıt olduğunuz için teşekkürler! E-posta adresinizi doğrulamak için lütfen aşağıdaki doğrulama kodunu kullanın. Bu kodun süresi tam olarak <strong>1 dakika</strong> içinde dolacaktır.', ignore: 'Bu kodu siz istemediyseniz, lütfen bu e-postayı dikkate almayın.' },
+  zh: { subject: 'IQROMAX - 验证您的电子邮件', hello: '你好', defaultName: '学生', body: '感谢您在IQROMAX注册！请使用下面的验证码确认您的电子邮件地址。此验证码将在<strong>1分钟</strong>后过期。', ignore: '如果您没有请求此代码，请忽略此电子邮件。' },
+  ky: { subject: 'IQROMAX - Электрондук почтаңызды ырастаңыз', hello: 'Салам', defaultName: 'Студент', body: 'IQROMAX сайтына катталганыңыз үчүн рахмат! Электрондук почтаңызды ырастоо үчүн төмөндөгү ырастоо кодун колдонуңуз. Бул код так <strong>1 мүнөттөн</strong> кийин жараксыз болот.', ignore: 'Эгер бул кодду сурабасаңыз, бул катты этибарга албаңыз.' },
+  kk: { subject: 'IQROMAX - Электрондық поштаңызды растаңыз', hello: 'Сәлеметсіз бе', defaultName: 'Студент', body: 'IQROMAX сайтына тіркелгеніңіз үшін рақмет! Электрондық поштаңызды растау үшін төмендегі растау кодын пайдаланыңыз. Бұл код дәл <strong>1 минуттан</strong> кейін жарамсыз болады.', ignore: 'Егер бұл кодты сұрамасаңыз, бұл хатты елемеңіз.' },
+  tg: { subject: 'IQROMAX - Почтаи электронии худро тасдиқ кунед', hello: 'Салом', defaultName: 'Донишҷӯ', body: 'Ташаккур барои сабти ном дар IQROMAX! Лутфан рамзи тасдиқи зеринро барои тасдиқи суроғаи почтаи электронии худ истифода баред. Ин рамз пас аз <strong>1 дақиқа</strong> беэътибор мешавад.', ignore: 'Агар шумо ин рамзро дархост накарда бошед, лутфан ин номаро нодида гиред.' },
+  ja: { subject: 'IQROMAX - メールアドレスの確認', hello: 'こんにちは', defaultName: '学生', body: 'IQROMAXにご登録いただきありがとうございます！メールアドレスを確認するには、以下の確認コードを使用してください。このコードは正確に<strong>1分</strong>で有効期限が切れます。', ignore: 'このコードをリクエストしていない場合は、このメールを無視してください。' },
+  ko: { subject: 'IQROMAX - 이메일 주소 확인', hello: '안녕하세요', defaultName: '학생', body: 'IQROMAX에 가입해 주셔서 감사합니다! 이메일 주소를 확인하려면 아래 인증 코드를 사용하세요. 이 코드는 정확히 <strong>1분</strong> 후에 만료됩니다.', ignore: '이 코드를 요청하지 않았다면 이 이메일을 무시하세요.' }
+};
+
 // 1. Send OTP
 app.post('/api/auth/send-otp', async (req, res) => {
   console.log('--- SEND OTP REQUEST ---');
   console.log('Body:', req.body);
   console.log('SMTP_USER:', process.env.SMTP_USER);
   try {
-    const { email, name } = req.body;
+    const { email, name, language = 'en' } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
     const code = generateOTP();
@@ -53,11 +67,13 @@ app.post('/api/auth/send-otp', async (req, res) => {
       create: { email, code, expiresAt },
     });
 
+    const t = EMAIL_TRANSLATIONS[language] || EMAIL_TRANSLATIONS['en'];
+
     // Send Email
     const mailOptions = {
       from: `"IQROMAX Admin" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: 'IQROMAX - Verify your email address',
+      subject: t.subject,
       html: `
         <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; background-color: #070712; color: #ffffff; padding: 40px; border-radius: 16px; border: 1px solid #1A1A2F;">
           <div style="text-align: center; margin-bottom: 30px;">
@@ -66,11 +82,10 @@ app.post('/api/auth/send-otp', async (req, res) => {
             </h1>
           </div>
           
-          <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 20px;">Hello ${name || 'Student'},</h2>
+          <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 20px;">${t.hello} ${name || t.defaultName},</h2>
           
           <p style="color: #C7D2FE; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
-            Thank you for registering at IQROMAX! Please use the verification code below to confirm your email address. 
-            This code will expire in exactly <strong>1 minute</strong>.
+            ${t.body}
           </p>
           
           <div style="text-align: center; background-color: #121223; padding: 20px; border-radius: 12px; border: 1px solid #2D1B69; margin-bottom: 30px;">
@@ -78,7 +93,7 @@ app.post('/api/auth/send-otp', async (req, res) => {
           </div>
           
           <p style="color: #818CF8; font-size: 14px; text-align: center; margin-top: 40px;">
-            If you did not request this code, please ignore this email.
+            ${t.ignore}
           </p>
         </div>
       `,
