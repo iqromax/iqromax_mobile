@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, Image, TouchableOpacity, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
@@ -47,7 +48,15 @@ export default function ResetPasswordScreen({ route, navigation }) {
         body: JSON.stringify({ email, newPassword: password, language })
       });
       
-      const data = await response.json();
+      let data = {};
+      const responseText = await response.text();
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Non-JSON response:', responseText);
+        Alert.alert(t.errorTitle, 'Server is not updated or returned an invalid response. Please update the backend server.');
+        return;
+      }
       
       if (response.ok) {
         Alert.alert('', t.success, [
