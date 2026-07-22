@@ -47,6 +47,20 @@ const EMAIL_TRANSLATIONS: Record<string, any> = {
   ko: { subject: 'IQROMAX - 이메일 주소 확인', hello: '안녕하세요', defaultName: '학생', body: 'IQROMAX에 가입해 주셔서 감사합니다! 이메일 주소를 확인하려면 아래 인증 코드를 사용하세요. 이 코드는 정확히 <strong>1분</strong> 후에 만료됩니다.', ignore: '이 코드를 요청하지 않았다면 이 이메일을 무시하세요.' }
 };
 
+const FORGOT_PASS_TRANSLATIONS: Record<string, any> = {
+  en: { subject: 'IQROMAX - Password Reset Code', hello: 'Hello', defaultName: 'User', body: 'We received a request to reset your password. Please use the verification code below to reset it. This code will expire in exactly <strong>1 minute</strong>.', ignore: 'If you did not request a password reset, please ignore this email.' },
+  ru: { subject: 'IQROMAX - Код сброса пароля', hello: 'Здравствуйте', defaultName: 'Студент', body: 'Мы получили запрос на сброс вашего пароля. Пожалуйста, используйте код подтверждения ниже, чтобы сбросить его. Этот код истекает ровно через <strong>1 минуту</strong>.', ignore: 'Если вы не запрашивали сброс пароля, проигнорируйте это письмо.' },
+  uz: { subject: 'IQROMAX - Parolni tiklash kodi', hello: 'Salom', defaultName: 'O\'quvchi', body: 'Biz parolingizni tiklash bo\'yicha so\'rov oldik. Uni tiklash uchun quyidagi tasdiqlash kodidan foydalaning. Ushbu kod aynan <strong>1 daqiqadan</strong> so\'ng o\'z kuchini yo\'qotadi.', ignore: 'Agar siz parolni tiklashni so\'ramagan bo\'lsangiz, iltimos, ushbu xatni e\'tiborsiz qoldiring.' },
+  ar: { subject: 'IQROMAX - رمز إعادة تعيين كلمة المرور', hello: 'مرحباً', defaultName: 'طالب', body: 'لقد تلقينا طلبًا لإعادة تعيين كلمة المرور الخاصة بك. يرجى استخدام رمز التحقق أدناه لإعادة تعيينها. ستنتهي صلاحية هذا الرمز بعد <strong>دقيقة واحدة</strong> بالضبط.', ignore: 'إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا البريد الإلكتروني.' },
+  tr: { subject: 'IQROMAX - Şifre Sıfırlama Kodu', hello: 'Merhaba', defaultName: 'Öğrenci', body: 'Şifrenizi sıfırlama isteği aldık. Sıfırlamak için lütfen aşağıdaki doğrulama kodunu kullanın. Bu kodun süresi tam olarak <strong>1 dakika</strong> içinde dolacaktır.', ignore: 'Şifre sıfırlama isteğinde bulunmadıysanız, lütfen bu e-postayı dikkate almayın.' },
+  zh: { subject: 'IQROMAX - 密码重置代码', hello: '你好', defaultName: '学生', body: '我们收到了重置您的密码的请求。请使用下面的验证码进行重置。此验证码将在<strong>1分钟</strong>后过期。', ignore: '如果您没有请求重置密码，请忽略此电子邮件。' },
+  ky: { subject: 'IQROMAX - Сырсөздү калыбына келтирүү коду', hello: 'Салам', defaultName: 'Студент', body: 'Биз сиздин сырсөздү калыбына келтирүү өтүнүчүн алдык. Аны калыбына келтирүү үчүн төмөндөгү ырастоо кодун колдонуңуз. Бул код так <strong>1 мүнөттөн</strong> кийин жараксыз болот.', ignore: 'Эгер сырсөздү калыбына келтирүүнү сурабасаңыз, бул катты этибарга албаңыз.' },
+  kk: { subject: 'IQROMAX - Құпия сөзді қалпына келтіру коды', hello: 'Сәлеметсіз бе', defaultName: 'Студент', body: 'Біз сіздің құпия сөзіңізді қалпына келтіру сұрауын алдық. Оны қалпына келтіру үшін төмендегі растау кодын пайдаланыңыз. Бұл код дәл <strong>1 минуттан</strong> кейін жарамсыз болады.', ignore: 'Егер құпия сөзді қалпына келтіруді сұрамасаңыз, бұл хатты елемеңіз.' },
+  tg: { subject: 'IQROMAX - Рамзи барқароркунии парол', hello: 'Салом', defaultName: 'Донишҷӯ', body: 'Мо дархостро барои барқарор кардани пароли шумо гирифтем. Лутфан рамзи тасдиқи зеринро барои барқарор кардани он истифода баред. Ин рамз пас аз <strong>1 дақиқа</strong> беэътибор мешавад.', ignore: 'Агар шумо барқароркунии паролро дархост накарда бошед, лутфан ин номаро нодида гиред.' },
+  ja: { subject: 'IQROMAX - パスワードリセットコード', hello: 'こんにちは', defaultName: '学生', body: 'パスワードのリセットリクエストを受け取りました。リセットするには以下の確認コードを使用してください。このコードは正確に<strong>1分</strong>で有効期限が切れます。', ignore: 'パスワードのリセットをリクエストしていない場合は、このメールを無視してください。' },
+  ko: { subject: 'IQROMAX - 비밀번호 재설정 코드', hello: '안녕하세요', defaultName: '학생', body: '비밀번호 재설정 요청을 받았습니다. 재설정하려면 아래 인증 코드를 사용하세요. 이 코드는 정확히 <strong>1분</strong> 후에 만료됩니다.', ignore: '비밀번호 재설정을 요청하지 않았다면 이 이메일을 무시하세요.' }
+};
+
 // 1. Send OTP
 app.post('/api/auth/send-otp', async (req, res) => {
   console.log('--- SEND OTP REQUEST ---');
@@ -130,6 +144,86 @@ app.post('/api/auth/verify-otp', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to verify OTP' });
+  }
+});
+
+// Forgot password OTP
+app.post('/api/auth/forgot-password-otp', async (req, res) => {
+  try {
+    const { email, language = 'en' } = req.body;
+    
+    // Check if user exists
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      // Return localized error message if possible, or simple error
+      const tLogin = LOGIN_TRANSLATIONS[language] || LOGIN_TRANSLATIONS['en'];
+      return res.status(400).json({ error: tLogin.userNotFound });
+    }
+
+    const code = generateOTP();
+    const expiresAt = new Date(Date.now() + 60 * 1000);
+
+    await prisma.otp.upsert({
+      where: { email },
+      update: { code, expiresAt },
+      create: { email, code, expiresAt },
+    });
+
+    const t = FORGOT_PASS_TRANSLATIONS[language] || FORGOT_PASS_TRANSLATIONS['en'];
+
+    const mailOptions = {
+      from: `"IQROMAX Admin" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: t.subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto; background-color: #070712; color: #ffffff; padding: 40px; border-radius: 16px; border: 1px solid #1A1A2F;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ffffff; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 2px;">
+              IQRO<span style="color: #A855F7;">MAX</span>
+            </h1>
+          </div>
+          
+          <h2 style="color: #ffffff; font-size: 24px; margin-bottom: 20px;">${t.hello} ${user.name || t.defaultName},</h2>
+          
+          <p style="color: #C7D2FE; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+            ${t.body}
+          </p>
+          
+          <div style="text-align: center; background-color: #121223; padding: 20px; border-radius: 12px; border: 1px solid #2D1B69; margin-bottom: 30px;">
+            <span style="font-size: 48px; font-weight: bold; letter-spacing: 12px; color: #A855F7;">${code}</span>
+          </div>
+          
+          <p style="color: #818CF8; font-size: 14px; text-align: center; margin-top: 40px;">
+            ${t.ignore}
+          </p>
+        </div>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    res.json({ message: 'OTP sent successfully' });
+  } catch (error) {
+    console.error('Forgot password OTP error:', error);
+    res.status(500).json({ error: 'Failed to send OTP' });
+  }
+});
+
+// Reset password
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    await prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword }
+    });
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
   }
 });
 
