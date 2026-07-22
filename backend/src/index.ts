@@ -173,23 +173,40 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+const LOGIN_TRANSLATIONS: Record<string, any> = {
+  en: { userNotFound: 'User not found. Check your phone number.', wrongPass: 'Incorrect password', inactive: 'Account is not active. Contact admin.', serverErr: 'Internal server error' },
+  ru: { userNotFound: 'Пользователь не найден. Проверьте номер телефона.', wrongPass: 'Неверный пароль', inactive: 'Аккаунт не активен. Обратитесь к админу.', serverErr: 'Внутренняя ошибка сервера' },
+  uz: { userNotFound: 'Foydalanuvchi topilmadi. Telefon raqamini tekshiring.', wrongPass: 'Parol noto\'g\'ri', inactive: 'Akkauntingiz faol emas. Adminga murojaat qiling.', serverErr: 'Ichki server xatosi' },
+  ar: { userNotFound: 'المستخدم غير موجود. تحقق من رقم الهاتف.', wrongPass: 'كلمة المرور غير صحيحة', inactive: 'الحساب غير نشط. اتصل بالمسؤول.', serverErr: 'خطأ داخلي في الخادم' },
+  tr: { userNotFound: 'Kullanıcı bulunamadı. Telefon numaranızı kontrol edin.', wrongPass: 'Yanlış şifre', inactive: 'Hesap aktif değil. Yönetici ile iletişime geçin.', serverErr: 'Dahili sunucu hatası' },
+  zh: { userNotFound: '未找到用户。请检查您的电话号码。', wrongPass: '密码错误', inactive: '帐户未激活。请联系管理员。', serverErr: '内部服务器错误' },
+  ky: { userNotFound: 'Колдонуучу табылган жок. Телефон номериңизди текшериңиз.', wrongPass: 'Сырсөз туура эмес', inactive: 'Аккаунт активдүү эмес. Админге кайрылыңыз.', serverErr: 'Ички сервер катасы' },
+  kk: { userNotFound: 'Пайдаланушы табылмады. Телефон нөміріңізді тексеріңіз.', wrongPass: 'Құпия сөз қате', inactive: 'Аккаунт белсенді емес. Әкімшіге хабарласыңыз.', serverErr: 'Ішкі сервер қатесі' },
+  tg: { userNotFound: 'Корбар ёфт нашуд. Рақами телефони худро тафтиш кунед.', wrongPass: 'Рамз нодуруст аст', inactive: 'Ҳисоб фаъол нест. Бо админ тамос гиред.', serverErr: 'Хатои дохилии сервер' },
+  ja: { userNotFound: 'ユーザーが見つかりません。電話番号を確認してください。', wrongPass: 'パスワードが間違っています', inactive: 'アカウントはアクティブではありません。管理者にお問い合わせください。', serverErr: '内部サーバーエラー' },
+  ko: { userNotFound: '사용자를 찾을 수 없습니다. 전화번호를 확인하세요.', wrongPass: '잘못된 비밀번호', inactive: '계정이 비활성 상태입니다. 관리자에게 문의하세요.', serverErr: '내부 서버 오류' }
+};
+
 // User login
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { phone, password } = req.body;
+    const { phone, password, language = 'en' } = req.body;
+    const t = LOGIN_TRANSLATIONS[language] || LOGIN_TRANSLATIONS['en'];
 
     const user = await prisma.user.findFirst({ where: { phone } });
-    if (!user) return res.status(400).json({ error: 'Foydalanuvchi topilmadi. Telefon raqamini tekshiring.' });
+    if (!user) return res.status(400).json({ error: t.userNotFound });
 
     const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) return res.status(400).json({ error: 'Parol noto\'g\'ri' });
+    if (!validPassword) return res.status(400).json({ error: t.wrongPass });
 
-    if (user.status !== 'Faol') return res.status(403).json({ error: 'Akkauntingiz faol emas. Adminga murojaat qiling.' });
+    if (user.status !== 'Faol') return res.status(403).json({ error: t.inactive });
 
     res.json({ message: 'Login successful', user });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Ichki server xatosi' });
+    const lang = req.body?.language || 'en';
+    const tError = LOGIN_TRANSLATIONS[lang] || LOGIN_TRANSLATIONS['en'];
+    res.status(500).json({ error: tError.serverErr });
   }
 });
 
