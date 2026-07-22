@@ -295,7 +295,13 @@ app.post('/api/auth/login', async (req, res) => {
 
     if (user.status !== 'Faol') return res.status(403).json({ error: t.inactive });
 
-    res.json({ message: 'Login successful', user });
+    // Update user's language to the one they selected during login
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { language }
+    });
+
+    res.json({ message: 'Login successful', user: updatedUser });
   } catch (error) {
     console.error('Login error:', error);
     const lang = req.body?.language || 'en';
