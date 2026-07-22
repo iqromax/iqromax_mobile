@@ -19,26 +19,13 @@ const TRANSLATIONS = {
 };
 
 export default function ResetPasswordScreen({ route, navigation }) {
-  const { email } = route.params || {};
+  const { email, language = 'en' } = route.params || {};
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
-  const [language, setLanguage] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const loadLang = async () => {
-      try {
-        const savedLang = await AsyncStorage.getItem('language');
-        if (savedLang) setLanguage(savedLang);
-      } catch (e) {
-        console.error('Error loading language', e);
-      }
-    };
-    loadLang();
-  }, []);
 
   const t = TRANSLATIONS[language] || TRANSLATIONS['en'];
 

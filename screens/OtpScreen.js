@@ -157,7 +157,7 @@ export default function OtpScreen({ navigation, route }) {
         // Give 500ms for the user to see the green success UI
         setTimeout(() => {
           if (route.params?.isResetPassword) {
-            navigation.navigate('ResetPasswordScreen', { email });
+            navigation.navigate('ResetPasswordScreen', { email, language });
           } else {
             navigation.navigate('StepFour', {
               ...route.params,

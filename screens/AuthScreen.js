@@ -369,7 +369,7 @@ export default function AuthScreen({ navigation, route }) {
           {activeTab === 'login' && (
             <TouchableOpacity 
               style={styles.forgotPasswordContainer} 
-              onPress={() => navigation.navigate('ForgotPasswordScreen')}
+              onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
               activeOpacity={0.7}
             >
               <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>

@@ -18,22 +18,10 @@ const TRANSLATIONS = {
   ko: { email: '이메일 주소', sendCode: '코드 전송', errorTitle: '오류', errEmail: '이메일 주소를 입력해주세요', errNetwork: '네트워크 연결 실패. 인터넷을 확인하세요.', dataProtected: '데이터는 안전하게 보호됩니다' }
 };
 
-export default function ForgotPasswordScreen({ navigation }) {
+export default function ForgotPasswordScreen({ route, navigation }) {
+  const { language = 'en' } = route.params || {};
   const [email, setEmail] = useState('');
-  const [language, setLanguage] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const loadLang = async () => {
-      try {
-        const savedLang = await AsyncStorage.getItem('language');
-        if (savedLang) setLanguage(savedLang);
-      } catch (e) {
-        console.error('Error loading language', e);
-      }
-    };
-    loadLang();
-  }, []);
 
   const t = TRANSLATIONS[language] || TRANSLATIONS['en'];
 
@@ -56,7 +44,8 @@ export default function ForgotPasswordScreen({ navigation }) {
       if (response.ok) {
         navigation.navigate('OtpScreen', { 
           email: email.trim(),
-          isResetPassword: true 
+          isResetPassword: true,
+          language
         });
       } else {
         Alert.alert(t.errorTitle, data.error || 'Server error');
