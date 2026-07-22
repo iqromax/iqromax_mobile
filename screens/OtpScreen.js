@@ -194,7 +194,7 @@ export default function OtpScreen({ navigation, route }) {
       await fetch(`${API_URL}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ email, name, language }),
       });
       setTimer(60);
       Alert.alert('', t.msgSent);

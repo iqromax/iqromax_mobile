@@ -162,7 +162,7 @@ export default function AuthScreen({ navigation, route }) {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email: email.trim(), name: name.trim() }),
+          body: JSON.stringify({ email: email.trim(), name: name.trim(), language }),
         });
         
         const data = await response.json();
