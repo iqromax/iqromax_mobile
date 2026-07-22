@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
-import { Search, Plus, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Loader2, AlertTriangle, X } from 'lucide-react';
 
 // Define the User type matching backend schema
 interface User {
@@ -20,6 +20,8 @@ const Students = () => {
   const [students, setStudents] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<{ id: string, name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch users from backend
   useEffect(() => {
@@ -61,20 +63,23 @@ const Students = () => {
     student.phone.includes(searchTerm)
   );
 
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Haqiqatan ham ${name} o'quvchini o'chirmoqchimisiz?`)) {
-      try {
-        const response = await fetch(`/api/admin/users/${id}`, {
-          method: 'DELETE'
-        });
-        if (response.ok) {
-          setStudents(prev => prev.filter(s => s.id !== id));
-        } else {
-          alert("O'chirishda xatolik yuz berdi");
-        }
-      } catch (error) {
-        console.error('Delete error:', error);
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/users/${userToDelete.id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        setStudents(prev => prev.filter(s => s.id !== userToDelete.id));
+        setUserToDelete(null);
+      } else {
+        alert("O'chirishda xatolik yuz berdi");
       }
+    } catch (error) {
+      console.error('Delete error:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -234,7 +239,7 @@ const Students = () => {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDelete(student.id, student.name);
+                              setUserToDelete({ id: student.id, name: student.name });
                             }}
                             className="w-8 h-8 rounded-lg flex items-center justify-center bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all border border-red-500/20 hover:border-red-500 hover:shadow-[0_0_10px_rgba(239,68,68,0.5)]"
                             title="O'chirish"
@@ -326,6 +331,54 @@ const Students = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#05050C]/80 backdrop-blur-sm" onClick={() => !isDeleting && setUserToDelete(null)}></div>
+          <div className="relative w-full max-w-sm bg-[#0A0A16] border border-[#1A1A2F] rounded-2xl shadow-[0_0_40px_rgba(239,68,68,0.15)] overflow-hidden animate-in fade-in zoom-in duration-300">
+            {/* Red accent line at top */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-rose-600"></div>
+            
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+              
+              <h3 className="text-xl font-bold text-white mb-2">O'quvchini o'chirish</h3>
+              <p className="text-sm text-indigo-200/70 mb-6 leading-relaxed">
+                Haqiqatan ham <strong className="text-white font-semibold">{userToDelete.name}</strong> ismli o'quvchini o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.
+              </p>
+              
+              <div className="flex gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => setUserToDelete(null)}
+                  disabled={isDeleting}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-transparent border border-[#1A1A2F] text-indigo-200/70 text-sm font-medium hover:bg-[#121223] hover:text-white transition-all disabled:opacity-50"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-medium hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      O'chirilmoqda
+                    </>
+                  ) : (
+                    "Ha, O'chirish"
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
