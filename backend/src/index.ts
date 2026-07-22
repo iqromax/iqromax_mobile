@@ -172,7 +172,7 @@ app.post('/api/auth/forgot-password-otp', async (req, res) => {
     const t = FORGOT_PASS_TRANSLATIONS[language] || FORGOT_PASS_TRANSLATIONS['en'];
 
     const mailOptions = {
-      from: `"IQROMAX Admin" <${process.env.SMTP_USER}>`,
+      from: `"IQROMAX Security" <${process.env.SMTP_USER}>`,
       to: email,
       subject: t.subject,
       html: `
