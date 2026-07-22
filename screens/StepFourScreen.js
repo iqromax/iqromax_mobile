@@ -8,7 +8,23 @@ const { width } = Dimensions.get('window');
 
 const ALPHABET = ['ALL', ...Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i)), '#'];
 
+const TRANSLATIONS = {
+  en: { step: 'STEP 4', search: 'Search for a country...', recommended: 'RECOMMENDED FOR YOU', all: 'ALL COUNTRIES', continue: 'CONTINUE' },
+  ru: { step: 'ШАГ 4', search: 'Поиск страны...', recommended: 'РЕКОМЕНДУЕТСЯ ДЛЯ ВАС', all: 'ВСЕ СТРАНЫ', continue: 'ПРОДОЛЖИТЬ' },
+  uz: { step: '4-QADAM', search: 'Davlatni qidiring...', recommended: 'SIZ UCHUN TAVSIYA ETILADI', all: 'BARCHA DAVLATLAR', continue: 'DAVOM ETISH' },
+  ar: { step: 'الخطوة 4', search: 'ابحث عن بلد...', recommended: 'موصى به لك', all: 'جميع البلدان', continue: 'استمر' },
+  tr: { step: 'ADIM 4', search: 'Bir ülke arayın...', recommended: 'SİZİN İÇİN ÖNERİLEN', all: 'TÜM ÜLKELER', continue: 'DEVAM ET' },
+  zh: { step: '第4步', search: '搜索国家...', recommended: '为您推荐', all: '所有国家', continue: '继续' },
+  ky: { step: '4-КАДАМ', search: 'Өлкөнү издөө...', recommended: 'СИЗ ҮЧҮН СУНУШТАЛАТ', all: 'БАРДЫК ӨЛКӨЛӨР', continue: 'УЛАНТУУ' },
+  kk: { step: '4-ҚАДАМ', search: 'Елді іздеу...', recommended: 'СІЗ ҮШІН ҰСЫНЫЛАДЫ', all: 'БАРЛЫҚ ЕЛДЕР', continue: 'ЖАЛҒАСТЫРУ' },
+  tg: { step: 'ҚАДАМИ 4', search: 'Ҷустуҷӯи кишвар...', recommended: 'БАРОИ ШУМО ТАВСИЯ МЕШАВАД', all: 'ҲАМАИ КИШВАРҲО', continue: 'ИДОМА ДОДАН' },
+  ja: { step: 'ステップ 4', search: '国を検索...', recommended: 'あなたへのおすすめ', all: 'すべての国', continue: '続ける' },
+  ko: { step: '4단계', search: '국가 검색...', recommended: '추천 국가', all: '모든 국가', continue: '계속하기' }
+};
+
 export default function StepFourScreen({ navigation, route }) {
+  const { language = 'en' } = route.params || {};
+  const t = TRANSLATIONS[language] || TRANSLATIONS['en'];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLetter, setSelectedLetter] = useState('ALL');
   const [selectedCountry, setSelectedCountry] = useState('UZ');
@@ -67,7 +83,7 @@ export default function StepFourScreen({ navigation, route }) {
           <Ionicons name="chevron-back" size={28} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.stepText}>STEP 4</Text>
+          <Text style={styles.stepText}>{t.step}</Text>
           <View style={styles.pagination}>
             <View style={styles.dot} />
             <View style={styles.dot} />
@@ -96,7 +112,7 @@ export default function StepFourScreen({ navigation, route }) {
               <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search for a country..."
+                placeholder={t.search}
                 placeholderTextColor="#666"
                 value={searchQuery}
                 onChangeText={(text) => {
@@ -140,13 +156,13 @@ export default function StepFourScreen({ navigation, route }) {
               <>
                 <View style={styles.sectionHeader}>
                   <MaterialCommunityIcons name="star-outline" size={16} color="#A855F7" />
-                  <Text style={styles.sectionTitle}>RECOMMENDED FOR YOU</Text>
+                  <Text style={styles.sectionTitle}>{t.recommended}</Text>
                 </View>
                 {renderCountryItem({ item: recommendedCountry })}
                 
                 <View style={styles.sectionHeader}>
                   <MaterialCommunityIcons name="web" size={16} color="#A855F7" />
-                  <Text style={styles.sectionTitle}>ALL COUNTRIES</Text>
+                  <Text style={styles.sectionTitle}>{t.all}</Text>
                 </View>
               </>
             )}
@@ -171,7 +187,7 @@ export default function StepFourScreen({ navigation, route }) {
             });
           }}
         >
-          <Text style={styles.buttonText}>CONTINUE</Text>
+          <Text style={styles.buttonText}>{t.continue}</Text>
           <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
         </TouchableOpacity>
       </View>

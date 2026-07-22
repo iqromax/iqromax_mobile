@@ -9,77 +9,77 @@ const TRANSLATIONS = {
     resendAsk: "Didn't receive the code?", resend: "Resend", resendIn: "Resend in ", s: "s",
     errCode: "Please enter the 4-digit code", errInvalid: "Invalid or expired code",
     errNetwork: "Failed to connect to the network.", msgSent: "A new code has been sent to your email",
-    errSent: "Failed to resend the code", tryAgain: "Try Again"
+    errSent: "Failed to resend the code", tryAgain: "Try Again", oops: "Oops!"
   },
   ru: { 
     title: 'Подтвердите ваш email', subtitle1: 'Мы отправили 4-значный код на ', subtitle2: '. Введите его ниже:',
     resendAsk: "Не получили код?", resend: "Отправить снова", resendIn: "Отправить через ", s: "с",
     errCode: "Пожалуйста, введите 4-значный код", errInvalid: "Неверный или просроченный код",
     errNetwork: "Не удалось подключиться к сети.", msgSent: "Новый код отправлен на ваш email",
-    errSent: "Не удалось отправить код", tryAgain: "Попробовать снова"
+    errSent: "Не удалось отправить код", tryAgain: "Попробовать снова", oops: "Ой!"
   },
   uz: { 
     title: 'Emailni tasdiqlang', subtitle1: 'Biz 4 xonali kodni quyidagi manzilga yubordik: ', subtitle2: '. Iltimos, uni pastga kiriting:',
     resendAsk: "Kodni olmadingizmi?", resend: "Qayta yuborish", resendIn: "Qayta yuborish: ", s: "s",
     errCode: "Iltimos, 4 xonali kodni kiriting", errInvalid: "Kod noto'g'ri yoki muddati o'tgan",
     errNetwork: "Tarmoqqa ulanib bo'lmadi.", msgSent: "Yangi kod emailingizga yuborildi",
-    errSent: "Kodni qayta yuborib bo'lmadi", tryAgain: "Qaytadan urinish"
+    errSent: "Kodni qayta yuborib bo'lmadi", tryAgain: "Qaytadan urinish", oops: "Xatolik!"
   },
   ar: { 
     title: 'تأكيد بريدك الإلكتروني', subtitle1: 'لقد أرسلنا رمزًا مكونًا من 4 أرقام إلى ', subtitle2: '. يرجى إدخاله أدناه:',
     resendAsk: "لم تستلم الرمز؟", resend: "إعادة إرسال", resendIn: "إعادة الإرسال خلال ", s: "ث",
     errCode: "يرجى إدخال الرمز المكون من 4 أرقام", errInvalid: "الرمز غير صالح أو منتهي الصلاحية",
     errNetwork: "فشل الاتصال بالشبكة.", msgSent: "تم إرسال رمز جديد إلى بريدك الإلكتروني",
-    errSent: "فشل إعادة إرسال الرمز", tryAgain: "حاول مرة أخرى"
+    errSent: "فشل إعادة إرسال الرمز", tryAgain: "حاول مرة أخرى", oops: "عفوًا!"
   },
   tr: { 
     title: 'E-postanızı doğrulayın', subtitle1: '4 haneli bir kodu şuraya gönderdik: ', subtitle2: '. Lütfen aşağıya girin:',
     resendAsk: "Kodu almadınız mı?", resend: "Tekrar gönder", resendIn: "Tekrar gönderilecek süre: ", s: "sn",
     errCode: "Lütfen 4 haneli kodu girin", errInvalid: "Geçersiz veya süresi dolmuş kod",
     errNetwork: "Ağa bağlanılamadı.", msgSent: "E-postanıza yeni bir kod gönderildi",
-    errSent: "Kod tekrar gönderilemedi", tryAgain: "Tekrar Dene"
+    errSent: "Kod tekrar gönderilemedi", tryAgain: "Tekrar Dene", oops: "Hata!"
   },
   zh: { 
     title: '验证您的电子邮件', subtitle1: '我们已向 ', subtitle2: ' 发送了4位数的代码。请在下面输入：',
     resendAsk: "没有收到验证码？", resend: "重新发送", resendIn: "重新发送还有 ", s: "秒",
     errCode: "请输入4位数代码", errInvalid: "无效或已过期的代码",
     errNetwork: "无法连接到网络。", msgSent: "新代码已发送到您的邮箱",
-    errSent: "重新发送代码失败", tryAgain: "重试"
+    errSent: "重新发送代码失败", tryAgain: "重试", oops: "哎呀！"
   },
   ky: { 
     title: 'Электрондук почтаңызды ырастаңыз', subtitle1: 'Биз 4 орундуу кодду ', subtitle2: ' дарегине жөнөттүк. Аны төмөнгө киргизиңиз:',
     resendAsk: "Код алган жоксузбу?", resend: "Кайра жөнөтүү", resendIn: "Кайра жөнөтүү убактысы: ", s: "с",
     errCode: "Сураныч, 4 орундуу кодду киргизиңиз", errInvalid: "Код туура эмес же мөөнөтү бүткөн",
     errNetwork: "Тармакка туташуу мүмкүн эмес.", msgSent: "Жаңы код электрондук почтаңызга жөнөтүлдү",
-    errSent: "Кодду кайра жөнөтүү мүмкүн эмес", tryAgain: "Кайра аракет кылуу"
+    errSent: "Кодду кайра жөнөтүү мүмкүн эмес", tryAgain: "Кайра аракет кылуу", oops: "Ката!"
   },
   kk: { 
     title: 'Электрондық поштаңызды растаңыз', subtitle1: 'Біз 4 таңбалы кодты ', subtitle2: ' мекенжайына жібердік. Оны төменде енгізіңіз:',
     resendAsk: "Кодты алмадыңыз ба?", resend: "Қайта жіберу", resendIn: "Қайта жіберу уақыты: ", s: "с",
     errCode: "Өтінеміз, 4 таңбалы кодты енгізіңіз", errInvalid: "Код қате немесе мерзімі біткен",
     errNetwork: "Желіге қосылу мүмкін емес.", msgSent: "Жаңа код электрондық поштаңызға жіберілді",
-    errSent: "Кодты қайта жіберу мүмкін емес", tryAgain: "Қайта байқап көру"
+    errSent: "Кодты қайта жіберу мүмкін емес", tryAgain: "Қайта байқап көру", oops: "Қате!"
   },
   tg: { 
     title: 'Почтаи электронии худро тасдиқ кунед', subtitle1: 'Мо рамзи 4-рақамаро ба ', subtitle2: ' фиристодем. Лутфан онро дар зер ворид кунед:',
     resendAsk: "Рамзро нагирифтед?", resend: "Дубора фиристодан", resendIn: "Дубора фиристодан дар ", s: "с",
     errCode: "Лутфан рамзи 4-рақамаро ворид кунед", errInvalid: "Рамз нодуруст ё мӯҳлаташ гузаштааст",
     errNetwork: "Пайвастшавӣ ба шабака ноком шуд.", msgSent: "Рамзи нав ба почтаи электронии шумо фиристода шуд",
-    errSent: "Дубора фиристодани рамз ноком шуд", tryAgain: "Дубора кӯшиш кунед"
+    errSent: "Дубора фиристодани рамз ноком шуд", tryAgain: "Дубора кӯшиш кунед", oops: "Хатогӣ!"
   },
   ja: { 
     title: 'メールを確認する', subtitle1: '4桁のコードを ', subtitle2: ' に送信しました。以下に入力してください：',
     resendAsk: "コードを受け取っていませんか？", resend: "再送信", resendIn: "再送信まで ", s: "秒",
     errCode: "4桁のコードを入力してください", errInvalid: "無効または期限切れのコード",
     errNetwork: "ネットワークへの接続に失敗しました。", msgSent: "新しいコードがメールに送信されました",
-    errSent: "コードの再送信に失敗しました", tryAgain: "再試行"
+    errSent: "コードの再送信に失敗しました", tryAgain: "再試行", oops: "おっと！"
   },
   ko: { 
     title: '이메일 확인', subtitle1: '4자리 코드를 ', subtitle2: ' 로 보냈습니다. 아래에 입력해주세요:',
     resendAsk: "코드를 받지 못하셨나요?", resend: "재전송", resendIn: "재전송 가능 시간: ", s: "초",
     errCode: "4자리 코드를 입력해주세요", errInvalid: "잘못되었거나 만료된 코드",
     errNetwork: "네트워크 연결에 실패했습니다.", msgSent: "새 코드가 이메일로 전송되었습니다",
-    errSent: "코드 재전송에 실패했습니다", tryAgain: "다시 시도"
+    errSent: "코드 재전송에 실패했습니다", tryAgain: "다시 시도", oops: "앗!"
   }
 };
 
@@ -291,7 +291,7 @@ export default function OtpScreen({ navigation, route }) {
               <View style={styles.modalIconContainer}>
                 <Feather name="alert-triangle" size={40} color="#EF4444" />
               </View>
-              <Text style={styles.modalTitle}>Oops!</Text>
+              <Text style={styles.modalTitle}>{t.oops}</Text>
               <Text style={styles.modalMessage}>{errorMessage}</Text>
               
               <TouchableOpacity style={styles.modalButton} onPress={handleModalClose} activeOpacity={0.8}>
