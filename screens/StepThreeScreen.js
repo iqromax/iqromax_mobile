@@ -1,175 +1,139 @@
-import React, { useState, useMemo } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, TextInput, FlatList, ScrollView, Platform } from 'react-native';
-import { Image } from 'expo-image';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { COUNTRIES } from '../data/countries';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, StatusBar, Platform } from 'react-native';
+import { Image, ImageBackground } from 'expo-image';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const { width } = Dimensions.get('window');
-
-const ALPHABET = ['ALL', ...Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i)), '#'];
+const ROLES = [
+  {
+    id: 'student',
+    title: 'Student',
+    subtitle: 'Practice and develop yourself',
+    image: require('../assets/role_student.png'),
+    bgUnselected: require('../assets/student_card_unselected.png'),
+    bgSelected: require('../assets/student_card_selected.png'),
+    aspectRatio: 1024 / 479,
+    color: '#32CD32', // Green
+  },
+  {
+    id: 'parent',
+    title: 'Parent',
+    subtitle: "Track and support your child's achievements",
+    image: require('../assets/role_parent.png'),
+    bgUnselected: require('../assets/parent_card_unselected.png'),
+    bgSelected: require('../assets/parent_card_selected.png'),
+    aspectRatio: 1024 / 448,
+    color: '#A855F7', // Purple
+  },
+  {
+    id: 'teacher',
+    title: 'Teacher',
+    subtitle: 'Manage and develop your students',
+    image: require('../assets/role_teacher.png'),
+    bgUnselected: require('../assets/teacher_card_unselected.png'),
+    bgSelected: require('../assets/teacher_card_selected.png'),
+    aspectRatio: 1024 / 448,
+    color: '#3B82F6', // Blue
+  },
+];
 
 export default function StepThreeScreen({ navigation, route }) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLetter, setSelectedLetter] = useState('ALL');
-  const [selectedCountry, setSelectedCountry] = useState('UZ');
+  const [selectedRole, setSelectedRole] = useState(null);
 
-  const filteredCountries = useMemo(() => {
-    let result = COUNTRIES;
-    
-    if (searchQuery) {
-      result = result.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    } else if (selectedLetter !== 'ALL') {
-      if (selectedLetter === '#') {
-        // Just for edge cases if numbers exist, though not really for standard countries
-        result = result.filter(c => !/^[A-Za-z]/.test(c.name));
-      } else {
-        result = result.filter(c => c.name.startsWith(selectedLetter));
-      }
+  const handleNext = () => {
+    if (selectedRole) {
+      // Proceed to AuthScreen
+      navigation.navigate('AuthScreen', { ...route.params, role: selectedRole });
     }
-    return result;
-  }, [searchQuery, selectedLetter]);
-
-  const recommendedCountry = COUNTRIES.find(c => c.code === 'UZ');
-
-  const renderCountryItem = ({ item }) => {
-    const isSelected = selectedCountry === item.code;
-    return (
-      <TouchableOpacity 
-        style={[styles.countryItem, isSelected && styles.countryItemSelected]}
-        onPress={() => setSelectedCountry(item.code)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.countryInfo}>
-          <Text style={styles.flag}>{item.flag}</Text>
-          <View style={styles.countryTextContainer}>
-            <Text style={styles.countryName}>{item.name}</Text>
-            <Text style={styles.capitalName}>{item.capital}</Text>
-          </View>
-        </View>
-        
-        {isSelected ? (
-          <View style={styles.radioSelected}>
-            <MaterialCommunityIcons name="check" size={16} color="#FFF" />
-          </View>
-        ) : (
-          <View style={styles.radioUnselected} />
-        )}
-      </TouchableOpacity>
-    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#05050C" />
       
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={28} color="#FFFFFF" />
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.stepText}>STEP 3</Text>
-          <View style={styles.pagination}>
-            <View style={styles.dot} />
-            <View style={styles.dot} />
-            <View style={[styles.dot, styles.activeDot]} />
-          </View>
+      {/* Header */}
+      <View style={styles.headerCenter}>
+        <Text style={styles.stepText}>STEP 3</Text>
+        <View style={styles.pagination}>
+          <View style={styles.dot} />
+          <View style={styles.dot} />
+          <View style={[styles.dot, styles.activeDot]} />
+          <View style={styles.dot} />
+          <View style={styles.dot} />
         </View>
       </View>
 
-      <FlatList
-        data={filteredCountries}
-        keyExtractor={(item) => item.code}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <>
-            <Image 
-              source={require('../assets/hero_card.png')} 
-              style={styles.heroCardImage} 
-              contentFit="fill" 
-              transition={200}
-            />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>CHOOSE YOUR ROLE</Text>
 
-            <View style={styles.searchContainer}>
-              <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search for a country..."
-                placeholderTextColor="#666"
-                value={searchQuery}
-                onChangeText={(text) => {
-                  setSearchQuery(text);
-                  setSelectedLetter('ALL'); // Reset alphabet filter when searching
-                }}
-              />
-              {searchQuery ? (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={20} color="#666" />
-                </TouchableOpacity>
-              ) : null}
-            </View>
+        <View style={styles.rolesContainer}>
+          {ROLES.map((role) => {
+            const isSelected = selectedRole === role.id;
 
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false} 
-              style={styles.alphabetScroll}
-              contentContainerStyle={styles.alphabetContent}
-            >
-              {ALPHABET.map(letter => {
-                const isActive = selectedLetter === letter && !searchQuery;
-                return (
-                  <TouchableOpacity
-                    key={letter}
-                    style={[styles.letterButton, isActive && styles.letterButtonActive]}
-                    onPress={() => {
-                      setSelectedLetter(letter);
-                      setSearchQuery(''); // Reset search when clicking alphabet
-                    }}
+            if (role.bgUnselected) {
+              const bgSource = isSelected ? role.bgSelected : role.bgUnselected;
+              return (
+                <TouchableOpacity
+                  key={role.id}
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedRole(role.id)}
+                >
+                  <ImageBackground
+                    source={bgSource}
+                    style={[styles.fullCardBackground, { aspectRatio: role.aspectRatio }]}
+                    imageStyle={{ borderRadius: 16 }}
+                    contentFit="fill"
+                    transition={200}
                   >
-                    <Text style={[styles.letterText, isActive && styles.letterTextActive]}>
-                      {letter}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                    <View style={[styles.fullCardTextContainer, role.id === 'parent' && { paddingLeft: 195 }]}>
+                      <Text style={styles.roleTitle}>{role.title}</Text>
+                      <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
+                    </View>
+                  </ImageBackground>
+                </TouchableOpacity>
+              );
+            }
 
-            {!searchQuery && selectedLetter === 'ALL' && recommendedCountry && (
-              <>
-                <View style={styles.sectionHeader}>
-                  <MaterialCommunityIcons name="star-outline" size={16} color="#A855F7" />
-                  <Text style={styles.sectionTitle}>RECOMMENDED FOR YOU</Text>
-                </View>
-                {renderCountryItem({ item: recommendedCountry })}
+            return (
+              <TouchableOpacity
+                key={role.id}
+                style={[
+                  styles.roleCard,
+                  isSelected ? { borderColor: role.color } : null,
+                ]}
+                activeOpacity={0.8}
+                onPress={() => setSelectedRole(role.id)}
+              >
+                <Image source={role.image} style={styles.roleImage} contentFit="contain" transition={200} />
                 
-                <View style={styles.sectionHeader}>
-                  <MaterialCommunityIcons name="web" size={16} color="#A855F7" />
-                  <Text style={styles.sectionTitle}>ALL COUNTRIES</Text>
+                <View style={styles.roleTextContainer}>
+                  <Text style={styles.roleTitle}>{role.title}</Text>
+                  <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
                 </View>
-              </>
-            )}
-          </>
-        }
-        renderItem={renderCountryItem}
-        initialNumToRender={15}
-        maxToRenderPerBatch={20}
-      />
 
-      <View style={styles.bottomContainer}>
+                {isSelected && (
+                  <View style={[styles.checkIcon, { backgroundColor: role.color }]}>
+                    <MaterialCommunityIcons name="check" size={16} color="#FFF" />
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
+
+      {/* Footer / Next Button */}
+      <View style={styles.footer}>
         <TouchableOpacity 
-          style={[styles.button, !selectedCountry && styles.buttonDisabled]} 
+          style={[styles.nextButton, !selectedRole && styles.nextButtonDisabled]}
           activeOpacity={0.8}
-          disabled={!selectedCountry}
           onPress={() => {
             requestAnimationFrame(() => {
-              navigation.navigate('StepFour', {
-                ...route.params,
-                country: selectedCountry
-              });
+              handleNext();
             });
           }}
+          disabled={!selectedRole}
         >
-          <Text style={styles.buttonText}>CONTINUE</Text>
+          <Text style={styles.nextButtonText}>NEXT</Text>
           <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
         </TouchableOpacity>
       </View>
@@ -183,21 +147,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#05050C',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Platform.OS === 'android' ? 5 : 15,
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-  },
-  backButton: {
-    position: 'absolute',
-    left: 15,
-    zIndex: 10,
-    padding: 5,
-  },
   headerCenter: {
     alignItems: 'center',
+    marginVertical: Platform.OS === 'android' ? 5 : 20,
   },
   stepText: {
     color: '#FFFFFF',
@@ -208,6 +160,7 @@ const styles = StyleSheet.create({
   },
   pagination: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   dot: {
@@ -222,148 +175,91 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === 'android' ? 0 : 10,
+    paddingBottom: 20,
   },
-  heroCardImage: {
-    width: '100%',
-    height: 190,
-    marginTop: Platform.OS === 'android' ? 0 : 10,
-    marginBottom: 20,
-    borderRadius: 16,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#12121D',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 50,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#1A1A2E',
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
+  title: {
     color: '#FFFFFF',
-    fontSize: 15,
-  },
-  alphabetScroll: {
-    marginBottom: 24,
-  },
-  alphabetContent: {
-    paddingRight: 20,
-    gap: 8,
-  },
-  letterButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#1A1A2E',
-  },
-  letterButtonActive: {
-    backgroundColor: '#A855F7',
-    borderColor: '#A855F7',
-  },
-  letterText: {
-    color: '#888899',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  letterTextActive: {
-    color: '#FFFFFF',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  sectionTitle: {
-    color: '#A855F7',
-    fontSize: 12,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginLeft: 8,
-    letterSpacing: 1,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 30,
   },
-  countryItem: {
+  rolesContainer: {
+    gap: 16,
+  },
+  fullCardBackground: {
+    width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+  fullCardTextContainer: {
+    flex: 1,
+    paddingLeft: 180, // Move text further right
+    justifyContent: 'center',
+    paddingRight: 24, // Keep it from touching the right edge/checkmark
+  },
+  roleCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#0A0A16',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#1A1A2E',
-  },
-  countryItemSelected: {
-    borderColor: '#A855F7',
-    backgroundColor: '#120A20',
-  },
-  countryInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  flag: {
-    fontSize: 28,
-    marginRight: 16,
-  },
-  countryTextContainer: {
-    flex: 1,
-  },
-  countryName: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  capitalName: {
-    color: '#888899',
-    fontSize: 13,
-  },
-  radioUnselected: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 2,
-    borderColor: '#333344',
+    borderColor: '#1A1A2E',
+    padding: 12,
+    overflow: 'hidden',
+    position: 'relative',
+    height: 120, // Ensure fixed height for uniformity
   },
-  radioSelected: {
+  roleImage: {
+    width: 90,
+    height: 90,
+    marginRight: 16,
+    borderRadius: 10,
+  },
+  roleTextContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  roleTitle: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  roleSubtitle: {
+    color: '#888899',
+    fontSize: 15,
+    lineHeight: 20,
+    paddingRight: 24, // Leave space for checkmark
+  },
+  checkIcon: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#A855F7',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  bottomContainer: {
+  footer: {
     padding: 20,
     paddingBottom: 30,
     backgroundColor: '#05050C',
-    borderTopWidth: 1,
-    borderTopColor: '#1A1A2E',
   },
-  button: {
-    backgroundColor: '#FACC15',
+  nextButton: {
+    backgroundColor: '#FACC15', // Matches StepOneScreen
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 18,
     borderRadius: 16,
   },
-  buttonDisabled: {
-    backgroundColor: '#555540',
-    opacity: 0.7,
+  nextButtonDisabled: {
+    opacity: 0.5,
   },
-  buttonText: {
+  nextButtonText: {
     color: '#000000',
     fontSize: 18,
     fontWeight: 'bold',

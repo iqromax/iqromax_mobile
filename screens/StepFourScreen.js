@@ -1,54 +1,62 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, ScrollView, Platform } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, TextInput, FlatList, ScrollView, Platform } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { COUNTRIES } from '../data/countries';
 
-const LANGUAGES = [
-  { code: 'en', name: 'English', native: 'English', flag: '🇬🇧' },
-  { code: 'ru', name: 'Russian', native: 'Русский', flag: '🇷🇺' },
-  { code: 'uz', name: 'Uzbek', native: "O'zbekcha", flag: '🇺🇿' },
-  { code: 'ar', name: 'Arabic', native: 'العربية', flag: '🇸🇦' },
-  { code: 'tr', name: 'Turkish', native: 'Türkçe', flag: '🇹🇷' },
-  { code: 'zh', name: 'Chinese', native: '中文', flag: '🇨🇳' },
-  { code: 'ky', name: 'Kyrgyz', native: 'Кыргызча', flag: '🇰🇬' },
-  { code: 'kk', name: 'Kazakh', native: 'Қазақша', flag: '🇰🇿' },
-  { code: 'tg', name: 'Tajik', native: 'Тоҷикӣ', flag: '🇹🇯' },
-  { code: 'ja', name: 'Japanese', native: '日本語', flag: '🇯🇵' },
-  { code: 'ko', name: 'Korean', native: '한국어', flag: '🇰🇷' },
-];
+const { width } = Dimensions.get('window');
 
-const TRANSLATIONS = {
-  en: { step: 'STEP 4', title: 'SELECT LANGUAGE', subtitle: 'Choose your preferred language for the application.', continue: 'CONTINUE' },
-  ru: { step: 'ШАГ 4', title: 'ВЫБЕРИТЕ ЯЗЫК', subtitle: 'Выберите предпочитаемый язык для приложения.', continue: 'ПРОДОЛЖИТЬ' },
-  uz: { step: '4-QADAM', title: 'TILNI TANLANG', subtitle: 'Ilova uchun afzal ko\'rgan tilingizni tanlang.', continue: 'DAVOM ETISH' },
-  ar: { step: 'الخطوة 4', title: 'اختر اللغة', subtitle: 'اختر لغتك المفضلة للتطبيق.', continue: 'استمر' },
-  tr: { step: 'ADIM 4', title: 'DİL SEÇİN', subtitle: 'Uygulama için tercih ettiğiniz dili seçin.', continue: 'DEVAM ET' },
-  zh: { step: '第4步', title: '选择语言', subtitle: '为应用程序选择您的首选语言。', continue: '继续' },
-  ky: { step: '4-КАДАМ', title: 'ТИЛДИ ТАНДАҢЫЗ', subtitle: 'Колдонмо үчүн каалаган тилиңизди тандаңыз.', continue: 'УЛАНТУУ' },
-  kk: { step: '4-ҚАДАМ', title: 'ТІЛДІ ТАҢДАҢЫЗ', subtitle: 'Қолданба үшін қалаған тіліңізді таңдаңыз.', continue: 'ЖАЛҒАСТЫРУ' },
-  tg: { step: 'ҚАДАМИ 4', title: 'ЗАБОНРО ИНТИХОБ КУНЕД', subtitle: 'Забони дилхоҳи худро барои барнома интихоб кунед.', continue: 'ИДОМА ДОДАН' },
-  ja: { step: 'ステップ 4', title: '言語を選択', subtitle: 'アプリケーションの優先言語を選択してください。', continue: '続く' },
-  ko: { step: '4단계', title: '언어 선택', subtitle: '애플리케이션에 사용할 언어를 선택하십시오.', continue: '계속하기' },
-};
-
-const LOCALIZED_LANGUAGES = {
-  en: { en: "English", ru: "Russian", uz: "Uzbek", ar: "Arabic", tr: "Turkish", zh: "Chinese", ky: "Kyrgyz", kk: "Kazakh", tg: "Tajik", ja: "Japanese", ko: "Korean" },
-  ru: { en: "Английский", ru: "Русский", uz: "Узбекский", ar: "Арабский", tr: "Турецкий", zh: "Китайский", ky: "Киргизский", kk: "Казахский", tg: "Таджикский", ja: "Японский", ko: "Корейский" },
-  uz: { en: "Ingliz tili", ru: "Rus tili", uz: "O'zbek tili", ar: "Arab tili", tr: "Turk tili", zh: "Xitoy tili", ky: "Qirg'iz tili", kk: "Qozoq tili", tg: "Tojik tili", ja: "Yapon tili", ko: "Koreys tili" },
-  ar: { en: "الإنجليزية", ru: "الروسية", uz: "الأوزبكية", ar: "العربية", tr: "التركية", zh: "الصينية", ky: "القرغيزية", kk: "الكازاخستانية", tg: "الطاجيكية", ja: "اليابانية", ko: "الكورية" },
-  tr: { en: "İngilizce", ru: "Rusça", uz: "Özbekçe", ar: "Arapça", tr: "Türkçe", zh: "Çince", ky: "Kırgızca", kk: "Kazakça", tg: "Tacikçe", ja: "Japonca", ko: "Korece" },
-  zh: { en: "英语", ru: "俄语", uz: "乌兹别克语", ar: "阿拉伯语", tr: "土耳其语", zh: "中文", ky: "吉尔吉斯语", kk: "哈萨克语", tg: "塔吉克语", ja: "日语", ko: "韩语" },
-  ky: { en: "Англис тили", ru: "Орус тили", uz: "Өзбек тили", ar: "Араб тили", tr: "Түрк тили", zh: "Кытай тили", ky: "Кыргыз тили", kk: "Казак тили", tg: "Тажик тили", ja: "Жапон тили", ko: "Корей тили" },
-  kk: { en: "Ағылшын тілі", ru: "Орыс тілі", uz: "Өзбек тілі", ar: "Араб тілі", tr: "Түрік тілі", zh: "Қытай тілі", ky: "Қырғыз тілі", kk: "Қазақ тілі", tg: "Тәжік тілі", ja: "Жапон тілі", ko: "Корей тілі" },
-  tg: { en: "Англисӣ", ru: "Русӣ", uz: "Ӯзбекӣ", ar: "Арабӣ", tr: "Туркӣ", zh: "Хитоӣ", ky: "Қирғизӣ", kk: "Қазоқӣ", tg: "Тоҷикӣ", ja: "Ҷопонӣ", ko: "Кореягӣ" },
-  ja: { en: "英語", ru: "ロシア語", uz: "ウズベク語", ar: "アラビア語", tr: "トルコ語", zh: "中国語", ky: "キルギス語", kk: "カザフ語", tg: "タジク語", ja: "日本語", ko: "韓国語" },
-  ko: { en: "영어", ru: "러시아어", uz: "우즈베크어", ar: "아랍어", tr: "튀르키예어", zh: "중국어", ky: "키르기스어", kk: "카자흐어", tg: "타지크어", ja: "일본어", ko: "한국어" },
-};
+const ALPHABET = ['ALL', ...Array.from({length: 26}, (_, i) => String.fromCharCode(65 + i)), '#'];
 
 export default function StepFourScreen({ navigation, route }) {
-  const [selectedLanguage, setSelectedLanguage] = useState('uz');
-  const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS['en'];
-  const localizedNames = LOCALIZED_LANGUAGES[selectedLanguage] || LOCALIZED_LANGUAGES['en'];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLetter, setSelectedLetter] = useState('ALL');
+  const [selectedCountry, setSelectedCountry] = useState('UZ');
+
+  const filteredCountries = useMemo(() => {
+    let result = COUNTRIES;
+    
+    if (searchQuery) {
+      result = result.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    } else if (selectedLetter !== 'ALL') {
+      if (selectedLetter === '#') {
+        // Just for edge cases if numbers exist, though not really for standard countries
+        result = result.filter(c => !/^[A-Za-z]/.test(c.name));
+      } else {
+        result = result.filter(c => c.name.startsWith(selectedLetter));
+      }
+    }
+    return result;
+  }, [searchQuery, selectedLetter]);
+
+  const recommendedCountry = COUNTRIES.find(c => c.code === 'UZ');
+
+  const renderCountryItem = ({ item }) => {
+    const isSelected = selectedCountry === item.code;
+    return (
+      <TouchableOpacity 
+        style={[styles.countryItem, isSelected && styles.countryItemSelected]}
+        onPress={() => setSelectedCountry(item.code)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.countryInfo}>
+          <Text style={styles.flag}>{item.flag}</Text>
+          <View style={styles.countryTextContainer}>
+            <Text style={styles.countryName}>{item.name}</Text>
+            <Text style={styles.capitalName}>{item.capital}</Text>
+          </View>
+        </View>
+        
+        {isSelected ? (
+          <View style={styles.radioSelected}>
+            <MaterialCommunityIcons name="check" size={16} color="#FFF" />
+          </View>
+        ) : (
+          <View style={styles.radioUnselected} />
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -59,75 +67,111 @@ export default function StepFourScreen({ navigation, route }) {
           <Ionicons name="chevron-back" size={28} color="#FFFFFF" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.stepText}>{t.step}</Text>
+          <Text style={styles.stepText}>STEP 4</Text>
           <View style={styles.pagination}>
             <View style={styles.dot} />
             <View style={styles.dot} />
             <View style={styles.dot} />
             <View style={[styles.dot, styles.activeDot]} />
+            <View style={styles.dot} />
           </View>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.heroContainer}>
-          <Image 
-            source={require('../assets/language_hero.jpg')} 
-            style={styles.heroImage} 
-            contentFit="contain" 
-            transition={200}
-          />
-        </View>
+      <FlatList
+        data={filteredCountries}
+        keyExtractor={(item) => item.code}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          <>
+            <Image 
+              source={require('../assets/hero_card.png')} 
+              style={styles.heroCardImage} 
+              contentFit="fill" 
+              transition={200}
+            />
 
-        <Text style={styles.title}>{t.title}</Text>
-        <Text style={styles.subtitle}>{t.subtitle}</Text>
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search for a country..."
+                placeholderTextColor="#666"
+                value={searchQuery}
+                onChangeText={(text) => {
+                  setSearchQuery(text);
+                  setSelectedLetter('ALL'); // Reset alphabet filter when searching
+                }}
+              />
+              {searchQuery ? (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color="#666" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
 
-        <View style={styles.languagesContainer}>
-          {LANGUAGES.map((lang) => {
-            const isSelected = selectedLanguage === lang.code;
-            return (
-              <TouchableOpacity 
-                key={lang.code}
-                style={[styles.languageItem, isSelected && styles.languageItemSelected]}
-                onPress={() => setSelectedLanguage(lang.code)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.languageInfo}>
-                  <Text style={styles.flag}>{lang.flag}</Text>
-                  <View style={styles.languageTextContainer}>
-                    <Text style={styles.languageName}>{localizedNames[lang.code]}</Text>
-                    <Text style={styles.languageEnglishName}>{lang.native}</Text>
-                  </View>
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={styles.alphabetScroll}
+              contentContainerStyle={styles.alphabetContent}
+            >
+              {ALPHABET.map(letter => {
+                const isActive = selectedLetter === letter && !searchQuery;
+                return (
+                  <TouchableOpacity
+                    key={letter}
+                    style={[styles.letterButton, isActive && styles.letterButtonActive]}
+                    onPress={() => {
+                      setSelectedLetter(letter);
+                      setSearchQuery(''); // Reset search when clicking alphabet
+                    }}
+                  >
+                    <Text style={[styles.letterText, isActive && styles.letterTextActive]}>
+                      {letter}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {!searchQuery && selectedLetter === 'ALL' && recommendedCountry && (
+              <>
+                <View style={styles.sectionHeader}>
+                  <MaterialCommunityIcons name="star-outline" size={16} color="#A855F7" />
+                  <Text style={styles.sectionTitle}>RECOMMENDED FOR YOU</Text>
                 </View>
+                {renderCountryItem({ item: recommendedCountry })}
                 
-                {isSelected ? (
-                  <View style={styles.radioSelected}>
-                    <MaterialCommunityIcons name="check" size={16} color="#FFF" />
-                  </View>
-                ) : (
-                  <View style={styles.radioUnselected} />
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </ScrollView>
+                <View style={styles.sectionHeader}>
+                  <MaterialCommunityIcons name="web" size={16} color="#A855F7" />
+                  <Text style={styles.sectionTitle}>ALL COUNTRIES</Text>
+                </View>
+              </>
+            )}
+          </>
+        }
+        renderItem={renderCountryItem}
+        initialNumToRender={15}
+        maxToRenderPerBatch={20}
+      />
 
       <View style={styles.bottomContainer}>
         <TouchableOpacity 
-          style={[styles.button, !selectedLanguage && styles.buttonDisabled]} 
+          style={[styles.button, !selectedCountry && styles.buttonDisabled]} 
           activeOpacity={0.8}
-          disabled={!selectedLanguage}
+          disabled={!selectedCountry}
           onPress={() => {
             requestAnimationFrame(() => {
-              navigation.navigate('StepFive', { 
+              navigation.navigate('StepFive', {
                 ...route.params,
-                language: selectedLanguage 
+                country: selectedCountry
               });
             });
           }}
         >
-          <Text style={styles.buttonText}>{t.continue}</Text>
+          <Text style={styles.buttonText}>CONTINUE</Text>
           <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
         </TouchableOpacity>
       </View>
@@ -180,66 +224,112 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 0 : 10,
   },
-  heroContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  heroImage: {
+  heroCardImage: {
     width: '100%',
-    height: 320,
+    height: 190,
+    marginTop: Platform.OS === 'android' ? 0 : 10,
+    marginBottom: 20,
+    borderRadius: 16,
   },
-  title: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#12121D',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 50,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#1A1A2E',
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
     color: '#FFFFFF',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
+    fontSize: 15,
   },
-  subtitle: {
+  alphabetScroll: {
+    marginBottom: 24,
+  },
+  alphabetContent: {
+    paddingRight: 20,
+    gap: 8,
+  },
+  letterButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#1A1A2E',
+  },
+  letterButtonActive: {
+    backgroundColor: '#A855F7',
+    borderColor: '#A855F7',
+  },
+  letterText: {
     color: '#888899',
     fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 32,
+    fontWeight: '600',
   },
-  languagesContainer: {
-    gap: 16,
+  letterTextActive: {
+    color: '#FFFFFF',
   },
-  languageItem: {
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  sectionTitle: {
+    color: '#A855F7',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 8,
+    letterSpacing: 1,
+  },
+  countryItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#0A0A16',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#1A1A2E',
   },
-  languageItemSelected: {
+  countryItemSelected: {
     borderColor: '#A855F7',
     backgroundColor: '#120A20',
   },
-  languageInfo: {
+  countryInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
   flag: {
-    fontSize: 32,
-    marginRight: 20,
+    fontSize: 28,
+    marginRight: 16,
   },
-  languageTextContainer: {
+  countryTextContainer: {
     flex: 1,
   },
-  languageName: {
+  countryName: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
   },
-  languageEnglishName: {
+  capitalName: {
     color: '#888899',
-    fontSize: 14,
+    fontSize: 13,
   },
   radioUnselected: {
     width: 24,

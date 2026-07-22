@@ -46,8 +46,9 @@ export default function OtpScreen({ navigation, route }) {
       const data = await response.json();
       
       if (response.ok) {
-        // Muvaffaqiyatli - Step 3 ga o'tamiz
-        navigation.navigate('StepThree', {
+        // Muvaffaqiyatli - Step 4 (Country) ga o'tamiz
+        navigation.navigate('StepFour', {
+          ...route.params,
           role,
           name,
           phone,

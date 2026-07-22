@@ -41,7 +41,7 @@ const CustomAnimatedInput = ({ icon, rightIcon, ...props }) => {
 };
 
 export default function AuthScreen({ navigation, route }) {
-  const { role = 'student' } = route.params || {};
+  const { role = 'student', language } = route.params || {};
   const [activeTab, setActiveTab] = useState('login'); // 'register' or 'login'
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -78,6 +78,7 @@ export default function AuthScreen({ navigation, route }) {
         if (response.ok) {
           // Move to OTP screen
           navigation.navigate('OtpScreen', {
+            ...route.params,
             role,
             name: name.trim(),
             phone: phone.trim(),
