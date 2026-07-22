@@ -81,6 +81,10 @@ const T = {
     selected: 'Tanlangan',
     next: 'KEYINGISI',
     loading: 'Personaj yuklanmoqda...',
+    congrats: 'Tabriklaymiz!',
+    successMessage: "Muvaffaqiyatli ro'yxatdan o'tdingiz.",
+    idLabel: 'Sizning ID raqamingiz:',
+    startBtn: 'Boshlash'
   },
   en: {
     step: 'STEP 4',
@@ -92,6 +96,10 @@ const T = {
     selected: 'Selected',
     next: 'NEXT',
     loading: 'Loading character...',
+    congrats: 'Congratulations!',
+    successMessage: 'You have successfully registered.',
+    idLabel: 'Your ID number:',
+    startBtn: 'Start'
   },
   ru: {
     step: 'ШАГ 4',
@@ -103,6 +111,10 @@ const T = {
     selected: 'Выбрано',
     next: 'ДАЛЕЕ',
     loading: 'Загрузка персонажа...',
+    congrats: 'Поздравляем!',
+    successMessage: 'Вы успешно зарегистрировались.',
+    idLabel: 'Ваш ID номер:',
+    startBtn: 'Начать'
   },
   ar: {
     step: 'الخطوة 4',
@@ -114,6 +126,10 @@ const T = {
     selected: 'المحدد',
     next: 'التالي',
     loading: 'جاري تحميل الشخصية...',
+    congrats: 'تهانينا!',
+    successMessage: 'لقد قمت بالتسجيل بنجاح.',
+    idLabel: 'رقم المعرف الخاص بك:',
+    startBtn: 'يبدأ'
   },
   tr: {
     step: 'ADIM 4',
@@ -125,6 +141,10 @@ const T = {
     selected: 'Seçildi',
     next: 'İLERİ',
     loading: 'Karakter yükleniyor...',
+    congrats: 'Tebrikler!',
+    successMessage: 'Başarıyla kayıt oldunuz.',
+    idLabel: 'Kimlik numaranız:',
+    startBtn: 'Başla'
   },
   zh: {
     step: '第4步',
@@ -136,6 +156,10 @@ const T = {
     selected: '已选',
     next: '下一步',
     loading: '角色加载中...',
+    congrats: '恭喜！',
+    successMessage: '您已成功注册。',
+    idLabel: '您的ID号：',
+    startBtn: '开始'
   },
   ky: {
     step: '4-КАДАМ',
@@ -147,6 +171,10 @@ const T = {
     selected: 'Тандалды',
     next: 'КИЙИНКИСИ',
     loading: 'Персонаж жүктөлүүдө...',
+    congrats: 'Куттуктайбыз!',
+    successMessage: 'Сиз ийгиликтүү катталдыңыз.',
+    idLabel: 'Сиздин ID номериңиз:',
+    startBtn: 'Баштоо'
   },
   kk: {
     step: '4-ҚАДАМ',
@@ -158,6 +186,10 @@ const T = {
     selected: 'Таңдалды',
     next: 'КЕЛЕСІ',
     loading: 'Персонаж жүктелуде...',
+    congrats: 'Құттықтаймыз!',
+    successMessage: 'Сіз сәтті тіркелдіңіз.',
+    idLabel: 'Сіздің ID нөміріңіз:',
+    startBtn: 'Бастау'
   },
   tg: {
     step: 'ҚАДАМИ 4',
@@ -169,6 +201,10 @@ const T = {
     selected: 'Интихоб шуд',
     next: 'БАЪДӢ',
     loading: 'Боргирии персонаж...',
+    congrats: 'Табрик!',
+    successMessage: 'Шумо бомуваффақият сабти ном шудед.',
+    idLabel: 'Рақами ID-и шумо:',
+    startBtn: 'Оғоз'
   },
   ja: {
     step: 'ステップ 4',
@@ -180,6 +216,10 @@ const T = {
     selected: '選択済み',
     next: '次へ',
     loading: 'キャラクターを読み込み中...',
+    congrats: 'おめでとうございます！',
+    successMessage: '正常に登録されました。',
+    idLabel: 'あなたのID番号：',
+    startBtn: '開始'
   },
   ko: {
     step: '4단계',
@@ -190,7 +230,11 @@ const T = {
     girlsChars: ['Lily', 'Maya', 'Emma', 'Sophia'],
     selected: '선택됨',
     next: '다음',
-    loading: '캐릭터 로딩 중...',
+    loading: '캐릭터 불러오는 중...',
+    congrats: '축하합니다!',
+    successMessage: '성공적으로 등록되었습니다.',
+    idLabel: '귀하의 ID 번호:',
+    startBtn: '시작'
   },
 };
 
@@ -459,11 +503,11 @@ export default function StepFiveScreen({ navigation, route }) {
             <View style={styles.modalIconContainer}>
               <MaterialCommunityIcons name="check-decagram" size={60} color="#A855F7" />
             </View>
-            <Text style={styles.modalTitle}>Tabriklaymiz!</Text>
-            <Text style={styles.modalMessage}>Muvaffaqiyatli ro'yxatdan o'tdingiz.</Text>
+            <Text style={styles.modalTitle}>{t.congrats}</Text>
+            <Text style={styles.modalMessage}>{t.successMessage}</Text>
             {userData && (
               <View style={styles.idContainer}>
-                <Text style={styles.idLabel}>Sizning ID raqamingiz:</Text>
+                <Text style={styles.idLabel}>{t.idLabel}</Text>
                 <Text style={styles.idValue}>{userData.customId}</Text>
               </View>
             )}
@@ -475,7 +519,7 @@ export default function StepFiveScreen({ navigation, route }) {
                 navigation.navigate('StudentDashboard', { language, selectedChar, gender, user: userData });
               }}
             >
-              <Text style={styles.modalButtonText}>Boshlash</Text>
+              <Text style={styles.modalButtonText}>{t.startBtn}</Text>
             </TouchableOpacity>
           </View>
         </View>
