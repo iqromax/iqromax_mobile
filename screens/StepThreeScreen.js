@@ -36,7 +36,78 @@ const ROLES = [
   },
 ];
 
+const TRANSLATIONS = {
+  en: { 
+    step: 'STEP 3', title: 'CHOOSE YOUR ROLE', next: 'NEXT',
+    studentTitle: 'Student', studentSubtitle: 'Practice and develop yourself',
+    parentTitle: 'Parent', parentSubtitle: "Track and support your child's achievements",
+    teacherTitle: 'Teacher', teacherSubtitle: 'Manage and develop your students'
+  },
+  ru: { 
+    step: 'ШАГ 3', title: 'ВЫБЕРИТЕ РОЛЬ', next: 'ДАЛЕЕ',
+    studentTitle: 'Ученик', studentSubtitle: 'Практикуйтесь и развивайтесь',
+    parentTitle: 'Родитель', parentSubtitle: 'Следите за достижениями ребенка',
+    teacherTitle: 'Учитель', teacherSubtitle: 'Управляйте своими учениками'
+  },
+  uz: { 
+    step: '3-QADAM', title: 'ROLNI TANLANG', next: 'KEYINGISI',
+    studentTitle: 'O\'quvchi', studentSubtitle: 'O\'rganing va rivojlaning',
+    parentTitle: 'Ota-ona', parentSubtitle: 'Farzandingiz yutuqlarini kuzating',
+    teacherTitle: 'O\'qituvchi', teacherSubtitle: 'O\'quvchilaringizni boshqaring'
+  },
+  ar: { 
+    step: 'الخطوة 3', title: 'اختر دورك', next: 'التالي',
+    studentTitle: 'طالب', studentSubtitle: 'تدرب وطور نفسك',
+    parentTitle: 'والد', parentSubtitle: 'تتبع إنجازات طفلك',
+    teacherTitle: 'معلم', teacherSubtitle: 'أدر طلابك'
+  },
+  tr: { 
+    step: 'ADIM 3', title: 'ROLÜNÜZÜ SEÇİN', next: 'İLERİ',
+    studentTitle: 'Öğrenci', studentSubtitle: 'Pratik yapın ve kendinizi geliştirin',
+    parentTitle: 'Ebeveyn', parentSubtitle: 'Çocuğunuzun başarılarını takip edin',
+    teacherTitle: 'Öğretmen', teacherSubtitle: 'Öğrencilerinizi yönetin'
+  },
+  zh: { 
+    step: '第3步', title: '选择角色', next: '下一步',
+    studentTitle: '学生', studentSubtitle: '练习并提升自己',
+    parentTitle: '家长', parentSubtitle: '跟踪和支持孩子的成就',
+    teacherTitle: '教师', teacherSubtitle: '管理和培养您的学生'
+  },
+  ky: { 
+    step: '3-КАДАМ', title: 'РОЛДУ ТАНДАҢЫЗ', next: 'КИЙИНКИСИ',
+    studentTitle: 'Окуучу', studentSubtitle: 'Практика жасаңыз жана өнүгүңүз',
+    parentTitle: 'Ата-эне', parentSubtitle: 'Балаңыздын жетишкендиктерин көзөмөлдөңүз',
+    teacherTitle: 'Мугалим', teacherSubtitle: 'Окуучуларыңызды башкарыңыз'
+  },
+  kk: { 
+    step: '3-ҚАДАМ', title: 'РӨЛДІ ТАҢДАҢЫЗ', next: 'КЕЛЕСІ',
+    studentTitle: 'Оқушы', studentSubtitle: 'Тәжірибе жасап, өзіңізді дамытыңыз',
+    parentTitle: 'Ата-ана', parentSubtitle: 'Балаңыздың жетістіктерін қадағалаңыз',
+    teacherTitle: 'Мұғалім', teacherSubtitle: 'Оқушыларыңызды басқарыңыз'
+  },
+  tg: { 
+    step: 'ҚАДАМИ 3', title: 'НАҚШИ ХУДРО ИНТИХОБ КУНЕД', next: 'БАЪДӢ',
+    studentTitle: 'Хонанда', studentSubtitle: 'Таҷриба кунед ва худро рушд диҳед',
+    parentTitle: 'Волидайн', parentSubtitle: 'Дастовардҳои фарзанди худро пайгирӣ кунед',
+    teacherTitle: 'Муаллим', teacherSubtitle: 'Хонандагони худро идора кунед'
+  },
+  ja: { 
+    step: 'ステップ 3', title: '役割を選択', next: '次へ',
+    studentTitle: '学生', studentSubtitle: '練習して自分を成長させる',
+    parentTitle: '親', parentSubtitle: '子供の達成を追跡し支援する',
+    teacherTitle: '教師', teacherSubtitle: '生徒を管理し育成する'
+  },
+  ko: { 
+    step: '3단계', title: '역할 선택', next: '다음',
+    studentTitle: '학생', studentSubtitle: '연습하고 자신을 발전시키세요',
+    parentTitle: '부모', parentSubtitle: '자녀의 성취를 추적하고 지원하세요',
+    teacherTitle: '교사', teacherSubtitle: '학생들을 관리하고 육성하세요'
+  }
+};
+
 export default function StepThreeScreen({ navigation, route }) {
+  const { language = 'en' } = route?.params || {};
+  const t = TRANSLATIONS[language] || TRANSLATIONS['en'];
   const [selectedRole, setSelectedRole] = useState(null);
 
   const handleNext = () => {
@@ -52,7 +123,7 @@ export default function StepThreeScreen({ navigation, route }) {
       
       {/* Header */}
       <View style={styles.headerCenter}>
-        <Text style={styles.stepText}>STEP 3</Text>
+        <Text style={styles.stepText}>{t.step}</Text>
         <View style={styles.pagination}>
           <View style={styles.dot} />
           <View style={styles.dot} />
@@ -63,7 +134,7 @@ export default function StepThreeScreen({ navigation, route }) {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>CHOOSE YOUR ROLE</Text>
+        <Text style={styles.title}>{t.title}</Text>
 
         <View style={styles.rolesContainer}>
           {ROLES.map((role) => {
@@ -85,8 +156,8 @@ export default function StepThreeScreen({ navigation, route }) {
                     transition={200}
                   >
                     <View style={[styles.fullCardTextContainer, role.id === 'parent' && { paddingLeft: 195 }]}>
-                      <Text style={styles.roleTitle}>{role.title}</Text>
-                      <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
+                      <Text style={styles.roleTitle}>{t[`${role.id}Title`]}</Text>
+                      <Text style={styles.roleSubtitle}>{t[`${role.id}Subtitle`]}</Text>
                     </View>
                   </ImageBackground>
                 </TouchableOpacity>
@@ -106,8 +177,8 @@ export default function StepThreeScreen({ navigation, route }) {
                 <Image source={role.image} style={styles.roleImage} contentFit="contain" transition={200} />
                 
                 <View style={styles.roleTextContainer}>
-                  <Text style={styles.roleTitle}>{role.title}</Text>
-                  <Text style={styles.roleSubtitle}>{role.subtitle}</Text>
+                  <Text style={styles.roleTitle}>{t[`${role.id}Title`]}</Text>
+                  <Text style={styles.roleSubtitle}>{t[`${role.id}Subtitle`]}</Text>
                 </View>
 
                 {isSelected && (
@@ -133,7 +204,7 @@ export default function StepThreeScreen({ navigation, route }) {
           }}
           disabled={!selectedRole}
         >
-          <Text style={styles.nextButtonText}>NEXT</Text>
+          <Text style={styles.nextButtonText}>{t.next}</Text>
           <MaterialCommunityIcons name="chevron-right" size={28} color="#000" />
         </TouchableOpacity>
       </View>
