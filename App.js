@@ -13,6 +13,7 @@ import StepFourScreen from './screens/StepFourScreen';
 import StepFiveScreen from './screens/StepFiveScreen';
 import StudentDashboardScreen from './screens/StudentDashboardScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import OddiyHisobGameScreen from './screens/OddiyHisobGameScreen';
 import AbacusSimulatorScreen from './screens/AbacusSimulatorScreen';
 import BattleSettingsScreen from './screens/BattleSettingsScreen';
@@ -99,11 +100,12 @@ export default function App() {
           <Stack.Screen name="StepTwo" component={StepTwoScreen} />
           <Stack.Screen name="AuthScreen" component={AuthScreen} />
           <Stack.Screen name="OtpScreen" component={OtpScreen} />
+          <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} />
+          <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
           <Stack.Screen name="StepThree" component={StepThreeScreen} />
           <Stack.Screen name="StepFour" component={StepFourScreen} />
           <Stack.Screen name="StepFive" component={StepFiveScreen} />
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} initialParams={initialRoute === 'StudentDashboard' ? initialParams : undefined} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           <Stack.Screen name="OddiyHisobGame" component={OddiyHisobGameScreen} />
           <Stack.Screen name="AbacusSimulator" component={AbacusSimulatorScreen} />
           <Stack.Screen name="BattleSettings" component={BattleSettingsScreen} />

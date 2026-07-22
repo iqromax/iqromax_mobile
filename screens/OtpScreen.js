@@ -156,14 +156,18 @@ export default function OtpScreen({ navigation, route }) {
         setOtpStatus('success');
         // Give 500ms for the user to see the green success UI
         setTimeout(() => {
-          navigation.navigate('StepFour', {
-            ...route.params,
-            role,
-            name,
-            phone,
-            email,
-            password
-          });
+          if (route.params?.isResetPassword) {
+            navigation.navigate('ResetPasswordScreen', { email });
+          } else {
+            navigation.navigate('StepFour', {
+              ...route.params,
+              role,
+              name,
+              phone,
+              email,
+              password
+            });
+          }
         }, 500);
       } else {
         setOtpStatus('error');
@@ -191,7 +195,8 @@ export default function OtpScreen({ navigation, route }) {
   const handleResend = async () => {
     if (timer > 0) return;
     try {
-      await fetch(`${API_URL}/auth/send-otp`, {
+      const endpoint = route.params?.isResetPassword ? 'forgot-password-otp' : 'send-otp';
+      await fetch(`${API_URL}/auth/${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name, language }),

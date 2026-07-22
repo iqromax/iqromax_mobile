@@ -198,7 +198,7 @@ export default function AuthScreen({ navigation, route }) {
         const response = await fetch(`${API_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: phone.trim(), password })
+          body: JSON.stringify({ phone: phone.trim(), password, language })
         });
         
         const data = await response.json();
@@ -369,8 +369,8 @@ export default function AuthScreen({ navigation, route }) {
           {activeTab === 'login' && (
             <TouchableOpacity 
               style={styles.forgotPasswordContainer} 
+              onPress={() => navigation.navigate('ForgotPasswordScreen')}
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('ForgotPassword')}
             >
               <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
             </TouchableOpacity>
