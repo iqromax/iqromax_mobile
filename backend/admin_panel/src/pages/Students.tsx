@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
-import { Search, Plus, Edit2, Trash2, Loader2, AlertTriangle, X } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 
 // Define the User type matching backend schema
 interface User {
