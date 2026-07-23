@@ -542,8 +542,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const renderSummaryArea = () => {
     return (
       <View style={styles.feedbackContainer}>
-        <View style={styles.feedbackHeader}>
-          <Text style={[styles.feedbackTitle, { color: '#10B981' }]}>{t.exerciseCompleted || "Mashq yakunlandi"}</Text>
+        <View style={[styles.feedbackHeader, { alignItems: 'center', marginBottom: 10 }]}>
+          <MaterialCommunityIcons name="trophy-award" size={80} color="#FBBF24" style={{ textShadowColor: 'rgba(251, 191, 36, 0.5)', textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 10 }} />
         </View>
         <ScrollView style={{width: '100%', marginTop: 20}}>
           {speedResults.map((res, i) => (
@@ -553,7 +553,15 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                   <MaterialCommunityIcons name={res.isCorrect ? "check-circle" : "close-circle"} size={24} color={res.isCorrect ? "#10B981" : "#EF4444"} />
                   <Text style={{color: res.isCorrect ? "#10B981" : "#EF4444", fontSize: 14, fontFamily: 'Inter_500Medium'}}>{res.userAnswer}</Text>
                 </View>
-                <View style={{alignItems: 'flex-end', width: 80}}>
+                <View style={{alignItems: 'center', width: 60}}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 14, height: 14, borderRadius: 7, marginRight: 4 }} />
+                    <Text style={{ color: res.isCorrect ? '#10B981' : '#EF4444', fontSize: 14, fontFamily: 'Inter_700Bold' }}>
+                      {res.isCorrect ? '+1' : '0'} XP
+                    </Text>
+                  </View>
+                </View>
+                <View style={{alignItems: 'flex-end', width: 60}}>
                   <Text style={{color: '#9CA3AF', fontSize: 12}}>{t.timeLabel || "Vaqt"}</Text>
                   <Text style={{color: '#FBBF24', fontSize: 16, fontFamily: 'Inter_700Bold'}}>{res.time}s</Text>
                 </View>
