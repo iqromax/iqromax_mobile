@@ -13,7 +13,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Image } from 'expo-image';
-import { API_URL } from '../src/config/api';
+import io from 'socket.io-client';
+import { API_URL, SOCKET_URL } from '../src/config/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const FriendInviteScreen = ({ navigation, route }) => {
@@ -170,7 +172,20 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   </View>
                 </View>
               </View>
-              <TouchableOpacity style={styles.inviteButton}>
+              <TouchableOpacity style={styles.inviteButton} onPress={async () => {
+                const userDataStr = await AsyncStorage.getItem('user_data');
+                const userData = userDataStr ? JSON.parse(userDataStr) : null;
+                const socket = io(SOCKET_URL);
+                socket.emit('send_battle_invite', {
+                  senderId: userData?.customId || 'NOMA\'LUM',
+                  targetId: foundUser.id,
+                  senderName: userData?.name || 'Foydalanuvchi',
+                  senderAvatar: userData?.character ? `https://api.dicebear.com/7.x/avataaars/png?seed=${userData.name}` : null,
+                  level: 1,
+                  rating: 1000
+                });
+                alert('Taklif yuborildi! Kutilmoqda...');
+              }}>
                 <Text style={styles.inviteButtonText}>Battle taklifini yuborish</Text>
                 <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
               </TouchableOpacity>

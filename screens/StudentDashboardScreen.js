@@ -106,6 +106,27 @@ function AccessoryModel({ modelPath, yPos, characterIndex }) {
   const posY = yPos + heightOffset;
   const posZ = zOffset;
   
+  
+  useEffect(() => {
+    let interval;
+    if (battleInvite && inviteTimer > 0) {
+      interval = setInterval(() => {
+        setInviteTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (inviteTimer === 0) {
+      setBattleInvite(null); // Timeout
+    }
+    return () => clearInterval(interval);
+  }, [battleInvite, inviteTimer]);
+
+  const handleRespondInvite = (status) => {
+    const socket = io(SOCKET_URL);
+    socket.emit('respond_battle_invite', { notifId: battleInvite.id, status });
+    setBattleInvite(null);
+    if (status === 'ACCEPTED') {
+      navigation.navigate('BattleMatchmaking', { mode: 'dost' });
+    }
+  };
   return (
     <primitive 
       object={scene.clone()} 

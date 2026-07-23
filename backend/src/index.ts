@@ -402,6 +402,74 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
+
+// --- BATTLE INVITE & NOTIFICATION IN-MEMORY LOGIC ---
+const onlineUsers = new Map<string, string>(); // customId -> socket.id
+const notifications = [] as any[]; // Mock DB for notifications
+
+io.on('connection', (socket) => {
+  console.log('New socket connected:', socket.id);
+
+  socket.on('register', (customId) => {
+    onlineUsers.set(customId.toUpperCase(), socket.id);
+    console.log(customId + ' registered with socket ' + socket.id);
+  });
+
+  socket.on('send_battle_invite', (data) => {
+    // data: { senderId, targetId, senderName, senderAvatar, level, rating }
+    console.log('Battle invite from ' + data.senderId + ' to ' + data.targetId);
+    const targetSocketId = onlineUsers.get(data.targetId.toUpperCase());
+    
+    // Save to notifications array
+    const notif = {
+      id: Math.random().toString(36).substring(7),
+      userId: data.targetId.toUpperCase(),
+      senderId: data.senderId.toUpperCase(),
+      senderName: data.senderName,
+      senderAvatar: data.senderAvatar,
+      level: data.level,
+      rating: data.rating,
+      type: 'BATTLE_INVITE',
+      status: 'PENDING',
+      createdAt: new Date().toISOString()
+    };
+    notifications.push(notif);
+
+    if (targetSocketId) {
+      io.to(targetSocketId).emit('receive_battle_invite', notif);
+    }
+  });
+
+  socket.on('respond_battle_invite', (data) => {
+    // data: { notifId, status: 'ACCEPTED' | 'REJECTED' }
+    const notif = notifications.find(n => n.id === data.notifId);
+    if (notif) {
+      notif.status = data.status;
+      // Send message back to sender
+      const senderSocketId = onlineUsers.get(notif.senderId);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit('battle_invite_response', notif);
+      }
+    }
+  });
+
+  socket.on('disconnect', () => {
+    for (const [key, value] of onlineUsers.entries()) {
+      if (value === socket.id) {
+        onlineUsers.delete(key);
+        break;
+      }
+    }
+  });
+});
+
+app.get('/api/notifications/:customId', (req, res) => {
+  const { customId } = req.params;
+  const userNotifs = notifications.filter(n => n.userId === customId.toUpperCase() && n.status === 'PENDING');
+  res.json(userNotifs);
+});
+// ----------------------------------------------------
+
 server.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
 });
