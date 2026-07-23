@@ -298,14 +298,32 @@ export const MentalMathGenerator = {
       let digitC = parseInt(sC[i]);
       let digitD = parseInt(sD[i]);
       if (op === 'add') {
-        // Qo'shishda 10-formula (digitC + digitD > 9) yoki 5-formula kerak bo'lmasligi kerak
         if ((digitC % 5) + (digitD % 5) >= 5 || digitC + digitD > 9) return false;
       } else {
-        // Ayirishda 10-formula (qarz olish) yoki 5-formula kerak bo'lmasligi kerak
         if ((digitC % 5) - (digitD % 5) < 0 || digitC - digitD < 0) return false;
       }
     }
     return true;
+  },
+
+  // Tekshiradi: A va B sonlari o'rtasidagi amal faqat Oddiy yoki Formula 5 orqali bajariladimi? (10-formula umuman ishlatilmaydi)
+  // return object { valid: boolean, usesF5: boolean }
+  isF5OrDirectMultiDigit: (c, d, op) => {
+    let sC = String(c).padStart(String(Math.max(c, d)).length, '0');
+    let sD = String(d).padStart(String(Math.max(c, d)).length, '0');
+    let usesF5 = false;
+    for (let i = 0; i < sC.length; i++) {
+      let digitC = parseInt(sC[i]);
+      let digitD = parseInt(sD[i]);
+      if (op === 'add') {
+        if (digitC + digitD > 9) return { valid: false, usesF5: false };
+        if ((digitC % 5) + (digitD % 5) >= 5) usesF5 = true;
+      } else {
+        if (digitC - digitD < 0) return { valid: false, usesF5: false };
+        if ((digitC % 5) - (digitD % 5) < 0) usesF5 = true;
+      }
+    }
+    return { valid: true, usesF5 };
   },
 
   // Qo'shish va Ayirish (Oddiy abakus usulida, formula ishlatilmaydi, ikki xonali javob chiqmaydi)
@@ -448,27 +466,68 @@ export const MentalMathGenerator = {
     }
   },
 
-  generateF5: (digits, termsCount) => {
-    const formulas = [1, 2, 3, 4];
-    const mainFormula = formulas[Math.floor(Math.random() * formulas.length)];
-    const operation = Math.random() > 0.5 ? 'add' : 'sub';
-    let res = generateFiveFormula(operation, mainFormula, digits, termsCount);
-    
-    if (!res) {
-      return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'f5' };
+  // Formula 5 (Kichik Do'st) usulida
+  generateF5: (digits, termsCount = 3) => {
+    for (let mainAttempt = 0; mainAttempt < 50; mainAttempt++) {
+      const terms = [];
+      let ok = true;
+      let sequenceHasF5 = false;
+      
+      const firstNum = MentalMathGenerator.getNumByDigits(digits);
+      let currentTotal = firstNum;
+      terms.push(String(firstNum));
+
+      for (let i = 1; i < termsCount; i++) {
+        let isPlus = Math.random() > 0.5;
+        let found = false;
+
+        for (let retry = 0; retry < 50; retry++) {
+          let num = MentalMathGenerator.getNumByDigits(digits);
+          
+          if (isPlus) {
+            const check = MentalMathGenerator.isF5OrDirectMultiDigit(currentTotal, num, 'add');
+            if (check.valid) {
+              currentTotal += num;
+              terms.push(`+ ${num}`);
+              if (check.usesF5) sequenceHasF5 = true;
+              found = true;
+              break;
+            } else {
+              isPlus = false; // try minus
+            }
+          } 
+          if (!isPlus) {
+            const check = MentalMathGenerator.isF5OrDirectMultiDigit(currentTotal, num, 'sub');
+            if (check.valid) {
+              currentTotal -= num;
+              terms.push(`- ${num}`);
+              if (check.usesF5) sequenceHasF5 = true;
+              found = true;
+              break;
+            } else {
+              isPlus = true; // reset
+            }
+          }
+        }
+        
+        if (!found) {
+           ok = false;
+           break;
+        }
+      }
+      
+      if (ok && sequenceHasF5) {
+        return {
+          display: terms.join(' '),
+          answer: currentTotal,
+          section: 'f5',
+          difficulty: digits,
+        };
+      }
     }
     
-    const terms = res.numbers.map((n, i) => {
-      if (i === 0) return String(n);
-      return n >= 0 ? `+ ${n}` : `- ${Math.abs(n)}`;
-    });
-    
-    return {
-      display: terms.join(' '),
-      answer: res.answer,
-      section: 'f5',
-      difficulty: digits,
-    };
+    // Fallback if failed to generate (masalan, faqat direct tushib qolsa, lekin bu ehtimoli juda kam)
+    return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'f5' };
   },
 
   generateF10: (digits, termsCount) => {
