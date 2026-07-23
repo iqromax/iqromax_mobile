@@ -254,7 +254,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'calc');
   const [user, setUser] = useState(route.params?.user);
-  const [isDeleted, setIsDeleted] = useState(false);
   const [battleInvite, setBattleInvite] = useState(null);
   const [inviteTimer, setInviteTimer] = useState(0);
 
@@ -292,17 +291,21 @@ export default function StudentDashboardScreen({ navigation, route }) {
       socket.emit('register', user.customId);
     }
     
-    socket.on('user_deleted', (data) => {
+    socket.on('user_deleted', async (data) => {
       if (data.id === user.id) {
-        setIsDeleted(true);
+        try { await AsyncStorage.removeItem('user_data'); } catch(e) {}
+        Alert.alert("Akkaunt o'chirildi", "Kechirasiz, admin ushbu profilingizni tizimdan butunlay o'chirib yubordi. Siz endi bu akkauntdan foydalana olmaysiz.");
+        navigation.reset({ index: 0, routes: [{ name: 'StepOne' }] });
       }
     });
 
-    socket.on('user_updated', (data) => {
+    socket.on('user_updated', async (data) => {
       if (data.id === user.id) {
         setUser(data);
         if (data.status !== 'Faol') {
-           setIsDeleted(true); // Log out if inactive
+           try { await AsyncStorage.removeItem('user_data'); } catch(e) {}
+           Alert.alert("Akkaunt bloklandi", "Kechirasiz, admin ushbu profilingizni blokladi. Siz endi bu akkauntdan foydalana olmaysiz.");
+           navigation.reset({ index: 0, routes: [{ name: 'StepOne' }] });
         }
       }
     });
@@ -3006,34 +3009,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* ACCOUNT DELETED MODAL */}
-        <Modal transparent visible={isDeleted} animationType="fade">
-          <View style={{ flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.9)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-            <View style={{ width: '100%', maxWidth: 340, backgroundColor: '#0A0A16', borderRadius: 24, padding: 24, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', shadowColor: '#EF4444', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 15 }}>
-              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(239, 68, 68, 0.1)', justifyContent: 'center', alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.4)' }}>
-                <MaterialCommunityIcons name="account-remove-outline" size={40} color="#EF4444" />
-              </View>
-              <Text style={{ color: '#FFFFFF', fontSize: 22, fontWeight: '800', marginBottom: 12, textAlign: 'center' }}>Akkaunt o'chirildi</Text>
-              <Text style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 15, textAlign: 'center', marginBottom: 30, lineHeight: 22 }}>
-                Kechirasiz, admin ushbu profilingizni tizimdan butunlay o'chirib yubordi. Siz endi bu akkauntdan foydalana olmaysiz.
-              </Text>
-              <TouchableOpacity
-                style={{ width: '100%', height: 56, backgroundColor: '#EF4444', borderRadius: 16, justifyContent: 'center', alignItems: 'center', shadowColor: '#EF4444', shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.4, shadowRadius: 10, elevation: 8 }}
-                onPress={async () => {
-                  try {
-                    await AsyncStorage.removeItem('user_data');
-                  } catch (e) {
-                    console.error(e);
-                  }
-                  setIsDeleted(false);
-                  navigation.reset({ index: 0, routes: [{ name: 'StepOne' }] });
-                }}
-              >
-                <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '700' }}>Tizimdan chiqish</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+        {/* ACCOUNT DELETED MODAL LOGIC MOVED TO ALERT */}
 
         {/* BATTLE INVITE MODAL */}
         <Modal transparent visible={!!battleInvite} animationType="slide">
