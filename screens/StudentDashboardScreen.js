@@ -2710,362 +2710,204 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
 
         {/* PROFILE TAB CONTENT */}
-        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight - 5 : 30 }}>
-          <View style={styles.profileHeader}>
-            <View style={styles.profileHeaderRight}>
-              <View style={[styles.profileStatBoxXp, { flex: 1 }]}>
-                <Image source={require('../assets/xp_icon.jpg')} style={styles.profileStatIconLeft} />
-                <View style={styles.profileStatTextWrapper}>
-                  <Text style={styles.profileStatValueTop}>128 560</Text>
-                </View>
-              </View>
-              <View style={[styles.profileStatBox, { flex: 1 }]}>
-                <Image source={require('../assets/lightning_energy.png')} style={styles.profileStatIconEnergy} />
-                <Text style={styles.profileStatValueMid}>2/10</Text>
-                <TouchableOpacity style={styles.profileStatPlusBtn}>
-                  <Text style={styles.profileStatPlusText}>+</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={[styles.profileStatBox, { flex: 1, marginRight: 0 }]}>
-                <Image source={require('../assets/s_coin.png')} style={styles.profileStatIconCoin} />
-                <Text style={styles.profileStatValueMid}>12 450</Text>
-                <TouchableOpacity style={styles.profileStatPlusBtn}>
-                  <Text style={styles.profileStatPlusText}>+</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-
-          {/* Main Card Section */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 16 }}>
-              {/* Card 1: Info Card */}
-              <View style={[styles.profileInfoCardContainer, { flex: 1.5, marginRight: 10 }]}>
-                <ImageBackground 
-                  source={require('../assets/space_bg.jpg')} 
-                  style={styles.profileInfoCardBg}
-                  imageStyle={styles.profileInfoCardBgImage}
-                >
-                  <View style={styles.profileInfoCardContent}>
-                    {/* Left: Avatar & Frame */}
-                    <View style={styles.profileAvatarContainer}>
-                      <Image source={baseAvatarsList.find(a => a.id === activeAvatarIndex)?.img || require('../assets/avatar_maks.png')} style={styles.profileBigAvatar} />
-                      <Image source={require('../assets/gold_frame.png')} style={styles.profileGoldFrame} />
-                    </View>
-
-                    {/* Right: Info */}
-                    <View style={styles.profileDetailsContainer}>
-                      <Text style={styles.profileMainName} numberOfLines={1}>{user?.name || 'IQROMAX'}</Text>
-                      
-                      <View style={styles.profileDetailRow}>
-                        <Text style={styles.profileDetailIcon}>📧</Text>
-                        <Text style={styles.profileDetailText} numberOfLines={1}>{user?.email || "Noma'lum email"}</Text>
-                      </View>
-
-                      <View style={styles.profileDetailRow}>
-                        <Text style={styles.profileDetailIcon}>📱</Text>
-                        <Text style={styles.profileDetailText} numberOfLines={1}>{user?.phone || "Noma'lum telefon"}</Text>
-                      </View>
-
-                      <View style={styles.profileDetailRow}>
-                        <Text style={styles.profileDetailIcon}>🆔</Text>
-                        <Text style={styles.profileDetailText} numberOfLines={1}>{user?.customId || '#0000'}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </ImageBackground>
-              </View>
-
-              {/* Card 2: Progress Card */}
-              <View style={[styles.profileProgressCard, { flex: 1 }]}>
-                <View style={styles.profileProgressHeaderRow}>
-                  <Image source={require('../assets/gold_star.png')} style={styles.profileStarIconMd} />
-                  <Text style={styles.profileProgressTitle} numberOfLines={1}>GOLD III</Text>
-                </View>
-
-                <View style={styles.profileProgressBarContainer}>
-                  <View style={styles.profileProgressBarTrack}>
-                    <View style={[styles.profileProgressBarFill, { width: '78%' }]} />
-                  </View>
-                  <Text style={styles.profileProgressPercent}>78%</Text>
-                </View>
-
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.profileProgressSubtitle} numberOfLines={1}>Platinum V gacha</Text>
-                  <Text style={styles.profileProgressXpLeft} numberOfLines={1}><Text style={styles.profileProgressXpHighlight}>352 XP</Text> qoldi</Text>
-                </View>
-
-                <TouchableOpacity style={styles.profileBatafsilBtn}>
-                  <Text style={styles.profileBatafsilText}>BATAFSIL</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={16} color="#F59E0B" style={styles.profileBatafsilIcon} />
-                </TouchableOpacity>
-              </View>
+        
+        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 40 }}>
+          
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 20 }}>
+            {/* Header: Title */}
+            <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 20}}>
+              <Text style={{color: '#fff', fontSize: 22, fontFamily: 'Inter_700Bold'}}>{t.navProfile}</Text>
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-            {/* STATISTIKA SECTION */}
-            <View style={styles.statSectionContainer}>
-              <View style={styles.statSectionHeader}>
-                <Image source={require('../assets/stat_icon_1.png')} style={styles.statSectionTitleIcon} />
-                <Text style={styles.statSectionTitle}>{t.stats}</Text>
+            {/* Avatar & Main Info Card */}
+            <View style={styles.proCardGlass}>
+              <View style={styles.proAvatarContainer}>
+                <View style={styles.proAvatarGlow} />
+                <Image source={baseAvatarsList.find(a => a.id === activeAvatarIndex)?.img || require('../assets/avatar_maks.png')} style={styles.proAvatarImg} />
+                <View style={styles.proAvatarBadge}>
+                  <Text style={styles.proAvatarBadgeText}>{user?.level || 12}</Text>
+                </View>
               </View>
-
-              <View style={styles.statGridContainer}>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_2.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>1248</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statRating}</Text>
+              <Text style={styles.proUserName} numberOfLines={1}>{user?.name || 'IQROMAX CHAMPION'}</Text>
+              <Text style={styles.proUserTag} numberOfLines={1}>#{user?.customId || '0000'} | {user?.email || "No Email"}</Text>
+              
+              <View style={styles.proTopStatsRow}>
+                <View style={styles.proTopStatItem}>
+                   <Image source={require('../assets/xp_icon.jpg')} style={styles.proTopStatIcon} />
+                   <Text style={styles.proTopStatValue}>128.5K</Text>
+                   <Text style={styles.proTopStatLabel}>XP</Text>
                 </View>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_3.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>0.8s</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statSpeed}</Text>
+                <View style={styles.proTopStatDivider} />
+                <View style={styles.proTopStatItem}>
+                   <Image source={require('../assets/s_coin.png')} style={styles.proTopStatIcon} />
+                   <Text style={styles.proTopStatValue}>12.4K</Text>
+                   <Text style={styles.proTopStatLabel}>Coin</Text>
                 </View>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_4.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>95%</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statAccuracy}</Text>
-                </View>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_5.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>14</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statStreak}</Text>
-                </View>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_6.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>256</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statExercises}</Text>
-                </View>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_7.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>18</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statAchievements}</Text>
-                </View>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_8.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>128560</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statXP}</Text>
-                </View>
-                <View style={styles.gridStatCard}>
-                  <Image source={require('../assets/stat_icon_9.png')} style={styles.gridStatCardIcon} />
-                  <Text style={styles.gridStatCardValue}>12450</Text>
-                  <Text style={styles.gridStatCardLabel}>{t.statCoin}</Text>
+                <View style={styles.proTopStatDivider} />
+                <View style={styles.proTopStatItem}>
+                   <Image source={require('../assets/lightning_energy.png')} style={styles.proTopStatIcon} />
+                   <Text style={styles.proTopStatValue}>2/10</Text>
+                   <Text style={styles.proTopStatLabel}>Energy</Text>
                 </View>
               </View>
             </View>
 
-            {/* YUTUQLAR SECTION */}
-            <View style={styles.yutuqSectionContainer}>
-              <View style={styles.yutuqHeaderRow}>
-                <View style={styles.yutuqHeaderLeft}>
-                  <Text style={styles.yutuqCrownIcon}>👑</Text>
-                  <Text style={styles.yutuqSectionTitle}>{t.achievementsTitle}</Text>
+            {/* Rank/Tier Holographic Card */}
+            <View style={styles.proTierCard}>
+              <ImageBackground source={require('../assets/space_bg.jpg')} style={styles.proTierBg} imageStyle={{borderRadius: 24, opacity: 0.6}}>
+                <View style={styles.proTierOverlay}>
+                  <View style={styles.proTierLeft}>
+                    <Image source={require('../assets/gold_star.png')} style={styles.proTierIcon} />
+                    <View>
+                      <Text style={styles.proTierTitle}>GOLD III</Text>
+                      <Text style={styles.proTierSub}>Top 15% of players</Text>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.proTierProgressContainer}>
+                    <View style={styles.proTierProgressHeader}>
+                      <Text style={styles.proTierTarget}>to Platinum V</Text>
+                      <Text style={styles.proTierPercent}>78%</Text>
+                    </View>
+                    <View style={styles.proTierProgressBar}>
+                      <View style={[styles.proTierProgressFill, { width: '78%' }]} />
+                    </View>
+                  </View>
                 </View>
-                
-                <View style={styles.yutuqPaginationDots}>
-                  {[0, 1, 2, 3, 4].map((dotIndex) => (
-                    <View 
-                      key={dotIndex} 
-                      style={[
-                        styles.yutuqDot, 
-                        (currentYutuqIndex % 5) === dotIndex && styles.yutuqDotActive
-                      ]} 
-                    />
-                  ))}
-                </View>
-
-                <TouchableOpacity style={styles.yutuqViewAllBtn}>
-                  <Text style={styles.yutuqViewAllText}>{t.seeAll}</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={16} color="#c084fc" />
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView 
-                ref={yutuqScrollRef}
-                horizontal 
-                showsHorizontalScrollIndicator={false} 
-                contentContainerStyle={styles.yutuqCarouselContainer}
-              >
-                {/* 12 Achievement Cards */}
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_1.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 1</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_2.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 2</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_3.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achv14Days}</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_4.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvTop10}</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_5.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGold3}</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_6.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 6</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_7.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 7</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_8.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 8</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_9.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 9</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_10.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 10</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_11.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 11</Text>
-                </View>
-                <View style={styles.yutuqCard}>
-                  <Image source={require('../assets/yutuq_12.png')} style={styles.yutuqCardIcon} />
-                  <Text style={styles.yutuqCardLabel}>{t.achvGeneric} 12</Text>
-                </View>
-              </ScrollView>
+              </ImageBackground>
             </View>
 
-            {/* FAOLIYAT VA KOLLEKSIYA */}
-            <View style={styles.activityCollectionRow}>
-              {/* FAOLIYAT TARIXI CARD */}
-              <View style={styles.activityCard}>
-                <View style={styles.activityHeader}>
-                  <View style={styles.activityHeaderLeft}>
-                    <Image source={require('../assets/yangi_1.png')} style={styles.activityHeaderIcon} />
-                    <Text style={styles.activityHeaderTitle}>{t.activityTitle}</Text>
-                  </View>
-                  <TouchableOpacity>
-                    <Text style={styles.activityHeaderLink}>{t.activitySeeAll}</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.activityList}>
-                  <View style={styles.activityItem}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_2.png')} style={styles.activityItemIcon} />
-                      <View>
-                        <Text style={styles.activityItemTitle}>{t.actSimple}</Text>
-                        <Text style={styles.activityItemSub}>{t.actToday}, 12:30</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.activityItemValueGreen}>95%</Text>
-                  </View>
-
-                  <View style={styles.activityItem}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_3.png')} style={styles.activityItemIcon} />
-                      <View>
-                        <Text style={styles.activityItemTitle}>{t.actBattle}</Text>
-                        <Text style={styles.activityItemSub}>{t.actToday}, 11:45</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.activityItemValueGreen}>{t.actWin}</Text>
-                  </View>
-
-                  <View style={styles.activityItem}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_4.png')} style={styles.activityItemIcon} />
-                      <View>
-                        <Text style={styles.activityItemTitle}>{t.actFast}</Text>
-                        <Text style={styles.activityItemSub}>{t.actToday}, 10:15</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.activityItemValueGreen}>92%</Text>
-                  </View>
-
-                  <View style={[styles.activityItem, { borderBottomWidth: 0, paddingBottom: 0, marginBottom: 0 }]}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_5.png')} style={styles.activityItemIcon} />
-                      <View>
-                        <Text style={styles.activityItemTitle}>{t.actAbacus}</Text>
-                        <Text style={styles.activityItemSub}>{t.actYesterday}, 21:20</Text>
-                      </View>
-                    </View>
-                    <Text style={styles.activityItemValueGreen}>88%</Text>
-                  </View>
-                </View>
+            {/* Stats Grid */}
+            <View style={styles.proSectionHeader}>
+              <Text style={styles.proSectionTitle}>{t.stats}</Text>
+            </View>
+            
+            <View style={styles.proStatsGrid}>
+              <View style={styles.proStatBox}>
+                <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FBBF24" />
+                <Text style={styles.proStatBoxValue}>0.8s</Text>
+                <Text style={styles.proStatBoxLabel}>{t.statSpeed}</Text>
               </View>
-
-              {/* MENING KOLLEKSIYAM CARD */}
-              <View style={styles.collectionCard}>
-                <View style={styles.activityHeader}>
-                  <View style={styles.activityHeaderLeft}>
-                    <Image source={require('../assets/yangi_6.png')} style={styles.activityHeaderIcon} />
-                    <Text style={styles.activityHeaderTitle}>{t.collectionTitle}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.collectionList}>
-                  <View style={styles.collectionItem}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_7.png')} style={styles.collectionItemIcon} />
-                      <Text style={styles.activityItemTitle}>{t.collAvatars}</Text>
-                    </View>
-                    <Text style={styles.collectionItemValue}>18</Text>
-                  </View>
-
-                  <View style={styles.collectionItem}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_8.png')} style={styles.collectionItemIcon} />
-                      <Text style={styles.activityItemTitle}>{t.collFrames}</Text>
-                    </View>
-                    <Text style={styles.collectionItemValue}>12</Text>
-                  </View>
-
-                  <View style={styles.collectionItem}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_9.png')} style={styles.collectionItemIcon} />
-                      <Text style={styles.activityItemTitle}>{t.collBgs}</Text>
-                    </View>
-                    <Text style={styles.collectionItemValue}>8</Text>
-                  </View>
-
-                  <View style={styles.collectionItem}>
-                    <View style={styles.activityItemLeft}>
-                      <Image source={require('../assets/yangi_10.png')} style={styles.collectionItemIcon} />
-                      <Text style={styles.activityItemTitle}>{t.collChars}</Text>
-                    </View>
-                    <Text style={styles.collectionItemValue}>3</Text>
-                  </View>
-                </View>
-
-                <TouchableOpacity style={styles.inventoryBtn}>
-                  <Text style={styles.inventoryBtnText}>{t.collBtn}</Text>
-                </TouchableOpacity>
+              <View style={styles.proStatBox}>
+                <MaterialCommunityIcons name="bullseye-arrow" size={24} color="#10B981" />
+                <Text style={styles.proStatBoxValue}>95%</Text>
+                <Text style={styles.proStatBoxLabel}>{t.statAccuracy}</Text>
+              </View>
+              <View style={styles.proStatBox}>
+                <MaterialCommunityIcons name="fire" size={24} color="#EF4444" />
+                <Text style={styles.proStatBoxValue}>14 {t.streakDesc}</Text>
+                <Text style={styles.proStatBoxLabel}>{t.statStreak}</Text>
+              </View>
+              <View style={styles.proStatBox}>
+                <MaterialCommunityIcons name="trophy-award" size={24} color="#8B5CF6" />
+                <Text style={styles.proStatBoxValue}>1248</Text>
+                <Text style={styles.proStatBoxLabel}>{t.statRating}</Text>
               </View>
             </View>
 
-            {/* TIZIMDAN CHIQISH TUGMASI */}
+            {/* Achievements Showcase */}
+            <View style={styles.proSectionHeader}>
+              <Text style={styles.proSectionTitle}>{t.achievementsTitle}</Text>
+              <TouchableOpacity><Text style={styles.proSectionLink}>{t.seeAll}</Text></TouchableOpacity>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.proBadgeScroll}>
+              <View style={styles.proBadgeActive}>
+                <Image source={require('../assets/yutuq_1.png')} style={styles.proBadgeImg} />
+                <Text style={styles.proBadgeText}>First Win</Text>
+              </View>
+              <View style={styles.proBadgeActive}>
+                <Image source={require('../assets/yutuq_3.png')} style={styles.proBadgeImg} />
+                <Text style={styles.proBadgeText}>14 Days</Text>
+              </View>
+              <View style={styles.proBadgeActive}>
+                <Image source={require('../assets/yutuq_4.png')} style={styles.proBadgeImg} />
+                <Text style={styles.proBadgeText}>Top 10</Text>
+              </View>
+              <View style={styles.proBadgeInactive}>
+                <Image source={require('../assets/yutuq_5.png')} style={styles.proBadgeImg} />
+                <Text style={styles.proBadgeTextInactive}>Platinum</Text>
+              </View>
+              <View style={styles.proBadgeInactive}>
+                <Image source={require('../assets/yutuq_6.png')} style={styles.proBadgeImg} />
+                <Text style={styles.proBadgeTextInactive}>Master</Text>
+              </View>
+            </ScrollView>
+
+            {/* Timeline Activity */}
+            <View style={styles.proSectionHeader}>
+              <Text style={styles.proSectionTitle}>{t.activityTitle}</Text>
+            </View>
+            
+            <View style={styles.proTimelineContainer}>
+              {/* Activity Item 1 */}
+              <View style={styles.proTimelineItem}>
+                <View style={styles.proTimelineDotLine}>
+                  <View style={[styles.proTimelineDot, {backgroundColor: '#10B981', shadowColor: '#10B981'}]} />
+                  <View style={styles.proTimelineLine} />
+                </View>
+                <View style={styles.proTimelineContent}>
+                  <View style={{flex: 1}}>
+                    <Text style={styles.proTimelineTitle}>{t.actBattle}</Text>
+                    <Text style={styles.proTimelineSub}>{t.actToday}, 14:30</Text>
+                  </View>
+                  <View style={[styles.proTimelineTag, {backgroundColor: 'rgba(16, 185, 129, 0.1)'}]}>
+                    <Text style={[styles.proTimelineTagText, {color: '#10B981'}]}>{t.actWin}</Text>
+                  </View>
+                </View>
+              </View>
+              
+              {/* Activity Item 2 */}
+              <View style={styles.proTimelineItem}>
+                <View style={styles.proTimelineDotLine}>
+                  <View style={[styles.proTimelineDot, {backgroundColor: '#3B82F6', shadowColor: '#3B82F6'}]} />
+                  <View style={styles.proTimelineLine} />
+                </View>
+                <View style={styles.proTimelineContent}>
+                  <View style={{flex: 1}}>
+                    <Text style={styles.proTimelineTitle}>{t.actFast}</Text>
+                    <Text style={styles.proTimelineSub}>{t.actToday}, 11:15</Text>
+                  </View>
+                  <View style={[styles.proTimelineTag, {backgroundColor: 'rgba(59, 130, 246, 0.1)'}]}>
+                    <Text style={[styles.proTimelineTagText, {color: '#3B82F6'}]}>+45 XP</Text>
+                  </View>
+                </View>
+              </View>
+              
+              {/* Activity Item 3 */}
+              <View style={styles.proTimelineItem}>
+                <View style={styles.proTimelineDotLine}>
+                  <View style={[styles.proTimelineDot, {backgroundColor: '#A855F7', shadowColor: '#A855F7'}]} />
+                  {/* No line for last item */}
+                </View>
+                <View style={styles.proTimelineContent}>
+                  <View style={{flex: 1}}>
+                    <Text style={styles.proTimelineTitle}>{t.actSimple}</Text>
+                    <Text style={styles.proTimelineSub}>{t.actYesterday}, 18:20</Text>
+                  </View>
+                  <View style={[styles.proTimelineTag, {backgroundColor: 'rgba(168, 85, 247, 0.1)'}]}>
+                    <Text style={[styles.proTimelineTagText, {color: '#A855F7'}]}>98%</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* Logout Button */}
             <TouchableOpacity 
-              style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.5)', marginTop: 20, marginBottom: 20, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', borderRadius: 16, borderWidth: 1 }}
+              style={styles.proLogoutBtn}
+              activeOpacity={0.8}
               onPress={async () => {
                 try {
                   await AsyncStorage.removeItem('user_data');
-                } catch (e) {
-                  console.error(e);
-                }
+                } catch (e) {}
                 navigation.reset({ index: 0, routes: [{ name: 'StepOne' }] });
               }}
             >
-              <MaterialCommunityIcons name="logout" size={22} color="#EF4444" style={{ marginRight: 8 }} />
-              <Text style={{ color: '#EF4444', fontSize: 16, fontWeight: '700' }}>{t.logout}</Text>
+              <MaterialCommunityIcons name="logout-variant" size={20} color="#EF4444" />
+              <Text style={styles.proLogoutText}>{t.logout}</Text>
             </TouchableOpacity>
 
           </ScrollView>
         </View>
-
 
         {/* Stats Row 2 */}
         <View style={styles.navBarContainer}>
@@ -5567,4 +5409,305 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     letterSpacing: 0.5,
   },
+
+  /* --- NEW PROFILE STYLES --- */
+  proCardGlass: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    marginBottom: 20,
+  },
+  proAvatarContainer: {
+    position: 'relative',
+    marginBottom: 16,
+  },
+  proAvatarGlow: {
+    position: 'absolute',
+    top: -10, left: -10, right: -10, bottom: -10,
+    borderRadius: 60,
+    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+    zIndex: 0,
+  },
+  proAvatarImg: {
+    width: 90, height: 90,
+    borderRadius: 45,
+    borderWidth: 3,
+    borderColor: '#A855F7',
+    zIndex: 1,
+  },
+  proAvatarBadge: {
+    position: 'absolute',
+    bottom: -5,
+    alignSelf: 'center',
+    backgroundColor: '#10B981',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 2,
+    borderWidth: 2,
+    borderColor: '#05050C',
+  },
+  proAvatarBadgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  proUserName: {
+    color: '#FFF',
+    fontSize: 22,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 4,
+  },
+  proUserTag: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 24,
+  },
+  proTopStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+  },
+  proTopStatItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  proTopStatIcon: {
+    width: 28, height: 28,
+    borderRadius: 14,
+    marginBottom: 8,
+  },
+  proTopStatValue: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+  },
+  proTopStatLabel: {
+    color: '#6B7280',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+  },
+  proTopStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  proTierCard: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+  },
+  proTierBg: {
+    width: '100%',
+    padding: 20,
+  },
+  proTierOverlay: {
+    flexDirection: 'column',
+  },
+  proTierLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  proTierIcon: {
+    width: 48, height: 48,
+    marginRight: 12,
+  },
+  proTierTitle: {
+    color: '#FBBF24',
+    fontSize: 20,
+    fontFamily: 'Inter_800ExtraBold',
+  },
+  proTierSub: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+  },
+  proTierProgressContainer: {
+    width: '100%',
+  },
+  proTierProgressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  proTierTarget: {
+    color: '#D1D5DB',
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  proTierPercent: {
+    color: '#FBBF24',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  proTierProgressBar: {
+    height: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  proTierProgressFill: {
+    height: '100%',
+    backgroundColor: '#FBBF24',
+    borderRadius: 4,
+  },
+  proSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 10,
+  },
+  proSectionTitle: {
+    color: '#FFF',
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+  },
+  proSectionLink: {
+    color: '#A855F7',
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+  },
+  proStatsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  proStatBox: {
+    width: '48%',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    marginBottom: 16,
+  },
+  proStatBoxValue: {
+    color: '#FFF',
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  proStatBoxLabel: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+  },
+  proBadgeScroll: {
+    paddingBottom: 24,
+  },
+  proBadgeActive: {
+    width: 80,
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  proBadgeInactive: {
+    width: 80,
+    alignItems: 'center',
+    marginRight: 16,
+    opacity: 0.3,
+  },
+  proBadgeImg: {
+    width: 60, height: 60,
+    marginBottom: 8,
+  },
+  proBadgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    textAlign: 'center',
+  },
+  proBadgeTextInactive: {
+    color: '#6B7280',
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    textAlign: 'center',
+  },
+  proTimelineContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    marginBottom: 24,
+  },
+  proTimelineItem: {
+    flexDirection: 'row',
+    marginBottom: 0,
+  },
+  proTimelineDotLine: {
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  proTimelineDot: {
+    width: 12, height: 12,
+    borderRadius: 6,
+    marginTop: 4,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  proTimelineLine: {
+    width: 2,
+    height: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginTop: 4,
+  },
+  proTimelineContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingBottom: 24,
+  },
+  proTimelineTitle: {
+    color: '#FFF',
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 2,
+  },
+  proTimelineSub: {
+    color: '#6B7280',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+  },
+  proTimelineTag: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  proTimelineTagText: {
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  proLogoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+    borderRadius: 16,
+    paddingVertical: 16,
+    marginBottom: 20,
+  },
+  proLogoutText: {
+    color: '#EF4444',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+    marginLeft: 8,
+  }
 });
+
