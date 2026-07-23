@@ -2081,7 +2081,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <TouchableOpacity 
               style={styles.battleModeStartBtn}
               onPress={() => {
-                if (activeBattleMode === 'oddiy' || activeBattleMode === 'dost') {
+                if (activeBattleMode === 'dost') {
+                  navigation.navigate('FriendInvite');
+                } else if (activeBattleMode === 'oddiy') {
                   navigation.navigate('BattleSettings', {
                     battleMode: activeBattleMode,
                     language: language

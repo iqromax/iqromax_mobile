@@ -19,6 +19,7 @@ import AbacusSimulatorScreen from './screens/AbacusSimulatorScreen';
 import BattleSettingsScreen from './screens/BattleSettingsScreen';
 import BattleMatchmakingScreen from './screens/BattleMatchmakingScreen';
 import BattleGameScreen from './screens/BattleGameScreen';
+import FriendInviteScreen from './screens/FriendInviteScreen';
 import BattleResultScreen from './screens/BattleResultScreen';
 
 
@@ -109,7 +110,8 @@ export default function App() {
           <Stack.Screen name="OddiyHisobGame" component={OddiyHisobGameScreen} />
           <Stack.Screen name="AbacusSimulator" component={AbacusSimulatorScreen} />
           <Stack.Screen name="BattleSettings" component={BattleSettingsScreen} />
-          <Stack.Screen name="BattleMatchmaking" component={BattleMatchmakingScreen} />
+                    <Stack.Screen name="FriendInvite" component={FriendInviteScreen} />
+<Stack.Screen name="BattleMatchmaking" component={BattleMatchmakingScreen} />
           <Stack.Screen name="BattleGame" component={BattleGameScreen} />
           <Stack.Screen name="BattleResult" component={BattleResultScreen} />
         </Stack.Navigator>
