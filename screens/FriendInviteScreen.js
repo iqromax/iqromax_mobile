@@ -97,12 +97,18 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   placeholder="ID ni kiriting"
                   placeholderTextColor="#6B7280"
                   value={friendId}
+                  onFocus={() => {
+                    if (friendId.length === 0) {
+                      setFriendId('#');
+                    }
+                  }}
                   onChangeText={async (text) => {
                     setFriendId(text);
                     if (text.length >= 5) {
                       setIsSearching(true);
                       try {
-                        const res = await fetch(`${API_URL}/users/search/${text}`);
+                        const encodedText = encodeURIComponent(text);
+                        const res = await fetch(`${API_URL}/users/search/${encodedText}`);
                         if (res.ok) {
                           const data = await res.json();
                           setFoundUser({
