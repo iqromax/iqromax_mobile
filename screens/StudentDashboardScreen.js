@@ -219,20 +219,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const searchBorderAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(searchBorderAnim, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: false,
-        }),
-        Animated.timing(searchBorderAnim, {
-          toValue: 0,
-          duration: 1500,
-          useNativeDriver: false,
-        }),
-      ])
-    ).start();
+    // Disabled infinite searchBorderAnim loop to fix severe Android lag
+    // Animated.timing with useNativeDriver: false running infinitely kills the JS bridge
   }, [searchBorderAnim]);
 
   const leaderboardData = [
@@ -365,20 +353,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: false,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0,
-          duration: 1500,
-          useNativeDriver: false,
-        })
-      ])
-    ).start();
+    // Disabled infinite pulseAnim loop to fix severe Android lag
   }, [pulseAnim]);
 
   const borderColorInterp = pulseAnim.interpolate({
