@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ImageBackground, Image, SafeAreaView, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform, Modal } from 'react-native';
+import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, SafeAreaView, Dimensions, ScrollView, Image, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Animated, Easing } from 'react-native';
+import { ImageBackground, Image } from 'expo-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
@@ -303,7 +304,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         {isLastAnswerCorrect && (
           <Animated.View style={[styles.feedbackRewards, { transform: [{translateY: translateYAnim}] }]}>
             <View style={styles.rewardBadge}>
-               <Image source={require('../assets/xp_icon.jpg')} style={{width: 24, height: 24, borderRadius: 12}} resizeMode="cover" />
+               <Image source={require('../assets/xp_icon.jpg')} style={{width: 24, height: 24, borderRadius: 12}} contentFit="cover" />
                <Text style={styles.rewardBadgeText}>+15 XP</Text>
             </View>
           </Animated.View>
@@ -545,7 +546,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   return (
     <View style={{ flex: 1, backgroundColor: '#050510' }}>
       {phase !== 'feedback' ? (
-        <ImageBackground source={require('../assets/oddiy_hisob_bg_new.png')} style={styles.bgImage} resizeMode="contain">
+        <ImageBackground source={require('../assets/oddiy_hisob_bg_new.png')} style={styles.bgImage} contentFit="contain">
           {ScreenContent}
         </ImageBackground>
       ) : (

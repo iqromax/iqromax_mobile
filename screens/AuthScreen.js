@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated, Alert, ActivityIndicator } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
@@ -275,7 +276,7 @@ export default function AuthScreen({ navigation, route }) {
                   : (role === 'parent' ? require('../assets/auth_hero_parent.jpg') : (role === 'teacher' ? require('../assets/auth_hero_teacher.jpg') : require('../assets/register_hero_with_text.jpg')))
               } 
               style={styles.heroImage} 
-              resizeMode="contain" 
+              contentFit="contain" 
             />
           </View>
 

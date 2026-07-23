@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, Easing, SafeAreaView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, SafeAreaView, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -192,7 +193,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
 
       <View style={[styles.stakesCard, { justifyContent: 'center' }]}>
         <View style={[styles.stakeHalf, { flex: 0 }]}>
-          <Image source={require('../assets/xp_icon.jpg')} style={{ width: 32, height: 32, borderRadius: 16, marginRight: 10 }} resizeMode="cover" />
+          <Image source={require('../assets/xp_icon.jpg')} style={{ width: 32, height: 32, borderRadius: 16, marginRight: 10 }} contentFit="cover" />
           <View style={styles.stakeTextContainer}>
             <Text style={styles.stakeLabel}>{t.stake}</Text>
             <Text style={styles.stakeValue}>+25 XP</Text>
@@ -219,7 +220,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
         {/* Player (Left) */}
         <View style={[styles.fighterCard, { borderColor: 'rgba(16, 185, 129, 0.4)', shadowColor: '#10B981' }]}>
           <View style={[styles.avatarGlowWrapper, { shadowColor: '#10B981' }]}>
-            <Image source={require('../assets/avatar_maks.png')} style={styles.fighterAvatar} resizeMode="cover" />
+            <Image source={require('../assets/avatar_maks.png')} style={styles.fighterAvatar} contentFit="cover" />
             <View style={[styles.fighterLevel, { backgroundColor: '#10B981' }]}>
               <Text style={styles.fighterLevelText}>12</Text>
             </View>
@@ -250,7 +251,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           ]
         }]}>
           <View style={[styles.avatarGlowWrapper, { shadowColor: '#EF4444' }]}>
-            <Image source={require('../assets/opponent_1.png')} style={styles.fighterAvatar} resizeMode="cover" />
+            <Image source={require('../assets/opponent_1.png')} style={styles.fighterAvatar} contentFit="cover" />
             <View style={[styles.fighterLevel, { backgroundColor: '#EF4444' }]}>
               <Text style={styles.fighterLevelText}>10</Text>
             </View>

@@ -1029,7 +1029,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         }}
                         activeOpacity={0.8}
                       >
-                        <Image source={avatar.img} style={styles.avatarImage} resizeMode="cover" />
+                        <Image source={avatar.img} style={styles.avatarImage} contentFit="cover" />
                         {index === 0 && (
                           <View style={styles.dropdownIconContainer}>
                             <Feather name={isDropdownOpen ? "chevron-up" : "chevron-down"} size={14} color="#FFF" />
@@ -1063,7 +1063,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Announcement Card */}
             <View style={styles.glassCard}>
               <View style={styles.cardHeader}>
-                <Image source={require('../assets/math_master_logo.png')} style={styles.mathMasterLogo} resizeMode="contain" />
+                <Image source={require('../assets/math_master_logo.png')} style={styles.mathMasterLogo} contentFit="contain" />
                 <View style={styles.cardTitles}>
                   <Text style={styles.cardTitle}>{t.title}</Text>
                   <Text style={styles.cardSubtitle}>{t.subtitle}</Text>
@@ -1109,7 +1109,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             
             {/* Overlapping Shield (Absolute) */}
             <View style={styles.shieldWrapper}>
-              <Image source={require('../assets/level_shield.png')} style={styles.shieldImage} resizeMode="contain" />
+              <Image source={require('../assets/level_shield.png')} style={styles.shieldImage} contentFit="contain" />
               <View style={styles.shieldTextWrapper}>
                 <Text style={styles.shieldLevelText}>{t.levelText}</Text>
                 <Text style={styles.shieldLevelNumber}>{levelNumber}</Text>
@@ -1118,7 +1118,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Overlapping Chest (Absolute) */}
             <View style={styles.chestWrapper}>
-              <Image source={require('../assets/level_chest.png')} style={styles.chestImage} resizeMode="contain" />
+              <Image source={require('../assets/level_chest.png')} style={styles.chestImage} contentFit="contain" />
             </View>
           </View>
 
@@ -1128,7 +1128,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             style={styles.startButton}
             onPress={() => setActiveTab('exercise')}
           >
-            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} resizeMode="stretch" />
+            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="stretch" />
             <View style={styles.startButtonTouchable}>
               <Text style={styles.startButtonText}>{t.startExercise}</Text>
             </View>
@@ -1141,26 +1141,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
           {/* Action Cards Section */}
           <View style={styles.actionCardsContainer}>
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
-              <ImageBackground source={require('../assets/card_mashq.png')} style={styles.actionImage} resizeMode="stretch">
+              <ImageBackground source={require('../assets/card_mashq.png')} style={styles.actionImage} contentFit="stretch">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navExercise}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
               <View style={styles.notificationDotCard} />
-              <ImageBackground source={require('../assets/card_missiya.png')} style={styles.actionImage} resizeMode="stretch">
+              <ImageBackground source={require('../assets/card_missiya.png')} style={styles.actionImage} contentFit="stretch">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.missions}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
-              <ImageBackground source={require('../assets/card_reyting.png')} style={styles.actionImage} resizeMode="stretch">
+              <ImageBackground source={require('../assets/card_reyting.png')} style={styles.actionImage} contentFit="stretch">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navRanking}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
-              <ImageBackground source={require('../assets/card_inventar.png')} style={styles.actionImage} resizeMode="stretch">
+              <ImageBackground source={require('../assets/card_inventar.png')} style={styles.actionImage} contentFit="stretch">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navInventory}</Text>
               </ImageBackground>
             </TouchableOpacity>
@@ -1245,7 +1245,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
 
             <TouchableOpacity style={styles.exEnergyButton} activeOpacity={0.7}>
-              <Image source={require('../assets/energy_icon.png')} style={{ width: 18, height: 18 }} resizeMode="contain" />
+              <Image source={require('../assets/energy_icon.png')} style={{ width: 18, height: 18 }} contentFit="contain" />
               <Text style={styles.exEnergyText}>2</Text>
               <Ionicons name="add" size={14} color="#FBBF24" />
             </TouchableOpacity>
@@ -1261,14 +1261,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('calc')}
           >
-            <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
+            <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
               <View style={[styles.exerciseCardContent, activeExerciseType === 'calc' && { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.calcTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.calcDesc}</Text>
                 </View>
                 <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#310787' }]}>
-                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} resizeMode="contain" />
+                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
                   <Text style={styles.exerciseCardEnergyText}>1</Text>
                 </View>
               </View>
@@ -1284,14 +1284,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('abacus')}
           >
-            <ImageBackground source={require('../assets/card_abacus.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
+            <ImageBackground source={require('../assets/card_abacus.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
               <View style={[styles.exerciseCardContent, activeExerciseType === 'abacus' && { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.abacusTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.abacusDesc}</Text>
                 </View>
                 <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#0A2B66' }]}>
-                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} resizeMode="contain" />
+                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
                   <Text style={styles.exerciseCardEnergyText}>1</Text>
                 </View>
               </View>
@@ -1307,14 +1307,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('speed')}
           >
-            <ImageBackground source={require('../assets/card_speed.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
+            <ImageBackground source={require('../assets/card_speed.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
               <View style={[styles.exerciseCardContent, activeExerciseType === 'speed' && { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.speedTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.speedDesc}</Text>
                 </View>
                 <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#104414' }]}>
-                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} resizeMode="contain" />
+                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
                   <Text style={styles.exerciseCardEnergyText}>2</Text>
                 </View>
               </View>
@@ -1330,14 +1330,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('battle')}
           >
-            <ImageBackground source={require('../assets/card_battle.jpg')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} resizeMode="cover">
+            <ImageBackground source={require('../assets/card_battle.jpg')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
               <View style={[styles.exerciseCardContent, activeExerciseType === 'battle' && { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.battleTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.battleDesc}</Text>
                 </View>
                 <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#6B2A03' }]}>
-                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} resizeMode="contain" />
+                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
                   <Text style={styles.exerciseCardEnergyText}>2</Text>
                 </View>
               </View>
@@ -1362,7 +1362,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{ flex: 1, height: 120 }}>
-                   <Image source={require('../assets/abacus_info.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                   <Image source={require('../assets/abacus_info.png')} style={{ width: '100%', height: '100%' }} contentFit="contain" />
                 </View>
                 <View style={{ flex: 1, paddingLeft: 15 }}>
                   <Text style={[styles.infoDesc, { fontSize: 13, lineHeight: 20, color: '#D1D5DB' }]}>
@@ -1387,7 +1387,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <>
         {/* INFO CARD SECTION */}
         <View style={[styles.infoCardContainer, { marginTop: 20, marginBottom: 15 }]}>
-          <ImageBackground source={require('../assets/info_card_bg.png')} style={styles.infoCardBg} imageStyle={{ borderRadius: 16 }} resizeMode="contain">
+          <ImageBackground source={require('../assets/info_card_bg.png')} style={styles.infoCardBg} imageStyle={{ borderRadius: 16 }} contentFit="contain">
             <View style={styles.infoCardContent}>
               <View style={styles.infoTextContainer}>
                 <Text style={styles.infoTitle}>{t.infoTitle}</Text>
@@ -1720,7 +1720,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* ABSOLUTE POSITIONED IMAGE SO CARD HEIGHT IS NOT AFFECTED */}
                 <View style={{ position: 'absolute', right: -30, top: -70, width: 220, height: 320 }}>
-                   <Image source={require('../assets/speed_info.png')} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                   <Image source={require('../assets/speed_info.png')} style={{ width: '100%', height: '100%' }} contentFit="contain" />
                 </View>
               </View>
             </View>
@@ -1957,7 +1957,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
 
             <View style={styles.battleCardContainer}>
-              <ImageBackground source={require('../assets/battle_vs_bg.png')} style={styles.battleCardBg} imageStyle={{ borderRadius: 16 }} resizeMode="stretch">
+              <ImageBackground source={require('../assets/battle_vs_bg.png')} style={styles.battleCardBg} imageStyle={{ borderRadius: 16 }} contentFit="stretch">
                 <View style={styles.battleCardOverlay}>
                   
                   {/* Left Player (You) */}
@@ -2003,7 +2003,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   activeBattleMode === 'oddiy' && styles.battleModeCardActive
                 ]}
               >
-                <Image source={require('../assets/battle_mode_oddiy.png')} style={styles.battleModeIcon} resizeMode="contain" />
+                <Image source={require('../assets/battle_mode_oddiy.png')} style={styles.battleModeIcon} contentFit="contain" />
                 <Text style={styles.battleModeTitle} numberOfLines={2}>{t.bmOddiy || 'Oddiy Battle'}</Text>
                 <Text style={styles.battleModeDesc} numberOfLines={3}>{t.bmOddiyDesc || 'Teng kuchdagilar bilan tezkor hisoblash'}</Text>
                 <View style={styles.battleModeEnergyBadge}>
@@ -2022,7 +2022,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   activeBattleMode === 'dost' && styles.battleModeCardActive
                 ]}
               >
-                <Image source={require('../assets/battle_mode_dost.jpg')} style={styles.battleModeIcon} resizeMode="contain" />
+                <Image source={require('../assets/battle_mode_dost.jpg')} style={styles.battleModeIcon} contentFit="contain" />
                 <Text style={styles.battleModeTitle} numberOfLines={2}>{t.bmDost || "Do'st bilan Battle"}</Text>
                 <Text style={styles.battleModeDesc} numberOfLines={3}>{t.bmDostDesc || "Do'stingizni taklif qiling va bellashing"}</Text>
                 <View style={styles.battleModeEnergyBadge}>
@@ -2040,7 +2040,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <Text style={styles.dailyBoxTitle}>{t.bmDailyMission || 'KUNLIK BATTLE MISSIYASI'}</Text>
                 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, flex: 1 }}>
-                  <Image source={require('../assets/target_icon.png')} style={{ width: 32, height: 32, marginRight: 10 }} resizeMode="contain" />
+                  <Image source={require('../assets/target_icon.png')} style={{ width: 32, height: 32, marginRight: 10 }} contentFit="contain" />
                   <Text style={{ color: '#FFF', fontSize: 11, fontFamily: 'Inter_600SemiBold', flex: 1, lineHeight: 16 }}>
                     {t.bmDailyMissionDesc || "3 ta battle'da ishtirok eting"}
                   </Text>
@@ -2065,7 +2065,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, justifyContent: 'space-between', flex: 1 }}>
                   {/* Coin */}
                   <View style={{ alignItems: 'center' }}>
-                    <Image source={require('../assets/coin_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} resizeMode="cover" />
+                    <Image source={require('../assets/coin_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} contentFit="cover" />
                     <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x100</Text>
                     <MaterialCommunityIcons name="check" size={14} color="#10B981" style={{ marginTop: 2 }} />
                   </View>
@@ -2074,7 +2074,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   
                   {/* XP */}
                   <View style={{ alignItems: 'center' }}>
-                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} resizeMode="cover" />
+                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} contentFit="cover" />
                     <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x50</Text>
                     <MaterialCommunityIcons name="check" size={14} color="#10B981" style={{ marginTop: 2 }} />
                   </View>
@@ -2083,7 +2083,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                   {/* Chest */}
                   <View style={{ alignItems: 'center' }}>
-                    <Image source={require('../assets/chest_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 6 }} resizeMode="cover" />
+                    <Image source={require('../assets/chest_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 6 }} contentFit="cover" />
                     <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x1</Text>
                     <Text style={{ color: '#9CA3AF', fontSize: 8, fontFamily: 'Inter_400Regular', marginTop: 2 }}>7 kun</Text>
                   </View>
@@ -2098,7 +2098,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <View style={styles.bestResultsRow}>
                 {/* Victories */}
                 <View style={styles.bestResultItem}>
-                  <Image source={require('../assets/best_victories.png')} style={styles.bestResultIcon} resizeMode="contain" />
+                  <Image source={require('../assets/best_victories.png')} style={styles.bestResultIcon} contentFit="contain" />
                   <Text style={styles.bestResultLabel}>{t.bestVictories || "G'alabalar"}</Text>
                   <Text style={styles.bestResultValue}>12</Text>
                 </View>
@@ -2108,7 +2108,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* Winning Streak */}
                 <View style={styles.bestResultItem}>
-                  <Image source={require('../assets/best_streak.png')} style={styles.bestResultIcon} resizeMode="contain" />
+                  <Image source={require('../assets/best_streak.png')} style={styles.bestResultIcon} contentFit="contain" />
                   <Text style={styles.bestResultLabel}>{t.bestStreak || "G'alaba seriyasi"}</Text>
                   <Text style={styles.bestResultValue}>5</Text>
                 </View>
@@ -2118,7 +2118,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* Fastest Time */}
                 <View style={styles.bestResultItem}>
-                  <Image source={require('../assets/best_time.png')} style={styles.bestResultIcon} resizeMode="contain" />
+                  <Image source={require('../assets/best_time.png')} style={styles.bestResultIcon} contentFit="contain" />
                   <Text style={styles.bestResultLabel}>{t.bestTime || "Eng tez vaqt"}</Text>
                   <Text style={styles.bestResultValue}>18.4s</Text>
                 </View>
@@ -2151,7 +2151,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               }}
             >
               <View style={styles.battleStartIconContainer}>
-                <Image source={require('../assets/battle_mode_oddiy.png')} style={{ width: 44, height: 44 }} resizeMode="contain" />
+                <Image source={require('../assets/battle_mode_oddiy.png')} style={{ width: 44, height: 44 }} contentFit="contain" />
               </View>
               <View style={styles.battleStartTextContainer}>
                 <Text style={styles.battleStartTitle}>{t.startBattle || "BATTLE BOSHLASH"}</Text>
@@ -2243,7 +2243,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
               {/* 3. Coins Widget */}
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 15, 5, 0.5)', borderWidth: 1, borderColor: '#D97706', borderRadius: 10, padding: 6, paddingHorizontal: 8 }}>
-                <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, marginRight: 5 }} resizeMode="contain" />
+                <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, marginRight: 5 }} contentFit="contain" />
                 <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>12k</Text>
                 <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 14 }}>+</Text>
               </View>
@@ -2333,7 +2333,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <View style={{ width: 68, height: 60, borderRadius: 10, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                     <View style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
                     <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 2 }}>RAMKA</Text>
-                    <Image source={require('../assets/gold_frame.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
+                    <Image source={require('../assets/gold_frame.png')} style={{ width: 24, height: 24 }} contentFit="contain" />
                     <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
                   </View>
 
@@ -2568,7 +2568,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
 
 {/* Golden Frame Card */}
-            <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} resizeMode="stretch">
+            <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} contentFit="stretch">
 {/* Left: Avatar with wreath */}
               <View style={styles.rankingFrameLeft}>
                  <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={styles.rankingAvatar} />
@@ -2589,7 +2589,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 {/* Right: Badge and Progress */}
               <View style={styles.rankingFrameRight}>
                 <View style={styles.rankingBadgeRow}>
-                  <Image source={require('../assets/ranking_badge.png')} style={styles.rankingBadgeIcon} resizeMode="contain" />
+                  <Image source={require('../assets/ranking_badge.png')} style={styles.rankingBadgeIcon} contentFit="contain" />
                   <View>
                     <Text style={styles.rankingBadgeText}>GOLD III</Text>
                     <View style={{ flexDirection: 'row', marginTop: 2 }}>
@@ -2622,7 +2622,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Podium Section */}
             <View style={styles.podiumContainer}>
-              <ImageBackground source={require('../assets/ranking_podium.png')} style={styles.podiumImage} resizeMode="contain">
+              <ImageBackground source={require('../assets/ranking_podium.png')} style={styles.podiumImage} contentFit="contain">
                 
                 {/* 2nd Place (Left) */}
                 <View style={styles.podiumSecond}>
