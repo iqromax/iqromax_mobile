@@ -478,24 +478,24 @@ export const MentalMathGenerator = {
     let n1, n2;
     switch (level) {
       case 1: 
-        n1 = Math.floor(Math.random() * 9) + 2;
-        n2 = Math.floor(Math.random() * 9) + 2;
+        n1 = Math.floor(Math.random() * 9) + 2; // 1-digit (2-9, ignoring 1 to avoid trivial 1x1)
+        n2 = Math.floor(Math.random() * 9) + 2; // 1-digit
         break;
       case 2: 
-        n1 = Math.floor(Math.random() * 90) + 10;
-        n2 = Math.floor(Math.random() * 9) + 2;
+        n1 = Math.floor(Math.random() * 90) + 10; // 2-digit
+        n2 = Math.floor(Math.random() * 90) + 10; // 2-digit
         break;
       case 3: 
-        n1 = Math.floor(Math.random() * 90) + 10;
-        n2 = Math.floor(Math.random() * 90) + 10;
+        n1 = Math.floor(Math.random() * 900) + 100; // 3-digit
+        n2 = Math.floor(Math.random() * 900) + 100; // 3-digit
         break;
       case 4: 
-        n1 = Math.floor(Math.random() * 900) + 100;
-        n2 = Math.floor(Math.random() * 9) + 2;
+        n1 = Math.floor(Math.random() * 9000) + 1000; // 4-digit
+        n2 = Math.floor(Math.random() * 9000) + 1000; // 4-digit
         break;
       default:
-        n1 = Math.floor(Math.random() * 900) + 100;
-        n2 = Math.floor(Math.random() * 90) + 10;
+        n1 = Math.floor(Math.random() * 9) + 2;
+        n2 = Math.floor(Math.random() * 9) + 2;
     }
     return {
       display: `${n1} × ${n2}`,
@@ -511,23 +511,23 @@ export const MentalMathGenerator = {
     switch (level) {
       case 1:
         divisor = Math.floor(Math.random() * 8) + 2; 
-        answer = Math.floor(Math.random() * 9) + 2;
+        answer = Math.floor(Math.random() * 8) + 2;
         break;
       case 2:
-        divisor = Math.floor(Math.random() * 8) + 2;
+        divisor = Math.floor(Math.random() * 90) + 10;
         answer = Math.floor(Math.random() * 90) + 10;
         break;
       case 3:
-        divisor = Math.floor(Math.random() * 90) + 10;
-        answer = Math.floor(Math.random() * 9) + 2;
+        divisor = Math.floor(Math.random() * 900) + 100;
+        answer = Math.floor(Math.random() * 900) + 100;
         break;
       case 4:
-        divisor = Math.floor(Math.random() * 90) + 10;
-        answer = Math.floor(Math.random() * 90) + 10;
+        divisor = Math.floor(Math.random() * 9000) + 1000;
+        answer = Math.floor(Math.random() * 9000) + 1000;
         break;
       default:
-        divisor = Math.floor(Math.random() * 90) + 10;
-        answer = Math.floor(Math.random() * 900) + 100;
+        divisor = Math.floor(Math.random() * 8) + 2;
+        answer = Math.floor(Math.random() * 8) + 2;
     }
     const dividend = divisor * answer; 
     return {
