@@ -568,13 +568,46 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
              </View>
           ))}
         </ScrollView>
-        <TouchableOpacity 
-            style={[styles.fbNextBtn, {backgroundColor: '#7C3AED', marginTop: 20, width: '100%'}]} 
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.fbNextBtnText}>{t.back || "Orqaga"}</Text>
-        </TouchableOpacity>
       </View>
+    );
+  };
+
+  const renderSummaryButtons = () => {
+    return (
+        <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 30, paddingTop: 10 }}>
+            <TouchableOpacity 
+                style={[styles.fbBackBtn, { flex: 1, marginRight: 10, backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)', height: 56 }]} 
+                onPress={() => navigation.goBack()}
+              >
+                <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
+                <Text style={[styles.fbBackBtnText, { color: '#FFF' }]}>{t.back || "Orqaga"}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+                style={[styles.fbNextBtn, { flex: 1, marginLeft: 10, backgroundColor: '#7C3AED', height: 56 }]} 
+                onPress={() => {
+                  setCorrectAnswers(0);
+                  setIncorrectAnswers(0);
+                  setXp(0);
+                  setSpeedResults([]);
+                  setLastElapsed(0);
+                  setCurrentQIndex(0);
+                  setSequence([]);
+                  setPhase('countdown');
+                  setCountdown(3);
+                  const generated = [];
+                  const numQuestions = isSpeedMode ? examplesCount : 10;
+                  const terms = isSpeedMode ? 2 : examplesCount;
+                  for (let i = 0; i < numQuestions; i++) {
+                    generated.push(MentalMathGenerator.generate(operation, digits, terms));
+                  }
+                  setQuestions(generated);
+                }}
+              >
+                <MaterialCommunityIcons name="refresh" size={24} color="#FFF" style={{ marginRight: 8 }} />
+                <Text style={styles.fbNextBtnText}>{t.retry || "Yana urinib ko'rish"}</Text>
+            </TouchableOpacity>
+        </View>
     );
   };
 
@@ -597,8 +630,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         
         <View style={{height: 30}} />
       </ScrollView>
-    
-      
+
+      {phase === 'summary' && renderSummaryButtons()}
     </SafeAreaView>
   );
 
