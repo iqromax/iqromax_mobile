@@ -15,6 +15,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const FriendInviteScreen = ({ navigation, route }) => {
   const [friendId, setFriendId] = useState('');
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false);
   const inviteLink = 'iqromax.app/battle/invite/IQX567890';
 
   return (
@@ -138,15 +139,25 @@ const FriendInviteScreen = ({ navigation, route }) => {
           </View>
 
           {/* Bottom Info Card */}
-          <TouchableOpacity style={styles.infoCard}>
+          <TouchableOpacity 
+            style={styles.infoCard}
+            onPress={() => setIsInfoExpanded(!isInfoExpanded)}
+            activeOpacity={0.8}
+          >
             <View style={styles.infoIconBox}>
               <MaterialCommunityIcons name="lightbulb-on" size={24} color="#A855F7" />
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoTitle}>ID ni qayerdan topish mumkin?</Text>
-              <Text style={styles.infoDesc}>ID ni profilingiz sahifasida yoki sozlamalar bo'limida topishingiz mumkin.</Text>
+              {isInfoExpanded && (
+                <Text style={styles.infoDesc}>ID ni profilingiz sahifasidan topishingiz mumkin.</Text>
+              )}
             </View>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#A855F7" />
+            <MaterialCommunityIcons 
+              name={isInfoExpanded ? "chevron-up" : "chevron-down"} 
+              size={24} 
+              color="#A855F7" 
+            />
           </TouchableOpacity>
 
         </ScrollView>
@@ -429,7 +440,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderRadius: 16,
     padding: 16,
