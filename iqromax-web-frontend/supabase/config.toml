@@ -1,0 +1,58 @@
+project_id = "rkhmmnqhzeogdushseqb"
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.telegram-webhook]
+verify_jwt = false
+
+[functions.send-telegram-code]
+verify_jwt = false
+
+[functions.verify-code]
+verify_jwt = false
+
+[functions.help-chat]
+verify_jwt = false
+
+[functions.send-verification-code]
+verify_jwt = false
+
+[functions.send-weekly-report]
+verify_jwt = false
+
+[functions.elevenlabs-tts]
+verify_jwt = false
+
+[functions.elevenlabs-stt]
+verify_jwt = false
+
+[functions.generate-otp]
+verify_jwt = false
+
+[functions.check-otp-status]
+verify_jwt = false
+
+[functions.verify-otp-website]
+verify_jwt = false
+
+[functions.set-telegram-webhook]
+verify_jwt = false
+
+[functions.reset-password-otp]
+verify_jwt = false
+
+[functions.reset-password-confirm]
+verify_jwt = false
+
+[functions.livekit-token]
+verify_jwt = false
+
+[functions.zoom-meeting]
+verify_jwt = false

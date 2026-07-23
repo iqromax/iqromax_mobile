@@ -1,0 +1,126 @@
+import { Link, useLocation } from 'react-router-dom';
+import { Home, Play, Trophy, BookOpen, Calculator, BarChart3, FileText, GraduationCap, Video } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
+
+const getNavItems = (role: string | null) => {
+  if (role === 'parent') {
+    return [
+      { icon: Home, label: "Uy", path: "/", emoji: "🏠" },
+      { icon: BarChart3, label: "Nazorat", path: "/parent-dashboard", emoji: "📊" },
+      { icon: FileText, label: "Hisobot", path: "/lesson-stats", emoji: "📋" },
+    ];
+  }
+  if (role === 'teacher') {
+    return [
+      { icon: Home, label: "Uy", path: "/", emoji: "🏠" },
+      { icon: Video, label: "Live", path: "/live-sessions", emoji: "📹" },
+      { icon: Calculator, label: "Abakus", path: "/abacus-simulator", emoji: "🧮" },
+      { icon: GraduationCap, label: "Kurslar", path: "/courses", emoji: "📚" },
+      { icon: FileText, label: "Hisobot", path: "/lesson-stats", emoji: "📋" },
+    ];
+  }
+  // Student (default)
+  return [
+    { icon: Home, label: "Uy", path: "/", emoji: "🏠" },
+    { icon: BookOpen, label: "Fanlar", path: "/subjects", emoji: "📚" },
+    { icon: Calculator, label: "Abakus", path: "/abacus-simulator", emoji: "🧮" },
+    { icon: Trophy, label: "Musobaqa", path: "/weekly-game", emoji: "🏆" },
+    { icon: Video, label: "Live", path: "/live-sessions", emoji: "📹" },
+  ];
+};
+
+export const MobileBottomNav = () => {
+  const location = useLocation();
+  const { user } = useAuth();
+  const { role } = useUserRole();
+
+  const navItems = getNavItems(role);
+
+  // Hide on auth page, admin pages and for non-logged-in users
+  if (!user || location.pathname === '/auth' || location.pathname === '/reset-password' || location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
+  return (
+    /* ENTERPRISE: Fixed bottom nav - properly isolated, won't affect scroll */
+    <nav 
+      className="fixed bottom-0 left-0 right-0 z-[100] md:hidden"
+      style={{ 
+        isolation: 'isolate',
+        willChange: 'transform',
+      }}
+    >
+      {/* Glass background with gradient border */}
+      <div className="absolute inset-0 bg-gradient-to-t from-card via-card/98 to-card/95 backdrop-blur-xl" />
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+      
+      {/* Safe area for notched phones */}
+      <div className="relative flex items-center justify-around px-2 pt-2" style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
+        {navItems.map((item) => {
+          const isActive = !item.external && (location.pathname === item.path ||
+            (item.path !== '/' && location.pathname.startsWith(item.path)));
+
+          if (item.external) {
+            return (
+              <a
+                key={item.path}
+                href={item.path}
+                className={cn(
+                  "relative flex flex-col items-center justify-center flex-1 py-1.5 rounded-2xl transition-all duration-300",
+                  "text-muted-foreground active:scale-95"
+                )}
+              >
+                <div className="absolute inset-x-2 -top-1 h-1 rounded-full transition-all duration-300 bg-transparent" />
+                <div className="relative flex items-center justify-center w-12 h-10 xs:w-14 xs:h-11 rounded-2xl transition-all duration-300">
+                  <item.icon className="w-5 h-5 xs:w-6 xs:h-6" />
+                </div>
+                <span className="text-[10px] xs:text-xs font-semibold mt-0.5 text-muted-foreground">
+                  {item.label}
+                </span>
+              </a>
+            );
+          }
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "relative flex flex-col items-center justify-center flex-1 py-1.5 rounded-2xl transition-all duration-300",
+                isActive 
+                  ? "text-primary" 
+                  : "text-muted-foreground active:scale-95"
+              )}
+            >
+              <div className={cn(
+                "absolute inset-x-2 -top-1 h-1 rounded-full transition-all duration-300",
+                isActive ? "bg-primary shadow-lg shadow-primary/50" : "bg-transparent"
+              )} />
+              <div className={cn(
+                "relative flex items-center justify-center w-12 h-10 xs:w-14 xs:h-11 rounded-2xl transition-all duration-300",
+                isActive && "bg-primary/15 scale-110"
+              )}>
+                {isActive ? (
+                  <span className="text-2xl xs:text-[1.75rem] drop-shadow-sm">{item.emoji}</span>
+                ) : (
+                  <item.icon className="w-5 h-5 xs:w-6 xs:h-6" />
+                )}
+                {isActive && (
+                  <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-lg -z-10" />
+                )}
+              </div>
+              <span className={cn(
+                "text-[10px] xs:text-xs font-semibold mt-0.5 transition-all duration-200",
+                isActive ? "text-primary font-bold" : "text-muted-foreground"
+              )}>
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};

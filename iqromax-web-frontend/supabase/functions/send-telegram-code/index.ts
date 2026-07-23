@@ -1,0 +1,265 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+interface TelegramVerificationRequest {
+  telegram_username: string;
+  email: string;
+  phone_number?: string;
+}
+
+function generateCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+function escapeMarkdownV2(text: string): string {
+  return text.replace(/[_*\[\]()~`>#+=|{}.!\\-]/g, '\\$&');
+}
+
+async function sendTelegramMessage(chatId: string, message: string): Promise<boolean> {
+  const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+  
+  if (!botToken) {
+    console.error("TELEGRAM_BOT_TOKEN not configured");
+    return false;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: "MarkdownV2",
+        }),
+      }
+    );
+
+    const result = await response.json();
+    
+    if (!result.ok) {
+      console.error("Telegram API error:", result);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Failed to send Telegram message:", error);
+    return false;
+  }
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { telegram_username, email, phone_number }: TelegramVerificationRequest = await req.json();
+
+    if (!telegram_username || typeof telegram_username !== "string" || !email || typeof email !== "string") {
+      throw new Error("Telegram username va email talab qilinadi");
+    }
+
+    // Input validation
+    if (email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      throw new Error("Email formati noto'g'ri");
+    }
+
+    // Clean up telegram username
+    const cleanUsername = telegram_username.replace(/^@/, '').trim().toLowerCase();
+
+    if (cleanUsername.length > 32 || !/^[a-z0-9_]+$/.test(cleanUsername)) {
+      throw new Error("Telegram username noto'g'ri");
+    }
+
+    // Create Supabase client with service role
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Find user in telegram_users table by username (fallback: phone number)
+    const normalizedPhone = (phone_number ?? "").replace(/[^\d+]/g, "").trim();
+    const phoneDigits = normalizedPhone.replace(/^\+/, "");
+    const phoneCandidates = Array.from(new Set([
+      normalizedPhone,
+      phoneDigits,
+      phoneDigits ? `+${phoneDigits}` : "",
+    ].filter(Boolean)));
+
+    let telegramUser: any = null;
+
+    if (cleanUsername) {
+      const { data, error } = await supabaseAdmin
+        .from("telegram_users")
+        .select("*")
+        .eq("is_active", true)
+        // allow both "username" and "@username" stored forms
+        .or(`username.ilike.${cleanUsername},username.ilike.@${cleanUsername}`)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Telegram user lookup error (username):", error);
+      }
+
+      telegramUser = data ?? null;
+    }
+
+    if (!telegramUser && phoneCandidates.length > 0) {
+      const { data, error } = await supabaseAdmin
+        .from("telegram_users")
+        .select("*")
+        .eq("is_active", true)
+        .in("phone_number", phoneCandidates)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Telegram user lookup error (phone):", error);
+      }
+
+      telegramUser = data ?? null;
+    }
+
+    if (!telegramUser) {
+      console.log("Telegram user not found:", cleanUsername || normalizedPhone);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error:
+            "Telegram foydalanuvchisi topilmadi. Iltimos, avval @iqromaxuzbot ga /start yuboring va botga telefon raqamingizni (Contact) yuboring.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Validate that the phone number matches the one stored in telegram_users
+    const storedPhone = (telegramUser.phone_number ?? "").replace(/[^\d]/g, "");
+    const inputPhone = (phone_number ?? "").replace(/[^\d]/g, "");
+
+    if (!storedPhone) {
+      console.log("Telegram user has no phone number stored:", telegramUser.username);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Telegram botga telefon raqamingizni (Contact) yubormadingiz. Iltimos, @iqromaxuzbot ga kirib 📱 tugmasini bosing.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    if (inputPhone !== storedPhone) {
+      console.log("Phone mismatch. Input:", inputPhone, "Stored:", storedPhone);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Kiritilgan telefon raqam Telegram botga yuborgan raqamingizdan farq qiladi. Iltimos, botga yuborgan raqamingizni kiriting.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    // Generate 6-digit code
+    const code = generateCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Delete any existing unused codes for this email
+    await supabaseAdmin
+      .from("verification_codes")
+      .delete()
+      .eq("email", email)
+      .eq("is_used", false);
+
+    // Insert new verification code
+    const { error: insertError } = await supabaseAdmin
+      .from("verification_codes")
+      .insert({
+        email,
+        phone_number: phone_number || "",
+        code,
+        expires_at: expiresAt.toISOString(),
+        is_used: false,
+      });
+
+    if (insertError) {
+      console.error("Insert error:", insertError);
+      throw new Error("Tasdiqlash kodini yaratishda xatolik");
+    }
+
+    // Create the message
+    const escapedCode = escapeMarkdownV2(code);
+    const message = `🔐 *IQROMAX Tasdiqlash Kodi*
+
+Sizning ro'yxatdan o'tish kodingiz:
+
+\`${escapedCode}\`
+
+⏱️ Kod 10 daqiqa davomida amal qiladi\\.
+
+⚠️ Bu kodni hech kimga bermang\\!`;
+
+    // Send code via Telegram
+    const sent = await sendTelegramMessage(telegramUser.chat_id, message);
+
+    if (!sent) {
+      // Delete the code if sending failed
+      await supabaseAdmin
+        .from("verification_codes")
+        .delete()
+        .eq("email", email)
+        .eq("code", code);
+
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Telegram xabar yuborishda xatolik yuz berdi" 
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+
+    console.log("Verification code sent via Telegram to:", cleanUsername);
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        message: "Tasdiqlash kodi Telegram orqali yuborildi" 
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
+  } catch (error: any) {
+    console.error("Error in send-telegram-code:", error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      }
+    );
+  }
+};
+
+serve(handler);
