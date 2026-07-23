@@ -229,9 +229,18 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
 // Helper: Generate Custom ID
 const generateCustomId = async () => {
-  const count = await prisma.user.count();
-  const nextId = count + 1;
-  return `#${nextId.toString().padStart(4, '0')}`;
+  let count = await prisma.user.count();
+  let nextId = count + 1;
+  let customId = `#${nextId.toString().padStart(4, '0')}`;
+  
+  while (true) {
+    const exists = await prisma.user.findUnique({ where: { customId } });
+    if (!exists) {
+      return customId;
+    }
+    nextId++;
+    customId = `#${nextId.toString().padStart(4, '0')}`;
+  }
 };
 
 // 3. Final Register
