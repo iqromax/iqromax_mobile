@@ -34,9 +34,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Do'st bilan battle</Text>
-          <TouchableOpacity style={styles.helpButton}>
-            <MaterialCommunityIcons name="help" size={20} color="#A855F7" />
-          </TouchableOpacity>
+          <View style={{ width: 44 }} /> {/* Bo'sh joy markazlash uchun */}
         </View>
 
         <ScrollView 
@@ -91,7 +89,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                 </View>
                 <TextInput
                   style={styles.textInput}
-                  placeholder="ID ni kiriting (masalan: IQX12345)"
+                  placeholder="ID ni kiriting"
                   placeholderTextColor="#6B7280"
                   value={friendId}
                   onChangeText={setFriendId}
@@ -103,7 +101,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                 )}
               </View>
               <TouchableOpacity style={styles.sendLinkBtn}>
-                <MaterialCommunityIcons name="link-variant" size={24} color="#FFF" />
+                <MaterialCommunityIcons name="send" size={24} color="#FFF" />
               </TouchableOpacity>
             </View>
           </View>
