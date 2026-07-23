@@ -108,7 +108,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                             name: 'Azizbek',
                             level: 24,
                             rating: 1540,
-                            avatar: require('../assets/battle_mode_dost.png'), // Vaqtinchalik rasm
+                            avatar: require('../assets/avatar_alex.jpg'), // Mavjud rasm
                           });
                         } else {
                           setFoundUser(null);
