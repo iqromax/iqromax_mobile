@@ -159,9 +159,11 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
          if (Array.isArray(child.material)) {
             child.material.forEach(mat => {
                if (mat.name) mat.name = mat.name.replace(/-/g, '_');
+               mat.needsUpdate = true;
             });
          } else {
             if (child.material.name) child.material.name = child.material.name.replace(/-/g, '_');
+            child.material.needsUpdate = true;
          }
       }
     });
@@ -1048,6 +1050,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
                 <ambientLight intensity={2} color="#ffffff" />
                 <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                <Environment preset="city" />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
                 <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                 <Suspense fallback={null}>
@@ -2237,6 +2240,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
                     <ambientLight intensity={2} color="#ffffff" />
                     <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                    <Environment preset="city" />
                     <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
                     <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                     <Suspense fallback={null}>
@@ -3021,7 +3025,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#05050C',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingTop: 0,
   },
   header: {
     paddingHorizontal: 16,
