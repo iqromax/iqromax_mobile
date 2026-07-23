@@ -555,8 +555,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                 </View>
                 <View style={{alignItems: 'center', width: 60}}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 14, height: 14, borderRadius: 7, marginRight: 4 }} />
-                    <Text style={{ color: res.isCorrect ? '#10B981' : '#EF4444', fontSize: 14, fontFamily: 'Inter_700Bold' }}>
+                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 20, height: 20, borderRadius: 10, marginRight: 6 }} />
+                    <Text style={{ color: res.isCorrect ? '#10B981' : '#EF4444', fontSize: 16, fontFamily: 'Inter_700Bold' }}>
                       {res.isCorrect ? '+1' : '0'} XP
                     </Text>
                   </View>
