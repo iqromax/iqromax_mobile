@@ -301,6 +301,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [selectedExamples, setSelectedExamples] = useState(15);
   const [selectedOperation, setSelectedOperation] = useState('oddiy');
   const exampleNumbers = [2, ...Array.from({ length: 19 }, (_, i) => i + 7)];
+  const speedExampleNumbers = [2, 5, 10];
   
   const [isSpeedPickerOpen, setIsSpeedPickerOpen] = useState(false);
   const [selectedSpeed, setSelectedSpeed] = useState(1);
@@ -1793,8 +1794,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="calculator" size={24} color="#A855F7" />
                 </View>
                 <View style={styles.examplesHeaderTextContainer}>
-                  <Text style={[styles.examplesTitle, { color: '#F8FAFC' }]}>{t.examplesCountTitle || 'HADLAR SONI'}</Text>
-                  <Text style={[styles.examplesSubtitle, { color: '#6B7280' }]}>{t.examplesCountSubtitle || '7 dan 25 hadgacha tanlang'}</Text>
+                  <Text style={[styles.examplesTitle, { color: '#F8FAFC' }]}>{t.examplesCountTitleSpeed || 'MISOLLAR SONI'}</Text>
+                  <Text style={[styles.examplesSubtitle, { color: '#6B7280' }]}>{t.examplesCountSubtitleSpeed || '2, 5, ёки 10 ta misol tanlang'}</Text>
                 </View>
               </View>
 
@@ -1804,7 +1805,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   activeOpacity={0.8}
                   onPress={() => setIsSpeedSecExamplesOpen(true)}
                 >
-                  <Text style={[styles.examplesSelectorValueText, { color: '#F8FAFC' }]}>{speedSecExamples} <Text style={[styles.examplesSelectorLabelText, { color: '#9CA3AF' }]}>{t.exampleWord || 'had'}</Text></Text>
+                  <Text style={[styles.examplesSelectorValueText, { color: '#F8FAFC' }]}>{speedSecExamples} <Text style={[styles.examplesSelectorLabelText, { color: '#9CA3AF' }]}>{t.exampleWordSpeed || 'ta misol'}</Text></Text>
                   <MaterialCommunityIcons name="chevron-down" size={24} color="#9CA3AF" />
                 </TouchableOpacity>
               ) : (
@@ -1817,11 +1818,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     onMomentumScrollEnd={(e) => {
                       const offsetY = e.nativeEvent.contentOffset.y;
                       const index = Math.round(offsetY / 40);
-                      if (exampleNumbers[index]) setSpeedSecExamples(exampleNumbers[index]);
+                      if (speedExampleNumbers[index]) setSpeedSecExamples(speedExampleNumbers[index]);
                     }}
                   >
                     <View style={{ height: 40 }} />
-                    {exampleNumbers.map((num) => {
+                    {speedExampleNumbers.map((num) => {
                       const isSelected = speedSecExamples === num;
                       return (
                         <TouchableOpacity 
@@ -1833,7 +1834,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           }}
                         >
                           <Text style={[styles.examplesPickerItemText, { color: '#9CA3AF' }, isSelected && { color: '#A855F7', fontWeight: 'bold' }]}>
-                            {num} {isSelected && <Text style={{ color: '#9CA3AF', fontSize: 14 }}>( {t.exampleWord || 'had'} )</Text>}
+                            {num} {isSelected && <Text style={{ color: '#9CA3AF', fontSize: 14 }}>( {t.exampleWordSpeed || 'ta misol'} )</Text>}
                           </Text>
                         </TouchableOpacity>
                       );
@@ -1844,64 +1845,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               )}
             </View>
 
-            {/* SPEED VAQT CHEKLOVI */}
-            <View style={[styles.examplesContainer, { backgroundColor: '#0A0A16', marginTop: 15, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
-              <View style={styles.examplesHeader}>
-                <View style={[styles.examplesIconBox, { backgroundColor: 'rgba(168, 85, 247, 0.1)' }]}>
-                  <MaterialCommunityIcons name="timer-outline" size={24} color="#A855F7" />
-                </View>
-                <View style={styles.examplesHeaderTextContainer}>
-                  <Text style={[styles.examplesTitle, { color: '#F8FAFC' }]}>{t.speedTimeTitle || 'VAQT CHEKLOVI'}</Text>
-                  <Text style={[styles.examplesSubtitle, { color: '#6B7280' }]}>{t.speedTimeSubtitle || '0.5 soniyadan 2 soniyagacha vaqt tanlang'}</Text>
-                </View>
-              </View>
 
-              {!isSpeedSecTimeOpen ? (
-                <TouchableOpacity 
-                  style={[styles.examplesSelectorClosed, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]} 
-                  activeOpacity={0.8}
-                  onPress={() => setIsSpeedSecTimeOpen(true)}
-                >
-                  <Text style={[styles.examplesSelectorValueText, { color: '#F8FAFC' }]}>{speedSecTime.toFixed(1)} <Text style={[styles.examplesSelectorLabelText, { color: '#9CA3AF' }]}>{t.speedSecLabel || 'soniya'}</Text></Text>
-                  <MaterialCommunityIcons name="chevron-down" size={24} color="#9CA3AF" />
-                </TouchableOpacity>
-              ) : (
-                <View style={[styles.examplesPickerExpanded, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
-                  <ScrollView 
-                    style={styles.examplesPickerScroll} 
-                    showsVerticalScrollIndicator={false}
-                    snapToInterval={40}
-                    decelerationRate="fast"
-                    onMomentumScrollEnd={(e) => {
-                      const offsetY = e.nativeEvent.contentOffset.y;
-                      const index = Math.round(offsetY / 40);
-                      const opts = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0];
-                      if (opts[index]) setSpeedSecTime(opts[index]);
-                    }}
-                  >
-                    <View style={{ height: 40 }} />
-                    {[0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0].map((num) => {
-                      const isSelected = speedSecTime === num;
-                      return (
-                        <TouchableOpacity 
-                          key={num.toString()} 
-                          style={[styles.examplesPickerItem, isSelected && { backgroundColor: 'rgba(168, 85, 247, 0.2)' }]}
-                          onPress={() => {
-                            setSpeedSecTime(num);
-                            setIsSpeedSecTimeOpen(false);
-                          }}
-                        >
-                          <Text style={[styles.examplesPickerItemText, { color: '#9CA3AF' }, isSelected && { color: '#A855F7', fontWeight: 'bold' }]}>
-                            {num.toFixed(1)} {isSelected && <Text style={{ color: '#9CA3AF', fontSize: 14 }}>( {t.speedSecLabel || 'soniya'} )</Text>}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                    <View style={{ height: 40 }} />
-                  </ScrollView>
-                </View>
-              )}
-            </View>
 
             {/* SPEED AMALLAR */}
             <View style={[styles.examplesContainer, { backgroundColor: '#0A0A16', marginTop: 15, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>

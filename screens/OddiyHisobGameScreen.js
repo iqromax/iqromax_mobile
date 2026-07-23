@@ -24,11 +24,12 @@ const { width, height } = Dimensions.get('window');
 
 export default function OddiyHisobGameScreen({ navigation, route }) {
   // Config from params
-  const { examplesCount = 3, operation = 'oddiy', speed = 1, digits = 1, language = 'uz' } = route.params || {};
+  const { examplesCount = 3, operation = 'oddiy', speed = 1, digits = 1, language = 'uz', isSpeedMode = false } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
 
   // Game phases: 'countdown' | 'flashing' | 'input' | 'feedback'
   const [phase, setPhase] = useState('countdown');
+  const [speedResults, setSpeedResults] = useState([]);
   const [countdown, setCountdown] = useState(3);
   
   // Game states
@@ -61,8 +62,10 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   // Initialize game
   useEffect(() => {
     const generated = [];
-    for (let i = 0; i < 10; i++) {
-      generated.push(MentalMathGenerator.generate(operation, digits, examplesCount));
+    const numQuestions = isSpeedMode ? examplesCount : 10;
+    const terms = isSpeedMode ? 2 : examplesCount;
+    for (let i = 0; i < numQuestions; i++) {
+      generated.push(MentalMathGenerator.generate(operation, digits, terms));
     }
     setQuestions(generated);
   }, []);
@@ -84,7 +87,12 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         return () => clearTimeout(timer);
       } else {
         setStartTime(Date.now()); // reset timer at start of flashing
-        setPhase('flashing');
+        if (isSpeedMode) {
+          setPhase('input');
+          setQuestionStartTime(Date.now());
+        } else {
+          setPhase('flashing');
+        }
       }
     } else if (phase === 'feedback') {
       fadeAnim.setValue(0);
@@ -154,7 +162,12 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         setPhase('countdown');
         setCountdown(3);
       } else {
-        setPhase('flashing');
+        if (isSpeedMode) {
+          setPhase('input');
+          setQuestionStartTime(Date.now());
+        } else {
+          setPhase('flashing');
+        }
       }
       setInputValue('');
     }
@@ -212,7 +225,21 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       setCombo(0);
     }
 
-    setPhase('feedback');
+    if (isSpeedMode) {
+      setSpeedResults(prev => [...prev, {
+        q: currentQ,
+        userAnswer: inputValue,
+        isCorrect,
+        time: timeForThisQuestion.toFixed(1)
+      }]);
+      if (currentQIndex + 1 < questions.length) {
+        setCurrentQIndex(prev => prev + 1);
+      } else {
+        setPhase('summary');
+      }
+    } else {
+      setPhase('feedback');
+    }
   };
 
   const handleNextQuestion = () => {
@@ -450,10 +477,18 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     );
   };
 
-  const renderInputArea = () => (
+  const renderInputArea = () => {
+    const currentQ = questions[currentQIndex];
+    return (
     <View style={styles.inputPhaseWrapper}>
       <View style={styles.inputSection}>
-        <Text style={styles.inputSectionTitle}>{t.enterAnswer}</Text>
+        {isSpeedMode ? (
+          <Text style={[styles.inputSectionTitle, { fontSize: 40, color: '#FBBF24', marginBottom: 20 }]}>
+            {currentQ?.display} = ?
+          </Text>
+        ) : (
+          <Text style={styles.inputSectionTitle}>{t.enterAnswer}</Text>
+        )}
         <View style={styles.inputField}>
           <Text style={[styles.inputText, !inputValue && {color: '#6B7280'}]}>
             {inputValue || t.enterAnswer}
@@ -477,7 +512,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         </TouchableOpacity>
       </View>
     </View>
-  );
+  );};
 
   const renderFlashingBottom = () => {
     if (phase === 'countdown' || phase === 'flashing') {
@@ -520,6 +555,37 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     );
   };
 
+  const renderSummaryArea = () => {
+    return (
+      <View style={styles.feedbackContainer}>
+        <View style={styles.feedbackHeader}>
+          <Text style={[styles.feedbackTitle, { color: '#10B981' }]}>{t.exerciseCompleted || "Mashq yakunlandi"}</Text>
+        </View>
+        <ScrollView style={{width: '100%', marginTop: 20}}>
+          {speedResults.map((res, i) => (
+             <View key={i} style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.05)', padding: 15, borderRadius: 12, marginBottom: 10, alignItems: 'center'}}>
+                <Text style={{color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold', width: 120}}>{res.q.display}</Text>
+                <View style={{alignItems: 'center', width: 60}}>
+                  <MaterialCommunityIcons name={res.isCorrect ? "check-circle" : "close-circle"} size={24} color={res.isCorrect ? "#10B981" : "#EF4444"} />
+                  <Text style={{color: res.isCorrect ? "#10B981" : "#EF4444", fontSize: 14, fontFamily: 'Inter_500Medium'}}>{res.userAnswer}</Text>
+                </View>
+                <View style={{alignItems: 'flex-end', width: 80}}>
+                  <Text style={{color: '#9CA3AF', fontSize: 12}}>{t.timeLabel || "Vaqt"}</Text>
+                  <Text style={{color: '#FBBF24', fontSize: 16, fontFamily: 'Inter_700Bold'}}>{res.time}s</Text>
+                </View>
+             </View>
+          ))}
+        </ScrollView>
+        <TouchableOpacity 
+            style={[styles.fbNextBtn, {backgroundColor: '#7C3AED', marginTop: 20, width: '100%'}]} 
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.fbNextBtnText}>{t.back || "Orqaga"}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   const ScreenContent = (
     <SafeAreaView style={styles.container}>
       
@@ -535,6 +601,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         {phase === 'input' && renderInputArea()}
         
         {phase === 'feedback' && renderFeedbackArea()}
+        {phase === 'summary' && renderSummaryArea()}
         
         <View style={{height: 30}} />
       </ScrollView>
@@ -545,7 +612,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#050510' }}>
-      {phase !== 'feedback' ? (
+      {phase !== 'feedback' && phase !== 'summary' ? (
         <ImageBackground source={require('../assets/oddiy_hisob_bg_new.png')} style={styles.bgImage} contentFit="contain">
           {ScreenContent}
         </ImageBackground>
