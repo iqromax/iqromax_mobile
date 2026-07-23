@@ -707,7 +707,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           {/* Center Column: Showcase */}
           <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
             <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
+              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
                 <ambientLight intensity={2} color="#ffffff" />
                 <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
@@ -871,7 +871,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             />
             {/* 3D Model */}
             <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
+              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
                 <ambientLight intensity={2} color="#ffffff" />
                 <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
@@ -1064,7 +1064,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Canvas Container */}
             <View style={{ position: 'absolute', top: -50, bottom: -20, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
-              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
+              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
                 <ambientLight intensity={2} color="#ffffff" />
                 <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
                 <Environment preset="city" />
@@ -2254,7 +2254,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* 3D Model Render */}
                 <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                  <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true, preserveDrawingBuffer: true, antialias: true }}>
+                  <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
                     <ambientLight intensity={2} color="#ffffff" />
                     <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
                     <Environment preset="city" />
