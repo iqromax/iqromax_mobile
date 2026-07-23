@@ -1150,7 +1150,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             style={styles.startButton}
             onPress={() => setActiveTab('exercise')}
           >
-            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="stretch" />
+            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="fill" />
             <View style={styles.startButtonTouchable}>
               <Text style={styles.startButtonText}>{t.startExercise}</Text>
             </View>
@@ -1163,26 +1163,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
           {/* Action Cards Section */}
           <View style={styles.actionCardsContainer}>
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
-              <ImageBackground source={require('../assets/card_mashq.png')} style={styles.actionImage} contentFit="stretch">
+              <ImageBackground source={require('../assets/card_mashq.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navExercise}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
               <View style={styles.notificationDotCard} />
-              <ImageBackground source={require('../assets/card_missiya.png')} style={styles.actionImage} contentFit="stretch">
+              <ImageBackground source={require('../assets/card_missiya.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.missions}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
-              <ImageBackground source={require('../assets/card_reyting.png')} style={styles.actionImage} contentFit="stretch">
+              <ImageBackground source={require('../assets/card_reyting.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navRanking}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
-              <ImageBackground source={require('../assets/card_inventar.png')} style={styles.actionImage} contentFit="stretch">
+              <ImageBackground source={require('../assets/card_inventar.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navInventory}</Text>
               </ImageBackground>
             </TouchableOpacity>
@@ -1922,7 +1922,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
 
             <View style={styles.battleCardContainer}>
-              <ImageBackground source={require('../assets/battle_vs_bg.png')} style={styles.battleCardBg} imageStyle={{ borderRadius: 16 }} contentFit="stretch">
+              <ImageBackground source={require('../assets/battle_vs_bg.png')} style={styles.battleCardBg} imageStyle={{ borderRadius: 16 }} contentFit="fill">
                 <View style={styles.battleCardOverlay}>
                   
                   {/* Left Player (You) */}
@@ -2535,7 +2535,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
 
 {/* Golden Frame Card */}
-            <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} contentFit="stretch">
+            <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} contentFit="fill">
 {/* Left: Avatar with wreath */}
               <View style={styles.rankingFrameLeft}>
                  <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={styles.rankingAvatar} />
