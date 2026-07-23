@@ -106,29 +106,6 @@ const FriendInviteScreen = ({ navigation, route }) => {
             </View>
           </View>
 
-          {/* Link Section */}
-          <View style={styles.linkCard}>
-            <View style={styles.linkIconBox}>
-              <MaterialCommunityIcons name="link-variant" size={24} color="#A855F7" />
-            </View>
-            <View style={styles.linkContent}>
-              <Text style={styles.linkTitle}>Sizning taklif havolangiz</Text>
-              <Text style={styles.linkText}>{inviteLink}</Text>
-              <Text style={styles.linkDesc}>Ushbu havolani do'stingiz bilan ulashing</Text>
-            </View>
-            <TouchableOpacity style={styles.copyBtn}>
-              <MaterialCommunityIcons name="content-copy" size={20} color="#A855F7" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Divider */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>YOKI</Text>
-            <View style={styles.dividerLine} />
-          </View>
-          <Text style={styles.dividerSubtext}>Pastdagi maydonda do'stingizni qidirib toping</Text>
-
           {/* Search Empty State */}
           <View style={styles.searchStateCard}>
             <MaterialCommunityIcons name="magnify" size={60} color="rgba(255, 255, 255, 0.2)" />
