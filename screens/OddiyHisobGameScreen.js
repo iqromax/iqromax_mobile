@@ -373,7 +373,16 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         <Animated.View style={[styles.feedbackActions, { transform: [{translateY: translateYAnim}] }]}>
           <TouchableOpacity 
             style={[styles.fbBackBtn, !isLastAnswerCorrect && {backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)'}]} 
-            onPress={() => isLastAnswerCorrect ? navigation.goBack() : handleNextQuestion()} // Just a placeholder behavior, but let's make it goback for both or we can define retry logic.
+            onPress={() => {
+              if (isLastAnswerCorrect) {
+                navigation.goBack();
+              } else {
+                setInputValue('');
+                setSeqIndex(0);
+                setPhase('countdown');
+                setCountdown(3);
+              }
+            }} 
           >
             <MaterialCommunityIcons name={isLastAnswerCorrect ? "chevron-left" : "refresh"} size={20} color={isLastAnswerCorrect ? "#A855F7" : "#F87171"} />
             <Text style={[styles.fbBackBtnText, !isLastAnswerCorrect && {color: '#F87171'}]}>
@@ -382,10 +391,10 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.fbNextBtn, !isLastAnswerCorrect && {backgroundColor: '#7C3AED'}]} 
-            onPress={handleNextQuestion}
+            onPress={() => isLastAnswerCorrect ? handleNextQuestion() : navigation.goBack()}
           >
-            <Text style={styles.fbNextBtnText}>{isLastAnswerCorrect ? t.nextExercise : t.newExercise}</Text>
-            <MaterialCommunityIcons name="chevron-right" size={24} color="#FFF" />
+            <Text style={styles.fbNextBtnText}>{isLastAnswerCorrect ? t.nextExercise : (t.back || "Orqaga")}</Text>
+            <MaterialCommunityIcons name={isLastAnswerCorrect ? "chevron-right" : "home"} size={24} color="#FFF" />
           </TouchableOpacity>
         </Animated.View>
       </Animated.View>
