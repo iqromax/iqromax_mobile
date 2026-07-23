@@ -87,12 +87,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         return () => clearTimeout(timer);
       } else {
         setStartTime(Date.now()); // reset timer at start of flashing
-        if (isSpeedMode) {
-          setPhase('input');
-          setQuestionStartTime(Date.now());
-        } else {
-          setPhase('flashing');
-        }
+        setPhase('flashing');
       }
     } else if (phase === 'feedback') {
       fadeAnim.setValue(0);
@@ -162,12 +157,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         setPhase('countdown');
         setCountdown(3);
       } else {
-        if (isSpeedMode) {
-          setPhase('input');
-          setQuestionStartTime(Date.now());
-        } else {
-          setPhase('flashing');
-        }
+        setPhase('flashing');
       }
       setInputValue('');
     }
@@ -482,13 +472,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     return (
     <View style={styles.inputPhaseWrapper}>
       <View style={styles.inputSection}>
-        {isSpeedMode ? (
-          <Text style={[styles.inputSectionTitle, { fontSize: 40, color: '#FBBF24', marginBottom: 20 }]}>
-            {currentQ?.display} = ?
-          </Text>
-        ) : (
-          <Text style={styles.inputSectionTitle}>{t.enterAnswer}</Text>
-        )}
+        <Text style={styles.inputSectionTitle}>{t.enterAnswer}</Text>
         <View style={styles.inputField}>
           <Text style={[styles.inputText, !inputValue && {color: '#6B7280'}]}>
             {inputValue || t.enterAnswer}
