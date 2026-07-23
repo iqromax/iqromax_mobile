@@ -34,7 +34,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Do'st bilan battle</Text>
-          <View style={{ width: 44 }} /> {/* Bo'sh joy markazlash uchun */}
+          <View style={{ width: 44 }} />
         </View>
 
         <ScrollView 
