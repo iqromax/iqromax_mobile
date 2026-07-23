@@ -107,26 +107,6 @@ function AccessoryModel({ modelPath, yPos, characterIndex }) {
   const posZ = zOffset;
   
   
-  useEffect(() => {
-    let interval;
-    if (battleInvite && inviteTimer > 0) {
-      interval = setInterval(() => {
-        setInviteTimer((prev) => prev - 1);
-      }, 1000);
-    } else if (inviteTimer === 0) {
-      setBattleInvite(null); // Timeout
-    }
-    return () => clearInterval(interval);
-  }, [battleInvite, inviteTimer]);
-
-  const handleRespondInvite = (status) => {
-    const socket = io(SOCKET_URL);
-    socket.emit('respond_battle_invite', { notifId: battleInvite.id, status });
-    setBattleInvite(null);
-    if (status === 'ACCEPTED') {
-      navigation.navigate('BattleMatchmaking', { mode: 'dost' });
-    }
-  };
   return (
     <primitive 
       object={scene.clone()} 
@@ -275,6 +255,30 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'calc');
   const [user, setUser] = useState(route.params?.user);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [battleInvite, setBattleInvite] = useState(null);
+  const [inviteTimer, setInviteTimer] = useState(0);
+
+  // Battle invite timer
+  useEffect(() => {
+    let interval;
+    if (battleInvite && inviteTimer > 0) {
+      interval = setInterval(() => {
+        setInviteTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (inviteTimer === 0 && battleInvite) {
+      setBattleInvite(null); // Timeout
+    }
+    return () => clearInterval(interval);
+  }, [battleInvite, inviteTimer]);
+
+  const handleRespondInvite = (status) => {
+    const socket = io(SOCKET_URL);
+    socket.emit('respond_battle_invite', { notifId: battleInvite.id, status });
+    setBattleInvite(null);
+    if (status === 'ACCEPTED') {
+      navigation.navigate('BattleMatchmaking', { mode: 'dost', inviteData: battleInvite });
+    }
+  };
 
   // Real-time socket logic for instant logout and updates
   useEffect(() => {
@@ -282,6 +286,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
     
     // Connect to backend socket
     const socket = io(SOCKET_URL);
+    
+    // Register user to receive targeted messages
+    if (user.customId) {
+      socket.emit('register', user.customId);
+    }
     
     socket.on('user_deleted', (data) => {
       if (data.id === user.id) {
@@ -292,7 +301,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
     socket.on('user_updated', (data) => {
       if (data.id === user.id) {
         setUser(data);
+        if (data.status !== 'Faol') {
+           setIsDeleted(true); // Log out if inactive
+        }
       }
+    });
+
+    socket.on('receive_battle_invite', (data) => {
+      setBattleInvite(data);
+      setInviteTimer(30); // 30 seconds to respond
     });
     
     return () => {
@@ -3017,6 +3034,36 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
           </View>
         </Modal>
+
+        {/* BATTLE INVITE MODAL */}
+        <Modal transparent visible={!!battleInvite} animationType="slide">
+          <View style={{ flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.8)', justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+            <View style={{ width: '100%', maxWidth: 340, backgroundColor: '#0A0A16', borderRadius: 24, padding: 24, alignItems: 'center', borderWidth: 1, borderColor: '#3B82F6', shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 15 }}>
+              <Text style={{ color: '#EAB308', fontSize: 18, fontWeight: '800', marginBottom: 15, textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1 }}>⚔️ Jangga Taklif ⚔️</Text>
+              
+              <Image source={{ uri: battleInvite?.senderAvatar }} style={{ width: 80, height: 80, borderRadius: 40, borderWidth: 2, borderColor: '#3B82F6', marginBottom: 15, backgroundColor: '#1F2937' }} />
+              
+              <Text style={{ color: '#FFFFFF', fontSize: 22, fontWeight: '800', marginBottom: 5 }}>{battleInvite?.senderName}</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 20 }}>Level {battleInvite?.level} • Rating {battleInvite?.rating}</Text>
+              
+              <View style={{ width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <TouchableOpacity 
+                  style={{ flex: 1, backgroundColor: '#EF4444', borderRadius: 12, paddingVertical: 14, marginRight: 8, alignItems: 'center' }}
+                  onPress={() => handleRespondInvite('REJECTED')}
+                >
+                  <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '700' }}>Rad etish</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={{ flex: 1, backgroundColor: '#3B82F6', borderRadius: 12, paddingVertical: 14, marginLeft: 8, alignItems: 'center' }}
+                  onPress={() => handleRespondInvite('ACCEPTED')}
+                >
+                  <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '700' }}>Qabul qilish ({inviteTimer}s)</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
     </SafeAreaView>
   );
 }
