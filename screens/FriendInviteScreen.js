@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Image } from 'expo-image';
+import { API_URL } from '../src/config/api';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const FriendInviteScreen = ({ navigation, route }) => {
@@ -96,25 +97,30 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   placeholder="ID ni kiriting"
                   placeholderTextColor="#6B7280"
                   value={friendId}
-                  onChangeText={(text) => {
+                  onChangeText={async (text) => {
                     setFriendId(text);
                     if (text.length >= 5) {
                       setIsSearching(true);
-                      // Kichik kechikish bilan qidirish (simulyatsiya)
-                      setTimeout(() => {
-                        if (text.toUpperCase() === 'IQX12345' || text === '12345') {
+                      try {
+                        const res = await fetch(`${API_URL}/users/search/${text}`);
+                        if (res.ok) {
+                          const data = await res.json();
                           setFoundUser({
-                            id: text.toUpperCase(),
-                            name: 'Azizbek',
-                            level: 24,
-                            rating: 1540,
-                            avatar: require('../assets/avatar_alex.jpg'), // Mavjud rasm
+                            id: data.id,
+                            name: data.name,
+                            level: data.level || 1,
+                            rating: data.rating || 1000,
+                            avatar: data.avatar && data.avatar.startsWith('http') ? { uri: data.avatar } : require('../assets/avatar_alex.jpg'),
                           });
                         } else {
                           setFoundUser(null);
                         }
+                      } catch (error) {
+                        console.error('Search error:', error);
+                        setFoundUser(null);
+                      } finally {
                         setIsSearching(false);
-                      }, 800);
+                      }
                     } else {
                       setFoundUser(null);
                       setIsSearching(false);

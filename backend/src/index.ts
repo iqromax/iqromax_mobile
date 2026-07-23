@@ -311,6 +311,30 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // 4. Admin API: Get Users
+app.get('/api/users/search/:customId', async (req, res) => {
+  try {
+    const { customId } = req.params;
+    const user = await prisma.user.findUnique({
+      where: { customId: customId.toUpperCase() }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({
+      id: user.customId,
+      name: user.name,
+      level: 1, // Assuming no level column in DB yet
+      rating: 1000, // Default rating
+      avatar: user.character || 'https://api.dicebear.com/7.x/avataaars/png?seed=' + user.name
+    });
+  } catch (error) {
+    console.error('Error searching user:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 app.get('/api/admin/users', async (req, res) => {
   try {
     const { role } = req.query;
