@@ -308,6 +308,54 @@ export const MentalMathGenerator = {
 
   // Tekshiradi: A va B sonlari o'rtasidagi amal faqat Oddiy yoki Formula 5 orqali bajariladimi? (10-formula umuman ishlatilmaydi)
   // return object { valid: boolean, usesF5: boolean }
+
+  // Tekshiradi: A va B sonlari o'rtasidagi amal faqat Oddiy yoki Formula 10 orqali bajariladimi? (Formula 5 va Aralash ishlatilmaydi)
+  // return object { valid: boolean, usesF10: boolean }
+  isF10OrDirectMultiDigit: (c, d, op) => {
+    if (op === 'sub' && c - d < 0) return { valid: false, usesF10: false };
+    
+    let strC = String(c).split('').map(Number).reverse();
+    let strD = String(d).split('').map(Number).reverse();
+    let maxLen = Math.max(strC.length, strD.length) + 1;
+    let carryOrBorrow = 0;
+    let usesF10 = false;
+    
+    for (let i = 0; i < maxLen; i++) {
+      let valC = strC[i] || 0;
+      let valD = (strD[i] || 0) + carryOrBorrow;
+      carryOrBorrow = 0;
+      
+      if (valD === 0 && i >= Math.max(strC.length, strD.length)) continue; 
+      
+      if (op === 'add') {
+        if (valC + valD <= 9) {
+          // Direct add: no F5 allowed
+          if ((valC % 5) + (valD % 5) >= 5) return { valid: false, usesF10: false };
+        } else {
+          // F10 add
+          usesF10 = true;
+          let comp = 10 - valD;
+          // Must subtract comp directly (no F5)
+          if ((valC % 5) - (comp % 5) < 0) return { valid: false, usesF10: false };
+          carryOrBorrow = 1;
+        }
+      } else {
+        if (valC - valD >= 0) {
+          // Direct sub: no F5 allowed
+          if ((valC % 5) - (valD % 5) < 0) return { valid: false, usesF10: false };
+        } else {
+          // F10 sub
+          usesF10 = true;
+          let comp = 10 - valD;
+          // Must add comp directly (no F5)
+          if ((valC % 5) + (comp % 5) >= 5) return { valid: false, usesF10: false };
+          carryOrBorrow = 1;
+        }
+      }
+    }
+    return { valid: true, usesF10 };
+  },
+
   isF5OrDirectMultiDigit: (c, d, op) => {
     let sC = String(c).padStart(String(Math.max(c, d)).length, '0');
     let sD = String(d).padStart(String(Math.max(c, d)).length, '0');
@@ -530,27 +578,67 @@ export const MentalMathGenerator = {
     return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'f5' };
   },
 
-  generateF10: (digits, termsCount) => {
-    const formulas = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const mainFormula = formulas[Math.floor(Math.random() * formulas.length)];
-    const operation = Math.random() > 0.5 ? 'add' : 'sub';
-    let res = generateTenFormula(operation, mainFormula, digits, termsCount);
-    
-    if (!res) {
-      return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'f10' };
+    // Formula 10 (Katta Do'st) usulida
+  generateF10: (digits, termsCount = 3) => {
+    for (let mainAttempt = 0; mainAttempt < 50; mainAttempt++) {
+      const terms = [];
+      let ok = true;
+      let sequenceHasF10 = false;
+      
+      const firstNum = MentalMathGenerator.getNumByDigits(digits);
+      let currentTotal = firstNum;
+      terms.push(String(firstNum));
+
+      for (let i = 1; i < termsCount; i++) {
+        let isPlus = Math.random() > 0.5;
+        let found = false;
+
+        for (let retry = 0; retry < 50; retry++) {
+          let num = MentalMathGenerator.getNumByDigits(digits);
+          
+          if (isPlus) {
+            const check = MentalMathGenerator.isF10OrDirectMultiDigit(currentTotal, num, 'add');
+            if (check.valid) {
+              currentTotal += num;
+              terms.push(`+ ${num}`);
+              if (check.usesF10) sequenceHasF10 = true;
+              found = true;
+              break;
+            } else {
+              isPlus = false; 
+            }
+          } 
+          if (!isPlus) {
+            const check = MentalMathGenerator.isF10OrDirectMultiDigit(currentTotal, num, 'sub');
+            if (check.valid) {
+              currentTotal -= num;
+              terms.push(`- ${num}`);
+              if (check.usesF10) sequenceHasF10 = true;
+              found = true;
+              break;
+            } else {
+              isPlus = true; 
+            }
+          }
+        }
+        
+        if (!found) {
+           ok = false;
+           break;
+        }
+      }
+      
+      if (ok && sequenceHasF10) {
+        return {
+          display: terms.join(' '),
+          answer: currentTotal,
+          section: 'f10',
+          difficulty: digits,
+        };
+      }
     }
     
-    const terms = res.numbers.map((n, i) => {
-      if (i === 0) return String(n);
-      return n >= 0 ? `+ ${n}` : `- ${Math.abs(n)}`;
-    });
-    
-    return {
-      display: terms.join(' '),
-      answer: res.answer,
-      section: 'f10',
-      difficulty: digits,
-    };
+    return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'f10' };
   },
 
   generateAralash: (digits, termsCount) => {
