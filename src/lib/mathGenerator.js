@@ -290,36 +290,84 @@ export const MentalMathGenerator = {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
 
-  // Qo'shish va Ayirish (Zanjir usulida ketma-ket)
-  generateAddSub: (digits, termsCount = 3) => {
-    const terms = [];
-    let currentTotal = 0;
-    
-    for (let i = 0; i < termsCount; i++) {
-      const num = MentalMathGenerator.getNumByDigits(digits);
-      if (i === 0) {
-        currentTotal = num;
-        terms.push(String(num));
+  // Tekshiradi: A va B sonlari o'rtasidagi amal Oddiy (formula ishlatilmaydigan) usulda bajarilishi mumkinmi?
+  isDirectMultiDigit: (c, d, op) => {
+    let sC = String(c).padStart(String(Math.max(c, d)).length, '0');
+    let sD = String(d).padStart(String(Math.max(c, d)).length, '0');
+    for (let i = 0; i < sC.length; i++) {
+      let digitC = parseInt(sC[i]);
+      let digitD = parseInt(sD[i]);
+      if (op === 'add') {
+        // Qo'shishda 10-formula (digitC + digitD > 9) yoki 5-formula kerak bo'lmasligi kerak
+        if ((digitC % 5) + (digitD % 5) >= 5 || digitC + digitD > 9) return false;
       } else {
-        const isPlus = Math.random() > 0.4;
-        if (isPlus) {
-          currentTotal += num;
-          terms.push(`+ ${num}`);
-        } else {
-          // Manfiy son chiqib ketmasligi uchun tekshiruv
-          if (currentTotal - num >= 0) {
-            currentTotal -= num;
-            terms.push(`- ${num}`);
-          } else {
-            currentTotal += num;
-            terms.push(`+ ${num}`);
-          }
-        }
+        // Ayirishda 10-formula (qarz olish) yoki 5-formula kerak bo'lmasligi kerak
+        if ((digitC % 5) - (digitD % 5) < 0 || digitC - digitD < 0) return false;
       }
     }
+    return true;
+  },
+
+  // Qo'shish va Ayirish (Oddiy abakus usulida, formula ishlatilmaydi, ikki xonali javob chiqmaydi)
+  generateAddSub: (digits, termsCount = 3) => {
+    for (let mainAttempt = 0; mainAttempt < 50; mainAttempt++) {
+      const terms = [];
+      let ok = true;
+      
+      const firstNum = MentalMathGenerator.getNumByDigits(digits);
+      let currentTotal = firstNum;
+      terms.push(String(firstNum));
+
+      for (let i = 1; i < termsCount; i++) {
+        let isPlus = Math.random() > 0.5;
+        let found = false;
+
+        for (let retry = 0; retry < 50; retry++) {
+          let num = MentalMathGenerator.getNumByDigits(digits);
+          
+          if (isPlus) {
+            if (MentalMathGenerator.isDirectMultiDigit(currentTotal, num, 'add')) {
+              currentTotal += num;
+              terms.push(`+ ${num}`);
+              found = true;
+              break;
+            } else {
+              isPlus = false; // try minus
+            }
+          } 
+          if (!isPlus) {
+            if (MentalMathGenerator.isDirectMultiDigit(currentTotal, num, 'sub')) {
+              currentTotal -= num;
+              terms.push(`- ${num}`);
+              found = true;
+              break;
+            } else {
+              isPlus = true; // reset for next retry
+            }
+          }
+        }
+        
+        if (!found) {
+           ok = false;
+           break;
+        }
+      }
+      
+      if (ok) {
+        return {
+          display: terms.join(' '),
+          answer: currentTotal,
+          section: 'add-sub',
+          difficulty: digits,
+        };
+      }
+    }
+    
+    // Fallback if failed to generate
+    const fbNum = Math.pow(10, digits - 1);
     return {
-      display: terms.join(' '),
-      answer: currentTotal,
+      display: `${fbNum} + ${fbNum}`,
+      answer: fbNum * 2,
       section: 'add-sub',
       difficulty: digits,
     };
