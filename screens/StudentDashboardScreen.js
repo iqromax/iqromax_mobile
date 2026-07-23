@@ -272,7 +272,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [battleInvite, inviteTimer]);
 
   const handleRespondInvite = (status) => {
-    const socket = io(SOCKET_URL);
+    const socket = io(SOCKET_URL, { transports: ['websocket'] });
     socket.emit('respond_battle_invite', { notifId: battleInvite.id, status });
     setBattleInvite(null);
     if (status === 'ACCEPTED') {
@@ -285,7 +285,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (!user?.id) return;
     
     // Connect to backend socket
-    const socket = io(SOCKET_URL);
+    const socket = io(SOCKET_URL, { transports: ['websocket'] });
     
     // Register user to receive targeted messages
     if (user.customId) {
