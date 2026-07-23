@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PageBackground } from '@/components/layout/PageBackground';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import api from '@/lib/axios';
 import { Navbar } from '@/components/Navbar';
 import { useSound } from '@/hooks/useSound';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -266,6 +267,15 @@ const Admin = () => {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      
+      // Sync delete with Express backend to trigger real-time Socket.IO event for the mobile app
+      if (deleteConfirmDialog.username) {
+        try {
+          await api.delete(`admin/users/sync-delete/${encodeURIComponent(deleteConfirmDialog.username)}`);
+        } catch (syncError) {
+          console.error("Failed to sync delete with mobile app backend:", syncError);
+        }
+      }
       
       setUsers(prev => prev.filter(u => u.user_id !== userId));
       setAdminUsers(prev => prev.filter(id => id !== userId));

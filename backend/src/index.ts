@@ -402,6 +402,27 @@ app.delete('/api/admin/users/:id', async (req, res) => {
   }
 });
 
+// Sync delete from Supabase Admin Panel
+app.delete('/api/admin/users/sync-delete/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await prisma.user.findFirst({
+      where: { name: username }
+    });
+    
+    if (user) {
+      await prisma.user.delete({ where: { id: user.id } });
+      io.emit('user_deleted', { id: user.id });
+      res.json({ message: 'User synced and deleted successfully' });
+    } else {
+      res.status(404).json({ error: 'User not found in local database' });
+    }
+  } catch (error) {
+    console.error('Sync delete error:', error);
+    res.status(500).json({ error: 'Failed to sync delete user' });
+  }
+});
+
 // Serve admin panel static files in production
 app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 
