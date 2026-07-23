@@ -374,6 +374,41 @@ export const MentalMathGenerator = {
     return { valid: true, usesF5 };
   },
 
+  // Tekshiradi: A va B sonlari o'rtasidagi amal Aralash (Mixed) formula orqali bajariladimi?
+  // return object { valid: boolean, usesMixed: boolean }
+  isMixedOrAnyMultiDigit: (c, d, op) => {
+    if (op === 'sub' && c - d < 0) return { valid: false, usesMixed: false };
+    
+    let strC = String(c).split('').map(Number).reverse();
+    let strD = String(d).split('').map(Number).reverse();
+    let maxLen = Math.max(strC.length, strD.length) + 1;
+    let carryOrBorrow = 0;
+    let usesMixed = false;
+    
+    for (let i = 0; i < maxLen; i++) {
+      let valC = strC[i] || 0;
+      let valD = (strD[i] || 0) + carryOrBorrow;
+      carryOrBorrow = 0;
+      
+      if (valD === 0 && i >= Math.max(strC.length, strD.length)) continue; 
+      
+      if (op === 'add') {
+        if (valC + valD > 9) {
+          let comp = 10 - valD;
+          if ((valC % 5) - (comp % 5) < 0) usesMixed = true;
+          carryOrBorrow = 1;
+        }
+      } else {
+        if (valC - valD < 0) {
+          let comp = 10 - valD;
+          if ((valC % 5) + (comp % 5) >= 5) usesMixed = true;
+          carryOrBorrow = 1;
+        }
+      }
+    }
+    return { valid: true, usesMixed };
+  },
+
   // Qo'shish va Ayirish (Oddiy abakus usulida, formula ishlatilmaydi, ikki xonali javob chiqmaydi)
   generateAddSub: (digits, termsCount = 3) => {
     for (let mainAttempt = 0; mainAttempt < 50; mainAttempt++) {
@@ -641,27 +676,67 @@ export const MentalMathGenerator = {
     return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'f10' };
   },
 
-  generateAralash: (digits, termsCount) => {
-    const formulas = [6, 7, 8, 9];
-    const mainFormula = formulas[Math.floor(Math.random() * formulas.length)];
-    const operation = Math.random() > 0.5 ? 'add' : 'sub';
-    let res = generateMixFormula(operation, mainFormula, digits, termsCount);
-    
-    if (!res) {
-      return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'aralash' };
+  // Aralash (Mixed) formula usulida
+  generateAralash: (digits, termsCount = 3) => {
+    for (let mainAttempt = 0; mainAttempt < 50; mainAttempt++) {
+      const terms = [];
+      let ok = true;
+      let sequenceHasMixed = false;
+      
+      const firstNum = MentalMathGenerator.getNumByDigits(digits);
+      let currentTotal = firstNum;
+      terms.push(String(firstNum));
+
+      for (let i = 1; i < termsCount; i++) {
+        let isPlus = Math.random() > 0.5;
+        let found = false;
+
+        for (let retry = 0; retry < 50; retry++) {
+          let num = MentalMathGenerator.getNumByDigits(digits);
+          
+          if (isPlus) {
+            const check = MentalMathGenerator.isMixedOrAnyMultiDigit(currentTotal, num, 'add');
+            if (check.valid) {
+              currentTotal += num;
+              terms.push(`+ ${num}`);
+              if (check.usesMixed) sequenceHasMixed = true;
+              found = true;
+              break;
+            } else {
+              isPlus = false; 
+            }
+          } 
+          if (!isPlus) {
+            const check = MentalMathGenerator.isMixedOrAnyMultiDigit(currentTotal, num, 'sub');
+            if (check.valid) {
+              currentTotal -= num;
+              terms.push(`- ${num}`);
+              if (check.usesMixed) sequenceHasMixed = true;
+              found = true;
+              break;
+            } else {
+              isPlus = true; 
+            }
+          }
+        }
+        
+        if (!found) {
+           ok = false;
+           break;
+        }
+      }
+      
+      if (ok && sequenceHasMixed) {
+        return {
+          display: terms.join(' '),
+          answer: currentTotal,
+          section: 'aralash',
+          difficulty: digits,
+        };
+      }
     }
     
-    const terms = res.numbers.map((n, i) => {
-      if (i === 0) return String(n);
-      return n >= 0 ? `+ ${n}` : `- ${Math.abs(n)}`;
-    });
-    
-    return {
-      display: terms.join(' '),
-      answer: res.answer,
-      section: 'aralash',
-      difficulty: digits,
-    };
+    return { ...MentalMathGenerator.generateAddSub(digits, termsCount), section: 'aralash' };
   },
 
 
