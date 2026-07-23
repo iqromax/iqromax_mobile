@@ -10,12 +10,16 @@ import {
   Platform,
   ScrollView,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const FriendInviteScreen = ({ navigation, route }) => {
   const [friendId, setFriendId] = useState('');
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
+  const [foundUser, setFoundUser] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
   const inviteLink = 'iqromax.app/battle/invite/IQX567890';
 
   return (
@@ -92,10 +96,33 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   placeholder="ID ni kiriting"
                   placeholderTextColor="#6B7280"
                   value={friendId}
-                  onChangeText={setFriendId}
+                  onChangeText={(text) => {
+                    setFriendId(text);
+                    if (text.length >= 5) {
+                      setIsSearching(true);
+                      // Kichik kechikish bilan qidirish (simulyatsiya)
+                      setTimeout(() => {
+                        if (text.toUpperCase() === 'IQX12345' || text === '12345') {
+                          setFoundUser({
+                            id: text.toUpperCase(),
+                            name: 'Azizbek',
+                            level: 24,
+                            rating: 1540,
+                            avatar: require('../assets/battle_mode_dost.png'), // Vaqtinchalik rasm
+                          });
+                        } else {
+                          setFoundUser(null);
+                        }
+                        setIsSearching(false);
+                      }, 800);
+                    } else {
+                      setFoundUser(null);
+                      setIsSearching(false);
+                    }
+                  }}
                 />
                 {friendId.length > 0 && (
-                  <TouchableOpacity onPress={() => setFriendId('')}>
+                  <TouchableOpacity onPress={() => { setFriendId(''); setFoundUser(null); }}>
                     <MaterialCommunityIcons name="close-circle" size={20} color="#6B7280" />
                   </TouchableOpacity>
                 )}
@@ -106,12 +133,43 @@ const FriendInviteScreen = ({ navigation, route }) => {
             </View>
           </View>
 
-          {/* Search Empty State */}
-          <View style={styles.searchStateCard}>
-            <MaterialCommunityIcons name="magnify" size={60} color="rgba(255, 255, 255, 0.2)" />
-            <Text style={styles.searchStateTitle}>Do'stingizni qidiring</Text>
-            <Text style={styles.searchStateSub}>ID kiriting yoki havolani ulashing,{"\n"}u yerda paydo bo'ladi</Text>
-          </View>
+          {/* Search State / User Card */}
+          {isSearching ? (
+            <View style={styles.searchStateCard}>
+              <ActivityIndicator size="large" color="#A855F7" style={{ marginBottom: 15 }} />
+              <Text style={styles.searchStateTitle}>Qidirilmoqda...</Text>
+            </View>
+          ) : foundUser ? (
+            <View style={styles.userCard}>
+              <View style={styles.userInfoRow}>
+                <Image source={foundUser.avatar} style={styles.userAvatar} contentFit="cover" />
+                <View style={styles.userDetails}>
+                  <Text style={styles.userName}>{foundUser.name}</Text>
+                  <Text style={styles.userIdText}>ID: {foundUser.id}</Text>
+                  <View style={styles.userStatsRow}>
+                    <View style={styles.statBadge}>
+                      <MaterialCommunityIcons name="star" size={14} color="#FBBF24" />
+                      <Text style={styles.statText}>{foundUser.level} lvl</Text>
+                    </View>
+                    <View style={[styles.statBadge, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
+                      <MaterialCommunityIcons name="trophy" size={14} color="#3B82F6" />
+                      <Text style={[styles.statText, { color: '#3B82F6' }]}>{foundUser.rating}</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <TouchableOpacity style={styles.inviteButton}>
+                <Text style={styles.inviteButtonText}>Battle taklifini yuborish</Text>
+                <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.searchStateCard}>
+              <MaterialCommunityIcons name="magnify" size={60} color="rgba(255, 255, 255, 0.2)" />
+              <Text style={styles.searchStateTitle}>Do'stingizni qidiring</Text>
+              <Text style={styles.searchStateSub}>ID kiriting, topilgan do'stingiz{"\n"}shu yerda paydo bo'ladi</Text>
+            </View>
+          )}
 
           {/* Bottom Info Card */}
           <TouchableOpacity 
@@ -412,6 +470,74 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  userCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.3)',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  userInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  userAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#1F2937',
+    marginRight: 16,
+    borderWidth: 2,
+    borderColor: '#A855F7',
+  },
+  userDetails: {
+    flex: 1,
+  },
+  userName: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  userIdText: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  userStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  statText: {
+    color: '#FBBF24',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  inviteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#A855F7',
+    borderRadius: 16,
+    paddingVertical: 16,
+  },
+  inviteButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   infoCard: {
     flexDirection: 'row',
