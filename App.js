@@ -212,6 +212,40 @@ export default function App() {
     verifyUserAuth();
     const authInterval = setInterval(verifyUserAuth, 3000);
 
+    // Check for pending battle invites missed while offline
+    const checkPendingInvites = async () => {
+      try {
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        if (userDataStr) {
+          const currentUser = JSON.parse(userDataStr);
+          if (currentUser?.customId) {
+            let cleanId = String(currentUser.customId).trim();
+            if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
+            const encodedId = encodeURIComponent(cleanId);
+            const res = await fetch(`${API_URL}/notifications/${encodedId}`);
+            if (res.ok) {
+              const text = await res.text();
+              if (text && text.trim().startsWith('[')) {
+                const notifs = JSON.parse(text);
+                if (notifs && notifs.length > 0) {
+                  const stored = await AsyncStorage.getItem('user_notifications');
+                  const localList = stored ? JSON.parse(stored) : [];
+                  const freshNotifs = notifs.filter(n => !localList.some(ln => ln.id === n.id));
+                  if (freshNotifs.length > 0 && !battleInvite) {
+                    setBattleInvite(freshNotifs[0]);
+                    setInviteTimer(30);
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {}
+    };
+    
+    // Check after a short delay to allow socket to connect and app to render
+    setTimeout(checkPendingInvites, 2000);
+
     return () => {
       socket.disconnect();
       clearInterval(authInterval);
