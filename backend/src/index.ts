@@ -390,11 +390,12 @@ app.put('/api/admin/users/:id', async (req, res) => {
 app.delete('/api/admin/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    const userToDelete = await prisma.user.findUnique({ where: { id } });
     await prisma.user.delete({
       where: { id }
     });
     // Emit real-time event to connected clients
-    io.emit('user_deleted', { id });
+    io.emit('user_deleted', { id: userToDelete?.id || id, customId: userToDelete?.customId });
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error);
@@ -412,7 +413,7 @@ app.delete('/api/admin/users/sync-delete/:username', async (req, res) => {
     
     if (user) {
       await prisma.user.delete({ where: { id: user.id } });
-      io.emit('user_deleted', { id: user.id });
+      io.emit('user_deleted', { id: user.id, customId: user.customId });
       res.json({ message: 'User synced and deleted successfully' });
     } else {
       res.status(404).json({ error: 'User not found in local database' });

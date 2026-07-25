@@ -1,9 +1,12 @@
 import { Asset } from 'expo-asset';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, ActivityIndicator } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { io } from 'socket.io-client';
+import { SOCKET_URL } from './src/config/api';
 import StepOneScreen from './screens/StepOneScreen';
 import StepTwoScreen from './screens/StepTwoScreen';
 import AuthScreen from './screens/AuthScreen';
@@ -27,6 +30,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black } from '@expo-google-fonts/inter';
 
 const Stack = createNativeStackNavigator();
+export const navigationRef = createNavigationContainerRef();
 
 export default function App() {
   
@@ -34,6 +38,79 @@ export default function App() {
   const [initialRoute, setInitialRoute] = useState('StepOne');
   const [initialParams, setInitialParams] = useState({});
   const [isReady, setIsReady] = useState(false);
+  const [deletedReason, setDeletedReason] = useState(null);
+
+  useEffect(() => {
+    // Persistent root-level socket listener for real-time account deletion/blocking across ALL screens
+    const socket = io(SOCKET_URL, { transports: ['websocket'] });
+
+    socket.on('connect', () => {
+      AsyncStorage.getItem('user_data').then(str => {
+        if (str) {
+          try {
+            const u = JSON.parse(str);
+            if (u && u.customId) socket.emit('register', u.customId);
+          } catch (e) {}
+        }
+      });
+    });
+
+    socket.on('user_deleted', async (data) => {
+      try {
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        if (userDataStr) {
+          const currentUser = JSON.parse(userDataStr);
+          if (currentUser && (
+            String(data.id) === String(currentUser.id) || 
+            (data.customId && String(data.customId).toUpperCase() === String(currentUser.customId).toUpperCase())
+          )) {
+            setDeletedReason("Hisobingiz admin tomonidan o'chirildi.");
+          }
+        }
+      } catch (e) {
+        console.error('user_deleted socket check error:', e);
+      }
+    });
+
+    socket.on('user_updated', async (data) => {
+      try {
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        if (userDataStr) {
+          const currentUser = JSON.parse(userDataStr);
+          if (currentUser && (
+            String(data.id) === String(currentUser.id) || 
+            (data.customId && String(data.customId).toUpperCase() === String(currentUser.customId).toUpperCase())
+          )) {
+            await AsyncStorage.setItem('user_data', JSON.stringify({ ...currentUser, ...data }));
+            if (data.status !== 'Faol') {
+              setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
+            }
+          }
+        }
+      } catch (e) {
+        console.error('user_updated socket check error:', e);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  const handleReturnHome = async () => {
+    try {
+      await AsyncStorage.removeItem('user_data');
+    } catch (e) {
+      console.error(e);
+    }
+    setDeletedReason(null);
+    if (navigationRef.isReady()) {
+      navigationRef.reset({
+        index: 0,
+        routes: [{ name: 'StepOne' }],
+      });
+    }
+  };
 
   useEffect(() => {
     async function checkAuthStatus() {
@@ -95,7 +172,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
           <Stack.Screen name="StepOne" component={StepOneScreen} />
           <Stack.Screen name="StepTwo" component={StepTwoScreen} />
@@ -115,7 +192,87 @@ export default function App() {
           <Stack.Screen name="BattleGame" component={BattleGameScreen} />
           <Stack.Screen name="BattleResult" component={BattleResultScreen} />
         </Stack.Navigator>
+
+        {/* Global Admin Action (Delete/Block) Alert Modal */}
+        <Modal visible={!!deletedReason} transparent animationType="fade" onRequestClose={() => {}}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <View style={styles.modalIconContainer}>
+                <MaterialCommunityIcons name="alert-decagram" size={60} color="#EF4444" />
+              </View>
+              <Text style={styles.modalTitle}>Diqqat!</Text>
+              <Text style={styles.modalMessage}>{deletedReason}</Text>
+              <TouchableOpacity 
+                style={styles.modalButton} 
+                activeOpacity={0.8}
+                onPress={handleReturnHome}
+              >
+                <Text style={styles.modalButtonText}>Bosh sahifaga qaytish</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </NavigationContainer>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 12, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: '#12121D',
+    borderRadius: 24,
+    padding: 30,
+    width: '100%',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+  modalIconContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+  },
+  modalTitle: {
+    color: '#FFF',
+    fontSize: 26,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalMessage: {
+    color: '#9CA3AF',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 26,
+    lineHeight: 22,
+  },
+  modalButton: {
+    backgroundColor: '#EF4444',
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 14,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
