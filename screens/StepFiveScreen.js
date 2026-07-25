@@ -508,7 +508,7 @@ export default function StepFiveScreen({ navigation, route }) {
             {userData && (
               <View style={styles.idContainer}>
                 <Text style={styles.idLabel}>{t.idLabel}</Text>
-                <Text style={styles.idValue}>{userData.customId}</Text>
+                <Text style={styles.idValue}>#{String(userData?.customId || '0000').replace(/^#+/, '')}</Text>
               </View>
             )}
             <TouchableOpacity 

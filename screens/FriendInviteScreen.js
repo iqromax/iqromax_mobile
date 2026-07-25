@@ -159,7 +159,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                 <Image source={foundUser.avatar} style={styles.userAvatar} contentFit="cover" />
                 <View style={styles.userDetails}>
                   <Text style={styles.userName}>{foundUser.name}</Text>
-                  <Text style={styles.userIdText}>ID: {foundUser.id}</Text>
+                  <Text style={styles.userIdText}>ID: #{String(foundUser?.id || '0000').replace(/^#+/, '')}</Text>
                   <View style={styles.userStatsRow}>
                     <View style={styles.statBadge}>
                       <MaterialCommunityIcons name="star" size={14} color="#FBBF24" />

@@ -2744,7 +2744,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
               <Text style={styles.proUserName} numberOfLines={1}>{user?.name || 'IQROMAX CHAMPION'}</Text>
-              <Text style={styles.proUserTag} numberOfLines={1}>#{user?.customId || '0000'} | {user?.email || "No Email"}</Text>
+              <Text style={styles.proUserTag} numberOfLines={1}>#{String(user?.customId || '0000').replace(/^#+/, '')} | {user?.email || "No Email"}</Text>
               
               <View style={styles.proTopStatsRow}>
                 <View style={styles.proTopStatItem}>
