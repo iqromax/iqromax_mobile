@@ -95,8 +95,35 @@ export default function App() {
       }
     });
 
+    // Continuous Auth Verification Polling (every 3 seconds)
+    // Guarantees immediate logout alert when account is deleted/blocked even if socket events were missed while offline or disconnected
+    const verifyUserAuth = async () => {
+      try {
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        if (userDataStr) {
+          const currentUser = JSON.parse(userDataStr);
+          if (currentUser && currentUser.customId) {
+            const encodedId = encodeURIComponent(currentUser.customId);
+            const res = await fetch(`${API_URL}/users/search/${encodedId}`);
+            if (res.status === 404) {
+              setDeletedReason("Hisobingiz admin tomonidan o'chirildi.");
+            } else if (res.ok) {
+              const data = await res.json();
+              if (data && data.status && data.status !== 'Faol') {
+                setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
+              }
+            }
+          }
+        }
+      } catch (e) {}
+    };
+
+    verifyUserAuth();
+    const authInterval = setInterval(verifyUserAuth, 3000);
+
     return () => {
       socket.disconnect();
+      clearInterval(authInterval);
     };
   }, []);
 
@@ -121,6 +148,24 @@ export default function App() {
         const userDataStr = await AsyncStorage.getItem('user_data');
         if (userDataStr) {
           const userData = JSON.parse(userDataStr);
+          
+          // Verify user still exists in database before allowing access
+          if (userData && userData.customId) {
+            try {
+              const encodedId = encodeURIComponent(userData.customId);
+              const res = await fetch(`${API_URL}/users/search/${encodedId}`);
+              if (res.status === 404) {
+                await AsyncStorage.removeItem('user_data');
+                setInitialRoute('StepOne');
+                return;
+              } else if (res.ok) {
+                const data = await res.json();
+                if (data && data.status && data.status !== 'Faol') {
+                  setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
+                }
+              }
+            } catch (e) {}
+          }
           
           let charIndex = 0;
           let gender = 'boys';

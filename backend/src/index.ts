@@ -333,8 +333,10 @@ app.get('/api/users/search/:customId', async (req, res) => {
     }
     
     res.json({
+      uuid: user.id,
       id: user.customId,
       name: user.name,
+      status: user.status,
       level: 1, // Assuming no level column in DB yet
       rating: 1000, // Default rating
       avatar: user.character || 'https://api.dicebear.com/7.x/avataaars/png?seed=' + user.name
