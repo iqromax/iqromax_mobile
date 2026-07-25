@@ -42,7 +42,10 @@ export default function App() {
 
   useEffect(() => {
     // Persistent root-level socket listener for real-time account deletion/blocking across ALL screens
-    const socket = io(SOCKET_URL, { transports: ['websocket'] });
+    const socket = io(SOCKET_URL, { 
+      path: '/api/socket.io',
+      transports: ['websocket', 'polling'] 
+    });
 
     socket.on('connect', () => {
       AsyncStorage.getItem('user_data').then(str => {
@@ -61,8 +64,8 @@ export default function App() {
         if (userDataStr) {
           const currentUser = JSON.parse(userDataStr);
           if (currentUser && (
-            String(data.id) === String(currentUser.id) || 
-            (data.customId && String(data.customId).toUpperCase() === String(currentUser.customId).toUpperCase())
+            (data && data.id && currentUser.id && String(data.id).trim() === String(currentUser.id).trim()) || 
+            (data && data.customId && currentUser.customId && String(data.customId).trim().toUpperCase() === String(currentUser.customId).trim().toUpperCase())
           )) {
             setDeletedReason("Hisobingiz admin tomonidan o'chirildi.");
           }
@@ -78,8 +81,8 @@ export default function App() {
         if (userDataStr) {
           const currentUser = JSON.parse(userDataStr);
           if (currentUser && (
-            String(data.id) === String(currentUser.id) || 
-            (data.customId && String(data.customId).toUpperCase() === String(currentUser.customId).toUpperCase())
+            (data && data.id && currentUser.id && String(data.id).trim() === String(currentUser.id).trim()) || 
+            (data && data.customId && currentUser.customId && String(data.customId).trim().toUpperCase() === String(currentUser.customId).trim().toUpperCase())
           )) {
             await AsyncStorage.setItem('user_data', JSON.stringify({ ...currentUser, ...data }));
             if (data.status !== 'Faol') {

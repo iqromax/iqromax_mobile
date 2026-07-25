@@ -175,7 +175,10 @@ const FriendInviteScreen = ({ navigation, route }) => {
               <TouchableOpacity style={styles.inviteButton} onPress={async () => {
                 const userDataStr = await AsyncStorage.getItem('user_data');
                 const userData = userDataStr ? JSON.parse(userDataStr) : null;
-                const socket = io(SOCKET_URL, { transports: ['websocket'] });
+                const socket = io(SOCKET_URL, { 
+                  path: '/api/socket.io',
+                  transports: ['websocket', 'polling'] 
+                });
                 socket.emit('send_battle_invite', {
                   senderId: userData?.customId || 'NOMA\'LUM',
                   targetId: foundUser.id,
