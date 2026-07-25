@@ -117,7 +117,12 @@ const FriendInviteScreen = ({ navigation, route }) => {
                         const encodedText = encodeURIComponent(formatted);
                         const res = await fetch(`${API_URL}/users/search/${encodedText}`);
                         if (res.ok) {
-                          const data = await res.json();
+                          const text = await res.text();
+                          if (!text || !text.trim().startsWith('{')) {
+                            setFoundUser(null);
+                            return;
+                          }
+                          const data = JSON.parse(text);
                           const userDataStr = await AsyncStorage.getItem('user_data');
                           const currentUser = userDataStr ? JSON.parse(userDataStr) : null;
                           const myId = String(currentUser?.id || '').trim();

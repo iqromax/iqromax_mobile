@@ -264,10 +264,17 @@ export default function StudentDashboardScreen({ navigation, route }) {
       
       let serverList = [];
       if (user?.customId) {
-        const cleanId = String(user.customId).replace(/^#+/, '').trim();
-        const res = await fetch(`${API_URL}/notifications/${cleanId}`);
-        if (res.ok) {
-          serverList = await res.json();
+        try {
+          const cleanId = String(user.customId).replace(/^#+/, '').trim();
+          const res = await fetch(`${API_URL}/notifications/${cleanId}`);
+          if (res.ok) {
+            const text = await res.text();
+            if (text && text.trim().startsWith('[')) {
+              serverList = JSON.parse(text);
+            }
+          }
+        } catch (err) {
+          // Ignore server fetch error silently and fall back to local notifications
         }
       }
       
@@ -279,7 +286,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       });
       setNotificationsList(merged);
     } catch (e) {
-      console.error('Error loading notifications:', e);
+      // Silently fall back if storage fails
     }
   };
 

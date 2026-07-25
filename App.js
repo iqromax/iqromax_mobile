@@ -195,9 +195,12 @@ export default function App() {
             if (res.status === 404) {
               setDeletedReason("Hisobingiz admin tomonidan o'chirildi.");
             } else if (res.ok) {
-              const data = await res.json();
-              if (data && data.status && data.status !== 'Faol') {
-                setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
+              const text = await res.text();
+              if (text && text.trim().startsWith('{')) {
+                const data = JSON.parse(text);
+                if (data && data.status && data.status !== 'Faol') {
+                  setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
+                }
               }
             }
           }
@@ -246,9 +249,12 @@ export default function App() {
                 setInitialRoute('StepOne');
                 return;
               } else if (res.ok) {
-                const data = await res.json();
-                if (data && data.status && data.status !== 'Faol') {
-                  setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
+                const text = await res.text();
+                if (text && text.trim().startsWith('{')) {
+                  const data = JSON.parse(text);
+                  if (data && data.status && data.status !== 'Faol') {
+                    setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
+                  }
                 }
               }
             } catch (e) {}
