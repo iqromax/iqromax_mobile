@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { Search, Plus, Edit2, Trash2, Loader2, AlertTriangle } from 'lucide-react';
+import { getCountryFullName } from '../utils/countryNames';
 
 // Define the User type matching backend schema
 interface User {
@@ -210,7 +211,7 @@ const Students = () => {
                       </td>
                       
                       <td className="py-4 px-6 text-sm text-indigo-100/80 whitespace-nowrap">
-                        {student.country || '-'}
+                        {getCountryFullName(student.country)}
                       </td>
                       
                       <td className="py-4 px-6 whitespace-nowrap">
