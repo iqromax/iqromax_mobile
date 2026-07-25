@@ -10,7 +10,7 @@ import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Canvas } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import io from 'socket.io-client';
-import { SOCKET_URL } from '../src/config/api';
+import { SOCKET_URL, API_URL } from '../src/config/api';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',

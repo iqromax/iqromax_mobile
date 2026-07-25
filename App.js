@@ -7,7 +7,7 @@ import { NavigationContainer, createNavigationContainerRef } from '@react-naviga
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { io } from 'socket.io-client';
-import { SOCKET_URL } from './src/config/api';
+import { SOCKET_URL, API_URL } from './src/config/api';
 import StepOneScreen from './screens/StepOneScreen';
 import StepTwoScreen from './screens/StepTwoScreen';
 import AuthScreen from './screens/AuthScreen';
