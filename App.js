@@ -67,6 +67,7 @@ export default function App() {
         if (navigationRef.isReady()) {
           navigationRef.navigate('BattleMatchmaking', { mode: 'dost', inviteData: battleInvite });
         }
+      }
       try {
         const stored = await AsyncStorage.getItem('user_notifications');
         if (stored) {
