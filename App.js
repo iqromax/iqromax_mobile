@@ -1,3 +1,4 @@
+import './src/utils/safeWeakMap';
 import { Asset } from 'expo-asset';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -44,7 +45,7 @@ export default function App() {
     // Persistent root-level socket listener for real-time account deletion/blocking across ALL screens
     const socket = io(SOCKET_URL, { 
       path: '/api/socket.io',
-      transports: ['websocket', 'polling'] 
+      transports: ['websocket'] 
     });
 
     socket.on('connect', () => {
@@ -63,10 +64,12 @@ export default function App() {
         const userDataStr = await AsyncStorage.getItem('user_data');
         if (userDataStr) {
           const currentUser = JSON.parse(userDataStr);
-          if (currentUser && (
-            (data && data.id && currentUser.id && String(data.id).trim() === String(currentUser.id).trim()) || 
-            (data && data.customId && currentUser.customId && String(data.customId).trim().toUpperCase() === String(currentUser.customId).trim().toUpperCase())
-          )) {
+          const dataId = String(data?.id || '').trim();
+          const currentId = String(currentUser?.id || '').trim();
+          const dataCustom = String(data?.customId || '').replace(/^#+/, '').trim().toUpperCase();
+          const currentCustom = String(currentUser?.customId || '').replace(/^#+/, '').trim().toUpperCase();
+
+          if (currentUser && ((dataId && currentId && dataId === currentId) || (dataCustom && currentCustom && dataCustom === currentCustom))) {
             setDeletedReason("Hisobingiz admin tomonidan o'chirildi.");
           }
         }
@@ -80,10 +83,12 @@ export default function App() {
         const userDataStr = await AsyncStorage.getItem('user_data');
         if (userDataStr) {
           const currentUser = JSON.parse(userDataStr);
-          if (currentUser && (
-            (data && data.id && currentUser.id && String(data.id).trim() === String(currentUser.id).trim()) || 
-            (data && data.customId && currentUser.customId && String(data.customId).trim().toUpperCase() === String(currentUser.customId).trim().toUpperCase())
-          )) {
+          const dataId = String(data?.id || '').trim();
+          const currentId = String(currentUser?.id || '').trim();
+          const dataCustom = String(data?.customId || '').replace(/^#+/, '').trim().toUpperCase();
+          const currentCustom = String(currentUser?.customId || '').replace(/^#+/, '').trim().toUpperCase();
+
+          if (currentUser && ((dataId && currentId && dataId === currentId) || (dataCustom && currentCustom && dataCustom === currentCustom))) {
             await AsyncStorage.setItem('user_data', JSON.stringify({ ...currentUser, ...data }));
             if (data.status !== 'Faol') {
               setDeletedReason("Hisobingiz admin tomonidan bloklandi.");
@@ -103,7 +108,8 @@ export default function App() {
         if (userDataStr) {
           const currentUser = JSON.parse(userDataStr);
           if (currentUser && currentUser.customId) {
-            const encodedId = encodeURIComponent(currentUser.customId);
+            const cleanId = String(currentUser.customId).replace(/^#+/, '');
+            const encodedId = encodeURIComponent(cleanId);
             const res = await fetch(`${API_URL}/users/search/${encodedId}`);
             if (res.status === 404) {
               setDeletedReason("Hisobingiz admin tomonidan o'chirildi.");

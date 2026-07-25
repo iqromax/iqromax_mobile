@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-// Local dev => localhost:8000, Production => iqromax-web-backend.onrender.com
+// Local dev => localhost:8000, Production => iqromax.net
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const DEFAULT_API_URL = isLocalhost
   ? `http://${window.location.hostname}:8000/api/`
-  : 'https://iqromax-web-backend.onrender.com/api/';
+  : 'https://iqromax.net/api/';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || DEFAULT_API_URL,
@@ -43,7 +43,7 @@ export const getImageUrl = (path: string | undefined | null) => {
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const apiBase = import.meta.env.VITE_API_URL || (isLocal
     ? `http://${window.location.hostname}:8000/api/`
-    : 'https://iqromax-web-backend.onrender.com/api/');
+    : 'https://iqromax.net/api/');
   const base = apiBase.replace(/\/api\/?$/, '');
   return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
 };

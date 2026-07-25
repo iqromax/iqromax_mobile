@@ -228,19 +228,16 @@ app.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
-// Helper: Generate Custom ID
+// Helper: Generate Custom ID (6-digit random unique ID)
 const generateCustomId = async () => {
-  let count = await prisma.user.count();
-  let nextId = count + 1;
-  let customId = `#${nextId.toString().padStart(4, '0')}`;
-  
   while (true) {
+    // Generate a random 6-digit number between 100000 and 999999
+    const randomNum = Math.floor(100000 + Math.random() * 900000);
+    const customId = `#${randomNum}`;
     const exists = await prisma.user.findUnique({ where: { customId } });
     if (!exists) {
       return customId;
     }
-    nextId++;
-    customId = `#${nextId.toString().padStart(4, '0')}`;
   }
 };
 
@@ -407,18 +404,31 @@ app.delete('/api/admin/users/:id', async (req, res) => {
 });
 
 // Sync delete from Supabase Admin Panel
-app.delete('/api/admin/users/sync-delete/:username', async (req, res) => {
+app.delete('/api/admin/users/sync-delete/:identifier', async (req, res) => {
   try {
-    const { username } = req.params;
+    const { identifier } = req.params;
+    const cleanId = identifier.replace(/^#+/, '');
     const user = await prisma.user.findFirst({
-      where: { name: username }
+      where: {
+        OR: [
+          { name: { equals: identifier, mode: 'insensitive' } },
+          { customId: { equals: identifier, mode: 'insensitive' } },
+          { customId: { equals: `#${cleanId}`, mode: 'insensitive' } },
+          { customId: { equals: cleanId, mode: 'insensitive' } },
+          { id: identifier },
+          { email: { equals: identifier, mode: 'insensitive' } },
+          { phone: identifier }
+        ]
+      }
     });
     
     if (user) {
       await prisma.user.delete({ where: { id: user.id } });
+      console.log(`[Sync Delete] User deleted and event emitted for: ${user.name} (${user.customId})`);
       io.emit('user_deleted', { id: user.id, customId: user.customId });
       res.json({ message: 'User synced and deleted successfully' });
     } else {
+      console.warn(`[Sync Delete] User not found in local database for identifier: ${identifier}`);
       res.status(404).json({ error: 'User not found in local database' });
     }
   } catch (error) {

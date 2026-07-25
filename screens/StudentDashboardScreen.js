@@ -273,7 +273,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const handleRespondInvite = (status) => {
     const socket = io(SOCKET_URL, { 
       path: '/api/socket.io',
-      transports: ['websocket', 'polling'] 
+      transports: ['websocket'] 
     });
     socket.emit('respond_battle_invite', { notifId: battleInvite.id, status });
     setBattleInvite(null);
@@ -289,7 +289,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     // Connect to backend socket
     const socket = io(SOCKET_URL, { 
       path: '/api/socket.io',
-      transports: ['websocket', 'polling'] 
+      transports: ['websocket'] 
     });
     
     // Register user to receive targeted messages
@@ -311,7 +311,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     return () => {
       socket.disconnect();
     };
-  }, [user]);
+  }, [user?.id, user?.customId]);
 
   useEffect(() => {
     if (route.params?.initialTab) {

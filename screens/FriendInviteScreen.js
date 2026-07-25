@@ -177,7 +177,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                 const userData = userDataStr ? JSON.parse(userDataStr) : null;
                 const socket = io(SOCKET_URL, { 
                   path: '/api/socket.io',
-                  transports: ['websocket', 'polling'] 
+                  transports: ['websocket'] 
                 });
                 socket.emit('send_battle_invite', {
                   senderId: userData?.customId || 'NOMA\'LUM',
