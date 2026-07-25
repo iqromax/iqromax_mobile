@@ -41,6 +41,7 @@ export default function App() {
   const [isReady, setIsReady] = useState(false);
   const [deletedReason, setDeletedReason] = useState(null);
   const [battleInvite, setBattleInvite] = useState(null);
+  const [inviteTimer, setInviteTimer] = useState(0);
   const [rejectionAlert, setRejectionAlert] = useState(null);
   const inviteSlideAnim = useRef(new Animated.Value(-300)).current;
   const rejectionSlideAnim = useRef(new Animated.Value(-200)).current;
@@ -66,11 +67,41 @@ export default function App() {
         if (navigationRef.isReady()) {
           navigationRef.navigate('BattleMatchmaking', { mode: 'dost', inviteData: battleInvite });
         }
-      }
+      try {
+        const stored = await AsyncStorage.getItem('user_notifications');
+        if (stored) {
+          const list = JSON.parse(stored);
+          const filtered = list.filter(n => n.id !== battleInvite.id);
+          await AsyncStorage.setItem('user_notifications', JSON.stringify(filtered));
+        }
+      } catch(e) {}
     } catch (e) {
       console.error('respond invite error:', e);
     }
   };
+
+  useEffect(() => {
+    let interval;
+    if (battleInvite && inviteTimer > 0) {
+      interval = setInterval(() => {
+        setInviteTimer((prev) => prev - 1);
+      }, 1000);
+    } else if (inviteTimer === 0 && battleInvite) {
+      Animated.timing(inviteSlideAnim, { toValue: -300, duration: 250, useNativeDriver: true }).start(async () => {
+        const expiredInvite = { ...battleInvite };
+        setBattleInvite(null);
+        try {
+          const stored = await AsyncStorage.getItem('user_notifications');
+          const list = stored ? JSON.parse(stored) : [];
+          if (!list.some(n => n.id === expiredInvite.id)) {
+            const updatedList = [expiredInvite, ...list];
+            await AsyncStorage.setItem('user_notifications', JSON.stringify(updatedList));
+          }
+        } catch(e) {}
+      });
+    }
+    return () => clearInterval(interval);
+  }, [battleInvite, inviteTimer]);
 
   useEffect(() => {
     // Persistent root-level socket listener for real-time account deletion/blocking across ALL screens
@@ -134,6 +165,7 @@ export default function App() {
 
     socket.on('receive_battle_invite', (data) => {
       setBattleInvite(data);
+      setInviteTimer(30);
       Animated.spring(inviteSlideAnim, { toValue: 50, useNativeDriver: true, tension: 50, friction: 8 }).start();
     });
 
@@ -341,7 +373,7 @@ export default function App() {
               </TouchableOpacity>
               <TouchableOpacity style={styles.topAlertAcceptBtn} onPress={() => handleRespondInvite('ACCEPTED')}>
                 <MaterialCommunityIcons name="sword-cross" size={16} color="#FFF" style={{ marginRight: 4 }} />
-                <Text style={styles.topAlertAcceptText}>Qabul qilish</Text>
+                <Text style={styles.topAlertAcceptText}>Qabul qilish ({inviteTimer}s)</Text>
               </TouchableOpacity>
             </View>
           </Animated.View>

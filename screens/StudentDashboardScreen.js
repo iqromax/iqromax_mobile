@@ -254,6 +254,66 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'calc');
   const [user, setUser] = useState(route.params?.user);
+  const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
+  const [notificationsList, setNotificationsList] = useState([]);
+
+  const loadNotifications = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('user_notifications');
+      const localList = stored ? JSON.parse(stored) : [];
+      
+      let serverList = [];
+      if (user?.customId) {
+        const cleanId = String(user.customId).replace(/^#+/, '').trim();
+        const res = await fetch(`${API_URL}/notifications/${cleanId}`);
+        if (res.ok) {
+          serverList = await res.json();
+        }
+      }
+      
+      const merged = [...localList];
+      serverList.forEach(sn => {
+        if (!merged.some(ln => ln.id === sn.id)) {
+          merged.push(sn);
+        }
+      });
+      setNotificationsList(merged);
+    } catch (e) {
+      console.error('Error loading notifications:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 4000);
+    return () => clearInterval(interval);
+  }, [user?.customId]);
+
+  const handleNotifRespond = async (notif, status) => {
+    try {
+      const socket = io(SOCKET_URL, { 
+        path: '/api/socket.io',
+        transports: ['websocket'] 
+      });
+      socket.emit('respond_battle_invite', {
+        notifId: notif.id,
+        status,
+        targetName: user?.name || "Do'stingiz",
+        targetAvatar: user?.avatar || null
+      });
+
+      const updatedList = notificationsList.filter(n => n.id !== notif.id);
+      setNotificationsList(updatedList);
+      await AsyncStorage.setItem('user_notifications', JSON.stringify(updatedList));
+
+      if (status === 'ACCEPTED') {
+        setIsNotifModalOpen(false);
+        navigation.navigate('BattleMatchmaking', { mode: 'dost', inviteData: notif });
+      }
+    } catch (e) {
+      console.error('Notif respond error:', e);
+    }
+  };
 
   // Real-time socket logic for battle invites and updates
   useEffect(() => {
@@ -931,9 +991,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           {/* Right Icons */}
           <View style={styles.rightIcons}>
-            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7} onPress={() => { loadNotifications(); setIsNotifModalOpen(true); }}>
               <Feather name="bell" size={22} color="#FFFFFF" />
-              <View style={styles.notificationDot} />
+              {notificationsList.length > 0 && <View style={styles.notificationDot} />}
             </TouchableOpacity>
             
             <TouchableOpacity style={[styles.iconButton, { marginLeft: 12 }]} activeOpacity={0.7}>
@@ -2970,6 +3030,68 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* NOTIFICATION SECTION MODAL */}
+        <Modal transparent visible={isNotifModalOpen} animationType="fade">
+          <View style={styles.notifModalOverlay}>
+            <View style={styles.notifModalCard}>
+              <View style={styles.notifModalHeader}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <MaterialCommunityIcons name="bell-ring" size={24} color="#FBBF24" style={{ marginRight: 8 }} />
+                  <Text style={styles.notifModalTitle}>Xabarnomalar</Text>
+                </View>
+                <TouchableOpacity onPress={() => setIsNotifModalOpen(false)}>
+                  <MaterialCommunityIcons name="close-circle" size={26} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={{ maxHeight: 400, width: '100%' }} showsVerticalScrollIndicator={false}>
+                {notificationsList.length === 0 ? (
+                  <View style={styles.notifEmptyBox}>
+                    <MaterialCommunityIcons name="bell-off-outline" size={50} color="#4B5563" style={{ marginBottom: 12 }} />
+                    <Text style={styles.notifEmptyTitle}>Xabarnomalar yo'q</Text>
+                    <Text style={styles.notifEmptySub}>Hozircha sizga yangi battle takliflari kelmadi</Text>
+                  </View>
+                ) : (
+                  notificationsList.map((notif, idx) => (
+                    <View key={notif.id || idx} style={styles.notifItemCard}>
+                      <View style={styles.notifItemHeader}>
+                        <Image 
+                          source={notif.senderAvatar ? { uri: notif.senderAvatar } : require('../assets/avatar_alex.jpg')} 
+                          style={styles.notifItemAvatar} 
+                        />
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.notifItemSender}>{notif.senderName || 'Foydalanuvchi'}</Text>
+                          <Text style={styles.notifItemStats}>Level {notif.level || 1} • Rating {notif.rating || 1000}</Text>
+                        </View>
+                        <View style={styles.notifBadge}>
+                          <Text style={styles.notifBadgeText}>30s o'tdi</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.notifItemMsg}>⚔️ Sizni jangga taklif qilgandi!</Text>
+                      <View style={styles.notifItemActions}>
+                        <TouchableOpacity 
+                          style={styles.notifRejectBtn} 
+                          onPress={() => handleNotifRespond(notif, 'REJECTED')}
+                        >
+                          <MaterialCommunityIcons name="close" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                          <Text style={styles.notifRejectText}>Rad etish</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={styles.notifAcceptBtn} 
+                          onPress={() => handleNotifRespond(notif, 'ACCEPTED')}
+                        >
+                          <MaterialCommunityIcons name="sword-cross" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                          <Text style={styles.notifAcceptText}>Qabul qilish</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
 
     </SafeAreaView>
   );
@@ -5664,6 +5786,143 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
     marginLeft: 8,
-  }
+  },
+  notifModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 12, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  notifModalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#0A0A16',
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1.5,
+    borderColor: '#3B82F6',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 20,
+  },
+  notifModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  notifModalTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+  },
+  notifEmptyBox: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  notifEmptyTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 6,
+  },
+  notifEmptySub: {
+    color: '#9CA3AF',
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
+    textAlign: 'center',
+  },
+  notifItemCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  notifItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  notifItemAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+    marginRight: 12,
+  },
+  notifItemSender: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+  },
+  notifItemStats: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+  },
+  notifBadge: {
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
+  },
+  notifBadgeText: {
+    color: '#F59E0B',
+    fontSize: 11,
+    fontFamily: 'Inter_700Bold',
+  },
+  notifItemMsg: {
+    color: '#EAB308',
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 14,
+  },
+  notifItemActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  notifRejectBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    borderRadius: 12,
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  notifRejectText: {
+    color: '#EF4444',
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+  },
+  notifAcceptBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    paddingVertical: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 6,
+  },
+  notifAcceptText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+  },
 });
 

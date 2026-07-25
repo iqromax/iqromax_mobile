@@ -23,6 +23,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
   const [foundUser, setFoundUser] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const [isInviteSent, setIsInviteSent] = useState(false);
   const inviteLink = 'iqromax.app/battle/invite/IQX567890';
 
   return (
@@ -106,6 +107,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                     }
                   }}
                   onChangeText={async (text) => {
+                    setIsInviteSent(false);
                     const cleaned = text.replace(/[^0-9]/g, '');
                     const formatted = cleaned.length > 0 ? `#${cleaned}` : '#';
                     setFriendId(formatted);
@@ -116,13 +118,24 @@ const FriendInviteScreen = ({ navigation, route }) => {
                         const res = await fetch(`${API_URL}/users/search/${encodedText}`);
                         if (res.ok) {
                           const data = await res.json();
-                          setFoundUser({
-                            id: data.id,
-                            name: data.name,
-                            level: data.level || 1,
-                            rating: data.rating || 1000,
-                            avatar: data.avatar && data.avatar.startsWith('http') ? { uri: data.avatar } : require('../assets/avatar_alex.jpg'),
-                          });
+                          const userDataStr = await AsyncStorage.getItem('user_data');
+                          const currentUser = userDataStr ? JSON.parse(userDataStr) : null;
+                          const myId = String(currentUser?.id || '').trim();
+                          const myCustomId = String(currentUser?.customId || '').replace(/^#+/, '').trim().toUpperCase();
+                          const foundId = String(data?.id || '').trim();
+                          const foundCustomId = String(data?.customId || '').replace(/^#+/, '').trim().toUpperCase();
+
+                          if ((myId && foundId && myId === foundId) || (myCustomId && foundCustomId && myCustomId === foundCustomId)) {
+                            setFoundUser(null);
+                          } else {
+                            setFoundUser({
+                              id: data.id,
+                              name: data.name,
+                              level: data.level || 1,
+                              rating: data.rating || 1000,
+                              avatar: data.avatar && data.avatar.startsWith('http') ? { uri: data.avatar } : require('../assets/avatar_alex.jpg'),
+                            });
+                          }
                         } else {
                           setFoundUser(null);
                         }
@@ -139,7 +152,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   }}
                 />
                 {friendId.length > 0 && friendId !== '#' && (
-                  <TouchableOpacity onPress={() => { setFriendId(''); setFoundUser(null); }}>
+                  <TouchableOpacity onPress={() => { setFriendId(''); setFoundUser(null); setIsInviteSent(false); }}>
                     <MaterialCommunityIcons name="close-circle" size={20} color="#6B7280" />
                   </TouchableOpacity>
                 )}
@@ -175,7 +188,10 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   </View>
                 </View>
               </View>
-              <TouchableOpacity style={styles.inviteButton} onPress={async () => {
+              <TouchableOpacity 
+                style={[styles.inviteButton, isInviteSent && { backgroundColor: '#4B5563', shadowOpacity: 0 }]} 
+                disabled={isInviteSent}
+                onPress={async () => {
                 const userDataStr = await AsyncStorage.getItem('user_data');
                 const userData = userDataStr ? JSON.parse(userDataStr) : null;
                 const socket = io(SOCKET_URL, { 
@@ -190,10 +206,14 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   level: 1,
                   rating: 1000
                 });
-                alert('Taklif yuborildi! Kutilmoqda...');
+                setIsInviteSent(true);
               }}>
-                <Text style={styles.inviteButtonText}>Battle taklifini yuborish</Text>
-                <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+                <Text style={styles.inviteButtonText}>{isInviteSent ? "Taklif yuborildi (Kutilmoqda...)" : "Battle taklifini yuborish"}</Text>
+                {!isInviteSent ? (
+                  <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+                ) : (
+                  <MaterialCommunityIcons name="check-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                )}
               </TouchableOpacity>
             </View>
           ) : (
