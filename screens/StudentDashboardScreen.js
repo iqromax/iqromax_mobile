@@ -265,8 +265,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
       let serverList = [];
       if (user?.customId) {
         try {
-          const cleanId = String(user.customId).replace(/^#+/, '').trim();
-          const res = await fetch(`${API_URL}/notifications/${cleanId}`);
+          let cleanId = String(user.customId).trim();
+          if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
+          const encodedId = encodeURIComponent(cleanId);
+          const res = await fetch(`${API_URL}/notifications/${encodedId}`);
           if (res.ok) {
             const text = await res.text();
             if (text && text.trim().startsWith('[')) {

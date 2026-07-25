@@ -189,7 +189,8 @@ export default function App() {
         if (userDataStr) {
           const currentUser = JSON.parse(userDataStr);
           if (currentUser && currentUser.customId) {
-            const cleanId = String(currentUser.customId).replace(/^#+/, '');
+            let cleanId = String(currentUser.customId).trim();
+            if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
             const encodedId = encodeURIComponent(cleanId);
             const res = await fetch(`${API_URL}/users/search/${encodedId}`);
             if (res.status === 404) {
@@ -242,7 +243,9 @@ export default function App() {
           // Verify user still exists in database before allowing access
           if (userData && userData.customId) {
             try {
-              const encodedId = encodeURIComponent(userData.customId);
+              let cleanId = String(userData.customId).trim();
+              if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
+              const encodedId = encodeURIComponent(cleanId);
               const res = await fetch(`${API_URL}/users/search/${encodedId}`);
               if (res.status === 404) {
                 await AsyncStorage.removeItem('user_data');
