@@ -1,8 +1,8 @@
 import './src/utils/safeWeakMap';
 import { Asset } from 'expo-asset';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -40,6 +40,37 @@ export default function App() {
   const [initialParams, setInitialParams] = useState({});
   const [isReady, setIsReady] = useState(false);
   const [deletedReason, setDeletedReason] = useState(null);
+  const [battleInvite, setBattleInvite] = useState(null);
+  const [rejectionAlert, setRejectionAlert] = useState(null);
+  const inviteSlideAnim = useRef(new Animated.Value(-300)).current;
+  const rejectionSlideAnim = useRef(new Animated.Value(-200)).current;
+  const socketRef = useRef(null);
+
+  const handleRespondInvite = async (status) => {
+    if (!battleInvite) return;
+    Animated.timing(inviteSlideAnim, { toValue: -300, duration: 250, useNativeDriver: true }).start(() => {
+      setBattleInvite(null);
+    });
+    try {
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      const currentUser = userDataStr ? JSON.parse(userDataStr) : null;
+      if (socketRef.current) {
+        socketRef.current.emit('respond_battle_invite', {
+          notifId: battleInvite.id,
+          status,
+          targetName: currentUser?.name || "Do'stingiz",
+          targetAvatar: currentUser?.avatar || null
+        });
+      }
+      if (status === 'ACCEPTED') {
+        if (navigationRef.isReady()) {
+          navigationRef.navigate('BattleMatchmaking', { mode: 'dost', inviteData: battleInvite });
+        }
+      }
+    } catch (e) {
+      console.error('respond invite error:', e);
+    }
+  };
 
   useEffect(() => {
     // Persistent root-level socket listener for real-time account deletion/blocking across ALL screens
@@ -47,6 +78,7 @@ export default function App() {
       path: '/api/socket.io',
       transports: ['websocket'] 
     });
+    socketRef.current = socket;
 
     socket.on('connect', () => {
       AsyncStorage.getItem('user_data').then(str => {
@@ -97,6 +129,22 @@ export default function App() {
         }
       } catch (e) {
         console.error('user_updated socket check error:', e);
+      }
+    });
+
+    socket.on('receive_battle_invite', (data) => {
+      setBattleInvite(data);
+      Animated.spring(inviteSlideAnim, { toValue: 50, useNativeDriver: true, tension: 50, friction: 8 }).start();
+    });
+
+    socket.on('battle_invite_response', (data) => {
+      if (data && data.status === 'REJECTED') {
+        const name = data.targetName || "Do'stingiz";
+        setRejectionAlert(`❌ ${name} battle taklifingizni rad etdi.`);
+        Animated.spring(rejectionSlideAnim, { toValue: 50, useNativeDriver: true, tension: 50, friction: 8 }).start();
+        setTimeout(() => {
+          Animated.timing(rejectionSlideAnim, { toValue: -200, duration: 250, useNativeDriver: true }).start(() => setRejectionAlert(null));
+        }, 3500);
       }
     });
 
@@ -266,6 +314,51 @@ export default function App() {
             </View>
           </View>
         </Modal>
+
+        {/* GLOBAL INCOMING BATTLE INVITE TOP BANNER */}
+        {battleInvite && (
+          <Animated.View style={[styles.topAlertCard, { transform: [{ translateY: inviteSlideAnim }] }]}>
+            <View style={styles.topAlertHeader}>
+              <View style={styles.topAlertIconBox}>
+                <MaterialCommunityIcons name="lightning-bolt" size={20} color="#FBBF24" />
+              </View>
+              <Text style={styles.topAlertTitle}>⚔️ BATTLE TAKLIFI ⚔️</Text>
+            </View>
+            <View style={styles.topAlertBody}>
+              <Image 
+                source={battleInvite?.senderAvatar ? { uri: battleInvite.senderAvatar } : require('./assets/avatar_alex.jpg')} 
+                style={styles.topAlertAvatar} 
+              />
+              <View style={styles.topAlertUserInfo}>
+                <Text style={styles.topAlertUserName}>{battleInvite?.senderName || 'Foydalanuvchi'}</Text>
+                <Text style={styles.topAlertUserStats}>Level {battleInvite?.level || 1} • Rating {battleInvite?.rating || 1000}</Text>
+              </View>
+            </View>
+            <View style={styles.topAlertButtonsRow}>
+              <TouchableOpacity style={styles.topAlertRejectBtn} onPress={() => handleRespondInvite('REJECTED')}>
+                <MaterialCommunityIcons name="close" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                <Text style={styles.topAlertRejectText}>Yopish</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.topAlertAcceptBtn} onPress={() => handleRespondInvite('ACCEPTED')}>
+                <MaterialCommunityIcons name="sword-cross" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                <Text style={styles.topAlertAcceptText}>Qabul qilish</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        )}
+
+        {/* GLOBAL REJECTION ALERT TOP BANNER */}
+        {rejectionAlert && (
+          <Animated.View style={[styles.rejectionAlertCard, { transform: [{ translateY: rejectionSlideAnim }] }]}>
+            <MaterialCommunityIcons name="alert-circle-outline" size={24} color="#EF4444" style={{ marginRight: 10 }} />
+            <Text style={styles.rejectionAlertText}>{rejectionAlert}</Text>
+            <TouchableOpacity onPress={() => {
+              Animated.timing(rejectionSlideAnim, { toValue: -200, duration: 250, useNativeDriver: true }).start(() => setRejectionAlert(null));
+            }}>
+              <MaterialCommunityIcons name="close" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
       </NavigationContainer>
     </SafeAreaProvider>
   );
@@ -328,5 +421,137 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  topAlertCard: {
+    position: 'absolute',
+    top: 50,
+    left: 16,
+    right: 16,
+    backgroundColor: '#0F0F24',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1.5,
+    borderColor: '#A855F7',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 25,
+    zIndex: 99999,
+  },
+  topAlertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  topAlertIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(251, 191, 36, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  topAlertTitle: {
+    color: '#FBBF24',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  topAlertBody: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 10,
+    borderRadius: 14,
+  },
+  topAlertAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#3B82F6',
+    marginRight: 12,
+  },
+  topAlertUserInfo: {
+    flex: 1,
+  },
+  topAlertUserName: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  topAlertUserStats: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  topAlertButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  topAlertRejectBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    borderRadius: 12,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  topAlertRejectText: {
+    color: '#EF4444',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  topAlertAcceptBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#3B82F6',
+    borderRadius: 12,
+    paddingVertical: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 6,
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+  },
+  topAlertAcceptText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  rejectionAlertCard: {
+    position: 'absolute',
+    top: 50,
+    left: 16,
+    right: 16,
+    backgroundColor: '#12121D',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 15,
+    elevation: 20,
+    zIndex: 99999,
+  },
+  rejectionAlertText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+    flex: 1,
   },
 });

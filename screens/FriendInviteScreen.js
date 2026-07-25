@@ -98,18 +98,21 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   style={styles.textInput}
                   placeholder="ID ni kiriting"
                   placeholderTextColor="#6B7280"
+                  keyboardType="number-pad"
                   value={friendId}
                   onFocus={() => {
-                    if (friendId.length === 0) {
+                    if (friendId.length === 0 || friendId === '') {
                       setFriendId('#');
                     }
                   }}
                   onChangeText={async (text) => {
-                    setFriendId(text);
-                    if (text.length >= 5) {
+                    const cleaned = text.replace(/[^0-9]/g, '');
+                    const formatted = cleaned.length > 0 ? `#${cleaned}` : '#';
+                    setFriendId(formatted);
+                    if (formatted.length >= 5 && cleaned.length >= 4) {
                       setIsSearching(true);
                       try {
-                        const encodedText = encodeURIComponent(text);
+                        const encodedText = encodeURIComponent(formatted);
                         const res = await fetch(`${API_URL}/users/search/${encodedText}`);
                         if (res.ok) {
                           const data = await res.json();
@@ -135,7 +138,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                     }
                   }}
                 />
-                {friendId.length > 0 && (
+                {friendId.length > 0 && friendId !== '#' && (
                   <TouchableOpacity onPress={() => { setFriendId(''); setFoundUser(null); }}>
                     <MaterialCommunityIcons name="close-circle" size={20} color="#6B7280" />
                   </TouchableOpacity>

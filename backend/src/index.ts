@@ -485,10 +485,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('respond_battle_invite', (data) => {
-    // data: { notifId, status: 'ACCEPTED' | 'REJECTED' }
-    const notif = notifications.find(n => n.id === data.notifId);
+    // data: { notifId, status: 'ACCEPTED' | 'REJECTED', targetName?: string, targetAvatar?: string }
+    const notif: any = notifications.find(n => n.id === data.notifId);
     if (notif) {
       notif.status = data.status;
+      if (data.targetName) notif.targetName = data.targetName;
+      if (data.targetAvatar) notif.targetAvatar = data.targetAvatar;
       // Send message back to sender
       const senderSocketId = onlineUsers.get(notif.senderId);
       if (senderSocketId) {
