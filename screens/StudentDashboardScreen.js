@@ -211,7 +211,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (activeTab === 'ranking') {
       const fetchRanking = async () => {
         try {
-          const res = await fetch('http://167.71.218.66:3000/api/ranking');
+          const res = await fetch(`${API_URL}/ranking`);
           if (res.ok) {
             const data = await res.json();
             const rankedData = data.map((u, index) => ({
@@ -2579,105 +2579,117 @@ export default function StudentDashboardScreen({ navigation, route }) {
 {/* Dummy view for centering */}
             </View>
 
-{/* Golden Frame Card */}
-            <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} contentFit="fill">
-{/* Left: Avatar with wreath */}
-              <View style={styles.rankingFrameLeft}>
-                 <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={styles.rankingAvatar} />
+{(() => {
+  const top1 = leaderboardData[0] || { name: '---', xp: 0, avatar: require('../assets/opponent_1.png') };
+  const top2 = leaderboardData[1] || { name: '---', xp: 0, avatar: require('../assets/avatar_david.jpg') };
+  const top3 = leaderboardData[2] || { name: '---', xp: 0, avatar: require('../assets/avatar_lily.jpg') };
+  
+  return (
+    <>
+      {/* Golden Frame Card */}
+      <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} contentFit="fill">
+        {/* Left: Avatar with wreath */}
+        <View style={styles.rankingFrameLeft}>
+            <Image source={top1.avatar} style={styles.rankingAvatar} />
+        </View>
+
+        {/* Middle: User Info */}
+        <View style={styles.rankingFrameMiddle}>
+          <Text style={styles.rankingUserName}>{top1.name}</Text>
+          <View style={styles.rankingUserPosition}>
+            <MaterialCommunityIcons name="trophy" size={16} color="#F59E0B" />
+            <Text style={styles.rankingPositionNumber}>#1</Text>
+          </View>
+          <View style={styles.rankingUserXpBadge}>
+            <Text style={styles.rankingUserXpText}>{top1.xp} XP</Text>
+          </View>
+        </View>
+
+        {/* Right: Badge and Progress */}
+        <View style={styles.rankingFrameRight}>
+          <View style={styles.rankingBadgeRow}>
+            <Image source={require('../assets/ranking_badge.png')} style={styles.rankingBadgeIcon} contentFit="contain" />
+            <View>
+              <Text style={styles.rankingBadgeText}>GOLD III</Text>
+              <View style={{ flexDirection: 'row', marginTop: 2 }}>
+                <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
+                <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
+                <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
+                <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
+                <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
               </View>
+            </View>
+          </View>
 
-{/* Middle: User Info */}
-              <View style={styles.rankingFrameMiddle}>
-                <Text style={styles.rankingUserName}>IQROMAX</Text>
-                <View style={styles.rankingUserPosition}>
-                  <MaterialCommunityIcons name="trophy" size={16} color="#F59E0B" />
-                  <Text style={styles.rankingPositionNumber}>#1</Text>
-                </View>
-                <View style={styles.rankingUserXpBadge}>
-                  <Text style={styles.rankingUserXpText}>1248 XP</Text>
-                </View>
-              </View>
+          {/* Progress Bar */}
+          <View style={styles.rankingProgressContainer}>
+            <View style={styles.rankingProgressBarBg}>
+              <View style={[styles.rankingProgressBarFill, { width: '78%' }]} />
+            </View>
+            <Text style={styles.rankingProgressPercent}>78%</Text>
+          </View>
 
-{/* Right: Badge and Progress */}
-              <View style={styles.rankingFrameRight}>
-                <View style={styles.rankingBadgeRow}>
-                  <Image source={require('../assets/ranking_badge.png')} style={styles.rankingBadgeIcon} contentFit="contain" />
-                  <View>
-                    <Text style={styles.rankingBadgeText}>GOLD III</Text>
-                    <View style={{ flexDirection: 'row', marginTop: 2 }}>
-                      <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
-                      <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
-                      <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
-                      <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
-                      <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
-                    </View>
-                  </View>
-                </View>
+          <Text style={styles.rankingTargetText}>{t.platinumTarget || "Platinum V gacha"}</Text>
+          <Text style={styles.rankingXpLeftText}>
+            <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold' }}>352</Text>
+            <Text>{' '}</Text>
+            <Text>{t.xpRemaining || "XP qoldi"}</Text>
+          </Text>
 
-{/* Progress Bar */}
-                <View style={styles.rankingProgressContainer}>
-                  <View style={styles.rankingProgressBarBg}>
-                    <View style={[styles.rankingProgressBarFill, { width: '78%' }]} />
-                  </View>
-                  <Text style={styles.rankingProgressPercent}>78%</Text>
-                </View>
+        </View>
+      </ImageBackground>
 
-                <Text style={styles.rankingTargetText}>{t.platinumTarget || "Platinum V gacha"}</Text>
-                <Text style={styles.rankingXpLeftText}>
-                  <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold' }}>352</Text>
-                  <Text>{' '}</Text>
-                  <Text>{t.xpRemaining || "XP qoldi"}</Text>
-                </Text>
+      {/* Podium Section */}
+      <View style={styles.podiumContainer}>
+        <ImageBackground source={require('../assets/ranking_podium.png')} style={styles.podiumImage} contentFit="contain">
+          
+          {/* 2nd Place (Left) */}
+          <View style={styles.podiumSecond}>
+              <Image source={top2.avatar} style={styles.podiumAvatar} />
+          </View>
 
-              </View>
-            </ImageBackground>
+          {/* 1st Place (Center) */}
+          <View style={styles.podiumFirst}>
+              <Image source={top1.avatar} style={styles.podiumAvatarFirst} />
+          </View>
 
-            {/* Podium Section */}
-            <View style={styles.podiumContainer}>
-              <ImageBackground source={require('../assets/ranking_podium.png')} style={styles.podiumImage} contentFit="contain">
-                
-                {/* 2nd Place (Left) */}
-                <View style={styles.podiumSecond}>
-                   <Image source={require('../assets/avatar_david.jpg')} style={styles.podiumAvatar} />
-                </View>
+          {/* 3rd Place (Right) */}
+          <View style={styles.podiumThird}>
+              <Image source={top3.avatar} style={styles.podiumAvatar} />
+          </View>
 
-                {/* 1st Place (Center) */}
-                <View style={styles.podiumFirst}>
-                   <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={styles.podiumAvatarFirst} />
-                </View>
+        </ImageBackground>
 
-                {/* 3rd Place (Right) */}
-                <View style={styles.podiumThird}>
-                   <Image source={require('../assets/avatar_lily.jpg')} style={styles.podiumAvatar} />
-                </View>
+        {/* User Info Under Podium */}
+        <View style={styles.podiumInfoRow}>
+          {/* 2nd Place Info */}
+          <View style={[styles.podiumInfoBox, { marginTop: -45, marginLeft: 5 }]}>
+            <Text style={styles.podiumInfoName}>{top2.name}</Text>
+            <View style={styles.podiumInfoXpBadge}>
+              <Text style={styles.podiumInfoXpText}>{top2.xp} XP</Text>
+            </View>
+          </View>
 
-              </ImageBackground>
+          {/* 1st Place Info */}
+          <View style={[styles.podiumInfoBox, { marginTop: -30 }]}>
+            <Text style={[styles.podiumInfoName, { color: '#F59E0B' }]}>{top1.name}</Text>
+            <View style={styles.podiumInfoXpBadge}>
+              <Text style={styles.podiumInfoXpText}>{top1.xp} XP</Text>
+            </View>
+          </View>
 
-              {/* User Info Under Podium */}
-              <View style={styles.podiumInfoRow}>
-                {/* 2nd Place Info */}
-                <View style={[styles.podiumInfoBox, { marginTop: -45, marginLeft: 5 }]}>
-                  <Text style={styles.podiumInfoName}>MathKing</Text>
-                  <View style={styles.podiumInfoXpBadge}>
-                    <Text style={styles.podiumInfoXpText}>1150 XP</Text>
-                  </View>
-                </View>
-
-                {/* 1st Place Info */}
-                <View style={[styles.podiumInfoBox, { marginTop: -30 }]}>
-                  <Text style={[styles.podiumInfoName, { color: '#F59E0B' }]}>IQROMAX</Text>
-                  <View style={styles.podiumInfoXpBadge}>
-                    <Text style={styles.podiumInfoXpText}>1248 XP</Text>
-                  </View>
-                </View>
-
-                {/* 3rd Place Info */}
-                <View style={[styles.podiumInfoBox, { marginTop: -48, marginRight: 5 }]}>
-                  <Text style={styles.podiumInfoName}>FastBrain</Text>
-                  <View style={styles.podiumInfoXpBadge}>
-                    <Text style={styles.podiumInfoXpText}>1120 XP</Text>
-                  </View>
-                </View>
+          {/* 3rd Place Info */}
+          <View style={[styles.podiumInfoBox, { marginTop: -48, marginRight: 5 }]}>
+            <Text style={styles.podiumInfoName}>{top3.name}</Text>
+            <View style={styles.podiumInfoXpBadge}>
+              <Text style={styles.podiumInfoXpText}>{top3.xp} XP</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </>
+  );
+})()}
               </View>
             </View>
 
