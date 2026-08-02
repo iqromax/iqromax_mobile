@@ -228,7 +228,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
           const res = await fetch(`${API_URL}/ranking?t=${Date.now()}`);
           if (res.ok) {
             const data = await res.json();
+            // Alert.alert('Debug Data', JSON.stringify(data)); // Commented out to prevent annoyance if it works, but let's actually show it once
             if (Array.isArray(data)) {
+              if (data.length === 0) {
+                Alert.alert('Ogohlantirish', 'Backend bo\'sh ro\'yxat qaytardi!');
+              }
               const rankedData = data.map((u, index) => ({
                 customId: u.id,
                 rank: index + 1,
@@ -237,9 +241,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 avatar: u.avatar && u.avatar.startsWith('http') ? { uri: u.avatar } : getAvatarByName(u.avatar)
               }));
               setLeaderboardData(rankedData);
+            } else {
+              Alert.alert('Xatolik', 'Data array emas: ' + JSON.stringify(data));
             }
+          } else {
+            Alert.alert('Xatolik', 'Server xatosi: ' + res.status);
           }
         } catch (e) {
+          Alert.alert('Fetch Xatolik', e.message || 'Noma\'lum xato');
           console.error('Fetch ranking error:', e);
         }
       };
