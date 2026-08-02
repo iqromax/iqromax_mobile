@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing } from 'react-native';
 import { Image, ImageBackground } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -11,6 +11,7 @@ import { Canvas } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL } from '../src/config/api';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',
@@ -213,13 +214,24 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [leaderboardSearch, setLeaderboardSearch] = useState('');
   const [highlightedUserId, setHighlightedUserId] = useState(null);
   const leaderboardScrollRef = useRef(null);
-  const searchBorderAnim = useRef(new Animated.Value(0)).current;
+  const searchRotationAnim = useRef(new Animated.Value(0)).current;
   const highlightAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Disabled infinite searchBorderAnim loop to fix severe Android lag
-    // Animated.timing with useNativeDriver: false running infinitely kills the JS bridge
-  }, [searchBorderAnim]);
+    Animated.loop(
+      Animated.timing(searchRotationAnim, {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.linear,
+        useNativeDriver: true
+      })
+    ).start();
+  }, [searchRotationAnim]);
+
+  const searchSpin = searchRotationAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg']
+  });
 
   const [leaderboardData, setLeaderboardData] = useState([]);
 
@@ -2721,41 +2733,39 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           {/* Sticky Search Bar */}
           <View style={styles.leaderboardSearchContainer}>
-            <Animated.View style={[styles.leaderboardSearchBox, { 
-              flex: 1,
-              marginRight: 12,
-              borderColor: searchBorderAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['rgba(192, 132, 252, 0.25)', 'rgba(192, 132, 252, 0.9)']
-              }),
-              shadowColor: '#C084FC',
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: searchBorderAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0.6]
-              }),
-              shadowRadius: 10,
-              elevation: searchBorderAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 6]
-              })
-            }]}>
-              <Text style={styles.leaderboardSearchIcon}>🔍</Text>
-              <TextInput
-                style={styles.leaderboardSearchInput}
-                placeholder={t.searchPlaceholder}
-                placeholderTextColor="rgba(255,255,255,0.35)"
-                value={leaderboardSearch}
-                onChangeText={setLeaderboardSearch}
-                keyboardType="default"
-                returnKeyType="search"
-              />
-              {leaderboardSearch.length > 0 && (
-                <TouchableOpacity onPress={() => setLeaderboardSearch('')} style={styles.leaderboardSearchClear}>
-                  <Text style={styles.leaderboardSearchClearText}>✕</Text>
-                </TouchableOpacity>
-              )}
-            </Animated.View>
+            <View style={{ flex: 1, marginRight: 12, borderRadius: 14, overflow: 'hidden', backgroundColor: 'rgba(192, 132, 252, 0.1)', position: 'relative', elevation: 4, shadowColor: '#C084FC', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.3, shadowRadius: 6 }}>
+              <Animated.View style={{
+                position: 'absolute',
+                top: '-50%', left: '-50%', right: '-50%', bottom: '-50%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                transform: [{ rotate: searchSpin }]
+              }}>
+                <LinearGradient
+                  colors={['transparent', '#C084FC', 'transparent']}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={{ width: '100%', height: 40 }}
+                />
+              </Animated.View>
+              <View style={[styles.leaderboardSearchBox, { flex: 1, margin: 1.5, borderWidth: 0, paddingVertical: 8 }]}>
+                <Text style={styles.leaderboardSearchIcon}>🔍</Text>
+                <TextInput
+                  style={styles.leaderboardSearchInput}
+                  placeholder={t.searchPlaceholder}
+                  placeholderTextColor="rgba(255,255,255,0.35)"
+                  value={leaderboardSearch}
+                  onChangeText={setLeaderboardSearch}
+                  keyboardType="default"
+                  returnKeyType="search"
+                />
+                {leaderboardSearch.length > 0 && (
+                  <TouchableOpacity onPress={() => setLeaderboardSearch('')} style={styles.leaderboardSearchClear}>
+                    <Text style={styles.leaderboardSearchClearText}>✕</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
 
             {/* My Profile Button */}
             <TouchableOpacity 
