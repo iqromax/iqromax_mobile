@@ -431,10 +431,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
               .then(res => res.json())
               .then(data => {
                 if (Array.isArray(data)) {
-                  const me = data.find(u => 
-                    u.id && localUser.customId && 
-                    String(u.id).toUpperCase() === String(localUser.customId).toUpperCase()
-                  );
+                  const me = data.find(u => {
+                    if (!u.id || !localUser.customId) return false;
+                    const rankId = String(u.id).replace(/^#+/, '').trim().toUpperCase();
+                    const myId = String(localUser.customId).replace(/^#+/, '').trim().toUpperCase();
+                    return rankId === myId;
+                  });
                   if (me) {
                     setUser(prev => {
                       const updated = { ...prev, xp: me.xp };
