@@ -450,8 +450,15 @@ app.get('/api/ranking', async (req, res) => {
 app.get('/api/users/search/:customId', async (req, res) => {
   try {
     const { customId } = req.params;
-    const user = await prisma.user.findUnique({
-      where: { customId: customId.toUpperCase() }
+    const searchId = customId.startsWith('#') ? customId.toUpperCase() : '#' + customId.toUpperCase();
+    
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: searchId },
+          { customId: customId.toUpperCase() }
+        ]
+      }
     });
     
     if (!user) {
