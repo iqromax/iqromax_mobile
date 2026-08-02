@@ -12,6 +12,7 @@ import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
+import { calculateUserRank } from '../src/utils/rankUtils';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',
@@ -234,6 +235,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
   });
 
   const [leaderboardData, setLeaderboardData] = useState([]);
+  
+  const userXp = user?.xp || 0;
+  const userRankInfo = calculateUserRank(userXp);
 
   useEffect(() => {
     if (activeTab === 'ranking') {
@@ -1201,12 +1205,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
               {/* Middle Progress Section (flex: 1) */}
               <View style={styles.progressSection}>
                 <View style={styles.progressHeaderRow}>
-                  <Text style={styles.progressValueBold}>7 850<Text style={styles.progressValueNormal}> / 10 000 </Text><Text style={styles.progressXP}>XP</Text></Text>
+                  <Text style={styles.progressValueBold}>{userXp}<Text style={styles.progressValueNormal}> / {userRankInfo.isMax ? 'MAX' : userRankInfo.nextRankXP} </Text><Text style={styles.progressXP}>XP</Text></Text>
                 </View>
                 <View style={styles.progressBarTrack}>
-                  <View style={[styles.progressBarFill, { width: '78.5%' }]} />
+                  <View style={[styles.progressBarFill, { width: `${userRankInfo.progressPercent}%`, backgroundColor: userRankInfo.color }]} />
                 </View>
-                <Text style={styles.progressFooterText}>{t.toNextLevel} 2 150 XP</Text>
+                <Text style={styles.progressFooterText}>{userRankInfo.isMax ? 'Max darajadasiz!' : `${t.toNextLevel} ${userRankInfo.xpNeededForNext} XP`}</Text>
               </View>
               
             </Animated.View>
@@ -2622,6 +2626,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const top2 = leaderboardData[1] || { name: '---', xp: 0, avatar: require('../assets/avatar_david.jpg') };
   const top3 = leaderboardData[2] || { name: '---', xp: 0, avatar: require('../assets/avatar_lily.jpg') };
   
+  const top1RankInfo = calculateUserRank(top1.xp);
+  
   return (
     <>
       {/* Golden Frame Card */}
@@ -2648,13 +2654,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <View style={styles.rankingBadgeRow}>
             <Image source={require('../assets/ranking_badge.png')} style={styles.rankingBadgeIcon} contentFit="contain" />
             <View>
-              <Text style={styles.rankingBadgeText}>GOLD III</Text>
+              <Text style={[styles.rankingBadgeText, { color: top1RankInfo.color }]}>{top1RankInfo.name}</Text>
               <View style={{ flexDirection: 'row', marginTop: 2 }}>
-                <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
-                <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
-                <MaterialCommunityIcons name="star" size={10} color="#F59E0B" />
-                <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
-                <MaterialCommunityIcons name="star" size={10} color="#4B5563" />
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <MaterialCommunityIcons 
+                    key={i} 
+                    name="star" 
+                    size={10} 
+                    color={i < top1RankInfo.stars ? top1RankInfo.color : '#4B5563'} 
+                  />
+                ))}
               </View>
             </View>
           </View>
@@ -2662,17 +2671,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
           {/* Progress Bar */}
           <View style={styles.rankingProgressContainer}>
             <View style={styles.rankingProgressBarBg}>
-              <View style={[styles.rankingProgressBarFill, { width: '78%' }]} />
+              <View style={[styles.rankingProgressBarFill, { width: `${Math.round(top1RankInfo.progressPercent)}%`, backgroundColor: top1RankInfo.color }]} />
             </View>
-            <Text style={styles.rankingProgressPercent}>78%</Text>
+            <Text style={styles.rankingProgressPercent}>{Math.round(top1RankInfo.progressPercent)}%</Text>
           </View>
 
-          <Text style={styles.rankingTargetText}>{t.platinumTarget || "Platinum V gacha"}</Text>
-          <Text style={styles.rankingXpLeftText}>
-            <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold' }}>352</Text>
-            <Text>{' '}</Text>
-            <Text>{t.xpRemaining || "XP qoldi"}</Text>
-          </Text>
+          <Text style={styles.rankingTargetText}>{top1RankInfo.isMax ? 'MAX Rank' : (t.platinumTarget?.replace('Platinum V', top1RankInfo.nextRankName) || `${top1RankInfo.nextRankName} gacha`)}</Text>
+          {top1RankInfo.isMax ? (
+             <Text style={styles.rankingXpLeftText}>
+               <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold' }}>Chempion</Text>
+             </Text>
+          ) : (
+            <Text style={styles.rankingXpLeftText}>
+              <Text style={{ color: top1RankInfo.color, fontFamily: 'Inter_700Bold' }}>{top1RankInfo.xpNeededForNext}</Text>
+              <Text>{' '}</Text>
+              <Text>{t.xpRemaining || "XP qoldi"}</Text>
+            </Text>
+          )}
 
         </View>
       </ImageBackground>
@@ -2901,18 +2916,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <View style={styles.proTierLeft}>
                     <Image source={require('../assets/gold_star.png')} style={styles.proTierIcon} />
                     <View>
-                      <Text style={styles.proTierTitle}>GOLD III</Text>
-                      <Text style={styles.proTierSub}>Top 15% of players</Text>
+                      <Text style={[styles.proTierTitle, { color: userRankInfo.color }]}>{userRankInfo.name}</Text>
+                      <Text style={styles.proTierSub}>Top {userXp > 5000 ? '1' : userXp > 1000 ? '5' : '15'}% of players</Text>
                     </View>
                   </View>
                   
                   <View style={styles.proTierProgressContainer}>
                     <View style={styles.proTierProgressHeader}>
-                      <Text style={styles.proTierTarget}>to Platinum V</Text>
-                      <Text style={styles.proTierPercent}>78%</Text>
+                      <Text style={styles.proTierTarget}>{userRankInfo.isMax ? 'MAX Rank' : `to ${userRankInfo.nextRankName}`}</Text>
+                      <Text style={styles.proTierPercent}>{Math.round(userRankInfo.progressPercent)}%</Text>
                     </View>
                     <View style={styles.proTierProgressBar}>
-                      <View style={[styles.proTierProgressFill, { width: '78%' }]} />
+                      <View style={[styles.proTierProgressFill, { width: `${Math.round(userRankInfo.progressPercent)}%`, backgroundColor: userRankInfo.color }]} />
                     </View>
                   </View>
                 </View>
