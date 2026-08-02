@@ -214,6 +214,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [highlightedUserId, setHighlightedUserId] = useState(null);
   const leaderboardScrollRef = useRef(null);
   const searchBorderAnim = useRef(new Animated.Value(0)).current;
+  const highlightAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Disabled infinite searchBorderAnim loop to fix severe Android lag
@@ -2768,24 +2769,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 if (userIndex !== -1) {
                   setHighlightedUserId(user.customId);
                   
-                  const ITEM_HEIGHT = 67; // padding(28) + avatar(38) + border(1)
-                  // Scroll to user position
-                  leaderboardScrollRef.current?.scrollTo({ y: userIndex * ITEM_HEIGHT, animated: true });
+                  const ITEM_HEIGHT = 67; // row height
+                  const OFFSET_Y = 23; // container marginTop(12) + border(1) + paddingTop(10)
                   
-                  // Blinking animation
-                  searchBorderAnim.setValue(0);
-                  Animated.loop(
-                    Animated.sequence([
-                      Animated.timing(searchBorderAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
-                      Animated.timing(searchBorderAnim, { toValue: 0, duration: 400, useNativeDriver: false })
-                    ]),
-                    { iterations: 3 }
-                  ).start();
+                  // Scroll to user position
+                  leaderboardScrollRef.current?.scrollTo({ y: OFFSET_Y + (userIndex * ITEM_HEIGHT), animated: true });
+                  
+                  // Dedicated Blinking animation
+                  highlightAnim.setValue(0);
+                  Animated.sequence([
+                    Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+                    Animated.timing(highlightAnim, { toValue: 0.2, duration: 400, useNativeDriver: false }),
+                    Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+                    Animated.timing(highlightAnim, { toValue: 0.2, duration: 400, useNativeDriver: false }),
+                    Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+                    Animated.timing(highlightAnim, { toValue: 0, duration: 500, useNativeDriver: false })
+                  ]).start();
 
                   setTimeout(() => {
                     setHighlightedUserId(null);
-                    searchBorderAnim.setValue(0);
-                  }, 2500);
+                  }, 3000);
                 } else {
                   Alert.alert('Ogohlantirish', 'Siz reyting jadvalidan topilmadingiz yoki qidiruv natijasiga mos kelmadingiz!');
                 }
@@ -2807,16 +2810,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     styles.leaderboardRow, 
                     (index !== filteredLeaderboard.length - 1 && item.customId !== highlightedUserId) && styles.leaderboardRowBorder,
                     item.customId === highlightedUserId && {
-                      backgroundColor: searchBorderAnim.interpolate({
+                      backgroundColor: highlightAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: ['rgba(192, 132, 252, 0.05)', 'rgba(192, 132, 252, 0.2)']
+                        outputRange: ['rgba(192, 132, 252, 0.05)', 'rgba(192, 132, 252, 0.4)']
                       }),
-                      borderColor: searchBorderAnim.interpolate({
+                      borderColor: highlightAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: ['rgba(192, 132, 252, 0.3)', 'rgba(192, 132, 252, 1)']
                       }),
-                      borderWidth: 1.5,
-                      borderBottomWidth: 1.5, // Explicitly override bottom width
+                      borderWidth: 2,
+                      borderBottomWidth: 2, // Explicitly override bottom width
                       borderRadius: 12,
                       zIndex: 10,
                       elevation: 10,
