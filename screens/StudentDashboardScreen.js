@@ -13,6 +13,7 @@ import io from 'socket.io-client';
 import { SOCKET_URL, API_URL } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import { calculateUserRank } from '../src/utils/rankUtils';
+import { useEnergy } from '../src/hooks/useEnergy';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',
@@ -184,6 +185,7 @@ const getAvatarByName = (name) => {
 };
 
 export default function StudentDashboardScreen({ navigation, route }) {
+  const { energy: currentEnergy } = useEnergy();
   const { language = 'uz', selectedChar = 0 } = route.params || {};
   const [activeTab, setActiveTab] = useState('home');
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(selectedChar);
@@ -1354,7 +1356,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             <TouchableOpacity style={styles.exEnergyButton} activeOpacity={0.7} onPress={() => navigation.navigate('EnergyCenter')}>
               <Image source={require('../assets/energy_icon.png')} style={{ width: 18, height: 18 }} contentFit="contain" />
-              <Text style={styles.exEnergyText}>2</Text>
+              <Text style={styles.exEnergyText}>{currentEnergy}</Text>
               <Ionicons name="add" size={14} color="#FBBF24" />
             </TouchableOpacity>
           </View>

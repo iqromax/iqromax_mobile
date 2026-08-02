@@ -3,11 +3,10 @@ import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Sta
 import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useEnergy } from '../src/hooks/useEnergy';
 
 export default function EnergyCenterScreen({ navigation }) {
-  // In a real app, these values would come from a context or Redux store
-  const currentEnergy = 2;
-  const maxEnergy = 10;
+  const { energy: currentEnergy, maxEnergy, formattedTime } = useEnergy();
   
   const borderAnim = useRef(new Animated.Value(0)).current;
 
@@ -78,9 +77,9 @@ export default function EnergyCenterScreen({ navigation }) {
                 </Text>
                 <View style={[styles.timerRow, { marginTop: 4 }]}>
                   <MaterialCommunityIcons name="timer-outline" size={16} color="#FBBF24" />
-                  <Text style={styles.timerText}>25:34</Text>
+                  <Text style={styles.timerText}>{currentEnergy >= maxEnergy ? 'To\\'lgan' : formattedTime}</Text>
                 </View>
-                <Text style={styles.energyRecoveryInfo}>1 ta energiya tiklanish vaqti: 30 minut</Text>
+                <Text style={styles.energyRecoveryInfo}>1 ta energiya tiklanish vaqti: 3 daqiqa</Text>
               </View>
             </View>
 
