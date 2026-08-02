@@ -18,6 +18,196 @@ import { API_URL, SOCKET_URL } from '../src/config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+const TRANSLATIONS = {
+  uz: {
+    headerTitle: "Do'st bilan battle",
+    step1: "ID orqali taklif",
+    step2: "Do'st qabul qildi",
+    step3: "Battle boshlash",
+    mainTitle: "Do'stingizni ID orqali taklif qiling",
+    subTitle: "Do'stingizning IQROMAX ID sini kiriting\nva battle taklifini yuboring!",
+    inputLabel: "Do'stingizning ID sini kiriting",
+    inputPlaceholder: "ID ni kiriting",
+    searching: "Qidirilmoqda...",
+    inviteSent: "Taklif yuborildi (Kutilmoqda...)",
+    sendInvite: "Battle taklifini yuborish",
+    searchFriend: "Do'stingizni qidiring",
+    searchSub: "ID kiriting, topilgan do'stingiz\nshu yerda paydo bo'ladi",
+    infoTitle: "ID ni qayerdan topish mumkin?",
+    infoDesc: "ID ni profilingiz sahifasidan topishingiz mumkin."
+  },
+  en: {
+    headerTitle: "Battle with a Friend",
+    step1: "Invite via ID",
+    step2: "Friend accepted",
+    step3: "Start Battle",
+    mainTitle: "Invite your friend via ID",
+    subTitle: "Enter your friend's IQROMAX ID\nand send a battle invite!",
+    inputLabel: "Enter your friend's ID",
+    inputPlaceholder: "Enter ID",
+    searching: "Searching...",
+    inviteSent: "Invite sent (Waiting...)",
+    sendInvite: "Send battle invite",
+    searchFriend: "Search for a friend",
+    searchSub: "Enter ID, the found friend\nwill appear here",
+    infoTitle: "Where to find the ID?",
+    infoDesc: "You can find your ID on your profile page."
+  },
+  ru: {
+    headerTitle: "Баттл с другом",
+    step1: "Пригласить по ID",
+    step2: "Друг принял",
+    step3: "Начать баттл",
+    mainTitle: "Пригласите друга по ID",
+    subTitle: "Введите IQROMAX ID друга\nи отправьте приглашение на баттл!",
+    inputLabel: "Введите ID вашего друга",
+    inputPlaceholder: "Введите ID",
+    searching: "Поиск...",
+    inviteSent: "Приглашение отправлено (Ожидание...)",
+    sendInvite: "Отправить приглашение",
+    searchFriend: "Поиск друга",
+    searchSub: "Введите ID, найденный друг\nпоявится здесь",
+    infoTitle: "Где найти ID?",
+    infoDesc: "Вы можете найти ID на странице вашего профиля."
+  },
+  ar: {
+    headerTitle: "معركة مع صديق",
+    step1: "دعوة عبر ID",
+    step2: "صديق قبل",
+    step3: "بدء المعركة",
+    mainTitle: "ادعُ صديقك عبر الـ ID",
+    subTitle: "أدخل IQROMAX ID لصديقك\nوأرسل دعوة للمعركة!",
+    inputLabel: "أدخل ID الخاص بصديقك",
+    inputPlaceholder: "أدخل ID",
+    searching: "جاري البحث...",
+    inviteSent: "تم إرسال الدعوة (قيد الانتظار...)",
+    sendInvite: "إرسال دعوة المعركة",
+    searchFriend: "ابحث عن صديق",
+    searchSub: "أدخل ID، الصديق الذي تم العثور عليه\nسيظهر هنا",
+    infoTitle: "أين تجد الـ ID؟",
+    infoDesc: "يمكنك العثور على الـ ID الخاص بك في صفحة ملفك الشخصي."
+  },
+  tr: {
+    headerTitle: "Arkadaşla Savaş",
+    step1: "ID ile Davet Et",
+    step2: "Arkadaş kabul etti",
+    step3: "Savaşı Başlat",
+    mainTitle: "Arkadaşınızı ID ile davet edin",
+    subTitle: "Arkadaşınızın IQROMAX ID'sini girin\nve savaş daveti gönderin!",
+    inputLabel: "Arkadaşınızın ID'sini girin",
+    inputPlaceholder: "ID Girin",
+    searching: "Aranıyor...",
+    inviteSent: "Davet gönderildi (Bekleniyor...)",
+    sendInvite: "Savaş daveti gönder",
+    searchFriend: "Bir arkadaş ara",
+    searchSub: "ID girin, bulunan arkadaş\nburada görünecek",
+    infoTitle: "ID nereden bulunur?",
+    infoDesc: "ID'nizi profil sayfanızda bulabilirsiniz."
+  },
+  zh: {
+    headerTitle: "与朋友对战",
+    step1: "通过ID邀请",
+    step2: "朋友已接受",
+    step3: "开始对战",
+    mainTitle: "通过ID邀请您的朋友",
+    subTitle: "输入您朋友的IQROMAX ID\n并发送对战邀请！",
+    inputLabel: "输入朋友的ID",
+    inputPlaceholder: "输入ID",
+    searching: "搜索中...",
+    inviteSent: "邀请已发送（等待中...）",
+    sendInvite: "发送对战邀请",
+    searchFriend: "搜索朋友",
+    searchSub: "输入ID，找到的朋友\n将显示在这里",
+    infoTitle: "在哪里可以找到ID？",
+    infoDesc: "您可以在您的个人资料页面上找到您的ID。"
+  },
+  ky: {
+    headerTitle: "Дос менен баттл",
+    step1: "ID аркылуу чакыруу",
+    step2: "Дос кабыл алды",
+    step3: "Баттлды баштоо",
+    mainTitle: "Досуңузду ID аркылуу чакырыңыз",
+    subTitle: "Досуңуздун IQROMAX IDсин киргизиңиз\nжана баттлга чакыруу жөнөтүңүз!",
+    inputLabel: "Досуңуздун IDсин киргизиңиз",
+    inputPlaceholder: "ID киргизиңиз",
+    searching: "Издөө...",
+    inviteSent: "Чакыруу жөнөтүлдү (Күтүлүүдө...)",
+    sendInvite: "Баттлга чакыруу жөнөтүү",
+    searchFriend: "Досуңузду издеңиз",
+    searchSub: "ID киргизиңиз, табылган дос\nушул жерде пайда болот",
+    infoTitle: "IDни кайдан тапса болот?",
+    infoDesc: "IDни профилиңиздин барагынан таба аласыз."
+  },
+  kk: {
+    headerTitle: "Доспен баттл",
+    step1: "ID арқылы шақыру",
+    step2: "Дос қабылдады",
+    step3: "Баттлды бастау",
+    mainTitle: "Досыңызды ID арқылы шақырыңыз",
+    subTitle: "Досыңыздың IQROMAX ID-ін енгізіңіз\nжәне баттлға шақыру жіберіңіз!",
+    inputLabel: "Досыңыздың ID-ін енгізіңіз",
+    inputPlaceholder: "ID енгізіңіз",
+    searching: "Ізделуде...",
+    inviteSent: "Шақыру жіберілді (Күтілуде...)",
+    sendInvite: "Баттлға шақыру жіберу",
+    searchFriend: "Досыңызды іздеңіз",
+    searchSub: "ID енгізіңіз, табылған дос\nосында пайда болады",
+    infoTitle: "ID-ді қайдан табуға болады?",
+    infoDesc: "ID-ді профиліңіздің парақшасынан таба аласыз."
+  },
+  tg: {
+    headerTitle: "Баттл бо дӯст",
+    step1: "Даъват тавассути ID",
+    step2: "Дӯст қабул кард",
+    step3: "Оғози баттл",
+    mainTitle: "Дӯсти худро бо ID даъват кунед",
+    subTitle: "ID IQROMAX-и дӯсти худро ворид кунед\nва даъвати баттл фиристед!",
+    inputLabel: "ID-и дӯстатонро ворид кунед",
+    inputPlaceholder: "ID-ро ворид кунед",
+    searching: "Ҷустуҷӯ...",
+    inviteSent: "Даъватнома фиристода шуд (Интизорӣ...)",
+    sendInvite: "Даъватномаи баттл фиристед",
+    searchFriend: "Дӯстро ҷустуҷӯ кунед",
+    searchSub: "ID-ро ворид кунед, дӯсти ёфтшуда\nдар ин ҷо пайдо мешавад",
+    infoTitle: "ID-ро аз куҷо ёфтан мумкин аст?",
+    infoDesc: "Шумо метавонед ID-и худро дар саҳифаи профили худ пайдо кунед."
+  },
+  ja: {
+    headerTitle: "友達とのバトル",
+    step1: "IDで招待",
+    step2: "友達が承認",
+    step3: "バトル開始",
+    mainTitle: "IDで友達を招待",
+    subTitle: "友達のIQROMAX IDを入力して\nバトルの招待を送ろう！",
+    inputLabel: "友達のIDを入力",
+    inputPlaceholder: "IDを入力",
+    searching: "検索中...",
+    inviteSent: "招待送信済み (待機中...)",
+    sendInvite: "バトル招待を送る",
+    searchFriend: "友達を探す",
+    searchSub: "IDを入力すると、見つかった友達が\nここに表示されます",
+    infoTitle: "IDはどこにありますか？",
+    infoDesc: "プロフィールページにIDが表示されています。"
+  },
+  ko: {
+    headerTitle: "친구와 배틀",
+    step1: "ID로 초대",
+    step2: "친구 수락함",
+    step3: "배틀 시작",
+    mainTitle: "ID로 친구 초대",
+    subTitle: "친구의 IQROMAX ID를 입력하고\n배틀 초대를 보내세요!",
+    inputLabel: "친구 ID 입력",
+    inputPlaceholder: "ID 입력",
+    searching: "검색 중...",
+    inviteSent: "초대 발송됨 (대기 중...)",
+    sendInvite: "배틀 초대 보내기",
+    searchFriend: "친구 찾기",
+    searchSub: "ID를 입력하면, 찾은 친구가\n여기에 표시됩니다",
+    infoTitle: "ID는 어디에서 찾을 수 있나요?",
+    infoDesc: "프로필 페이지에서 ID를 확인할 수 있습니다."
+  }
+};
+
 const FriendInviteScreen = ({ navigation, route }) => {
   const [friendId, setFriendId] = useState('');
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
@@ -25,6 +215,9 @@ const FriendInviteScreen = ({ navigation, route }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [isInviteSent, setIsInviteSent] = useState(false);
   const inviteLink = 'iqromax.app/battle/invite/IQX567890';
+  
+  const { language = 'uz' } = route?.params || {};
+  const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -41,7 +234,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
           >
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Do'st bilan battle</Text>
+          <Text style={styles.headerTitle}>{t.headerTitle}</Text>
           <View style={{ width: 44 }} />
         </View>
 
@@ -55,21 +248,21 @@ const FriendInviteScreen = ({ navigation, route }) => {
               <View style={[styles.stepCircle, styles.stepActive]}>
                 <Text style={styles.stepTextActive}>1</Text>
               </View>
-              <Text style={styles.stepLabelActive}>ID orqali taklif</Text>
+              <Text style={styles.stepLabelActive}>{t.step1}</Text>
             </View>
             <View style={styles.stepLine} />
             <View style={styles.stepItem}>
               <View style={[styles.stepCircle, styles.stepInactive]}>
                 <Text style={styles.stepTextInactive}>2</Text>
               </View>
-              <Text style={styles.stepLabelInactive}>Do'st qabul qildi</Text>
+              <Text style={styles.stepLabelInactive}>{t.step2}</Text>
             </View>
             <View style={styles.stepLine} />
             <View style={styles.stepItem}>
               <View style={[styles.stepCircle, styles.stepInactive]}>
                 <Text style={styles.stepTextInactive}>3</Text>
               </View>
-              <Text style={styles.stepLabelInactive}>Battle boshlash</Text>
+              <Text style={styles.stepLabelInactive}>{t.step3}</Text>
             </View>
           </View>
 
@@ -83,13 +276,13 @@ const FriendInviteScreen = ({ navigation, route }) => {
           </View>
 
           <View style={styles.titlesContainer}>
-            <Text style={styles.mainTitle}>Do'stingizni ID orqali taklif qiling</Text>
-            <Text style={styles.subTitle}>Do'stingizning IQROMAX ID sini kiriting{"\n"}va battle taklifini yuboring!</Text>
+            <Text style={styles.mainTitle}>{t.mainTitle}</Text>
+            <Text style={styles.subTitle}>{t.subTitle}</Text>
           </View>
 
           {/* Input Section */}
           <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>Do'stingizning ID sini kiriting</Text>
+            <Text style={styles.inputLabel}>{t.inputLabel}</Text>
             <View style={styles.inputRow}>
               <View style={styles.inputContainer}>
                 <View style={styles.inputIconWrapper}>
@@ -97,7 +290,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                 </View>
                 <TextInput
                   style={styles.textInput}
-                  placeholder="ID ni kiriting"
+                  placeholder={t.inputPlaceholder}
                   placeholderTextColor="#6B7280"
                   keyboardType="number-pad"
                   value={friendId}
@@ -172,7 +365,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
           {isSearching ? (
             <View style={styles.searchStateCard}>
               <ActivityIndicator size="large" color="#A855F7" style={{ marginBottom: 15 }} />
-              <Text style={styles.searchStateTitle}>Qidirilmoqda...</Text>
+              <Text style={styles.searchStateTitle}>{t.searching}</Text>
             </View>
           ) : foundUser ? (
             <View style={styles.userCard}>
@@ -213,7 +406,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                 });
                 setIsInviteSent(true);
               }}>
-                <Text style={styles.inviteButtonText}>{isInviteSent ? "Taklif yuborildi (Kutilmoqda...)" : "Battle taklifini yuborish"}</Text>
+                <Text style={styles.inviteButtonText}>{isInviteSent ? t.inviteSent : t.sendInvite}</Text>
                 {!isInviteSent ? (
                   <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
                 ) : (
@@ -224,8 +417,8 @@ const FriendInviteScreen = ({ navigation, route }) => {
           ) : (
             <View style={styles.searchStateCard}>
               <MaterialCommunityIcons name="magnify" size={60} color="rgba(255, 255, 255, 0.2)" />
-              <Text style={styles.searchStateTitle}>Do'stingizni qidiring</Text>
-              <Text style={styles.searchStateSub}>ID kiriting, topilgan do'stingiz{"\n"}shu yerda paydo bo'ladi</Text>
+              <Text style={styles.searchStateTitle}>{t.searchFriend}</Text>
+              <Text style={styles.searchStateSub}>{t.searchSub}</Text>
             </View>
           )}
 
@@ -239,9 +432,9 @@ const FriendInviteScreen = ({ navigation, route }) => {
               <MaterialCommunityIcons name="lightbulb-on" size={24} color="#A855F7" />
             </View>
             <View style={styles.infoContent}>
-              <Text style={styles.infoTitle}>ID ni qayerdan topish mumkin?</Text>
+              <Text style={styles.infoTitle}>{t.infoTitle}</Text>
               {isInfoExpanded && (
-                <Text style={styles.infoDesc}>ID ni profilingiz sahifasidan topishingiz mumkin.</Text>
+                <Text style={styles.infoDesc}>{t.infoDesc}</Text>
               )}
             </View>
             <MaterialCommunityIcons 

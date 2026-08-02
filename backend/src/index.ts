@@ -244,7 +244,7 @@ const generateCustomId = async () => {
 // 3. Final Register
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { role, name, phone, email, password, country, language, character } = req.body;
+    const { role, name, phone, email, password, country, language, character, referralCode } = req.body;
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) return res.status(400).json({ error: 'User already exists with this email' });
@@ -266,6 +266,34 @@ app.post('/api/auth/register', async (req, res) => {
         status: 'Faol',
       },
     });
+
+    // Referral logic
+    if (referralCode) {
+      try {
+        const cleanRefCode = referralCode.replace(/^#+/, '');
+        const referrer = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { customId: referralCode.toUpperCase() },
+              { customId: `#${cleanRefCode}` },
+              { customId: cleanRefCode }
+            ]
+          }
+        });
+        if (referrer) {
+          // @ts-ignore
+          await prisma.referral.create({
+            data: {
+              referrerId: referrer.id,
+              referredId: user.id,
+              status: 'WAITING'
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Referral creation error:', err);
+      }
+    }
 
     res.status(201).json({ message: 'User created successfully', user });
   } catch (error) {
@@ -314,6 +342,47 @@ app.post('/api/auth/login', async (req, res) => {
     const lang = req.body?.language || 'en';
     const tError = LOGIN_TRANSLATIONS[lang] || LOGIN_TRANSLATIONS['en'];
     res.status(500).json({ error: tError.serverErr });
+  }
+});
+
+
+// Get referrals
+app.get('/api/referrals/:customId', async (req, res) => {
+  try {
+    const { customId } = req.params;
+    const cleanId = customId.replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId }
+        ]
+      }
+    });
+    
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    // @ts-ignore
+    const referrals = await prisma.referral.findMany({
+      where: { referrerId: user.id },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    const results = await Promise.all(referrals.map(async (ref) => {
+      const referredUser = await prisma.user.findUnique({ where: { id: ref.referredId } });
+      return {
+        id: ref.id,
+        name: referredUser ? referredUser.name : 'Noma\'lum',
+        status: ref.status,
+        reward: ref.status === 'ACTIVE' ? '+1⚡' : '-'
+      };
+    }));
+    
+    res.json(results);
+  } catch (error) {
+    console.error('Referrals fetch error:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

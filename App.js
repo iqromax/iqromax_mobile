@@ -17,6 +17,7 @@ import StepFourScreen from './screens/StepFourScreen';
 import StepFiveScreen from './screens/StepFiveScreen';
 import StudentDashboardScreen from './screens/StudentDashboardScreen';
 import EnergyCenterScreen from './screens/EnergyCenterScreen';
+import ReferralScreen from './screens/ReferralScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import ResetPasswordScreen from './screens/ResetPasswordScreen';
 import OddiyHisobGameScreen from './screens/OddiyHisobGameScreen';
@@ -364,6 +365,7 @@ export default function App() {
           <Stack.Screen name="StepFive" component={StepFiveScreen} />
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} initialParams={initialRoute === 'StudentDashboard' ? initialParams : undefined} />
           <Stack.Screen name="EnergyCenter" component={EnergyCenterScreen} />
+        <Stack.Screen name="ReferralScreen" component={ReferralScreen} />
           <Stack.Screen name="OddiyHisobGame" component={OddiyHisobGameScreen} />
           <Stack.Screen name="AbacusSimulator" component={AbacusSimulatorScreen} />
           <Stack.Screen name="BattleSettings" component={BattleSettingsScreen} />

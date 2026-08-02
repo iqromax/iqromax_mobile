@@ -270,7 +270,7 @@ export default function StepFiveScreen({ navigation, route }) {
   };
 
   const handleFinish = async () => {
-    const { role, name, phone, email, password, country } = route.params || {};
+    const { role, name, phone, email, password, country, referralCode } = route.params || {};
     
     // Determine character name
     const charList = gender === 'boys' ? t.boysChars : t.girlsChars;
@@ -296,7 +296,8 @@ export default function StepFiveScreen({ navigation, route }) {
           password,
           country,
           language,
-          character: characterName
+          character: characterName,
+          referralCode
         })
       });
 

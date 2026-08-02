@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ENERGY_STORAGE_KEY = 'user_energy_data';
@@ -64,6 +65,13 @@ export function useEnergy() {
   }, []);
 
   // Recalculate on mount and app state change (foreground/background)
+
+  useFocusEffect(
+    useCallback(() => {
+      calculateEnergy();
+    }, [calculateEnergy])
+  );
+
   useEffect(() => {
     calculateEnergy();
 

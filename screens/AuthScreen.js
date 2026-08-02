@@ -141,6 +141,7 @@ export default function AuthScreen({ navigation, route }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -177,6 +178,7 @@ export default function AuthScreen({ navigation, route }) {
             phone: phone.trim(),
             email: email.trim(),
             password: password,
+            referralCode: referralCode.trim(),
           });
         } else {
           Alert.alert(t.errorTitle, data.error || t.errServer);
@@ -364,6 +366,17 @@ export default function AuthScreen({ navigation, route }) {
                   <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color="#888899" />
                 </TouchableOpacity>
               }
+            />
+          )}
+
+          {activeTab === 'register' && (
+            <CustomAnimatedInput
+              icon={<Feather name="gift" size={18} color="#888899" style={styles.inputIcon} />}
+              placeholder="Taklif kodi (Ixtiyoriy)"
+              placeholderTextColor="#555566"
+              autoCapitalize="characters"
+              value={referralCode}
+              onChangeText={setReferralCode}
             />
           )}
 
