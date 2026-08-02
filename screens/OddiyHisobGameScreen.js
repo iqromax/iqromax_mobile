@@ -5,6 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
+import { useEnergy } from '../src/hooks/useEnergy';
 
 const TRANSLATIONS = {
   en: { getReady: "GET READY", rememberNumber: "REMEMBER THE NUMBER!", correctAnswer: "Correct answer!", incorrectAnswer: "Incorrect answer", awesome: "Awesome!", oops: "Oops...", exerciseCompleted: "Exercise completed successfully", tryAgainFeedback: "Try again!", correctLabel: "Correct answer:", yourAnswer: "Your answer:", answerTime: "Answer time:", sequence: "Sequence of examples:", iqromaxRecommendation: "IQROMAX recommendation", championText: "Great job!\nYou are a real IQROMAX champion!", rushText: "Don't rush!\nFocus and try again.", back: "Back", nextExercise: "Next exercise", retry: "Try again", newExercise: "New exercise", enterAnswer: "Enter answer...", timeLabel: "Time", accuracy: "ACCURACY", averageTime: "AVERAGE TIME", gameTitle: "SIMPLE MATH", tipTitle: "Tip", tipDesc: "Helps in the next question" },
@@ -23,6 +24,7 @@ const TRANSLATIONS = {
 const { width, height } = Dimensions.get('window');
 
 export default function OddiyHisobGameScreen({ navigation, route }) {
+  const { energy: currentEnergy } = useEnergy();
   // Config from params
   const { examplesCount = 3, operation = 'oddiy', speed = 1, digits = 1, language = 'uz', isSpeedMode = false } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
@@ -260,12 +262,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       <View style={styles.resourceContainer}>
         <View style={styles.energyBadge}>
           <MaterialCommunityIcons name="lightning-bolt" size={16} color="#FBBF24" />
-          <Text style={styles.resourceText}>2</Text>
-          <MaterialCommunityIcons name="plus" size={14} color="#FBBF24" />
-        </View>
-        <View style={styles.coinBadge}>
-          <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, resizeMode: 'contain' }} />
-          <Text style={styles.resourceText}>12 450</Text>
+          <Text style={styles.resourceText}>{currentEnergy}</Text>
           <MaterialCommunityIcons name="plus" size={14} color="#FBBF24" />
         </View>
       </View>

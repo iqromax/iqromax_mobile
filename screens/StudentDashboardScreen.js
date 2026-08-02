@@ -2905,7 +2905,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.proTopStatDivider} />
                 <View style={styles.proTopStatItem}>
                    <Image source={require('../assets/lightning_energy.png')} style={styles.proTopStatIcon} />
-                   <Text style={styles.proTopStatValue}>2/10</Text>
+                   <Text style={styles.proTopStatValue}>{currentEnergy}/10</Text>
                    <Text style={styles.proTopStatLabel}>Energy</Text>
                 </View>
               </View>
