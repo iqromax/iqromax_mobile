@@ -438,15 +438,21 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     return rankId === myId;
                   });
                   if (me) {
+                    Alert.alert('DEBUG SYNC SUCCESS', `XP topildi: ${me.xp}. Hozir yangilanadi!`);
                     setUser(prev => {
                       const updated = { ...prev, xp: me.xp };
                       AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
                       return updated;
                     });
+                  } else {
+                    Alert.alert('DEBUG SYNC FAILED', `Sizning ID raqamingiz reytingdan topilmadi! ID: ${localUser.customId}`);
                   }
                 }
               })
-              .catch(err => console.log('Error syncing user from ranking', err));
+              .catch(err => {
+                Alert.alert('DEBUG SYNC ERROR', `Internet yoki server bilan xato: ${err.message}`);
+                console.log('Error syncing user from ranking', err);
+              });
           }
         } catch (e) {
           console.log('Error reloading user data', e);
