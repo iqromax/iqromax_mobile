@@ -465,6 +465,8 @@ app.get('/api/users/search/:customId', async (req, res) => {
       status: user.status,
       level: 1, // Assuming no level column in DB yet
       rating: 1000, // Default rating
+      xp: user.xp || 0,
+      energy: user.energy || 0,
       avatar: user.character || 'https://api.dicebear.com/7.x/avataaars/png?seed=' + user.name
     });
   } catch (error) {

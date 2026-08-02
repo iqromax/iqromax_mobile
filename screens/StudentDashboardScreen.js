@@ -422,7 +422,25 @@ export default function StudentDashboardScreen({ navigation, route }) {
         try {
           const dataStr = await AsyncStorage.getItem('user_data');
           if (dataStr) {
-            setUser(JSON.parse(dataStr));
+            const localUser = JSON.parse(dataStr);
+            setUser(localUser);
+            
+            // Sync with backend to get latest XP and stats
+            if (localUser.customId) {
+              const cleanId = localUser.customId.replace(/^#+/, '');
+              fetch(`${API_URL}/users/search/${cleanId}`)
+                .then(res => res.json())
+                .then(freshData => {
+                  if (freshData && !freshData.error) {
+                    setUser(prev => {
+                      const updated = { ...prev, xp: freshData.xp, energy: freshData.energy };
+                      AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
+                      return updated;
+                    });
+                  }
+                })
+                .catch(err => console.log('Error syncing user', err));
+            }
           }
         } catch (e) {
           console.log('Error reloading user data', e);
