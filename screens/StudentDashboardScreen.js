@@ -167,6 +167,20 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   );
 }
 
+const getAvatarByName = (name) => {
+  if (!name) return require('../assets/avatar_maks.png');
+  const lower = name.toLowerCase();
+  if (lower.includes('alex')) return require('../assets/avatar_alex.jpg');
+  if (lower.includes('maks')) return require('../assets/avatar_maks.png');
+  if (lower.includes('david')) return require('../assets/avatar_david.jpg');
+  if (lower.includes('kevin')) return require('../assets/avatar_kevin.png');
+  if (lower.includes('lily')) return require('../assets/avatar_lily.jpg');
+  if (lower.includes('maya')) return require('../assets/avatar_maya.jpg');
+  if (lower.includes('sophia')) return require('../assets/avatar_sophia.png');
+  if (lower.includes('emma')) return require('../assets/avatar_emma.jpg');
+  return require('../assets/avatar_maks.png');
+};
+
 export default function StudentDashboardScreen({ navigation, route }) {
   const { language = 'uz', selectedChar = 0 } = route.params || {};
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(selectedChar);
@@ -211,17 +225,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (activeTab === 'ranking') {
       const fetchRanking = async () => {
         try {
-          const res = await fetch(`${API_URL}/ranking`);
+          const res = await fetch(`${API_URL}/ranking?t=${Date.now()}`);
           if (res.ok) {
             const data = await res.json();
-            const rankedData = data.map((u, index) => ({
-              customId: u.id,
-              rank: index + 1,
-              name: u.name,
-              xp: u.xp,
-              avatar: u.avatar && u.avatar.startsWith('http') ? { uri: u.avatar } : require('../assets/opponent_1.png')
-            }));
-            setLeaderboardData(rankedData);
+            if (Array.isArray(data)) {
+              const rankedData = data.map((u, index) => ({
+                customId: u.id,
+                rank: index + 1,
+                name: u.name || '---',
+                xp: u.xp || 0,
+                avatar: u.avatar && u.avatar.startsWith('http') ? { uri: u.avatar } : getAvatarByName(u.avatar)
+              }));
+              setLeaderboardData(rankedData);
+            }
           }
         } catch (e) {
           console.error('Fetch ranking error:', e);
@@ -2580,7 +2596,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
 
 {(() => {
-  const top1 = leaderboardData[0] || { name: '---', xp: 0, avatar: require('../assets/opponent_1.png') };
+  const top1 = leaderboardData[0] || { name: '---', xp: 0, avatar: require('../assets/avatar_alex.jpg') };
   const top2 = leaderboardData[1] || { name: '---', xp: 0, avatar: require('../assets/avatar_david.jpg') };
   const top3 = leaderboardData[2] || { name: '---', xp: 0, avatar: require('../assets/avatar_lily.jpg') };
   
