@@ -1352,7 +1352,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <Text style={styles.exSubtitle}>{t.exerciseSubtitle}</Text>
             </View>
 
-            <TouchableOpacity style={styles.exEnergyButton} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.exEnergyButton} activeOpacity={0.7} onPress={() => navigation.navigate('EnergyCenter')}>
               <Image source={require('../assets/energy_icon.png')} style={{ width: 18, height: 18 }} contentFit="contain" />
               <Text style={styles.exEnergyText}>2</Text>
               <Ionicons name="add" size={14} color="#FBBF24" />
