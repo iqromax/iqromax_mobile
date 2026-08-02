@@ -183,6 +183,7 @@ const getAvatarByName = (name) => {
 
 export default function StudentDashboardScreen({ navigation, route }) {
   const { language = 'uz', selectedChar = 0 } = route.params || {};
+  const [activeTab, setActiveTab] = useState('home');
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(selectedChar);
   const [equippedAccessories, setEquippedAccessories] = useState({});
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
@@ -267,7 +268,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const t = DASHBOARD_TRANSLATIONS[language] || DASHBOARD_TRANSLATIONS['en'];
   const ext = EXERCISE_TYPES_TRANSLATIONS[language] || EXERCISE_TYPES_TRANSLATIONS['en'];
   const coinText = COIN_TRANSLATIONS[language] || COIN_TRANSLATIONS['en'];
-  const [activeTab, setActiveTab] = useState('home');
 
   const yutuqScrollRef = useRef(null);
   const [currentYutuqIndex, setCurrentYutuqIndex] = useState(0);
