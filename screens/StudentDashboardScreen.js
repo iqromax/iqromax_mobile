@@ -2760,9 +2760,35 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <TouchableOpacity 
               style={styles.floatingMyProfileBtn}
               onPress={() => {
-                setHighlightedUserId(7); // User ID 7
-                leaderboardScrollRef.current?.scrollTo({y: 350, animated: true});
-                setTimeout(() => setHighlightedUserId(null), 3000); // Remove highlight after 3 seconds
+                if (!user?.customId) {
+                  Alert.alert('Ogohlantirish', 'Foydalanuvchi ma\'lumotlari topilmadi!');
+                  return;
+                }
+                const userIndex = filteredLeaderboard.findIndex(item => item.customId === user.customId);
+                if (userIndex !== -1) {
+                  setHighlightedUserId(user.customId);
+                  
+                  const ITEM_HEIGHT = 67; // padding(28) + avatar(38) + border(1)
+                  // Scroll to user position
+                  leaderboardScrollRef.current?.scrollTo({ y: userIndex * ITEM_HEIGHT, animated: true });
+                  
+                  // Blinking animation
+                  searchBorderAnim.setValue(0);
+                  Animated.loop(
+                    Animated.sequence([
+                      Animated.timing(searchBorderAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+                      Animated.timing(searchBorderAnim, { toValue: 0, duration: 400, useNativeDriver: false })
+                    ]),
+                    { iterations: 3 }
+                  ).start();
+
+                  setTimeout(() => {
+                    setHighlightedUserId(null);
+                    searchBorderAnim.setValue(0);
+                  }, 2500);
+                } else {
+                  Alert.alert('Ogohlantirish', 'Siz reyting jadvalidan topilmadingiz yoki qidiruv natijasiga mos kelmadingiz!');
+                }
               }}
               activeOpacity={0.8}
             >
