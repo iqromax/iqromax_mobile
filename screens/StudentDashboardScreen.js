@@ -2690,8 +2690,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
     </>
   );
 })()}
-              </View>
-            </View>
 
           </ScrollView>
 
