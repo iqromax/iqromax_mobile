@@ -369,7 +369,7 @@ app.get('/api/referrals/:customId', async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
     
-    const results = await Promise.all(referrals.map(async (ref) => {
+    const results = await Promise.all(referrals.map(async (ref: any) => {
       const referredUser = await prisma.user.findUnique({ where: { id: ref.referredId } });
       return {
         id: ref.id,
