@@ -410,6 +410,8 @@ app.post('/api/user/xp', async (req, res) => {
       data: { xp: { increment: xpToAdd } }
     });
 
+    io.emit('user_xp_updated', { customId: updatedUser.customId, xp: updatedUser.xp });
+
     res.json({ message: 'XP added successfully', xp: updatedUser.xp });
   } catch (error) {
     console.error('Update XP error:', error);
@@ -425,13 +427,16 @@ app.get('/api/ranking', async (req, res) => {
       where: { 
         role: { in: ['student', 'Student'] },
         status: 'Faol'
+      },
+      orderBy: {
+        xp: 'desc'
       }
     });
     
     const rankingData = users.map((u, index) => ({
       id: u.customId,
       name: u.name,
-      xp: 0,
+      xp: u.xp || 0,
       avatar: u.character || null,
     }));
     

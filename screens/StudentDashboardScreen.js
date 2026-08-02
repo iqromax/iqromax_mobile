@@ -523,6 +523,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
       }
     });
 
+    socket.on('user_xp_updated', async (data) => {
+      if (user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase()) {
+        setUser(prev => {
+          const updated = { ...prev, xp: data.xp };
+          AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(console.error);
+          return updated;
+        });
+      }
+      
+      setLeaderboardData(prev => {
+        if (!prev || prev.length === 0) return prev;
+        const newData = prev.map(u => 
+          (String(u.customId).toUpperCase() === String(data.customId).toUpperCase()) ? { ...u, xp: data.xp } : u
+        ).sort((a, b) => b.xp - a.xp);
+        
+        // Re-assign ranks after sorting
+        return newData.map((u, index) => ({ ...u, rank: index + 1 }));
+      });
+    });
+
     
     return () => {
       socket.disconnect();
@@ -3022,7 +3042,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <View style={styles.proTopStatsRow}>
                 <View style={styles.proTopStatItem}>
                    <Image source={require('../assets/xp_icon.jpg')} style={styles.proTopStatIcon} />
-                   <Text style={styles.proTopStatValue}>0</Text>
+                   <Text style={styles.proTopStatValue}>{userXp}</Text>
                    <Text style={styles.proTopStatLabel}>{t.statXP || 'XP'}</Text>
                 </View>
                 {/* Coin Section Temporarily Removed */}
