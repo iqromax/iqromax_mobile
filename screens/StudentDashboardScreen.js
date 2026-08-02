@@ -567,6 +567,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
       });
     });
 
+    socket.on('user_deleted', (data) => {
+      setLeaderboardData(prev => {
+        if (!prev || prev.length === 0) return prev;
+        
+        const newData = prev.filter(u => {
+          if (!u.customId || !data.customId) return String(u.customId) !== String(data.customId);
+          return String(u.customId).replace(/^#+/, '').trim().toUpperCase() !== String(data.customId).replace(/^#+/, '').trim().toUpperCase();
+        });
+        
+        return newData.map((u, index) => ({ ...u, rank: index + 1 }));
+      });
+    });
+
     
     return () => {
       socket.disconnect();
