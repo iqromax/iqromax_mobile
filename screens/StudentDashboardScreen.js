@@ -427,8 +427,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
             
             // Sync with backend to get latest XP and stats
             if (localUser.customId) {
-              const cleanId = localUser.customId.replace(/^#+/, '');
-              fetch(`${API_URL}/users/search/${cleanId}`)
+              const encodedId = encodeURIComponent(localUser.customId);
+              fetch(`${API_URL}/users/search/${encodedId}`)
                 .then(res => res.json())
                 .then(freshData => {
                   if (freshData && !freshData.error) {
