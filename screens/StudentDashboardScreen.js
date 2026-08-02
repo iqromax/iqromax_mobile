@@ -425,22 +425,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
             const localUser = JSON.parse(dataStr);
             setUser(localUser);
             
-            // Sync with backend to get latest XP and stats
-            if (localUser.customId) {
-              const cleanId = localUser.customId.replace(/^#+/, '');
-              fetch(`${API_URL}/users/search/${cleanId}?t=${Date.now()}`)
-                .then(res => res.json())
-                .then(freshData => {
-                  if (freshData && !freshData.error) {
+            // Sync with backend to get latest XP and stats by fetching ranking
+            // This is more robust as it avoids any customId URL encoding issues
+            fetch(`${API_URL}/ranking?t=${Date.now()}`)
+              .then(res => res.json())
+              .then(data => {
+                if (Array.isArray(data)) {
+                  const me = data.find(u => 
+                    u.id && localUser.customId && 
+                    String(u.id).toUpperCase() === String(localUser.customId).toUpperCase()
+                  );
+                  if (me) {
                     setUser(prev => {
-                      const updated = { ...prev, xp: freshData.xp, energy: freshData.energy };
+                      const updated = { ...prev, xp: me.xp };
                       AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
                       return updated;
                     });
                   }
-                })
-                .catch(err => console.log('Error syncing user', err));
-            }
+                }
+              })
+              .catch(err => console.log('Error syncing user from ranking', err));
           }
         } catch (e) {
           console.log('Error reloading user data', e);
