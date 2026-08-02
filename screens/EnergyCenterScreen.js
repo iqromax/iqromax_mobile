@@ -321,7 +321,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
 
         {/* FOOTER CALL TO ACTIONS */}
 
-        <Animated.View style={[styles.footerCard, { borderColor: borderColorInterp }]}>
+        <Animated.View style={[styles.footerCard, { borderColor: borderColorInterp, opacity: 0.5 }]}>
           <LinearGradient colors={['rgba(168, 85, 247, 0.1)', 'transparent']} style={StyleSheet.absoluteFill} />
           <Ionicons name="people" size={40} color="#C084FC" style={{ marginRight: 12 }} />
           <View style={{ flex: 1, marginRight: 8 }}>
@@ -329,12 +329,11 @@ export default function EnergyCenterScreen({ navigation, route }) {
             <Text style={styles.footerDesc}>{t.inviteDesc}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
               <MaterialCommunityIcons name="lightning-bolt" size={20} color="#FBBF24" />
-              <Text style={{ color: '#FBBF24', fontFamily: 'Inter_800ExtraBold', fontSize: 18 }}>+1</Text>
+              <Text style={{ color: '#FBBF24', fontFamily: 'Inter_800ExtraBold', fontSize: 18 }}>+2</Text>
             </View>
           </View>
-          <TouchableOpacity style={[styles.premiumButton, { paddingHorizontal: 12, paddingVertical: 10 }]} onPress={() => navigation.navigate('ReferralScreen')}>
-            <Ionicons name="share-social" size={16} color="#FFF" />
-            <Text style={[styles.premiumButtonText, { fontSize: 12, marginLeft: 4 }]}>{t.inviteBtn}</Text>
+          <TouchableOpacity style={[styles.premiumButton, { paddingHorizontal: 12, paddingVertical: 10, backgroundColor: '#374151' }]} activeOpacity={1}>
+            <Ionicons name="lock-closed" size={18} color="#9CA3AF" />
           </TouchableOpacity>
         </Animated.View>
 

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing } from 'react-native';
 import { Image, ImageBackground } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -414,6 +415,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'calc');
   const [user, setUser] = useState(route.params?.user);
+  
+  useFocusEffect(
+    useCallback(() => {
+      const loadUser = async () => {
+        try {
+          const dataStr = await AsyncStorage.getItem('user_data');
+          if (dataStr) {
+            setUser(JSON.parse(dataStr));
+          }
+        } catch (e) {
+          console.log('Error reloading user data', e);
+        }
+      };
+      loadUser();
+    }, [])
+  );
+
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [notificationsList, setNotificationsList] = useState([]);
 
@@ -1230,7 +1248,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <View style={styles.statContent}>
               <Image source={require('../assets/xp.jpg')} style={styles.statImage} />
               <View>
-                <Text style={styles.statValue}>0</Text>
+                <Text style={styles.statValue}>{userXp}</Text>
                 <Text style={styles.statLabel}>XP</Text>
               </View>
             </View>

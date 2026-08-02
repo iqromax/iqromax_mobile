@@ -6,6 +6,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
 import { useEnergy } from '../src/hooks/useEnergy';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../src/config/api';
 
 const TRANSLATIONS = {
   en: { getReady: "GET READY", rememberNumber: "REMEMBER THE NUMBER!", correctAnswer: "Correct answer!", incorrectAnswer: "Incorrect answer", awesome: "Awesome!", oops: "Oops...", exerciseCompleted: "Exercise completed successfully", tryAgainFeedback: "Try again!", correctLabel: "Correct answer:", yourAnswer: "Your answer:", answerTime: "Answer time:", sequence: "Sequence of examples:", iqromaxRecommendation: "IQROMAX recommendation", championText: "Great job!\nYou are a real IQROMAX champion!", rushText: "Don't rush!\nFocus and try again.", back: "Back", nextExercise: "Next exercise", retry: "Try again", newExercise: "New exercise", enterAnswer: "Enter answer...", timeLabel: "Time", accuracy: "ACCURACY", averageTime: "AVERAGE TIME", gameTitle: "SIMPLE MATH", speedGameTitle: "SPEED MATH", tipTitle: "Tip", tipDesc: "Helps in the next question", countdown3: "Focus your mind...", countdown2: "Get ready...", countdown1: "Let's go!" },
@@ -72,6 +74,45 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     }
     setQuestions(generated);
   }, []);
+
+  const calculateQuestionXP = () => {
+    let xpAmount = 0;
+    const tCount = isSpeedMode ? 2 : examplesCount;
+    xpAmount += tCount;
+    
+    if (operation === 'oddiy' || operation === 'multiply' || operation === 'divide') xpAmount += 1;
+    else if (operation === 'f5') xpAmount += 2;
+    else if (operation === 'f10') xpAmount += 3;
+    else if (operation === 'aralash') xpAmount += 4;
+    else xpAmount += 1;
+
+    xpAmount += Math.max(1, Math.round(2.5 / speed));
+    xpAmount += digits;
+
+    return xpAmount;
+  };
+
+  const saveXPToBackend = async (xpToAdd) => {
+    if (xpToAdd <= 0) return;
+    try {
+      const dataStr = await AsyncStorage.getItem('user_data');
+      if (dataStr) {
+        const userData = JSON.parse(dataStr);
+        const res = await fetch(`${API_URL}/user/xp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customId: userData.customId || userData.id, xpToAdd })
+        });
+        if (res.ok) {
+          const resData = await res.json();
+          userData.xp = resData.xp;
+          await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+        }
+      }
+    } catch (e) {
+      console.log('Error saving XP', e);
+    }
+  };
 
   // Timer starts only after countdown
   useEffect(() => {
@@ -211,8 +252,13 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
 
     if (isCorrect) {
       setCorrectAnswers(prev => prev + 1);
-      setXp(prev => prev + 15);
+      const wonXp = calculateQuestionXP();
+      setXp(prev => prev + wonXp);
       setCombo(prev => prev + 1);
+      
+      if (!isSpeedMode) {
+        saveXPToBackend(wonXp);
+      }
     } else {
       setIncorrectAnswers(prev => prev + 1);
       setCombo(0);
@@ -228,6 +274,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       if (currentQIndex + 1 < questions.length) {
         setCurrentQIndex(prev => prev + 1);
       } else {
+        const finalXp = xp + (isCorrect ? calculateQuestionXP() : 0);
+        saveXPToBackend(finalXp);
         setPhase('summary');
       }
     } else {
@@ -313,7 +361,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           <Animated.View style={[styles.feedbackRewards, { transform: [{translateY: translateYAnim}] }]}>
             <View style={styles.rewardBadge}>
                <Image source={require('../assets/xp_icon.jpg')} style={{width: 24, height: 24, borderRadius: 12}} contentFit="cover" />
-               <Text style={styles.rewardBadgeText}>+15 XP</Text>
+               <Text style={styles.rewardBadgeText}>+{calculateQuestionXP()} XP</Text>
             </View>
           </Animated.View>
         )}
@@ -558,7 +606,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Image source={require('../assets/xp_icon.jpg')} style={{ width: 20, height: 20, borderRadius: 10, marginRight: 6 }} />
                     <Text style={{ color: res.isCorrect ? '#10B981' : '#EF4444', fontSize: 16, fontFamily: 'Inter_700Bold' }}>
-                      {res.isCorrect ? '+1' : '0'} XP
+                      {res.isCorrect ? '+' + calculateQuestionXP() : '0'} XP
                     </Text>
                   </View>
                 </View>

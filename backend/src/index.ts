@@ -386,6 +386,37 @@ app.get('/api/referrals/:customId', async (req, res) => {
   }
 });
 
+// Add XP to user
+app.post('/api/user/xp', async (req, res) => {
+  try {
+    const { customId, xpToAdd } = req.body;
+    if (!customId || xpToAdd == null) return res.status(400).json({ error: 'customId and xpToAdd are required' });
+
+    const cleanId = customId.replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId }
+        ]
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { xp: { increment: xpToAdd } }
+    });
+
+    res.json({ message: 'XP added successfully', xp: updatedUser.xp });
+  } catch (error) {
+    console.error('Update XP error:', error);
+    res.status(500).json({ error: 'Failed to update XP' });
+  }
+});
+
 // 4. Admin API: Get Users
 
 app.get('/api/ranking', async (req, res) => {

@@ -19,6 +19,8 @@ model User {
   language  String?
   character String?
   status    String   @default("Faol")
+  energy    Int      @default(10)
+  xp        Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
