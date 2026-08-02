@@ -339,7 +339,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const [leaderboardData, setLeaderboardData] = useState([]);
   
-  const userXp = user?.xp || 0;
+  const [userXp, setUserXp] = useState(user?.xp || 0);
+  
+  useEffect(() => {
+    if (user?.xp !== undefined) {
+      setUserXp(user.xp);
+    }
+  }, [user?.xp]);
   const userRankInfo = calculateUserRank(userXp);
 
   useEffect(() => {
@@ -438,19 +444,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     return rankId === myId;
                   });
                   if (me) {
-                    Alert.alert('DEBUG SYNC SUCCESS', `XP topildi: ${me.xp}. Hozir yangilanadi!`);
+                    setUserXp(me.xp);
                     setUser(prev => {
                       const updated = { ...prev, xp: me.xp };
                       AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
                       return updated;
                     });
-                  } else {
-                    Alert.alert('DEBUG SYNC FAILED', `Sizning ID raqamingiz reytingdan topilmadi! ID: ${localUser.customId}`);
                   }
                 }
               })
               .catch(err => {
-                Alert.alert('DEBUG SYNC ERROR', `Internet yoki server bilan xato: ${err.message}`);
                 console.log('Error syncing user from ranking', err);
               });
           }
@@ -578,8 +581,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
         if (!prev || prev.length === 0) return prev;
         
         const newData = prev.filter(u => {
-          if (!u.customId || !data.customId) return String(u.customId) !== String(data.customId);
-          return String(u.customId).replace(/^#+/, '').trim().toUpperCase() !== String(data.customId).replace(/^#+/, '').trim().toUpperCase();
+          const userIdentifier = u.id || u.customId;
+          if (!userIdentifier || !data.customId) return String(userIdentifier) !== String(data.customId);
+          return String(userIdentifier).replace(/^#+/, '').trim().toUpperCase() !== String(data.customId).replace(/^#+/, '').trim().toUpperCase();
         });
         
         return newData.map((u, index) => ({ ...u, rank: index + 1 }));
