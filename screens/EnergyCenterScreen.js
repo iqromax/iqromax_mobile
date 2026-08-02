@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,7 +8,30 @@ export default function EnergyCenterScreen({ navigation }) {
   // In a real app, these values would come from a context or Redux store
   const currentEnergy = 2;
   const maxEnergy = 10;
-  const coins = 12450;
+  
+  const borderAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(borderAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+        Animated.timing(borderAnim, {
+          toValue: 0,
+          duration: 1500,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const borderColorInterp = borderAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['rgba(168, 85, 247, 0.2)', 'rgba(168, 85, 247, 1)']
+  });
   
   return (
     <SafeAreaView style={styles.container}>
@@ -25,7 +48,6 @@ export default function EnergyCenterScreen({ navigation }) {
               <MaterialCommunityIcons name="lightning-bolt" size={20} color="#FBBF24" />
               <Text style={styles.headerTitle}>ENERGIYA MARKAZI</Text>
             </View>
-            <Text style={styles.headerSubtitle}>Mashqlarni boshlash uchun energiya kerak bo'ladi.</Text>
           </View>
         </View>
 
@@ -54,8 +76,7 @@ export default function EnergyCenterScreen({ navigation }) {
                   <Text style={styles.energyBigValue}>{currentEnergy}</Text>
                   <Text style={styles.energyBigDivider}> / {maxEnergy}</Text>
                 </Text>
-                <Text style={styles.nextEnergyLabel}>Keyingi energiya:</Text>
-                <View style={styles.timerRow}>
+                <View style={[styles.timerRow, { marginTop: 4 }]}>
                   <MaterialCommunityIcons name="timer-outline" size={16} color="#FBBF24" />
                   <Text style={styles.timerText}>25:34</Text>
                 </View>
@@ -68,8 +89,9 @@ export default function EnergyCenterScreen({ navigation }) {
                 <MaterialCommunityIcons 
                   key={i} 
                   name="lightning-bolt" 
-                  size={20} 
+                  size={16} 
                   color={i < currentEnergy ? "#FBBF24" : "#1E293B"} 
+                  style={{ marginHorizontal: 1 }}
                 />
               ))}
             </View>
@@ -209,18 +231,22 @@ export default function EnergyCenterScreen({ navigation }) {
 
         {/* FOOTER CALL TO ACTIONS */}
 
-        <View style={[styles.footerCard, { borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
+        <Animated.View style={[styles.footerCard, { borderColor: borderColorInterp }]}>
           <LinearGradient colors={['rgba(168, 85, 247, 0.1)', 'transparent']} style={StyleSheet.absoluteFill} />
-          <Ionicons name="people" size={40} color="#C084FC" style={{ marginRight: 16 }} />
-          <View style={{ flex: 1 }}>
+          <Ionicons name="people" size={40} color="#C084FC" style={{ marginRight: 12 }} />
+          <View style={{ flex: 1, marginRight: 8 }}>
             <Text style={[styles.footerTitle, { color: '#C084FC' }]}>DO'STLARNI TAKLIF QILING</Text>
-            <Text style={styles.footerDesc}>Do'stlaringizni taklif qiling va energiya oling! Har bir do'st uchun <MaterialCommunityIcons name="lightning-bolt" size={12} color="#FBBF24" />+1</Text>
+            <Text style={styles.footerDesc}>Do'st taklif qiling va mukofot oling!</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
+              <MaterialCommunityIcons name="lightning-bolt" size={20} color="#FBBF24" />
+              <Text style={{ color: '#FBBF24', fontFamily: 'Inter_800ExtraBold', fontSize: 18 }}>+1</Text>
+            </View>
           </View>
-          <TouchableOpacity style={styles.premiumButton}>
-            <Ionicons name="share-social" size={14} color="#FFF" />
-            <Text style={styles.premiumButtonText}>TAKLIF QILISH</Text>
+          <TouchableOpacity style={[styles.premiumButton, { paddingHorizontal: 12, paddingVertical: 10 }]}>
+            <Ionicons name="share-social" size={16} color="#FFF" />
+            <Text style={[styles.premiumButtonText, { fontSize: 12, marginLeft: 4 }]}>TAKLIF QILISH</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
         <View style={{ height: 40 }} />
       </ScrollView>
@@ -357,10 +383,10 @@ const styles = StyleSheet.create({
   },
   energyDotsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.3)',
     borderRadius: 12,
-    padding: 8,
+    paddingVertical: 8,
     marginBottom: 8,
   },
   maxEnergyText: {
