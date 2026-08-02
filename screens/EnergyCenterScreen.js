@@ -77,7 +77,7 @@ export default function EnergyCenterScreen({ navigation }) {
                 </Text>
                 <View style={[styles.timerRow, { marginTop: 4 }]}>
                   <MaterialCommunityIcons name="timer-outline" size={16} color="#FBBF24" />
-                  <Text style={styles.timerText}>{currentEnergy >= maxEnergy ? 'To\\'lgan' : formattedTime}</Text>
+                  <Text style={styles.timerText}>{currentEnergy >= maxEnergy ? "To'lgan" : formattedTime}</Text>
                 </View>
                 <Text style={styles.energyRecoveryInfo}>1 ta energiya tiklanish vaqti: 3 daqiqa</Text>
               </View>
