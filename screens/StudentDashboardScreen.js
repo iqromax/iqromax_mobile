@@ -205,16 +205,31 @@ export default function StudentDashboardScreen({ navigation, route }) {
     // Animated.timing with useNativeDriver: false running infinitely kills the JS bridge
   }, [searchBorderAnim]);
 
-  const leaderboardData = [
-    { id: 1, name: 'IQROMAX', xp: '1248', avatar: selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png') },
-    { id: 2, name: 'MathKing', xp: '1150', avatar: require('../assets/avatar_david.jpg') },
-    { id: 3, name: 'FastBrain', xp: '1120', avatar: require('../assets/avatar_lily.jpg') },
-    { id: 4, name: 'AbacusPro', xp: '1085', avatar: require('../assets/opponent_4.png') },
-    { id: 5, name: 'LogicStar', xp: '1060', avatar: require('../assets/avatar_maks.png') },
-    { id: 6, name: 'NumberMaster', xp: '1045', avatar: require('../assets/avatar_kevin.png') },
-    { id: 7, name: 'BrainStorm', xp: '980', avatar: require('../assets/avatar_sophia.png') },
-    { id: 8, name: 'SpeedMath', xp: '945', avatar: require('../assets/avatar_emma.jpg') },
-  ];
+  const [leaderboardData, setLeaderboardData] = useState([]);
+
+  useEffect(() => {
+    if (activeTab === 'ranking') {
+      const fetchRanking = async () => {
+        try {
+          const res = await fetch('http://167.71.218.66:3000/api/ranking');
+          if (res.ok) {
+            const data = await res.json();
+            const rankedData = data.map((u, index) => ({
+              customId: u.id,
+              rank: index + 1,
+              name: u.name,
+              xp: u.xp,
+              avatar: u.avatar && u.avatar.startsWith('http') ? { uri: u.avatar } : require('../assets/opponent_1.png')
+            }));
+            setLeaderboardData(rankedData);
+          }
+        } catch (e) {
+          console.error('Fetch ranking error:', e);
+        }
+      };
+      fetchRanking();
+    }
+  }, [activeTab]);
 
   const filteredLeaderboard = leaderboardData.filter(item => {
     const q = leaderboardSearch.trim().toLowerCase();
@@ -2727,10 +2742,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <View style={styles.leaderboardContainer}>
               {filteredLeaderboard.length > 0 ? (
                 filteredLeaderboard.map((item, index) => (
-                  <Animated.View key={item.id} style={[
+                  <Animated.View key={item.customId || index} style={[
                     styles.leaderboardRow, 
-                    (index !== filteredLeaderboard.length - 1 && item.id !== highlightedUserId) && styles.leaderboardRowBorder,
-                    item.id === highlightedUserId && {
+                    (index !== filteredLeaderboard.length - 1 && item.customId !== highlightedUserId) && styles.leaderboardRowBorder,
+                    item.customId === highlightedUserId && {
                       backgroundColor: searchBorderAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: ['rgba(192, 132, 252, 0.05)', 'rgba(192, 132, 252, 0.2)']
@@ -2746,7 +2761,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       elevation: 10,
                     }
                   ]}>
-                    <Text style={styles.leaderboardRank}>{item.id}</Text>
+                    <Text style={styles.leaderboardRank}>{item.rank}</Text>
                     <Image source={item.avatar} style={styles.leaderboardAvatar} />
                     <Text style={styles.leaderboardName}>{item.name}</Text>
                     <Text style={styles.leaderboardXp}>{item.xp} XP</Text>

@@ -318,6 +318,27 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // 4. Admin API: Get Users
+
+app.get('/api/ranking', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      where: { role: 'Student' } // Get all students
+    });
+    
+    const rankingData = users.map((u, index) => ({
+      id: u.customId,
+      name: u.name,
+      xp: 0,
+      avatar: u.character || null,
+    }));
+    
+    res.json(rankingData);
+  } catch (error) {
+    console.error('Error fetching ranking:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 app.get('/api/users/search/:customId', async (req, res) => {
   try {
     const { customId } = req.params;
