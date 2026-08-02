@@ -35,11 +35,7 @@ export default function EnergyCenterScreen({ navigation }) {
             <Text style={styles.headerStatText}>{currentEnergy} / {maxEnergy}</Text>
             <Ionicons name="add" size={14} color="#FFF" />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.headerStatBadge, { borderColor: 'rgba(245, 158, 11, 0.3)' }]}>
-            <Image source={require('../assets/coin_icon.jpg')} style={{ width: 16, height: 16, borderRadius: 8, marginRight: 4 }} />
-            <Text style={styles.headerStatText}>{coins}</Text>
-            <Ionicons name="add" size={14} color="#FFF" />
-          </TouchableOpacity>
+
         </View>
       </View>
 
@@ -154,20 +150,18 @@ export default function EnergyCenterScreen({ navigation }) {
           <View style={styles.taskIconContainer}>
             <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
           </View>
-          <View style={styles.taskContent}>
+          <View style={[styles.taskContent, { flex: 1 }]}>
             <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>MISSIYALAR</Text>
             <Text style={styles.taskDesc}>Missiyalarni bajaring va energiya oling!</Text>
+            <Text style={[styles.taskProgressText, { marginTop: 6, marginBottom: 4 }]}>5 ta mashq bajaring</Text>
+            <View style={styles.taskProgressBarContainer}>
+              <View style={styles.taskProgressBarBg}>
+                <View style={[styles.taskProgressBarFill, { width: '60%' }]} />
+              </View>
+              <Text style={styles.taskProgressCount}>3 / 5</Text>
+            </View>
           </View>
-          <View style={styles.taskProgressArea}>
-             <Text style={styles.taskProgressText}>5 ta mashq bajaring</Text>
-             <View style={styles.taskProgressBarContainer}>
-               <View style={styles.taskProgressBarBg}>
-                 <View style={[styles.taskProgressBarFill, { width: '60%' }]} />
-               </View>
-               <Text style={styles.taskProgressCount}>3 / 5</Text>
-             </View>
-          </View>
-          <TouchableOpacity style={styles.secondaryBadge}>
+          <TouchableOpacity style={[styles.secondaryBadge, { marginLeft: 10 }]}>
             <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
             <Text style={styles.secondaryBadgeText}>+1</Text>
           </TouchableOpacity>
@@ -176,20 +170,18 @@ export default function EnergyCenterScreen({ navigation }) {
         {/* Streak Bonus */}
         <View style={styles.taskCard}>
           <View style={styles.taskIconContainer}>
-            <Image source={require('../assets/streak.png')} style={styles.taskIcon} contentFit="contain" />
+            <Image source={require('../assets/best_streak.png')} style={styles.taskIcon} contentFit="contain" />
           </View>
-          <View style={styles.taskContent}>
-            <Text style={[styles.taskTitle, { color: '#FB923C' }]}>STREAK BONUS</Text>
+          <View style={[styles.taskContent, { flex: 1 }]}>
+            <Text style={[styles.taskTitle, { color: '#FB923C' }]}>KUNLIK BONUS</Text>
             <Text style={styles.taskDesc}>Ketma-ket kirish orqali ko'proq energiya oling!</Text>
+            <Text style={[styles.taskProgressText, { marginTop: 6, marginBottom: 4 }]}>7 kunlik kirish</Text>
+            <View style={{ flexDirection: 'row' }}>
+              {[1, 2, 3, 4].map(i => <Ionicons key={i} name="checkmark-circle" size={16} color="#FBBF24" style={{ marginRight: 2 }} />)}
+              {[5, 6, 7].map(i => <Ionicons key={i} name="ellipse-outline" size={16} color="#334155" style={{ marginRight: 2 }} />)}
+            </View>
           </View>
-          <View style={styles.taskProgressArea}>
-             <Text style={styles.taskProgressText}>7 kunlik streak</Text>
-             <View style={{ flexDirection: 'row', marginTop: 4 }}>
-               {[1, 2, 3, 4].map(i => <Ionicons key={i} name="checkmark-circle" size={16} color="#FBBF24" style={{ marginRight: 2 }} />)}
-               {[5, 6, 7].map(i => <Ionicons key={i} name="ellipse-outline" size={16} color="#334155" style={{ marginRight: 2 }} />)}
-             </View>
-          </View>
-          <TouchableOpacity style={styles.secondaryBadge}>
+          <TouchableOpacity style={[styles.secondaryBadge, { marginLeft: 10 }]}>
             <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
             <Text style={styles.secondaryBadgeText}>+3</Text>
           </TouchableOpacity>
@@ -215,36 +207,7 @@ export default function EnergyCenterScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Premium */}
-        <View style={[styles.taskCard, { borderColor: 'rgba(168, 85, 247, 0.3)', backgroundColor: '#130B24' }]}>
-          <View style={styles.taskIconContainer}>
-            <Image source={require('../assets/diamond.png')} style={styles.taskIcon} contentFit="contain" />
-          </View>
-          <View style={styles.taskContent}>
-            <Text style={[styles.taskTitle, { color: '#C084FC' }]}>PREMIUM</Text>
-            <Text style={styles.taskDesc}>Premium bo'ling va energiya limitini 2 baravar oshiring!</Text>
-          </View>
-          <View style={styles.taskProgressArea}>
-             <Text style={styles.taskProgressText}>Siz uchun ko'proq imkoniyatlar!</Text>
-             <TouchableOpacity style={styles.premiumButton}>
-               <MaterialCommunityIcons name="crown" size={14} color="#FBBF24" />
-               <Text style={styles.premiumButtonText}>PREMIUM OLISH</Text>
-             </TouchableOpacity>
-          </View>
-        </View>
-
         {/* FOOTER CALL TO ACTIONS */}
-        <View style={[styles.footerCard, { borderColor: 'rgba(251, 191, 36, 0.3)' }]}>
-          <LinearGradient colors={['rgba(251, 191, 36, 0.1)', 'transparent']} style={StyleSheet.absoluteFill} />
-          <MaterialCommunityIcons name="lightning-bolt" size={40} color="#FBBF24" style={{ marginRight: 16 }} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.footerTitle, { color: '#FBBF24' }]}>ENERGIYANGIZ TUGADI?</Text>
-            <Text style={styles.footerDesc}>Ko'proq energiya oling va mashqlarni davom eting!</Text>
-          </View>
-          <TouchableOpacity style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>ENERGIYA OLISH</Text>
-          </TouchableOpacity>
-        </View>
 
         <View style={[styles.footerCard, { borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
           <LinearGradient colors={['rgba(168, 85, 247, 0.1)', 'transparent']} style={StyleSheet.absoluteFill} />
