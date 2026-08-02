@@ -322,7 +322,10 @@ app.post('/api/auth/login', async (req, res) => {
 app.get('/api/ranking', async (req, res) => {
   try {
     const users = await prisma.user.findMany({
-      where: { role: 'Student' } // Get all students
+      where: { 
+        role: { in: ['student', 'Student'] },
+        status: 'Faol'
+      }
     });
     
     const rankingData = users.map((u, index) => ({
