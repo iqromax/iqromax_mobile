@@ -31,8 +31,8 @@ export default function EnergyCenter() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('video/')) {
-      alert('Iltimos, faqat video fayl yuklang.');
+    if (!file.type.includes('mp4')) {
+      alert('Iltimos, mobil ilovada ko\'rsatilishi uchun faqat MP4 (.mp4) formatidagi video yuklang!');
       return;
     }
 
@@ -132,13 +132,14 @@ export default function EnergyCenter() {
                 <div>
                   <h3 className="text-xl font-bold text-white mb-2">Hozircha reklama yo'q</h3>
                   <p className="text-indigo-200/60 max-w-md mx-auto">
-                    Yangi reklama videosini yuklash uchun quyidagi tugmani bosing. Tavsiya etilgan uzunlik: 30 soniyadan 1 daqiqagacha.
+                    Yangi reklama videosini yuklash uchun quyidagi tugmani bosing. Tavsiya etilgan uzunlik: 30 soniyadan 1 daqiqagacha.<br/>
+                    <strong className="text-yellow-400">Diqqat: Ilovada ko'rinishi uchun faqat MP4 (.mp4) video yuklang!</strong>
                   </p>
                 </div>
                 
                 <input 
                   type="file" 
-                  accept="video/*" 
+                  accept="video/mp4" 
                   className="hidden" 
                   ref={fileInputRef}
                   onChange={handleFileChange}
