@@ -7,8 +7,13 @@ import dotenv from 'dotenv';
 import http from 'http';
 import path from 'path';
 import { Server } from 'socket.io';
+import { fileURLToPath } from 'url';
+import adVideoRoutes from './adVideoRoutes.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
@@ -21,6 +26,12 @@ const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
+
+// Mount the ad video routes
+app.use('/api', adVideoRoutes);
+
+// Serve the uploads directory for video files
+app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
 
 // Nodemailer Config
 const transporter = nodemailer.createTransport({

@@ -5,6 +5,7 @@ import Users from './pages/Users';
 import Students from './pages/Students';
 import Teachers from './pages/Teachers';
 import Parents from './pages/Parents';
+import EnergyCenter from './pages/EnergyCenter';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/students" element={<Students />} />
         <Route path="/teachers" element={<Teachers />} />
         <Route path="/parents" element={<Parents />} />
+        <Route path="/energy-center" element={<EnergyCenter />} />
       </Routes>
     </Router>
   );

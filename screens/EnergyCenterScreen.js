@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Video } from 'expo-av';
+import { API_URL } from '../src/config/api';
 import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -31,6 +33,9 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [dailyGiftClaimed, setDailyGiftClaimed] = useState(false);
   const [dailyGiftActive, setDailyGiftActive] = useState(false);
   const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
+  const [dailyVideoClaimed, setDailyVideoClaimed] = useState(false);
+  const [adVideoUrl, setAdVideoUrl] = useState(null);
+  const [isVideoModalVisible, setIsVideoModalVisible] = useState(false);
 
   useEffect(() => {
     checkClaims();
@@ -66,6 +71,35 @@ export default function EnergyCenterScreen({ navigation, route }) {
         }
       }
       setDailyBonusClaimed(bonusClaimedToday);
+
+      // Daily Video Claim Logic
+      const videoClaimTimeStr = await AsyncStorage.getItem('daily_video_claim_time');
+      let videoClaimedToday = false;
+      if (videoClaimTimeStr) {
+        const videoClaimTime = new Date(parseInt(videoClaimTimeStr, 10));
+        if (videoClaimTime.getDate() === now.getDate() && 
+            videoClaimTime.getMonth() === now.getMonth() && 
+            videoClaimTime.getFullYear() === now.getFullYear()) {
+          videoClaimedToday = true;
+        }
+      }
+      setDailyVideoClaimed(videoClaimedToday);
+
+      // Fetch active ad video
+      try {
+        const res = await fetch(`${API_URL}/ad-video`);
+        if (res.ok) {
+          const data = await res.json();
+          // Since API_URL is https://iqromax.net/api, we need the base domain for uploads
+          // Better: ad-video returns URL like "/uploads/ad_video.mp4"
+          if (data.url) {
+            const baseUrl = API_URL.replace('/api', '');
+            setAdVideoUrl(baseUrl + data.url);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch ad video:', err);
+      }
 
     } catch (e) {
       console.error('Error checking claims:', e);
@@ -310,11 +344,23 @@ export default function EnergyCenterScreen({ navigation, route }) {
           </View>
           <View style={styles.taskProgressArea}>
              <Text style={styles.taskProgressText}>{t.watchReward}</Text>
-             <TouchableOpacity style={styles.videoButton}>
-               <Ionicons name="play" size={12} color="#FFF" />
-               <Text style={styles.videoButtonText}>{t.watchBtn}</Text>
-               <MaterialCommunityIcons name="lightning-bolt" size={12} color="#FBBF24" />
-               <Text style={styles.videoButtonText}>+1</Text>
+             <TouchableOpacity 
+               style={[styles.videoButton, (!adVideoUrl || dailyVideoClaimed) ? { backgroundColor: '#334155' } : {}]}
+               disabled={!adVideoUrl || dailyVideoClaimed}
+               onPress={() => {
+                 if (currentEnergy >= maxEnergy) {
+                   setIsAlertVisible(true);
+                   return;
+                 }
+                 setIsVideoModalVisible(true);
+               }}
+             >
+               <Ionicons name="play" size={12} color={(!adVideoUrl || dailyVideoClaimed) ? "#9CA3AF" : "#FFF"} />
+               <Text style={[styles.videoButtonText, (!adVideoUrl || dailyVideoClaimed) ? { color: '#9CA3AF' } : {}]}>
+                 {dailyVideoClaimed ? t.claimed : t.watchBtn}
+               </Text>
+               <MaterialCommunityIcons name="lightning-bolt" size={12} color={(!adVideoUrl || dailyVideoClaimed) ? "#9CA3AF" : "#FBBF24"} />
+               <Text style={[styles.videoButtonText, (!adVideoUrl || dailyVideoClaimed) ? { color: '#9CA3AF' } : {}]}>+1</Text>
              </TouchableOpacity>
           </View>
         </View>
@@ -367,6 +413,41 @@ export default function EnergyCenterScreen({ navigation, route }) {
             </View>
           </View>
         </View>
+      </Modal>
+
+      {/* AD VIDEO MODAL */}
+      <Modal visible={isVideoModalVisible} transparent={false} animationType="slide">
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            {adVideoUrl && (
+              <Video
+                source={{ uri: adVideoUrl }}
+                style={{ width: '100%', height: '100%' }}
+                useNativeControls={false}
+                resizeMode="contain"
+                shouldPlay={isVideoModalVisible}
+                onPlaybackStatusUpdate={async (status) => {
+                  if (status.didJustFinish) {
+                    setIsVideoModalVisible(false);
+                    try {
+                      await addEnergy(1);
+                      await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
+                      setDailyVideoClaimed(true);
+                    } catch (e) {
+                      console.error('Error claiming ad video:', e);
+                    }
+                  }
+                }}
+              />
+            )}
+            <TouchableOpacity 
+              style={{ position: 'absolute', top: 40, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', padding: 10, borderRadius: 20 }}
+              onPress={() => setIsVideoModalVisible(false)}
+            >
+              <Text style={{ color: '#FFF', fontWeight: 'bold' }}>{t.close}</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
       </Modal>
 
     </SafeAreaView>
