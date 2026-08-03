@@ -369,6 +369,7 @@ export default function AuthScreen({ navigation, route }) {
             />
           )}
 
+          {/* Temporarily hidden 
           {activeTab === 'register' && (
             <CustomAnimatedInput
               icon={<Feather name="gift" size={18} color="#888899" style={styles.inputIcon} />}
@@ -379,6 +380,7 @@ export default function AuthScreen({ navigation, route }) {
               onChangeText={setReferralCode}
             />
           )}
+          */}
 
           {activeTab === 'login' && (
             <TouchableOpacity 
