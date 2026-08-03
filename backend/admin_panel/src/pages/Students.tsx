@@ -189,7 +189,7 @@ const Students = () => {
                           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 p-[1px] shrink-0 overflow-hidden">
                             <div className="w-full h-full rounded-full bg-[#050510] flex items-center justify-center relative overflow-hidden">
                               <img 
-                                src={student.character ? `/avatars/${student.character}.png` : (student.avatar || '/admin-logo.png')} 
+                                src={student.character ? `/avatars/${student.character.toLowerCase()}.png` : (student.avatar || '/admin-logo.png')} 
                                 alt={student.name} 
                                 className="w-full h-full object-cover scale-[1.3] mt-1" 
                                 onError={(e) => { e.currentTarget.src = '/admin-logo.png'; }}
