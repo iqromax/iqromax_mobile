@@ -419,6 +419,39 @@ app.post('/api/user/xp', async (req, res) => {
   }
 });
 
+// Update user character
+app.put('/api/user/character', async (req, res) => {
+  try {
+    const { customId, character } = req.body;
+    if (!customId || !character) return res.status(400).json({ error: 'customId and character are required' });
+
+    const cleanId = customId.replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId }
+        ]
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { character }
+    });
+
+    io.emit('user_updated', updatedUser);
+
+    res.json({ message: 'Character updated successfully', character: updatedUser.character });
+  } catch (error) {
+    console.error('Update character error:', error);
+    res.status(500).json({ error: 'Failed to update character' });
+  }
+});
+
 // 4. Admin API: Get Users
 
 app.get('/api/ranking', async (req, res) => {

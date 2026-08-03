@@ -421,6 +421,42 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'calc');
   const [user, setUser] = useState(route.params?.user);
+
+  const updateCharacterOnServer = async (index) => {
+    const charNames = {
+      0: 'alex',
+      1: 'maks',
+      2: 'david',
+      3: 'kevin',
+      4: 'lily',
+      5: 'maya',
+      6: 'emma',
+      7: 'sophia'
+    };
+    const characterName = charNames[index] || 'maks';
+    
+    // Update local user state immediately
+    setUser(prev => {
+      const updated = { ...prev, character: characterName };
+      import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
+         AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
+      });
+      return updated;
+    });
+
+    if (user?.customId || route.params?.user?.customId) {
+      const customId = user?.customId || route.params?.user?.customId;
+      try {
+        await fetch(`${API_URL}/user/character`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customId, character: characterName })
+        });
+      } catch (err) {
+        console.log('Error updating character on server', err);
+      }
+    }
+  };
   
   useFocusEffect(
     useCallback(() => {
@@ -551,9 +587,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }
 
     socket.on('user_updated', (data) => {
-      if (String(data.id) === String(user.id) || (data.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase())) {
+      if (String(data.id) === String(user?.id) || (data.customId && user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase())) {
         setUser(data);
       }
+      
+      setLeaderboardData(prev => {
+        if (!prev || prev.length === 0) return prev;
+        return prev.map(u => {
+          if (data.customId && u.customId && String(u.customId).toUpperCase() === String(data.customId).toUpperCase()) {
+            return {
+              ...u,
+              name: data.name || u.name,
+              avatar: data.character ? getAvatarByName(data.character) : u.avatar
+            };
+          }
+          return u;
+        });
+      });
     });
 
     socket.on('user_xp_updated', async (data) => {
@@ -1357,6 +1407,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                             toggleDropdown();
                           } else {
                             setActiveAvatarIndex(avatar.id);
+                            updateCharacterOnServer(avatar.id);
                             toggleDropdown();
                           }
                         }}
@@ -2693,6 +2744,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           onPress={() => {
                             if (!item.locked) {
                               setActiveAvatarIndex(item.id);
+                              updateCharacterOnServer(item.id);
                             }
                           }}
                           activeOpacity={item.locked ? 1 : 0.7}
