@@ -1436,7 +1436,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.progressBarTrack}>
                   <View style={[styles.progressBarFill, { width: `${userRankInfo.progressPercent}%`, backgroundColor: userRankInfo.color }]} />
                 </View>
-                <Text style={styles.progressFooterText}>{userRankInfo.isMax ? 'Max darajadasiz!' : `${t.toNextLevel} ${userRankInfo.xpNeededForNext} XP`}</Text>
+                <Text style={styles.progressFooterText}>{userRankInfo.isMax ? 'Max darajadasiz!' : `${t.toNextLevel} ${userRankInfo.xpRemaining} XP`}</Text>
               </View>
               
             </Animated.View>
@@ -2881,7 +2881,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
              </Text>
           ) : (
             <Text style={styles.rankingXpLeftText}>
-              <Text style={{ color: top1RankInfo.color, fontFamily: 'Inter_700Bold' }}>{top1RankInfo.xpNeededForNext}</Text>
+              <Text style={{ color: top1RankInfo.color, fontFamily: 'Inter_700Bold' }}>{top1RankInfo.xpRemaining}</Text>
               <Text>{' '}</Text>
               <Text>{t.xpRemaining || "XP qoldi"}</Text>
             </Text>
