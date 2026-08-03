@@ -31,7 +31,7 @@ app.use(express.json());
 app.use('/api', adVideoRoutes);
 
 // Serve the uploads directory for video files
-app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
+app.use('/api/uploads', express.static(path.join(__dirname, '../../public/uploads')));
 
 // Nodemailer Config
 const transporter = nodemailer.createTransport({

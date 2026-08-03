@@ -34,7 +34,7 @@ router.get('/ad-video', (req, res) => {
     const videoFile = files.find(f => f.startsWith('ad_video.'));
     
     if (videoFile) {
-      res.json({ url: `/uploads/${videoFile}` });
+      res.json({ url: `/api/uploads/${videoFile}` });
     } else {
       res.json({ url: null });
     }
@@ -59,7 +59,7 @@ router.post('/admin/ad-video', upload.single('video'), (req, res) => {
       }
     });
 
-    res.json({ message: 'Video uploaded successfully', url: `/uploads/${req.file.filename}` });
+    res.json({ message: 'Video uploaded successfully', url: `/api/uploads/${req.file.filename}` });
   } catch (error) {
     console.error('Error uploading video:', error);
     res.status(500).json({ error: 'Failed to upload video' });
