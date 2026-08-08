@@ -426,6 +426,11 @@ export default function EnergyCenterScreen({ navigation, route }) {
                 useNativeControls={false}
                 resizeMode="contain"
                 shouldPlay={isVideoModalVisible}
+                onError={(error) => {
+                  console.error('Video error:', error);
+                  alert('Video o\'qishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko\'ring yoki MP4 formatiga ishonch hosil qiling.');
+                  setIsVideoModalVisible(false);
+                }}
                 onPlaybackStatusUpdate={async (status) => {
                   if (status.didJustFinish) {
                     setIsVideoModalVisible(false);
