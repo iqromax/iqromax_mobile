@@ -63,7 +63,7 @@ function CharacterModel({ onLoad, characterIndex }) {
         enableZoom={false} 
         minPolarAngle={Math.PI / 2} 
         maxPolarAngle={Math.PI / 2} 
-        rotateSpeed={2}
+        rotateSpeed={25}
         target={[0, 1.1, 0]}
       />
     </>

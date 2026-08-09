@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import api from '@/lib/axios';
 import * as Icons from 'lucide-react';
 
@@ -986,7 +987,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-8 py-4">
                           <span className="text-xs font-bold text-zinc-500 bg-zinc-100 px-3 py-1 rounded-full border border-zinc-200">
-                            {ad.created_at ? new Date(ad.created_at).toLocaleDateString('uz-UZ') : ad.date}
+                            {ad.created_at ? format(new Date(ad.created_at), 'dd.MM.yyyy') : ad.date}
                           </span>
                         </td>
                         <td className="px-8 py-4 text-right">
@@ -1189,7 +1190,7 @@ const AdminDashboard = () => {
                           <p className="text-xs text-zinc-500 line-clamp-1 max-w-[300px]">{feature.description}</p>
                         </td>
                         <td className="px-8 py-4">
-                          <span className="text-xs font-bold text-zinc-400">{new Date(feature.created_at).toLocaleDateString()}</span>
+                          <span className="text-xs font-bold text-zinc-400">{format(new Date(feature.created_at), 'dd.MM.yyyy')}</span>
                         </td>
                         <td className="px-8 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
@@ -1487,7 +1488,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-8 py-4">
                           <span className="text-xs font-bold text-zinc-400">
-                            {detail.created_at ? new Date(detail.created_at).toLocaleDateString() : new Date().toLocaleDateString()}
+                            {detail.created_at ? format(new Date(detail.created_at), 'dd.MM.yyyy') : format(new Date(), 'dd.MM.yyyy')}
                           </span>
                         </td>
                         <td className="px-8 py-4 text-right">
@@ -1770,7 +1771,7 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td className="px-8 py-4">
-                          <span className="text-xs font-bold text-zinc-400">{new Date(news.created_at).toLocaleDateString()}</span>
+                          <span className="text-xs font-bold text-zinc-400">{format(new Date(news.created_at), 'dd.MM.yyyy')}</span>
                         </td>
                         <td className="px-8 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
@@ -1921,13 +1922,7 @@ const AdminDashboard = () => {
                             </td>
                             <td className="px-8 py-4">
                               <span className="text-xs text-zinc-500 font-medium">
-                                {new Date(app.created_at).toLocaleDateString('uz-UZ', {
-                                  year: 'numeric',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
+                                {format(new Date(app.created_at), 'dd.MM.yyyy HH:mm')}
                               </span>
                             </td>
                             <td className="px-8 py-4">
