@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Users, AlertCircle, CheckCircle2, Bell, Sparkles, MessageSquare, Search, Check, ChevronDown, Plus, X, Clock, Eye } from 'lucide-react';
+import { Send, Users, AlertCircle, CheckCircle2, Bell, Sparkles, MessageSquare, Search, Check, ChevronDown, Plus, X, Clock } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 const Notifications = () => {
