@@ -21,6 +21,7 @@ const io = new Server(server, {
   path: '/api/socket.io',
   cors: { origin: '*' }
 });
+app.set('io', io);
 
 const prisma = new PrismaClient();
 

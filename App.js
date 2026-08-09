@@ -2,7 +2,7 @@ import './src/utils/safeWeakMap';
 import { Asset } from 'expo-asset';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -183,6 +183,14 @@ export default function App() {
           Animated.timing(rejectionSlideAnim, { toValue: -200, duration: 250, useNativeDriver: true }).start(() => setRejectionAlert(null));
         }, 3500);
       }
+    });
+
+    socket.on('new_ad_video_uploaded', (data) => {
+      DeviceEventEmitter.emit('new_ad_video_uploaded', data);
+    });
+
+    socket.on('ad_video_deleted', (data) => {
+      DeviceEventEmitter.emit('ad_video_deleted', data);
     });
 
     // Continuous Auth Verification Polling (every 3 seconds)

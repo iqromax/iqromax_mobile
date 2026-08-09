@@ -34,9 +34,10 @@ router.get('/ad-video', (req, res) => {
     const videoFile = files.find(f => f.startsWith('ad_video.'));
     
     if (videoFile) {
-      res.json({ url: `/api/uploads/${videoFile}` });
+      const stats = fs.statSync(path.join(uploadDir, videoFile));
+      res.json({ url: `/api/uploads/${videoFile}`, timestamp: stats.mtimeMs });
     } else {
-      res.json({ url: null });
+      res.json({ url: null, timestamp: null });
     }
   } catch (error) {
     console.error('Error fetching ad video:', error);
@@ -60,6 +61,12 @@ router.post('/admin/ad-video', upload.single('video'), (req, res) => {
     });
 
     res.json({ message: 'Video uploaded successfully', url: `/api/uploads/${req.file.filename}` });
+    
+    // Emit event to all clients
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('new_ad_video_uploaded', { url: `/api/uploads/${req.file.filename}`, timestamp: Date.now() });
+    }
   } catch (error) {
     console.error('Error uploading video:', error);
     res.status(500).json({ error: 'Failed to upload video' });
@@ -76,6 +83,12 @@ router.delete('/admin/ad-video', (req, res) => {
       }
     });
     res.json({ message: 'Video deleted successfully' });
+    
+    // Emit event to all clients
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('ad_video_deleted', { timestamp: Date.now() });
+    }
   } catch (error) {
     console.error('Error deleting video:', error);
     res.status(500).json({ error: 'Failed to delete video' });

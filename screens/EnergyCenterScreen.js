@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video } from 'expo-av';
 import { API_URL } from '../src/config/api';
@@ -37,8 +37,29 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [adVideoUrl, setAdVideoUrl] = useState(null);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState(false);
 
+  const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
+
   useEffect(() => {
     checkClaims();
+
+    const sub1 = DeviceEventEmitter.addListener('new_ad_video_uploaded', (data) => {
+      if (data && data.url) {
+        const baseUrl = API_URL.replace('/api', '');
+        setAdVideoUrl(baseUrl + data.url);
+        setAdVideoTimestamp(data.timestamp);
+        setDailyVideoClaimed(false); // Enable the button immediately!
+      }
+    });
+
+    const sub2 = DeviceEventEmitter.addListener('ad_video_deleted', () => {
+      setAdVideoUrl(null);
+      setAdVideoTimestamp(null);
+    });
+
+    return () => {
+      sub1.remove();
+      sub2.remove();
+    };
   }, []);
 
   const checkClaims = async () => {
@@ -90,11 +111,18 @@ export default function EnergyCenterScreen({ navigation, route }) {
         const res = await fetch(`${API_URL}/ad-video`);
         if (res.ok) {
           const data = await res.json();
-          // Since API_URL is https://iqromax.net/api, we need the base domain for uploads
-          // Better: ad-video returns URL like "/uploads/ad_video.mp4"
           if (data.url) {
             const baseUrl = API_URL.replace('/api', '');
             setAdVideoUrl(baseUrl + data.url);
+            setAdVideoTimestamp(data.timestamp);
+            
+            // Check if THIS specific video was already claimed
+            const claimedVideoTs = await AsyncStorage.getItem('claimed_video_timestamp');
+            if (claimedVideoTs && data.timestamp && claimedVideoTs === String(data.timestamp)) {
+              setDailyVideoClaimed(true);
+            } else {
+              setDailyVideoClaimed(false);
+            }
           }
         }
       } catch (err) {
@@ -307,31 +335,6 @@ export default function EnergyCenterScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Streak Bonus */}
-        <View style={styles.taskCard}>
-          <View style={styles.taskIconContainer}>
-            <Image source={require('../assets/best_streak.png')} style={styles.taskIcon} contentFit="contain" />
-          </View>
-          <View style={[styles.taskContent, { flex: 1 }]}>
-            <Text style={[styles.taskTitle, { color: '#FB923C' }]}>{t.dailyBonus}</Text>
-            <Text style={styles.taskDesc}>{t.dailyBonusDesc}</Text>
-            <Text style={[styles.taskProgressText, { marginTop: 6, marginBottom: 4 }]}>{t.streakDays}</Text>
-            <View style={{ flexDirection: 'row' }}>
-              {[1, 2, 3, 4].map(i => <Ionicons key={i} name="checkmark-circle" size={16} color="#FBBF24" style={{ marginRight: 2 }} />)}
-              {[5, 6, 7].map(i => <Ionicons key={i} name="ellipse-outline" size={16} color="#334155" style={{ marginRight: 2 }} />)}
-            </View>
-          </View>
-          <TouchableOpacity 
-            style={[styles.primaryButton, { paddingHorizontal: 12 }, dailyBonusClaimed ? { backgroundColor: '#334155', shadowOpacity: 0 } : {}]}
-            disabled={dailyBonusClaimed}
-            onPress={() => handleClaim('bonus')}
-          >
-            <Text style={[styles.primaryButtonText, dailyBonusClaimed ? { color: '#9CA3AF' } : {}]}>
-              {dailyBonusClaimed ? t.claimed : t.claim}
-            </Text>
-            {!dailyBonusClaimed && <View style={styles.notificationDot} />}
-          </TouchableOpacity>
-        </View>
 
         {/* Watch Video */}
         <View style={styles.taskCard}>
@@ -481,6 +484,9 @@ export default function EnergyCenterScreen({ navigation, route }) {
                       try {
                         await addEnergy(1);
                         await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
+                        if (adVideoTimestamp) {
+                          await AsyncStorage.setItem('claimed_video_timestamp', String(adVideoTimestamp));
+                        }
                         setDailyVideoClaimed(true);
                       } catch (e) {
                         console.error('Error claiming ad video:', e);
