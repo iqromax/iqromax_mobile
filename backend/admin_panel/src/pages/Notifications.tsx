@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Send, Users, AlertCircle, CheckCircle2, Bell, Sparkles, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Send, Users, AlertCircle, CheckCircle2, Bell, Sparkles, MessageSquare, Search, Check, ChevronDown } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 const Notifications = () => {
@@ -12,8 +12,23 @@ const Notifications = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [isFocused, setIsFocused] = useState<string | null>(null);
 
+  // Custom Dropdown states
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchUsers = async () => {
@@ -65,6 +80,19 @@ const Notifications = () => {
     }
   };
 
+  const filteredUsers = users.filter(u => 
+    u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.customId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (u.phone && u.phone.includes(searchQuery))
+  );
+
+  const getTargetLabel = () => {
+    if (target === 'ALL') return "🌟 Barcha foydalanuvchilarga (Global e'lon)";
+    const user = users.find(u => u.customId === target);
+    if (user) return `${user.name} (${user.customId})`;
+    return target;
+  };
+
   return (
     <AdminLayout>
       <div className="max-w-4xl mx-auto py-8">
@@ -91,7 +119,7 @@ const Notifications = () => {
           {/* Animated gradient border wrapper */}
           <div className="absolute -inset-[1px] bg-gradient-to-r from-purple-600/50 via-blue-500/50 to-purple-600/50 rounded-[2rem] blur-sm opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
           
-          <div className="relative bg-[#070714]/90 backdrop-blur-xl rounded-[2rem] p-8 sm:p-10 border border-white/5 shadow-2xl overflow-hidden">
+          <div className="relative bg-[#070714]/90 backdrop-blur-xl rounded-[2rem] p-8 sm:p-10 border border-white/5 shadow-2xl overflow-visible">
             
             {/* Inner top highlight */}
             <div className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-purple-400/50 to-transparent"></div>
@@ -123,39 +151,112 @@ const Notifications = () => {
 
             <form onSubmit={handleSend} className="space-y-8">
               
-              {/* Target Selection */}
-              <div className="space-y-3 relative">
+              {/* Target Selection - Custom Searchable Dropdown */}
+              <div className="space-y-3 relative" ref={dropdownRef}>
                 <label className="flex items-center gap-2 text-sm font-semibold text-indigo-100 ml-1">
                   <Users className="w-4 h-4 text-purple-400" />
                   Qabul qiluvchi
                 </label>
-                <div className={`relative rounded-2xl transition-all duration-300 ${isFocused === 'target' ? 'ring-2 ring-purple-500/50 bg-[#121226]' : 'bg-[#0B0B19]'}`}>
-                  <select 
-                    value={target}
-                    onChange={(e) => setTarget(e.target.value)}
-                    onFocus={() => setIsFocused('target')}
-                    onBlur={() => setIsFocused(null)}
-                    className="w-full bg-transparent border border-white/10 rounded-2xl px-5 py-4 text-white appearance-none focus:outline-none transition-colors cursor-pointer text-sm"
+                
+                <div className={`relative rounded-2xl transition-all duration-300 ${isDropdownOpen ? 'ring-2 ring-purple-500/50 bg-[#121226]' : 'bg-[#0B0B19]'}`}>
+                  <div 
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full flex items-center justify-between bg-transparent border border-white/10 rounded-2xl px-5 py-4 text-white cursor-pointer transition-colors hover:bg-white/5"
                   >
-                    <option value="ALL">🌟 Barcha foydalanuvchilarga (Global e'lon)</option>
-                    <optgroup label="Maxsus Foydalanuvchilar" className="bg-[#0B0B19]">
-                      {users.map(user => (
-                        <option key={user.id} value={user.customId} className="bg-[#0B0B19]">
-                          {user.name} ({user.customId}) - {user.role}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </select>
-                  <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <span className="text-sm truncate pr-4 text-indigo-50">
+                      {getTargetLabel()}
+                    </span>
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                      <ChevronDown className={`w-4 h-4 text-indigo-300 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </div>
                   </div>
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-3 bg-[#0B0B19]/95 backdrop-blur-xl border border-purple-500/30 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-50 overflow-hidden flex flex-col max-h-[320px] animate-in fade-in slide-in-from-top-2 duration-200">
+                      
+                      {/* Search Bar */}
+                      <div className="p-3 border-b border-white/10 bg-[#070714]">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
+                          <input 
+                            type="text"
+                            placeholder="Ism, ID yoki raqam bo'yicha qidirish..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-[#121226] border border-white/5 focus:border-purple-500/50 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-indigo-300/50 focus:outline-none transition-all"
+                            autoFocus
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Users List */}
+                      <div className="overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-purple-500/30 scrollbar-track-transparent">
+                        
+                        {/* Global Option */}
+                        <div 
+                          onClick={() => { setTarget('ALL'); setIsDropdownOpen(false); setSearchQuery(''); }}
+                          className={`flex items-center justify-between p-3 mb-1 rounded-xl cursor-pointer transition-all duration-200 ${target === 'ALL' ? 'bg-purple-500/20 border border-purple-500/30' : 'hover:bg-white/5 border border-transparent'}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${target === 'ALL' ? 'bg-purple-500/30' : 'bg-white/5'}`}>
+                              <Users className={`w-5 h-5 ${target === 'ALL' ? 'text-purple-300' : 'text-indigo-300'}`} />
+                            </div>
+                            <span className={`text-sm font-medium ${target === 'ALL' ? 'text-purple-200' : 'text-indigo-100'}`}>
+                              🌟 Barcha foydalanuvchilarga (Global e'lon)
+                            </span>
+                          </div>
+                          {target === 'ALL' && <Check className="w-5 h-5 text-purple-400" />}
+                        </div>
+                        
+                        {/* Filtered Users */}
+                        {filteredUsers.length > 0 ? (
+                          filteredUsers.map(user => {
+                            const isSelected = target === user.customId;
+                            return (
+                              <div 
+                                key={user.id}
+                                onClick={() => { setTarget(user.customId); setIsDropdownOpen(false); setSearchQuery(''); }}
+                                className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all duration-200 ${isSelected ? 'bg-purple-500/20 border border-purple-500/30' : 'hover:bg-white/5 border border-transparent'}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-500/50 to-blue-500/50 p-[1px]">
+                                    <div className="w-full h-full rounded-full bg-[#0B0B19] flex items-center justify-center overflow-hidden">
+                                      <img 
+                                        src={user.character ? `/avatars/${user.character.toLowerCase()}.png` : (user.avatar || '/admin-logo.png')} 
+                                        alt={user.name} 
+                                        className="w-full h-full object-cover" 
+                                        onError={(e) => { e.currentTarget.src = '/admin-logo.png'; }}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className={`text-sm font-medium ${isSelected ? 'text-purple-200' : 'text-indigo-100'}`}>
+                                      {user.name}
+                                    </div>
+                                    <div className="text-xs text-indigo-300/60 mt-0.5">
+                                      {user.customId} • {user.role}
+                                    </div>
+                                  </div>
+                                </div>
+                                {isSelected && <Check className="w-5 h-5 text-purple-400" />}
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="p-8 text-center text-indigo-300/50">
+                            <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <div className="text-sm">Foydalanuvchi topilmadi</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Title Input */}
-              <div className="space-y-3 relative">
+              <div className="space-y-3 relative z-10">
                 <label className="flex items-center gap-2 text-sm font-semibold text-indigo-100 ml-1">
                   <Sparkles className="w-4 h-4 text-purple-400" />
                   Xabar Sarlavhasi
@@ -175,7 +276,7 @@ const Notifications = () => {
               </div>
 
               {/* Message Input */}
-              <div className="space-y-3 relative">
+              <div className="space-y-3 relative z-0">
                 <label className="flex items-center gap-2 text-sm font-semibold text-indigo-100 ml-1">
                   <MessageSquare className="w-4 h-4 text-purple-400" />
                   Xabar Matni
