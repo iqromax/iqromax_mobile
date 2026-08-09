@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Users, AlertCircle, CheckCircle2 } from 'lucide-react';
-import axios from '../lib/axios';
 
 const Notifications = () => {
   const [title, setTitle] = useState('');
@@ -17,8 +16,11 @@ const Notifications = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('/api/admin/users');
-      setUsers(res.data);
+      const res = await fetch('/api/admin/users');
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      }
     } catch (err) {
       console.error('Failed to fetch users', err);
     }
@@ -33,17 +35,29 @@ const Notifications = () => {
     setSuccessMsg('');
     
     try {
-      await axios.post('/api/notifications/admin-send', {
-        title,
-        message,
-        target
+      const response = await fetch('/api/notifications/admin-send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title,
+          message,
+          target
+        })
       });
-      setSuccessMsg('Xabarnoma muvaffaqiyatli yuborildi!');
-      setTitle('');
-      setMessage('');
-      setTimeout(() => setSuccessMsg(''), 3000);
+      
+      if (response.ok) {
+        setSuccessMsg('Xabarnoma muvaffaqiyatli yuborildi!');
+        setTitle('');
+        setMessage('');
+        setTimeout(() => setSuccessMsg(''), 3000);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setErrorMsg(errorData.error || 'Xatolik yuz berdi');
+      }
     } catch (err: any) {
-      setErrorMsg(err.response?.data?.error || 'Xatolik yuz berdi');
+      setErrorMsg('Tizimda xatolik yuz berdi');
     } finally {
       setLoading(false);
     }
