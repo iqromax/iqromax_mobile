@@ -648,6 +648,50 @@ app.get('/api/notifications/:customId', async (req, res) => {
   }
 });
 
+app.get('/api/admin/notifications/history', async (req, res) => {
+  try {
+    const rawNotifications = await prisma.notification.findMany({
+      where: { type: 'ADMIN' },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const groupedMap = new Map();
+
+    for (const notif of rawNotifications) {
+      // Group by title, message, and minute of creation to ensure batches are grouped together
+      const timeKey = new Date(notif.createdAt).toISOString().slice(0, 16); 
+      const key = `${notif.title}_${notif.message}_${timeKey}`;
+      
+      if (!groupedMap.has(key)) {
+        groupedMap.set(key, {
+          id: notif.id,
+          title: notif.title || 'Tizim Xabari',
+          message: notif.message || '',
+          createdAt: notif.createdAt,
+          target: notif.userId,
+          total: 0,
+          readCount: 0
+        });
+      }
+      
+      const group = groupedMap.get(key);
+      group.total += 1;
+      if (notif.status === 'READ') {
+        group.readCount += 1;
+      }
+      if (group.total > 1) {
+        group.target = 'ALL';
+      }
+    }
+
+    const history = Array.from(groupedMap.values());
+    res.json(history);
+  } catch (error) {
+    console.error('History fetch error:', error);
+    res.status(500).json({ error: 'Xatolik yuz berdi' });
+  }
+});
+
 app.post('/api/notifications/admin-send', async (req, res) => {
   try {
     const { title, message, target } = req.body; // target: 'ALL' or specific customId
