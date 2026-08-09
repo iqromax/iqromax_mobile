@@ -547,22 +547,30 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const handleNotifRespond = async (notif, status) => {
     try {
-      const socket = io(SOCKET_URL, { 
-        path: '/api/socket.io',
-        transports: ['websocket'] 
-      });
-      socket.emit('respond_battle_invite', {
-        notifId: notif.id,
-        status,
-        targetName: user?.name || "Do'stingiz",
-        targetAvatar: user?.avatar || null
-      });
+      if (notif.type === 'BATTLE_INVITE') {
+        const socket = io(SOCKET_URL, { 
+          path: '/api/socket.io',
+          transports: ['websocket'] 
+        });
+        socket.emit('respond_battle_invite', {
+          notifId: notif.id,
+          status,
+          targetName: user?.name || "Do'stingiz",
+          targetAvatar: user?.avatar || null
+        });
+      } else {
+        await fetch(`${API_URL}/notifications/${notif.id}/respond`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+      }
 
       const updatedList = notificationsList.filter(n => n.id !== notif.id);
       setNotificationsList(updatedList);
       await AsyncStorage.setItem('user_notifications', JSON.stringify(updatedList));
 
-      if (status === 'ACCEPTED') {
+      if (status === 'ACCEPTED' && notif.type === 'BATTLE_INVITE') {
         setIsNotifModalOpen(false);
         navigation.navigate('BattleMatchmaking', { mode: 'dost', inviteData: notif });
       }
@@ -3441,43 +3449,71 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <View style={styles.notifEmptyBox}>
                     <MaterialCommunityIcons name="bell-off-outline" size={50} color="#4B5563" style={{ marginBottom: 12 }} />
                     <Text style={styles.notifEmptyTitle}>Xabarnomalar yo'q</Text>
-                    <Text style={styles.notifEmptySub}>Hozircha sizga yangi battle takliflari kelmadi</Text>
+                    <Text style={styles.notifEmptySub}>Hozircha sizga yangi xabarnomalar kelmadi</Text>
                   </View>
                 ) : (
-                  notificationsList.map((notif, idx) => (
-                    <View key={notif.id || idx} style={styles.notifItemCard}>
-                      <View style={styles.notifItemHeader}>
-                        <Image 
-                          source={notif.senderAvatar ? { uri: notif.senderAvatar } : require('../assets/avatar_alex.jpg')} 
-                          style={styles.notifItemAvatar} 
-                        />
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.notifItemSender}>{notif.senderName || 'Foydalanuvchi'}</Text>
-                          <Text style={styles.notifItemStats}>Level {notif.level || 1} • Rating {notif.rating || 1000}</Text>
+                  notificationsList.map((notif, idx) => {
+                    if (notif.type === 'BATTLE_INVITE') {
+                      return (
+                        <View key={notif.id || idx} style={styles.notifItemCard}>
+                          <View style={styles.notifItemHeader}>
+                            <Image 
+                              source={notif.senderAvatar ? { uri: notif.senderAvatar } : require('../assets/avatar_alex.jpg')} 
+                              style={styles.notifItemAvatar} 
+                            />
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.notifItemSender}>{notif.senderName || 'Foydalanuvchi'}</Text>
+                              <Text style={styles.notifItemStats}>Level {notif.level || 1} • Rating {notif.rating || 1000}</Text>
+                            </View>
+                            <View style={styles.notifBadge}>
+                              <Text style={styles.notifBadgeText}>Yangi</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.notifItemMsg}>⚔️ Sizni jangga taklif qilgandi!</Text>
+                          <View style={styles.notifItemActions}>
+                            <TouchableOpacity 
+                              style={styles.notifRejectBtn} 
+                              onPress={() => handleNotifRespond(notif, 'REJECTED')}
+                            >
+                              <MaterialCommunityIcons name="close" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                              <Text style={styles.notifRejectText}>Rad etish</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                              style={styles.notifAcceptBtn} 
+                              onPress={() => handleNotifRespond(notif, 'ACCEPTED')}
+                            >
+                              <MaterialCommunityIcons name="sword-cross" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                              <Text style={styles.notifAcceptText}>Qabul qilish</Text>
+                            </TouchableOpacity>
+                          </View>
                         </View>
-                        <View style={styles.notifBadge}>
-                          <Text style={styles.notifBadgeText}>30s o'tdi</Text>
+                      );
+                    } else {
+                      return (
+                        <View key={notif.id || idx} style={styles.notifItemCard}>
+                          <View style={styles.notifItemHeader}>
+                            <View style={[styles.notifItemAvatar, { backgroundColor: 'rgba(168, 85, 247, 0.2)', justifyContent: 'center', alignItems: 'center' }]}>
+                              <MaterialCommunityIcons name={notif.type === 'ADMIN' ? 'shield-crown-outline' : 'bell-ring-outline'} size={24} color="#A855F7" />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.notifItemSender}>{notif.title || 'Tizim Xabari'}</Text>
+                              <Text style={styles.notifItemStats}>{new Date(notif.createdAt).toLocaleDateString()}</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.notifItemMsg}>{notif.message || ''}</Text>
+                          <View style={styles.notifItemActions}>
+                            <TouchableOpacity 
+                              style={[styles.notifAcceptBtn, { backgroundColor: '#3B82F6', width: '100%' }]} 
+                              onPress={() => handleNotifRespond(notif, 'READ')}
+                            >
+                              <MaterialCommunityIcons name="check-all" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                              <Text style={styles.notifAcceptText}>O'qildi</Text>
+                            </TouchableOpacity>
+                          </View>
                         </View>
-                      </View>
-                      <Text style={styles.notifItemMsg}>⚔️ Sizni jangga taklif qilgandi!</Text>
-                      <View style={styles.notifItemActions}>
-                        <TouchableOpacity 
-                          style={styles.notifRejectBtn} 
-                          onPress={() => handleNotifRespond(notif, 'REJECTED')}
-                        >
-                          <MaterialCommunityIcons name="close" size={16} color="#FFF" style={{ marginRight: 4 }} />
-                          <Text style={styles.notifRejectText}>Rad etish</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                          style={styles.notifAcceptBtn} 
-                          onPress={() => handleNotifRespond(notif, 'ACCEPTED')}
-                        >
-                          <MaterialCommunityIcons name="sword-cross" size={16} color="#FFF" style={{ marginRight: 4 }} />
-                          <Text style={styles.notifAcceptText}>Qabul qilish</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  ))
+                      );
+                    }
+                  })
                 )}
               </ScrollView>
             </View>

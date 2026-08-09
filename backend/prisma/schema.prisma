@@ -38,6 +38,7 @@ model Notification {
   userId    String   // The user receiving the notification
   senderId  String?  // The user sending the notification (optional if system)
   type      String   // "BATTLE_INVITE", etc.
+  title     String?  // The title of the notification (optional)
   message   String?
   status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED, IGNORED
   createdAt DateTime @default(now())

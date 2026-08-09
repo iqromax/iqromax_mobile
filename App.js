@@ -27,6 +27,7 @@ import BattleMatchmakingScreen from './screens/BattleMatchmakingScreen';
 import BattleGameScreen from './screens/BattleGameScreen';
 import FriendInviteScreen from './screens/FriendInviteScreen';
 import BattleResultScreen from './screens/BattleResultScreen';
+import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -41,6 +42,7 @@ export default function App() {
   const [initialRoute, setInitialRoute] = useState('StepOne');
   const [initialParams, setInitialParams] = useState({});
   const [isReady, setIsReady] = useState(false);
+  const [splashFinished, setSplashFinished] = useState(false);
   const [deletedReason, setDeletedReason] = useState(null);
   const [battleInvite, setBattleInvite] = useState(null);
   const [inviteTimer, setInviteTimer] = useState(0);
@@ -341,13 +343,10 @@ export default function App() {
     Inter_900Black,
   });
 
-  if ((!fontsLoaded && !fontError) || !isReady) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', alignItems: 'center' }}>
-        <Image source={require('./assets/icon.png')} style={{ width: 150, height: 150, marginBottom: 30 }} resizeMode="contain" />
-        <ActivityIndicator size="large" color="#FFC107" />
-      </View>
-    );
+  const appIsReady = (fontsLoaded || fontError) && isReady;
+
+  if (!appIsReady || !splashFinished) {
+    return <AdvancedSplashScreen isAppReady={appIsReady} onFinish={() => setSplashFinished(true)} />;
   }
 
   return (

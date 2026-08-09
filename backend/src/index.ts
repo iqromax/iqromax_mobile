@@ -622,6 +622,90 @@ app.delete('/api/admin/users/sync-delete/:identifier', async (req, res) => {
 // Serve admin panel static files in production
 app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 
+// --- BATTLE INVITE & NOTIFICATION REST API ---
+app.get('/api/notifications/:customId', async (req, res) => {
+  try {
+    const { customId } = req.params;
+    const userNotifs = await prisma.notification.findMany({
+      where: {
+        userId: customId.toUpperCase(),
+        status: 'PENDING'
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    const formatted = userNotifs.map(n => {
+      let extra = {};
+      if (n.type === 'BATTLE_INVITE' && n.message) {
+        try { extra = JSON.parse(n.message); } catch (e) {}
+      }
+      return { ...n, ...extra };
+    });
+    res.json(formatted);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+app.post('/api/notifications/admin-send', async (req, res) => {
+  try {
+    const { title, message, target } = req.body; // target: 'ALL' or specific customId
+    if (!title || !message || !target) return res.status(400).json({ error: 'Missing fields' });
+
+    if (target === 'ALL') {
+      const allUsers = await prisma.user.findMany({ select: { customId: true } });
+      const notifsToCreate = allUsers.map(u => ({
+        userId: u.customId,
+        type: 'ADMIN',
+        title,
+        message,
+        status: 'PENDING'
+      }));
+      await prisma.notification.createMany({ data: notifsToCreate });
+      
+      // Emit to all online users
+      io.emit('receive_admin_notification', { type: 'ADMIN', title, message, status: 'PENDING', createdAt: new Date().toISOString() });
+    } else {
+      const targetUser = await prisma.user.findFirst({ where: { customId: target.toUpperCase() } });
+      if (!targetUser) return res.status(404).json({ error: 'User not found' });
+      
+      const notif = await prisma.notification.create({
+        data: {
+          userId: targetUser.customId,
+          type: 'ADMIN',
+          title,
+          message,
+          status: 'PENDING'
+        }
+      });
+      const targetSocketId = onlineUsers.get(targetUser.customId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('receive_admin_notification', notif);
+      }
+    }
+    res.json({ message: 'Notification sent' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to send notification' });
+  }
+});
+
+// Mark notification as read or responded
+app.post('/api/notifications/:id/respond', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const updated = await prisma.notification.update({
+      where: { id },
+      data: { status }
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update notification' });
+  }
+});
+
 // Fallback to admin panel for unhandled routes
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
@@ -629,9 +713,8 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// --- BATTLE INVITE & NOTIFICATION IN-MEMORY LOGIC ---
+// --- SOCKET LOGIC ---
 const onlineUsers = new Map<string, string>(); // customId -> socket.id
-const notifications = [] as any[]; // Mock DB for notifications
 
 io.on('connection', (socket) => {
   console.log('New socket connected:', socket.id);
@@ -641,43 +724,62 @@ io.on('connection', (socket) => {
     console.log(customId + ' registered with socket ' + socket.id);
   });
 
-  socket.on('send_battle_invite', (data) => {
+  socket.on('send_battle_invite', async (data) => {
     // data: { senderId, targetId, senderName, senderAvatar, level, rating }
     console.log('Battle invite from ' + data.senderId + ' to ' + data.targetId);
-    const targetSocketId = onlineUsers.get(data.targetId.toUpperCase());
     
-    // Save to notifications array
-    const notif = {
-      id: Math.random().toString(36).substring(7),
-      userId: data.targetId.toUpperCase(),
-      senderId: data.senderId.toUpperCase(),
-      senderName: data.senderName,
-      senderAvatar: data.senderAvatar,
-      level: data.level,
-      rating: data.rating,
-      type: 'BATTLE_INVITE',
-      status: 'PENDING',
-      createdAt: new Date().toISOString()
-    };
-    notifications.push(notif);
+    try {
+      // Save to database
+      const notif = await prisma.notification.create({
+        data: {
+          userId: data.targetId.toUpperCase(),
+          senderId: data.senderId.toUpperCase(),
+          type: 'BATTLE_INVITE',
+          message: JSON.stringify({
+            senderName: data.senderName,
+            senderAvatar: data.senderAvatar,
+            level: data.level,
+            rating: data.rating
+          }),
+          status: 'PENDING'
+        }
+      });
 
-    if (targetSocketId) {
-      io.to(targetSocketId).emit('receive_battle_invite', notif);
+      const targetSocketId = onlineUsers.get(data.targetId.toUpperCase());
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('receive_battle_invite', {
+          ...notif,
+          senderName: data.senderName,
+          senderAvatar: data.senderAvatar,
+          level: data.level,
+          rating: data.rating
+        });
+      }
+    } catch (e) {
+      console.error('Error saving battle invite:', e);
     }
   });
 
-  socket.on('respond_battle_invite', (data) => {
+  socket.on('respond_battle_invite', async (data) => {
     // data: { notifId, status: 'ACCEPTED' | 'REJECTED', targetName?: string, targetAvatar?: string }
-    const notif: any = notifications.find(n => n.id === data.notifId);
-    if (notif) {
-      notif.status = data.status;
-      if (data.targetName) notif.targetName = data.targetName;
-      if (data.targetAvatar) notif.targetAvatar = data.targetAvatar;
-      // Send message back to sender
-      const senderSocketId = onlineUsers.get(notif.senderId);
-      if (senderSocketId) {
-        io.to(senderSocketId).emit('battle_invite_response', notif);
+    try {
+      const notif = await prisma.notification.update({
+        where: { id: data.notifId },
+        data: { status: data.status }
+      });
+      
+      if (notif && notif.senderId) {
+        const senderSocketId = onlineUsers.get(notif.senderId);
+        if (senderSocketId) {
+          io.to(senderSocketId).emit('battle_invite_response', {
+            ...notif,
+            targetName: data.targetName,
+            targetAvatar: data.targetAvatar
+          });
+        }
       }
+    } catch (e) {
+      console.error('Error responding to battle invite:', e);
     }
   });
 
@@ -689,12 +791,6 @@ io.on('connection', (socket) => {
       }
     }
   });
-});
-
-app.get('/api/notifications/:customId', (req, res) => {
-  const { customId } = req.params;
-  const userNotifs = notifications.filter(n => n.userId === customId.toUpperCase() && n.status === 'PENDING');
-  res.json(userNotifs);
 });
 // ----------------------------------------------------
 

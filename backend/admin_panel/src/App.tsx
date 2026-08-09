@@ -6,6 +6,7 @@ import Students from './pages/Students';
 import Teachers from './pages/Teachers';
 import Parents from './pages/Parents';
 import EnergyCenter from './pages/EnergyCenter';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/teachers" element={<Teachers />} />
         <Route path="/parents" element={<Parents />} />
         <Route path="/energy-center" element={<EnergyCenter />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Routes>
     </Router>
   );
