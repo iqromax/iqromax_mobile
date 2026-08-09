@@ -503,6 +503,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const [isNotifModalOpen, setIsNotifModalOpen] = useState(false);
   const [notificationsList, setNotificationsList] = useState([]);
+  const dismissedNotifsRef = useRef(new Set());
 
   const loadNotifications = async () => {
     try {
@@ -529,7 +530,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       
       const merged = [...localList];
       serverList.forEach(sn => {
-        if (!merged.some(ln => ln.id === sn.id)) {
+        if (!merged.some(ln => ln.id === sn.id) && !dismissedNotifsRef.current.has(sn.id)) {
           merged.push(sn);
         }
       });
@@ -546,6 +547,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [user?.customId]);
 
   const handleNotifRespond = async (notif, status) => {
+    // Optimistic UI update: remove immediately
+    dismissedNotifsRef.current.add(notif.id);
+    const updatedList = notificationsList.filter(n => n.id !== notif.id);
+    setNotificationsList(updatedList);
+    AsyncStorage.setItem('user_notifications', JSON.stringify(updatedList)).catch(() => {});
+
     try {
       if (notif.type === 'BATTLE_INVITE') {
         const socket = io(SOCKET_URL, { 
@@ -565,10 +572,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
           body: JSON.stringify({ status })
         });
       }
-
-      const updatedList = notificationsList.filter(n => n.id !== notif.id);
-      setNotificationsList(updatedList);
-      await AsyncStorage.setItem('user_notifications', JSON.stringify(updatedList));
 
       if (status === 'ACCEPTED' && notif.type === 'BATTLE_INVITE') {
         setIsNotifModalOpen(false);
