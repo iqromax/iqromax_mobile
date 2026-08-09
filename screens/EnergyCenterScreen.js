@@ -416,43 +416,87 @@ export default function EnergyCenterScreen({ navigation, route }) {
       </Modal>
 
       {/* AD VIDEO MODAL */}
-      <Modal visible={isVideoModalVisible} transparent={false} animationType="slide">
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }}>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            {adVideoUrl && (
-              <Video
-                source={{ uri: adVideoUrl }}
-                style={{ width: '100%', height: '100%' }}
-                useNativeControls={false}
-                resizeMode="contain"
-                shouldPlay={isVideoModalVisible}
-                onError={(error) => {
-                  console.error('Video error:', error);
-                  alert('Video o\'qishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko\'ring yoki MP4 formatiga ishonch hosil qiling.');
-                  setIsVideoModalVisible(false);
+      <Modal visible={isVideoModalVisible} transparent={false} animationType="slide" hardwareAccelerated={true}>
+        <View style={{ flex: 1, backgroundColor: '#05050C' }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            {/* Custom Header for Video Modal */}
+            <View style={{
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              paddingHorizontal: 20, 
+              paddingVertical: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255,255,255,0.05)'
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(251, 191, 36, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                  <Ionicons name="play" size={18} color="#FBBF24" style={{ marginLeft: 2 }} />
+                </View>
+                <View>
+                  <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_800ExtraBold', textTransform: 'uppercase' }}>
+                    {t.watchVideo}
+                  </Text>
+                  <Text style={{ color: '#FBBF24', fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                    Mukofot: +1 Energiya
+                  </Text>
+                </View>
+              </View>
+              
+              <TouchableOpacity 
+                style={{ 
+                  backgroundColor: 'rgba(255,255,255,0.1)', 
+                  paddingHorizontal: 16, 
+                  paddingVertical: 8, 
+                  borderRadius: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: 'rgba(255,255,255,0.05)'
                 }}
-                onPlaybackStatusUpdate={async (status) => {
-                  if (status.didJustFinish) {
+                onPress={() => setIsVideoModalVisible(false)}
+              >
+                <Text style={{ color: '#E2E8F0', fontFamily: 'Inter_700Bold', fontSize: 12, marginRight: 6 }}>{t.close}</Text>
+                <Ionicons name="close" size={16} color="#E2E8F0" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Video Container */}
+            <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
+              {adVideoUrl ? (
+                <Video
+                  source={{ uri: adVideoUrl }}
+                  style={{ width: '100%', flex: 1 }}
+                  useNativeControls={true}
+                  resizeMode="contain"
+                  shouldPlay={isVideoModalVisible}
+                  onError={(error) => {
+                    console.error('Video error:', error);
+                    alert('Video o\'qishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko\'ring.');
                     setIsVideoModalVisible(false);
-                    try {
-                      await addEnergy(1);
-                      await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
-                      setDailyVideoClaimed(true);
-                    } catch (e) {
-                      console.error('Error claiming ad video:', e);
+                  }}
+                  onPlaybackStatusUpdate={async (status) => {
+                    if (status.didJustFinish) {
+                      setIsVideoModalVisible(false);
+                      try {
+                        await addEnergy(1);
+                        await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
+                        setDailyVideoClaimed(true);
+                      } catch (e) {
+                        console.error('Error claiming ad video:', e);
+                      }
                     }
-                  }
-                }}
-              />
-            )}
-            <TouchableOpacity 
-              style={{ position: 'absolute', top: 40, right: 20, backgroundColor: 'rgba(255,255,255,0.2)', padding: 10, borderRadius: 20 }}
-              onPress={() => setIsVideoModalVisible(false)}
-            >
-              <Text style={{ color: '#FFF', fontWeight: 'bold' }}>{t.close}</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
+                  }}
+                />
+              ) : (
+                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="videocam-off-outline" size={48} color="rgba(255,255,255,0.2)" />
+                  <Text style={{ color: 'rgba(255,255,255,0.4)', marginTop: 12, fontFamily: 'Inter_500Medium', fontSize: 13 }}>Video topilmadi</Text>
+                </View>
+              )}
+            </View>
+          </SafeAreaView>
+        </View>
       </Modal>
 
     </SafeAreaView>
