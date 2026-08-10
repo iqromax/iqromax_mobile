@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PlayCircle, Upload, Trash2, Video, Plus, Youtube, MessageCircle, Instagram, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
+import { PlayCircle, Trash2, Video, Plus, Play, MessageCircle, Camera, Link as LinkIcon, CheckCircle2 } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 type MissionType = 'VIDEO_UPLOAD' | 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM';
@@ -130,9 +130,9 @@ export default function EnergyCenter() {
   const getMissionIcon = (type: MissionType) => {
     switch (type) {
       case 'VIDEO_UPLOAD': return <Video className="w-5 h-5 text-purple-400" />;
-      case 'YOUTUBE': return <Youtube className="w-5 h-5 text-red-500" />;
+      case 'YOUTUBE': return <Play className="w-5 h-5 text-red-500" />;
       case 'TELEGRAM': return <MessageCircle className="w-5 h-5 text-blue-400" />;
-      case 'INSTAGRAM': return <Instagram className="w-5 h-5 text-pink-500" />;
+      case 'INSTAGRAM': return <Camera className="w-5 h-5 text-pink-500" />;
     }
   };
 
