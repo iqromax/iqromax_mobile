@@ -28,8 +28,11 @@ const prisma = new PrismaClient();
 app.use(cors());
 app.use(express.json());
 
+import missionRoutes from './missionRoutes.js';
+
 // Mount the ad video routes
 app.use('/api', adVideoRoutes);
+app.use('/api', missionRoutes);
 
 // Serve the uploads directory for video files
 app.use('/api/uploads', express.static(path.join(__dirname, '../../public/uploads')));

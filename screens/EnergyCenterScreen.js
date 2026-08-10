@@ -33,34 +33,84 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [dailyGiftClaimed, setDailyGiftClaimed] = useState(false);
   const [dailyGiftActive, setDailyGiftActive] = useState(false);
   const [dailyBonusClaimed, setDailyBonusClaimed] = useState(false);
-  const [dailyVideoClaimed, setDailyVideoClaimed] = useState(false);
-  const [adVideoUrl, setAdVideoUrl] = useState(null);
-  const [isVideoModalVisible, setIsVideoModalVisible] = useState(false);
 
-  const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
+  // New Missions State
+  const [missions, setMissions] = useState([]);
+  const [isMissionsModalVisible, setIsMissionsModalVisible] = useState(false);
+  const [activeVideoMission, setActiveVideoMission] = useState(null);
+  const [customId, setCustomId] = useState(null);
+  const [isLoadingMissions, setIsLoadingMissions] = useState(false);
 
   useEffect(() => {
-    checkClaims();
-
-    const sub1 = DeviceEventEmitter.addListener('new_ad_video_uploaded', (data) => {
-      if (data && data.url) {
-        const baseUrl = API_URL.replace('/api', '');
-        setAdVideoUrl(baseUrl + data.url);
-        setAdVideoTimestamp(data.timestamp);
-        setDailyVideoClaimed(false); // Enable the button immediately!
+    const init = async () => {
+      try {
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          setCustomId(userData.customId);
+          fetchMissions(userData.customId);
+        }
+      } catch (e) {
+        console.error('Error fetching user data', e);
       }
-    });
-
-    const sub2 = DeviceEventEmitter.addListener('ad_video_deleted', () => {
-      setAdVideoUrl(null);
-      setAdVideoTimestamp(null);
-    });
-
-    return () => {
-      sub1.remove();
-      sub2.remove();
+      checkClaims();
     };
+    init();
   }, []);
+
+  const fetchMissions = async (userId = customId) => {
+    if (!userId) return;
+    setIsLoadingMissions(true);
+    try {
+      const response = await fetch(`${API_URL}/missions/${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMissions(data);
+      }
+    } catch (e) {
+      console.error('Error fetching missions:', e);
+    } finally {
+      setIsLoadingMissions(false);
+    }
+  };
+
+  const handleMissionClick = async (mission) => {
+    if (mission.isCompleted) return;
+    
+    if (mission.type === 'VIDEO_UPLOAD') {
+      setActiveVideoMission(mission);
+    } else {
+      if (mission.link) {
+        try {
+          const { Linking } = require('react-native');
+          await Linking.openURL(mission.link);
+          await completeMission(mission.id);
+        } catch (e) {
+          console.error("Failed to open link", e);
+        }
+      }
+    }
+  };
+
+  const completeMission = async (missionId) => {
+    try {
+      const res = await fetch(`${API_URL}/missions/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customId, missionId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.allMissionsCompleted) {
+          await addEnergy(data.energyAdded || 5);
+          alert(`Tabriklaymiz! Barcha missiyalarni bajardingiz va +${data.energyAdded || 5} energiya oldingiz!`);
+        }
+        fetchMissions();
+      }
+    } catch (e) {
+      console.error('Complete mission error', e);
+    }
+  };
 
   const checkClaims = async () => {
     try {
@@ -92,42 +142,6 @@ export default function EnergyCenterScreen({ navigation, route }) {
         }
       }
       setDailyBonusClaimed(bonusClaimedToday);
-
-      // Daily Video Claim Logic
-      const videoClaimTimeStr = await AsyncStorage.getItem('daily_video_claim_time');
-      let videoClaimedToday = false;
-      if (videoClaimTimeStr) {
-        const videoClaimTime = new Date(parseInt(videoClaimTimeStr, 10));
-        if (videoClaimTime.getDate() === now.getDate() && 
-            videoClaimTime.getMonth() === now.getMonth() && 
-            videoClaimTime.getFullYear() === now.getFullYear()) {
-          videoClaimedToday = true;
-        }
-      }
-      setDailyVideoClaimed(videoClaimedToday);
-
-      // Fetch active ad video
-      try {
-        const res = await fetch(`${API_URL}/ad-video`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.url) {
-            const baseUrl = API_URL.replace('/api', '');
-            setAdVideoUrl(baseUrl + data.url);
-            setAdVideoTimestamp(data.timestamp);
-            
-            // Check if THIS specific video was already claimed
-            const claimedVideoTs = await AsyncStorage.getItem('claimed_video_timestamp');
-            if (claimedVideoTs && data.timestamp && claimedVideoTs === String(data.timestamp)) {
-              setDailyVideoClaimed(true);
-            } else {
-              setDailyVideoClaimed(false);
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Failed to fetch ad video:', err);
-      }
 
     } catch (e) {
       console.error('Error checking claims:', e);
@@ -314,59 +328,28 @@ export default function EnergyCenterScreen({ navigation, route }) {
         </View>
 
         {/* Missions */}
-        <View style={styles.taskCard}>
+        <TouchableOpacity style={styles.taskCard} onPress={() => setIsMissionsModalVisible(true)}>
           <View style={styles.taskIconContainer}>
             <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
           </View>
           <View style={[styles.taskContent, { flex: 1 }]}>
             <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{t.missions}</Text>
             <Text style={styles.taskDesc}>{t.missionsDesc}</Text>
-            <Text style={[styles.taskProgressText, { marginTop: 6, marginBottom: 4 }]}>{t.missionProgress}</Text>
+            <Text style={[styles.taskProgressText, { marginTop: 6, marginBottom: 4 }]}>Missiyalar ro'yxatini ochish</Text>
             <View style={styles.taskProgressBarContainer}>
               <View style={styles.taskProgressBarBg}>
-                <View style={[styles.taskProgressBarFill, { width: '60%' }]} />
+                <View style={[styles.taskProgressBarFill, { width: missions.length > 0 ? `${(missions.filter(m => m.isCompleted).length / missions.length) * 100}%` : '0%' }]} />
               </View>
-              <Text style={styles.taskProgressCount}>3 / 5</Text>
+              <Text style={styles.taskProgressCount}>{missions.filter(m => m.isCompleted).length} / {missions.length || 0}</Text>
             </View>
           </View>
-          <TouchableOpacity style={[styles.secondaryBadge, { marginLeft: 10 }]}>
+          <View style={[styles.secondaryBadge, { marginLeft: 10 }]}>
             <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
-            <Text style={styles.secondaryBadgeText}>+1</Text>
-          </TouchableOpacity>
-        </View>
+            <Text style={styles.secondaryBadgeText}>+5</Text>
+          </View>
+        </TouchableOpacity>
 
 
-        {/* Watch Video */}
-        <View style={styles.taskCard}>
-          <View style={styles.taskIconContainer}>
-            <Image source={require('../assets/ec_video.png')} style={styles.taskIcon} contentFit="contain" />
-          </View>
-          <View style={styles.taskContent}>
-            <Text style={[styles.taskTitle, { color: '#60A5FA' }]}>{t.watchVideo}</Text>
-            <Text style={styles.taskDesc}>{t.watchVideoDesc}</Text>
-          </View>
-          <View style={styles.taskProgressArea}>
-             <Text style={styles.taskProgressText}>{t.watchReward}</Text>
-             <TouchableOpacity 
-               style={[styles.videoButton, (!adVideoUrl || dailyVideoClaimed) ? { backgroundColor: '#334155' } : {}]}
-               disabled={!adVideoUrl || dailyVideoClaimed}
-               onPress={() => {
-                 if (currentEnergy >= maxEnergy) {
-                   setIsAlertVisible(true);
-                   return;
-                 }
-                 setIsVideoModalVisible(true);
-               }}
-             >
-               <Ionicons name="play" size={12} color={(!adVideoUrl || dailyVideoClaimed) ? "#9CA3AF" : "#FFF"} />
-               <Text style={[styles.videoButtonText, (!adVideoUrl || dailyVideoClaimed) ? { color: '#9CA3AF' } : {}]}>
-                 {dailyVideoClaimed ? t.claimed : t.watchBtn}
-               </Text>
-               <MaterialCommunityIcons name="lightning-bolt" size={12} color={(!adVideoUrl || dailyVideoClaimed) ? "#9CA3AF" : "#FBBF24"} />
-               <Text style={[styles.videoButtonText, (!adVideoUrl || dailyVideoClaimed) ? { color: '#9CA3AF' } : {}]}>+1</Text>
-             </TouchableOpacity>
-          </View>
-        </View>
 
         {/* FOOTER CALL TO ACTIONS */}
 
@@ -418,11 +401,11 @@ export default function EnergyCenterScreen({ navigation, route }) {
         </View>
       </Modal>
 
-      {/* AD VIDEO MODAL */}
-      <Modal visible={isVideoModalVisible} transparent={false} animationType="slide" hardwareAccelerated={true}>
+      {/* MISSIONS MODAL */}
+      <Modal visible={isMissionsModalVisible} transparent={false} animationType="slide" hardwareAccelerated={true}>
         <View style={{ flex: 1, backgroundColor: '#05050C' }}>
           <SafeAreaView style={{ flex: 1 }}>
-            {/* Custom Header for Video Modal */}
+            {/* Modal Header */}
             <View style={{
               flexDirection: 'row', 
               justifyContent: 'space-between', 
@@ -433,15 +416,15 @@ export default function EnergyCenterScreen({ navigation, route }) {
               borderBottomColor: 'rgba(255,255,255,0.05)'
             }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(251, 191, 36, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
-                  <Ionicons name="play" size={18} color="#FBBF24" style={{ marginLeft: 2 }} />
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(56, 189, 248, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                  <Ionicons name="trophy" size={18} color="#38BDF8" />
                 </View>
                 <View>
                   <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_800ExtraBold', textTransform: 'uppercase' }}>
-                    {t.watchVideo}
+                    {t.missions}
                   </Text>
                   <Text style={{ color: '#FBBF24', fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
-                    Mukofot: +1 Energiya
+                    Barcha missiyalarni bajarib +5 energiya oling!
                   </Text>
                 </View>
               </View>
@@ -457,50 +440,79 @@ export default function EnergyCenterScreen({ navigation, route }) {
                   borderWidth: 1,
                   borderColor: 'rgba(255,255,255,0.05)'
                 }}
-                onPress={() => setIsVideoModalVisible(false)}
+                onPress={() => {
+                  setIsMissionsModalVisible(false);
+                  setActiveVideoMission(null);
+                }}
               >
                 <Text style={{ color: '#E2E8F0', fontFamily: 'Inter_700Bold', fontSize: 12, marginRight: 6 }}>{t.close}</Text>
                 <Ionicons name="close" size={16} color="#E2E8F0" />
               </TouchableOpacity>
             </View>
 
-            {/* Video Container */}
-            <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
-              {adVideoUrl ? (
+            {/* Video Player overlay */}
+            {activeVideoMission ? (
+              <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
                 <Video
-                  source={{ uri: adVideoUrl }}
+                  source={{ uri: API_URL.replace('/api', '') + activeVideoMission.fileUrl }}
                   style={{ width: '100%', flex: 1 }}
                   useNativeControls={true}
                   resizeMode="contain"
-                  shouldPlay={isVideoModalVisible}
+                  shouldPlay={true}
                   onError={(error) => {
                     console.error('Video error:', error);
                     alert('Video o\'qishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko\'ring.');
-                    setIsVideoModalVisible(false);
+                    setActiveVideoMission(null);
                   }}
                   onPlaybackStatusUpdate={async (status) => {
                     if (status.didJustFinish) {
-                      setIsVideoModalVisible(false);
-                      try {
-                        await addEnergy(1);
-                        await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
-                        if (adVideoTimestamp) {
-                          await AsyncStorage.setItem('claimed_video_timestamp', String(adVideoTimestamp));
-                        }
-                        setDailyVideoClaimed(true);
-                      } catch (e) {
-                        console.error('Error claiming ad video:', e);
-                      }
+                      await completeMission(activeVideoMission.id);
+                      setActiveVideoMission(null);
                     }
                   }}
                 />
-              ) : (
-                <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-                  <Ionicons name="videocam-off-outline" size={48} color="rgba(255,255,255,0.2)" />
-                  <Text style={{ color: 'rgba(255,255,255,0.4)', marginTop: 12, fontFamily: 'Inter_500Medium', fontSize: 13 }}>Video topilmadi</Text>
-                </View>
-              )}
-            </View>
+              </View>
+            ) : (
+              /* Missions List */
+              <ScrollView contentContainerStyle={{ padding: 20 }}>
+                {isLoadingMissions ? (
+                  <View style={{ alignItems: 'center', marginTop: 40 }}>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium' }}>Yuklanmoqda...</Text>
+                  </View>
+                ) : missions.length > 0 ? (
+                  missions.map(mission => (
+                    <View key={mission.id} style={[styles.taskCard, mission.isCompleted ? { opacity: 0.6 } : {}]}>
+                      <View style={[styles.taskIconContainer, { backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12 }]}>
+                        {mission.type === 'VIDEO_UPLOAD' ? <Ionicons name="videocam" size={24} color="#A855F7" /> : 
+                         mission.type === 'YOUTUBE' ? <Ionicons name="logo-youtube" size={24} color="#EF4444" /> :
+                         mission.type === 'TELEGRAM' ? <MaterialCommunityIcons name="send-circle" size={26} color="#3B82F6" /> :
+                         <Ionicons name="logo-instagram" size={24} color="#EC4899" />}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.taskTitle, { color: '#FFF' }]}>{mission.title}</Text>
+                        <Text style={styles.taskDesc}>
+                          {mission.type === 'VIDEO_UPLOAD' ? 'Videoni to\'liq ko\'rib chiqing' : 'Link orqali obuna bo\'ling'}
+                        </Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={[styles.primaryButton, { paddingHorizontal: 12, paddingVertical: 8, minWidth: 80 }, mission.isCompleted ? { backgroundColor: '#10B981', shadowOpacity: 0 } : {}]}
+                        disabled={mission.isCompleted}
+                        onPress={() => handleMissionClick(mission)}
+                      >
+                        <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 12 }}>
+                          {mission.isCompleted ? 'Bajarildi' : 'Bajarish'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))
+                ) : (
+                  <View style={{ alignItems: 'center', marginTop: 40 }}>
+                    <Ionicons name="list" size={48} color="rgba(255,255,255,0.2)" />
+                    <Text style={{ color: 'rgba(255,255,255,0.4)', marginTop: 12, fontFamily: 'Inter_500Medium' }}>Hozircha faol missiyalar yo'q</Text>
+                  </View>
+                )}
+              </ScrollView>
+            )}
           </SafeAreaView>
         </View>
       </Modal>

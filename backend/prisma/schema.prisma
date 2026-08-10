@@ -51,3 +51,23 @@ model Referral {
   status     String   @default("WAITING") // "WAITING" or "ACTIVE"
   createdAt  DateTime @default(now())
 }
+
+model Mission {
+  id        String   @id @default(uuid())
+  type      String   // "VIDEO_UPLOAD", "YOUTUBE", "TELEGRAM", "INSTAGRAM"
+  title     String
+  link      String?  // Youtube, Telegram, Instagram linki
+  fileUrl   String?  // Upload qilingan video linki
+  reward    Int      @default(1)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model UserMission {
+  id          String   @id @default(uuid())
+  userId      String   // Custom ID of the user (e.g. #0012)
+  missionId   String
+  completedAt DateTime @default(now())
+
+  @@unique([userId, missionId])
+}

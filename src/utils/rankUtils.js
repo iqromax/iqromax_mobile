@@ -52,6 +52,7 @@ export const calculateUserRank = (xp = 0) => {
     xpNeededForNext,
     progressPercent,
     xpRemaining: isMax ? 0 : nextRank.xp - xp,
-    stars
+    stars,
+    levelNumber: rankIndex + 1
   };
 };

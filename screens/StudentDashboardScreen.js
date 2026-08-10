@@ -728,7 +728,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [levelNumber, setLevelNumber] = useState(0);
   useEffect(() => {
     let current = 0;
-    const target = 24;
+    const target = userRankInfo?.levelNumber || 1;
     const duration = 1500; // 1.5 seconds
     const intervalTime = duration / target;
 
@@ -741,7 +741,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [userRankInfo?.levelNumber]);
 
   const framesData = [
     { id: 1, name: 'Tech Frame', rarity: 'EPIC', color: '#A855F7', state: 'AKTIV', image: require('../assets/gold_frame.png') },
@@ -1463,7 +1463,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <Image source={require('../assets/math_master_logo.png')} style={styles.mathMasterLogo} contentFit="contain" />
                 <View style={styles.cardTitles}>
                   <Text style={styles.cardTitle}>{t.title}</Text>
-                  <Text style={styles.cardSubtitle}>{t.subtitle}</Text>
+                  <Text style={styles.cardSubtitle}>{t.levelText} {userRankInfo.levelNumber}</Text>
                 </View>
               </View>
               <Text style={styles.cardDesc}>{t.desc}</Text>
