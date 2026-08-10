@@ -16,7 +16,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/iqromax_mobile
+            cd /var/www/iqromax_mobile
             git fetch origin main
             git reset --hard origin/main
             
