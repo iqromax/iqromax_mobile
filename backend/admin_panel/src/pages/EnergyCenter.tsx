@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlayCircle, Trash2, Video, Plus, Play, MessageCircle, Camera, Link as LinkIcon, CheckCircle2, Upload } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
-type MissionType = 'VIDEO_UPLOAD' | 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM';
+type MissionType = 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM';
 
 interface Mission {
   id: string;
@@ -26,10 +26,10 @@ export default function EnergyCenter() {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [missionType, setMissionType] = useState<MissionType>('VIDEO_UPLOAD');
+  const [missionType, setMissionType] = useState<MissionType>('YOUTUBE');
   const [title, setTitle] = useState('');
   const [link, setLink] = useState('');
-  const [videoFile, setVideoFile] = useState<File | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -116,16 +116,6 @@ export default function EnergyCenter() {
     }
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.includes('mp4')) {
-      alert('Iltimos, mobil ilovada ko\'rsatilishi uchun faqat MP4 (.mp4) formatidagi video yuklang!');
-      return;
-    }
-    setVideoFile(file);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,12 +123,8 @@ export default function EnergyCenter() {
       alert("Sarlavhani kiriting!");
       return;
     }
-    if (missionType !== 'VIDEO_UPLOAD' && !link.trim()) {
+    if (!link.trim()) {
       alert("Havolani (Link) kiriting!");
-      return;
-    }
-    if (missionType === 'VIDEO_UPLOAD' && !videoFile) {
-      alert("Video faylni tanlang!");
       return;
     }
 
@@ -147,7 +133,6 @@ export default function EnergyCenter() {
     formData.append('type', missionType);
     formData.append('title', title);
     if (link) formData.append('link', link);
-    if (videoFile) formData.append('video', videoFile);
 
     try {
       const response = await fetch('/api/admin/missions', {
@@ -173,8 +158,8 @@ export default function EnergyCenter() {
   const resetForm = () => {
     setTitle('');
     setLink('');
-    setVideoFile(null);
-    setMissionType('VIDEO_UPLOAD');
+
+    setMissionType('YOUTUBE');
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -199,10 +184,10 @@ export default function EnergyCenter() {
   
   const getMissionIcon = (type: MissionType) => {
     switch (type) {
-      case 'VIDEO_UPLOAD': return <Video className="w-5 h-5 text-purple-400" />;
       case 'YOUTUBE': return <Play className="w-5 h-5 text-red-500" />;
       case 'TELEGRAM': return <MessageCircle className="w-5 h-5 text-blue-400" />;
       case 'INSTAGRAM': return <Camera className="w-5 h-5 text-pink-500" />;
+      default: return <LinkIcon className="w-5 h-5 text-gray-400" />;
     }
   };
 
@@ -327,8 +312,7 @@ export default function EnergyCenter() {
                                 {getMissionIcon(mission.type)}
                               </div>
                               <span className="text-sm font-medium text-white">
-                                {mission.type === 'VIDEO_UPLOAD' ? 'Video yuklash' :
-                                 mission.type === 'YOUTUBE' ? 'YouTube' :
+                                {mission.type === 'YOUTUBE' ? 'YouTube' :
                                  mission.type === 'TELEGRAM' ? 'Telegram' : 'Instagram'}
                               </span>
                             </div>
@@ -403,7 +387,6 @@ export default function EnergyCenter() {
                     onChange={(e) => setMissionType(e.target.value as MissionType)}
                     className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500"
                   >
-                    <option value="VIDEO_UPLOAD">Video Yuklash (MP4)</option>
                     <option value="YOUTUBE">YouTube Video Link</option>
                     <option value="TELEGRAM">Telegram Kanalga Obuna</option>
                     <option value="INSTAGRAM">Instagram Sahifaga Obuna</option>
@@ -422,19 +405,6 @@ export default function EnergyCenter() {
                   />
                 </div>
 
-                {missionType === 'VIDEO_UPLOAD' ? (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Video fayl (MP4)</label>
-                    <input 
-                      type="file" 
-                      accept="video/mp4" 
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl px-4 py-2 text-white focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-500/20 file:text-purple-400 hover:file:bg-purple-500/30 cursor-pointer"
-                      required
-                    />
-                  </div>
-                ) : (
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Manzil (URL Link)</label>
                     <input 
@@ -450,7 +420,6 @@ export default function EnergyCenter() {
                       required
                     />
                   </div>
-                )}
 
                 <div className="pt-4 flex gap-3">
                   <button
