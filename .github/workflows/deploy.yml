@@ -17,7 +17,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/iqromax_mobile
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             
             # Install and setup Backend
             cd backend
