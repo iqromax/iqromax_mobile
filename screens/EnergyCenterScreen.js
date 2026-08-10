@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video } from 'expo-av';
 import { API_URL } from '../src/config/api';
@@ -36,7 +36,8 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [dailyVideoClaimed, setDailyVideoClaimed] = useState(false);
   const [adVideoUrl, setAdVideoUrl] = useState(null);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState(false);
-
+  const [missionsList, setMissionsList] = useState([]);
+  
   const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
 
   useEffect(() => {
@@ -129,6 +130,24 @@ export default function EnergyCenterScreen({ navigation, route }) {
         console.error('Failed to fetch ad video:', err);
       }
 
+      // Fetch dynamic missions
+      try {
+        const dataStr = await AsyncStorage.getItem('user_data');
+        if (dataStr) {
+          const userData = JSON.parse(dataStr);
+          if (userData.customId) {
+            const cleanId = userData.customId.replace(/^#+/, '');
+            const res = await fetch(`${API_URL}/missions/${encodeURIComponent(cleanId)}`);
+            if (res.ok) {
+              const data = await res.json();
+              setMissionsList(data);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch missions:', e);
+      }
+
     } catch (e) {
       console.error('Error checking claims:', e);
     }
@@ -154,6 +173,42 @@ export default function EnergyCenterScreen({ navigation, route }) {
       }
     } catch (e) {
       console.error('Error claiming:', e);
+    }
+  };
+
+  const handleCompleteMission = async (mission) => {
+    if (mission.isCompleted) return;
+    if (currentEnergy >= maxEnergy) {
+      setIsAlertVisible(true);
+      return;
+    }
+    
+    if (mission.link) {
+      Linking.openURL(mission.link).catch(err => console.error('Error opening link:', err));
+    }
+    
+    try {
+      const dataStr = await AsyncStorage.getItem('user_data');
+      if (dataStr) {
+        const userData = JSON.parse(dataStr);
+        if (userData.customId) {
+          const cleanId = userData.customId.replace(/^#+/, '');
+          const res = await fetch(`${API_URL}/missions/complete`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customId: cleanId, missionId: mission.id })
+          });
+          if (res.ok) {
+            const result = await res.json();
+            setMissionsList(prev => prev.map(m => m.id === mission.id ? { ...m, isCompleted: true } : m));
+            if (result.energyAdded) {
+               await addEnergy(result.energyAdded);
+            }
+          }
+        }
+      }
+    } catch(e) {
+      console.error('Error completing mission', e);
     }
   };
 
@@ -314,26 +369,38 @@ export default function EnergyCenterScreen({ navigation, route }) {
         </View>
 
         {/* Missions */}
-        <View style={styles.taskCard}>
-          <View style={styles.taskIconContainer}>
-            <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
+        {missionsList.length > 0 && (
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionHeaderLine} />
+            <Text style={styles.sectionTitle}>{t.missions}</Text>
+            <View style={styles.sectionHeaderLine} />
           </View>
-          <View style={[styles.taskContent, { flex: 1 }]}>
-            <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{t.missions}</Text>
-            <Text style={styles.taskDesc}>{t.missionsDesc}</Text>
-            <Text style={[styles.taskProgressText, { marginTop: 6, marginBottom: 4 }]}>{t.missionProgress}</Text>
-            <View style={styles.taskProgressBarContainer}>
-              <View style={styles.taskProgressBarBg}>
-                <View style={[styles.taskProgressBarFill, { width: '60%' }]} />
-              </View>
-              <Text style={styles.taskProgressCount}>3 / 5</Text>
+        )}
+
+        {missionsList.map(mission => (
+          <View key={mission.id} style={styles.taskCard}>
+            <View style={styles.taskIconContainer}>
+              <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
             </View>
+            <View style={[styles.taskContent, { flex: 1 }]}>
+              <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{mission.title}</Text>
+              <Text style={styles.taskDesc}>
+                {mission.type === 'VIDEO_UPLOAD' ? 'Video yuklash' :
+                 mission.type === 'YOUTUBE' ? 'YouTube videoni ko\'rish' :
+                 mission.type === 'TELEGRAM' ? 'Telegram kanalga obuna' : 'Instagram sahifaga obuna'}
+              </Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.primaryButton, mission.isCompleted ? { backgroundColor: '#334155' } : { backgroundColor: '#38BDF8' }]}
+              disabled={mission.isCompleted}
+              onPress={() => handleCompleteMission(mission)}
+            >
+              <Text style={[styles.primaryButtonText, mission.isCompleted ? { color: '#9CA3AF' } : {}]}>
+                {mission.isCompleted ? t.claimed : "BAJARISH"}
+              </Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={[styles.secondaryBadge, { marginLeft: 10 }]}>
-            <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
-            <Text style={styles.secondaryBadgeText}>+1</Text>
-          </TouchableOpacity>
-        </View>
+        ))}
 
 
         {/* Watch Video */}
