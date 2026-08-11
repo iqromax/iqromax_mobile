@@ -2554,9 +2554,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* End Global Header */}
               {/* Tab Title & Stats button */}
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 10, position: 'relative', height: 40 }}>
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 1 }}>
-                  {t.navInventory}
-                </Text>
                 <TouchableOpacity 
                   style={{ 
                     flexDirection: 'row', 
