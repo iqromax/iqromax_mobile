@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Video } from 'expo-av';
+import { Video, Audio } from 'expo-av';
 import { API_URL, SOCKET_URL } from '../src/config/api';
 import { io } from 'socket.io-client';
 import { Image } from 'expo-image';
@@ -44,6 +44,20 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
 
   useEffect(() => {
+    // Enable audio even if the device is in silent mode
+    const enableAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+        });
+      } catch (e) {
+        console.warn('Audio settings error:', e);
+      }
+    };
+    enableAudio();
+
     checkClaims();
 
     const socket = io(SOCKET_URL, {
