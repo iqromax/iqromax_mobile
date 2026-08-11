@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Animated, Easing, Platform, StatusBar } from 'react-native';
 import { ImageBackground, Image } from 'expo-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
@@ -63,6 +64,24 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const [startTime, setStartTime] = useState(Date.now());
   const [elapsedTime, setElapsedTime] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+
+  const playSound = async (type) => {
+    try {
+      let soundAsset;
+      if (type === 'tick') soundAsset = require('../assets/sounds/tick.wav');
+      else if (type === 'correct') soundAsset = require('../assets/sounds/correct.wav');
+      else if (type === 'wrong') soundAsset = require('../assets/sounds/wrong.wav');
+      
+      const { sound } = await Audio.Sound.createAsync(soundAsset);
+      await sound.playAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) sound.unloadAsync();
+      });
+    } catch (e) {
+      console.log('Error playing sound', e);
+    }
+  };
+  
   
   // Initialize game
   useEffect(() => {
@@ -131,6 +150,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         return () => clearTimeout(timer);
       } else {
         setStartTime(Date.now()); // reset timer at start of flashing
+        playSound('tick');
         setPhase('flashing');
       }
     } else if (phase === 'feedback') {
@@ -201,6 +221,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         setPhase('countdown');
         setCountdown(3);
       } else {
+        playSound('tick');
         setPhase('flashing');
       }
       setInputValue('');
@@ -216,6 +237,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         const delay = speed * 1000;
         timeout = setTimeout(() => {
           if (seqIndex + 1 < sequence.length) {
+            playSound('tick');
             setSeqIndex(seqIndex + 1);
           } else {
             setQuestionStartTime(Date.now());
@@ -251,6 +273,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     setLastElapsed(timeForThisQuestion.toFixed(1));
 
     if (isCorrect) {
+      playSound('correct');
       setCorrectAnswers(prev => prev + 1);
       const wonXp = calculateQuestionXP();
       setXp(prev => prev + wonXp);
@@ -260,6 +283,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         saveXPToBackend(wonXp);
       }
     } else {
+      playSound('wrong');
       setIncorrectAnswers(prev => prev + 1);
       setCombo(0);
     }
