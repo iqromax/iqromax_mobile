@@ -10,9 +10,79 @@ import { MentalMathGenerator } from '../src/lib/mathGenerator';
 
 const { width } = Dimensions.get('window');
 
+const TRANSLATIONS = {
+  uz: {
+    realTime: "Real vaqtda raqobat", you: "O'yinchi", opponent: "Raqib", level: "Daraja",
+    getReady: "Tayyorlaning...", enterAnswer: "Javobni kiriting", chat: "CHAT",
+    leaveBtn: "TARK ETISH", exitTitle: "O'yinni tark etish", exitDesc: "Rostdan ham chiqmoqchimisiz?",
+    no: "Yo'q", yes: "Ha"
+  },
+  en: {
+    realTime: "Real-time competition", you: "Player", opponent: "Opponent", level: "Level",
+    getReady: "Get Ready...", enterAnswer: "Enter answer", chat: "CHAT",
+    leaveBtn: "LEAVE", exitTitle: "Leave game", exitDesc: "Are you sure you want to leave?",
+    no: "No", yes: "Yes"
+  },
+  ru: {
+    realTime: "Соревнование в реальном времени", you: "Игрок", opponent: "Противник", level: "Уровень",
+    getReady: "Приготовьтесь...", enterAnswer: "Введите ответ", chat: "ЧАТ",
+    leaveBtn: "ПОКИНУТЬ", exitTitle: "Покинуть игру", exitDesc: "Вы уверены, что хотите выйти?",
+    no: "Нет", yes: "Да"
+  },
+  ar: {
+    realTime: "منافسة في الوقت الفعلي", you: "لاعب", opponent: "الخصم", level: "مستوى",
+    getReady: "استعد...", enterAnswer: "أدخل الإجابة", chat: "دردشة",
+    leaveBtn: "مغادرة", exitTitle: "مغادرة اللعبة", exitDesc: "هل أنت متأكد أنك تريد المغادرة؟",
+    no: "لا", yes: "نعم"
+  },
+  tr: {
+    realTime: "Gerçek zamanlı rekabet", you: "Oyuncu", opponent: "Rakip", level: "Seviye",
+    getReady: "Hazırlan...", enterAnswer: "Cevabı girin", chat: "SOHBET",
+    leaveBtn: "ÇIKIŞ", exitTitle: "Oyundan Çık", exitDesc: "Çıkmak istediğinize emin misiniz?",
+    no: "Hayır", yes: "Evet"
+  },
+  zh: {
+    realTime: "实时竞争", you: "玩家", opponent: "对手", level: "等级",
+    getReady: "准备...", enterAnswer: "输入答案", chat: "聊天",
+    leaveBtn: "离开", exitTitle: "离开游戏", exitDesc: "你确定要离开吗？",
+    no: "否", yes: "是"
+  },
+  ky: {
+    realTime: "Реалдуу убакыттагы мелдеш", you: "Оюнчу", opponent: "Атаандаш", level: "Деңгээл",
+    getReady: "Даярданыңыз...", enterAnswer: "Жоопту киргизиңиз", chat: "ЧАТ",
+    leaveBtn: "ЧЫГУУ", exitTitle: "Оюндан чыгуу", exitDesc: "Чыгууну каалайсызбы?",
+    no: "Жок", yes: "Ооба"
+  },
+  kk: {
+    realTime: "Нақты уақыттағы жарыс", you: "Ойыншы", opponent: "Қарсылас", level: "Деңгей",
+    getReady: "Дайындалыңыз...", enterAnswer: "Жауапты енгізіңіз", chat: "ЧАТ",
+    leaveBtn: "ШЫҒУ", exitTitle: "Ойыннан шығу", exitDesc: "Шыққыңыз келе ме?",
+    no: "Жоқ", yes: "Иә"
+  },
+  tg: {
+    realTime: "Рақобати вақти воқеӣ", you: "Бозингар", opponent: "Ҳариф", level: "Сатҳ",
+    getReady: "Омода шавед...", enterAnswer: "Ҷавобро ворид кунед", chat: "ЧАТ",
+    leaveBtn: "БАРОМАДАН", exitTitle: "Баромадан аз бозӣ", exitDesc: "Шумо дар ҳақиқат мехоҳед бароед?",
+    no: "Не", yes: "Ҳа"
+  },
+  ja: {
+    realTime: "リアルタイム競争", you: "プレイヤー", opponent: "対戦相手", level: "レベル",
+    getReady: "準備して...", enterAnswer: "答えを入力", chat: "チャット",
+    leaveBtn: "退出する", exitTitle: "ゲームを退出", exitDesc: "本当に退出しますか？",
+    no: "いいえ", yes: "はい"
+  },
+  ko: {
+    realTime: "실시간 경쟁", you: "플레이어", opponent: "상대", level: "레벨",
+    getReady: "준비하세요...", enterAnswer: "정답 입력", chat: "채팅",
+    leaveBtn: "나가기", exitTitle: "게임 나가기", exitDesc: "정말 나가시겠습니까?",
+    no: "아니요", yes: "예"
+  }
+};
+
 export default function BattleGameScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { examplesCount = 10, operation = 'oddiy', speed = 1, digits = 1 } = route.params || {};
+  const { examplesCount = 10, operation = 'oddiy', speed = 1, digits = 1, language = 'uz' } = route.params || {};
+  const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
   
   const totalQuestions = 1;
   const [phase, setPhase] = useState('countdown'); // 'countdown' | 'flashing' | 'input'
@@ -226,9 +296,10 @@ export default function BattleGameScreen({ navigation, route }) {
          oppIncorrect: isCorrect ? 1 : 0,
          oppAvgTime: (Math.random() * 2 + 1).toFixed(1),
          oppMaxCombo: 0,
-         oppName: 'Raqib',
+         oppName: t.opponent,
          actualAnswer: currentQ.answer,
          userAnswer: inputValue,
+         language
       });
     }
   };
@@ -241,34 +312,26 @@ export default function BattleGameScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={[styles.header, { marginTop: Platform.OS === 'android' ? 10 : 0 }]}>
-        <View style={styles.headerCenter}>
-          <View style={styles.battleTitleRow}>
-            <MaterialCommunityIcons name="sword-cross" size={18} color="#f97316" />
-            <Text style={styles.battleTitle}>BATTLE <Text style={styles.badge1v1}>1v1</Text></Text>
-          </View>
-          <Text style={styles.battleSubtitle}>Real vaqtda raqobat</Text>
+      <View style={[styles.headerContainer, { paddingTop: insets.top + 10 }]}>
+        <View style={styles.headerTitles}>
+          <Text style={styles.battleTitle}>BATTLE <Text style={styles.badge1v1}>1v1</Text></Text>
+          <Text style={styles.battleSubtitle}>{t.realTime}</Text>
         </View>
       </View>
 
-
-
-      {/* VS Bar */}
-      <View style={styles.vsBarContainer}>
-        {/* Player Side */}
-        <View style={styles.vsSide}>
-          <View style={[styles.avatarGlow, { borderColor: '#0ea5e9', shadowColor: '#0ea5e9' }]}>
-            <Image source={getAvatarImg(userData)} style={styles.avatarImage} />
+      <View style={styles.playersTopBar}>
+        <View style={[styles.playerProfileCard, { borderColor: '#10B981', shadowColor: '#10B981' }]}>
+          <View style={styles.avatarMiniGlow}>
+            <Image source={getAvatarImg(userData)} style={styles.avatarMini} contentFit="cover" />
           </View>
           <View style={styles.playerInfo}>
             <View style={styles.nameRow}>
               <Text style={styles.flag}>🇺🇿</Text>
-              <Text style={styles.playerName}>{userData?.name || "O'yinchi"}</Text>
+              <Text style={styles.playerName}>{userData?.name || t.you}</Text>
             </View>
             <View style={styles.trophyRow}>
               <MaterialCommunityIcons name="star" size={12} color="#facc15" />
-              <Text style={styles.trophyText}>Daraja {userLevel}</Text>
+              <Text style={styles.trophyText}>{t.level} {userLevel}</Text>
             </View>
             <View style={styles.healthBarTrack}>
               <View style={[styles.healthBarFill, { backgroundColor: '#0ea5e9', width: '80%' }]} />
@@ -276,51 +339,51 @@ export default function BattleGameScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* Center Timer */}
+        <View style={[styles.playerProfileCard, { borderColor: '#EF4444', shadowColor: '#EF4444' }]}>
+          <View style={styles.playerInfoRight}>
+            <View style={styles.nameRowRight}>
+              <Text style={styles.playerName}>{t.opponent}</Text>
+              <Text style={styles.flag}>🇺🇿</Text>
+            </View>
+            <View style={styles.trophyRowRight}>
+              <Text style={styles.trophyText}>{t.level} 10</Text>
+              <MaterialCommunityIcons name="star" size={12} color="#facc15" />
+            </View>
+            <View style={styles.healthBarTrack}>
+              <View style={[styles.healthBarFill, { backgroundColor: '#ef4444', width: '60%' }]} />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.gameAreaWrapper}>
         <View style={styles.timerWrapper}>
           <View style={styles.timerCircle}>
             <Text style={styles.timerText}>{formatTime(elapsedTime)}</Text>
           </View>
         </View>
-
-        {/* Opponent Side */}
-        <View style={styles.vsSide}>
-          <View style={styles.opponentInfo}>
-            <View style={[styles.nameRow, { justifyContent: 'flex-end' }]}>
-              <Text style={styles.playerName}>Raqib</Text>
-              <Text style={styles.flag}>🇺🇿</Text>
-            </View>
-            <View style={[styles.healthBarTrack, { alignSelf: 'flex-end' }]}>
-              <View style={[styles.healthBarFill, { backgroundColor: '#ef4444', width: '60%' }]} />
-            </View>
-          </View>
-          <View style={[styles.avatarGlow, { borderColor: '#ef4444', shadowColor: '#ef4444' }]}>
-            <Image source={require('../assets/avatar_david.jpg')} style={styles.avatarImage} />
-          </View>
-        </View>
-      </View>
-
-      {/* Main Game Area */}
-      <View style={styles.gameAreaWrapper}>
-
-        {phase === 'countdown' ? (
-          <View style={styles.gameArea}>
+        <View style={styles.gameArea}>
+          {phase === 'countdown' && (
             <Text style={{ fontSize: 120, color: '#f97316', fontFamily: 'Inter_800ExtraBold', textShadowColor: 'rgba(249, 115, 22, 0.5)', textShadowRadius: 20 }}>
               {startCountdown}
             </Text>
-            <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>Tayyorlaning...</Text>
-          </View>
-        ) : phase === 'flashing' ? (
-          <View style={styles.gameArea}>
-            <Text style={styles.mainNumber}>{sequence[seqIndex]?.num || '?'}</Text>
-            {sequence[seqIndex]?.op ? <Text style={styles.operator}>{sequence[seqIndex].op}</Text> : null}
-          </View>
-        ) : (
-          <View style={styles.gameArea}>
-            <Text style={styles.mainNumber}>{inputValue || '?'}</Text>
-            <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>Javobni kiriting</Text>
-          </View>
-        )}
+          )}
+          {phase === 'flashing' && (
+            <View style={{ alignItems: 'center' }}>
+              <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.getReady}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
+                <Text style={styles.mainNumber}>{sequence[seqIndex]?.num || '?'}</Text>
+                {sequence[seqIndex]?.op ? <Text style={styles.operator}>{sequence[seqIndex].op}</Text> : null}
+              </View>
+            </View>
+          )}
+          {phase === 'input' && (
+            <View style={{ alignItems: 'center' }}>
+              <Text style={styles.mainNumber}>{inputValue || '?'}</Text>
+              <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.enterAnswer}</Text>
+            </View>
+          )}
+        </View>
       </View>
 
       {phase === 'input' ? (
@@ -351,30 +414,25 @@ export default function BattleGameScreen({ navigation, route }) {
           ))}
         </View>
       ) : (
-        <View style={styles.bottomPanel}>
-          <View style={styles.actionsRow}>
-            <TouchableOpacity style={styles.chatBtn}>
-              <MaterialCommunityIcons name="chat-processing-outline" size={20} color="#d1d5db" />
-              <Text style={styles.chatBtnText}>CHAT</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.leaveBtn} onPress={() => setIsExitModalVisible(true)}>
-              <MaterialCommunityIcons name="exit-to-app" size={20} color="#ef4444" />
-              <Text style={styles.leaveBtnText}>TARK ETISH</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.footerActions}>
+          <TouchableOpacity style={styles.chatBtn}>
+            <MaterialCommunityIcons name="chat-processing" size={20} color="#fff" />
+            <Text style={styles.chatBtnText}>{t.chat}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.leaveBtn} onPress={() => setIsExitModalVisible(true)}>
+            <MaterialCommunityIcons name="exit-run" size={20} color="#ef4444" />
+            <Text style={styles.leaveBtnText}>{t.leaveBtn}</Text>
+          </TouchableOpacity>
         </View>
       )}
 
-      {/* Exit Modal */}
-      <Modal transparent visible={isExitModalVisible} animationType="fade">
+      <Modal visible={isExitModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <MaterialCommunityIcons name="alert-circle-outline" size={32} color="#f97316" />
-              <Text style={styles.modalTitle}>O'yinni tark etish</Text>
-            </View>
-            <Text style={styles.modalText}>Rostdan ham chiqmoqchimisiz?</Text>
-            <View style={styles.modalButtons}>
+            <MaterialCommunityIcons name="alert-circle-outline" size={48} color="#ef4444" />
+            <Text style={styles.modalTitle}>{t.exitTitle}</Text>
+            <Text style={styles.modalText}>{t.exitDesc}</Text>
+            <View style={styles.modalActions}>
               <TouchableOpacity style={styles.modalBtnNo} onPress={() => setIsExitModalVisible(false)}>
                 <Text style={styles.modalBtnNoText}>Yo'q</Text>
               </TouchableOpacity>

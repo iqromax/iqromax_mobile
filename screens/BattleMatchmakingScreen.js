@@ -198,7 +198,8 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
               examplesCount,
               operation,
               speed,
-              digits
+              digits,
+              language
             });
           }, 500);
           return 0;
@@ -263,7 +264,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           <Text style={styles.fighterName}>{userData?.name || t.you}</Text>
           <View style={styles.fighterRating}>
             <MaterialCommunityIcons name="star" size={14} color="#F59E0B" />
-            <Text style={styles.fighterRatingText}>Daraja {userLevel}</Text>
+            <Text style={styles.fighterRatingText}>{t.level} {userLevel}</Text>
           </View>
           <View style={[styles.fighterStats, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
             <MaterialCommunityIcons name="target" size={12} color="#10B981" />
@@ -294,7 +295,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           <Text style={styles.fighterName}>{t.opponent}</Text>
           <View style={styles.fighterRating}>
             <MaterialCommunityIcons name="star" size={14} color="#F59E0B" />
-            <Text style={styles.fighterRatingText}>Daraja 10</Text>
+            <Text style={styles.fighterRatingText}>{t.level} 10</Text>
           </View>
           <View style={[styles.fighterStats, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
             <MaterialCommunityIcons name="target" size={12} color="#EF4444" />

@@ -10,6 +10,97 @@ import { API_URL } from '../src/config/api';
 
 const { width } = Dimensions.get('window');
 
+const TRANSLATIONS = {
+  uz: {
+    winTitle: "G'ALABA!", loseTitle: "MAG'LUBIYAT", winSub: "Siz g'alaba qozondingiz!", loseSub: "Raqibingiz g'alaba qozondi",
+    correctAnswer: "To'g'ri javob:", yourAnswer: "Sizning javobingiz:", you: "O'yinchi", opponent: "Raqib", level: "Daraja",
+    correctAnswers: "To'g'ri javoblar", wrongAnswers: "Xato javoblar", avgTime: "O'rtacha vaqt", gainedXp: "Olingan XP",
+    chat: "CHAT", playAgain: "YANA BIR O'YIN", home: "BOSH SAHIFAGA QAYTISH",
+    winPhrases: ["A'lo!", "Qoyil!", "Zo'r!", "Yaxshi!"],
+    losePhrases: ["Afsus", "Taslim bo'lmang!", "Keyingi safar"]
+  },
+  en: {
+    winTitle: "VICTORY!", loseTitle: "DEFEAT", winSub: "You won the battle!", loseSub: "Your opponent won",
+    correctAnswer: "Correct answer:", yourAnswer: "Your answer:", you: "Player", opponent: "Opponent", level: "Level",
+    correctAnswers: "Correct answers", wrongAnswers: "Wrong answers", avgTime: "Average time", gainedXp: "Gained XP",
+    chat: "CHAT", playAgain: "PLAY AGAIN", home: "RETURN TO HOME",
+    winPhrases: ["Excellent!", "Wow!", "Great!", "Good job!"],
+    losePhrases: ["Alas", "Don't give up!", "Next time"]
+  },
+  ru: {
+    winTitle: "ПОБЕДА!", loseTitle: "ПОРАЖЕНИЕ", winSub: "Вы выиграли битву!", loseSub: "Ваш противник выиграл",
+    correctAnswer: "Правильный ответ:", yourAnswer: "Ваш ответ:", you: "Игрок", opponent: "Противник", level: "Уровень",
+    correctAnswers: "Правильные ответы", wrongAnswers: "Неверные ответы", avgTime: "Среднее время", gainedXp: "Получено XP",
+    chat: "ЧАТ", playAgain: "ИГРАТЬ СНОВА", home: "ВЕРНУТЬСЯ ДОМОЙ",
+    winPhrases: ["Отлично!", "Ого!", "Супер!", "Хорошо!"],
+    losePhrases: ["Увы", "Не сдавайся!", "В следующий раз"]
+  },
+  ar: {
+    winTitle: "انتصار!", loseTitle: "هزيمة", winSub: "لقد فزت بالمعركة!", loseSub: "فاز خصمك",
+    correctAnswer: "الإجابة الصحيحة:", yourAnswer: "إجابتك:", you: "لاعب", opponent: "الخصم", level: "مستوى",
+    correctAnswers: "إجابات صحيحة", wrongAnswers: "إجابات خاطئة", avgTime: "متوسط الوقت", gainedXp: "XP المكتسبة",
+    chat: "دردشة", playAgain: "العب مرة أخرى", home: "العودة إلى الرئيسية",
+    winPhrases: ["ممتاز!", "رائع!", "عظيم!", "عمل جيد!"],
+    losePhrases: ["للأسف", "لا تستسلم!", "في المرة القادمة"]
+  },
+  tr: {
+    winTitle: "ZAFER!", loseTitle: "YENİLGİ", winSub: "Savaşı kazandın!", loseSub: "Rakibin kazandı",
+    correctAnswer: "Doğru cevap:", yourAnswer: "Senin cevabın:", you: "Oyuncu", opponent: "Rakip", level: "Seviye",
+    correctAnswers: "Doğru cevaplar", wrongAnswers: "Yanlış cevaplar", avgTime: "Ortalama süre", gainedXp: "Kazanılan XP",
+    chat: "SOHBET", playAgain: "TEKRAR OYNA", home: "ANASAYFAYA DÖN",
+    winPhrases: ["Mükemmel!", "Vay!", "Harika!", "İyi iş!"],
+    losePhrases: ["Maalesef", "Pes etme!", "Bir dahaki sefere"]
+  },
+  zh: {
+    winTitle: "胜利！", loseTitle: "失败", winSub: "你赢得了战斗！", loseSub: "你的对手赢了",
+    correctAnswer: "正确答案：", yourAnswer: "你的答案：", you: "玩家", opponent: "对手", level: "等级",
+    correctAnswers: "正确答案", wrongAnswers: "错误答案", avgTime: "平均时间", gainedXp: "获得的 XP",
+    chat: "聊天", playAgain: "再玩一次", home: "返回主页",
+    winPhrases: ["优秀！", "哇！", "太棒了！", "干得好！"],
+    losePhrases: ["唉", "别放弃！", "下次再来"]
+  },
+  ky: {
+    winTitle: "ЖЕҢИШ!", loseTitle: "ЖЕҢИЛҮҮ", winSub: "Сиз жеңдиңиз!", loseSub: "Атаандашыңыз жеңди",
+    correctAnswer: "Туура жооп:", yourAnswer: "Сиздин жообуңуз:", you: "Оюнчу", opponent: "Атаандаш", level: "Деңгээл",
+    correctAnswers: "Туура жооптор", wrongAnswers: "Ката жооптор", avgTime: "Орточо убакыт", gainedXp: "Алынган XP",
+    chat: "ЧАТ", playAgain: "КАЙРА ОЙНОО", home: "БАШКЫ БЕТКЕ КАЙТУУ",
+    winPhrases: ["Мыкты!", "Ой!", "Сонун!", "Жакшы!"],
+    losePhrases: ["Тилекке каршы", "Багынбаңыз!", "Кийинки жолу"]
+  },
+  kk: {
+    winTitle: "ЖЕҢІС!", loseTitle: "ЖЕҢІЛІС", winSub: "Сіз жеңдіңіз!", loseSub: "Қарсыласыңыз жеңді",
+    correctAnswer: "Дұрыс жауап:", yourAnswer: "Сіздің жауабыңыз:", you: "Ойыншы", opponent: "Қарсылас", level: "Деңгей",
+    correctAnswers: "Дұрыс жауаптар", wrongAnswers: "Қате жауаптар", avgTime: "Орташа уақыт", gainedXp: "Алынған XP",
+    chat: "ЧАТ", playAgain: "ҚАЙТА ОЙНАУ", home: "БАСТЫ БЕТКЕ ҚАЙТУ",
+    winPhrases: ["Керемет!", "Оу!", "Тамаша!", "Жарайсың!"],
+    losePhrases: ["Өкінішке орай", "Берілмеңіз!", "Келесі жолы"]
+  },
+  tg: {
+    winTitle: "ҒАЛАБА!", loseTitle: "МАҒЛУБИЯТ", winSub: "Шумо ғолиб шудед!", loseSub: "Ҳарифи шумо ғолиб шуд",
+    correctAnswer: "Ҷавоби дуруст:", yourAnswer: "Ҷавоби шумо:", you: "Бозингар", opponent: "Ҳариф", level: "Сатҳ",
+    correctAnswers: "Ҷавобҳои дуруст", wrongAnswers: "Ҷавобҳои хато", avgTime: "Вақти миёна", gainedXp: "XP гирифта шуд",
+    chat: "ЧАТ", playAgain: "БОЗ БОЗӢ КУНЕД", home: "БА САҲИФАИ АСОСӢ",
+    winPhrases: ["Аъло!", "Оҳо!", "Зӯр!", "Хуб!"],
+    losePhrases: ["Афсӯс", "Таслим нашавед!", "Дафъаи дигар"]
+  },
+  ja: {
+    winTitle: "勝利！", loseTitle: "敗北", winSub: "あなたは戦いに勝ちました！", loseSub: "対戦相手の勝利",
+    correctAnswer: "正解：", yourAnswer: "あなたの答え：", you: "プレイヤー", opponent: "対戦相手", level: "レベル",
+    correctAnswers: "正解数", wrongAnswers: "不正解数", avgTime: "平均時間", gainedXp: "獲得 XP",
+    chat: "チャット", playAgain: "もう一度プレイ", home: "ホームに戻る",
+    winPhrases: ["素晴らしい！", "すごい！", "いいね！", "よくやった！"],
+    losePhrases: ["残念", "諦めないで！", "次回"]
+  },
+  ko: {
+    winTitle: "승리!", loseTitle: "패배", winSub: "배틀에서 승리했습니다!", loseSub: "상대가 승리했습니다",
+    correctAnswer: "정답:", yourAnswer: "당신의 답:", you: "플레이어", opponent: "상대", level: "레벨",
+    correctAnswers: "정답 수", wrongAnswers: "오답 수", avgTime: "평균 시간", gainedXp: "획득 XP",
+    chat: "채팅", playAgain: "다시 플레이", home: "홈으로 돌아가기",
+    winPhrases: ["훌륭해요!", "와우!", "멋져요!", "잘했어요!"],
+    losePhrases: ["아쉽네요", "포기하지 마세요!", "다음 기회에"]
+  }
+};
+
 export default function BattleResultScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   
@@ -50,10 +141,12 @@ export default function BattleResultScreen({ navigation, route }) {
     oppCorrect = 0,
     oppIncorrect = 0,
     oppAvgTime = "0.0",
-    oppMaxCombo = 0
+    oppMaxCombo = 0,
+    language = 'uz'
   } = route.params || {};
 
-  const isWin = correct >= oppCorrect; // Simple logic: whoever has more correct answers wins
+  const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
+  const isWin = correct >= oppCorrect; 
 
   useEffect(() => {
     async function fetchUserAndSaveXP() {
@@ -100,11 +193,10 @@ export default function BattleResultScreen({ navigation, route }) {
     }
     playResultSound();
 
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
+    Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.timing(slideUpAnim, { toValue: 0, duration: 800, useNativeDriver: true })
+    ]).start();
 
     Animated.loop(
       Animated.sequence([
@@ -114,10 +206,8 @@ export default function BattleResultScreen({ navigation, route }) {
     ).start();
   }, [isWin]);
 
-  const winnerPhrases = ["A'lo!", "Qoyil!", "Zo'r!", "Yaxshi!"];
-  const loserPhrases = ["Afsus", "Taslim bo'lmang!", "Keyingi safar"];
-  const winPhrase = useRef(winnerPhrases[Math.floor(Math.random() * winnerPhrases.length)]).current;
-  const losePhrase = useRef(loserPhrases[Math.floor(Math.random() * loserPhrases.length)]).current;
+  const winPhrase = useRef(t.winPhrases[Math.floor(Math.random() * t.winPhrases.length)]).current;
+  const losePhrase = useRef(t.losePhrases[Math.floor(Math.random() * t.losePhrases.length)]).current;
 
   const playerFeedback = isWin ? winPhrase : losePhrase;
   const oppFeedback = !isWin ? winPhrase : losePhrase;
@@ -133,20 +223,14 @@ export default function BattleResultScreen({ navigation, route }) {
   const oppColor = !isWin ? winnerColor : loserColor;
   const oppBorder = !isWin ? winnerBorder : loserBorder;
   
-  const userScore = (correct * 100) - (incorrect * 20) + (maxCombo * 5);
-  const oppScore = (oppCorrect * 100) - (oppIncorrect * 20) + (oppMaxCombo * 5);
-
-  const mainColor = isWin ? '#f59e0b' : '#ef4444'; // Orange for Victory, Red for Defeat
-  const mainTitle = isWin ? "G'ALABA!" : "MAG'LUBIYAT";
-  const subTitle = isWin ? "Siz g'alaba qozondingiz!" : "Raqibingiz g'alaba qozondi";
+  const mainColor = isWin ? '#f59e0b' : '#ef4444';
+  const mainTitle = isWin ? t.winTitle : t.loseTitle;
+  const subTitle = isWin ? t.winSub : t.loseSub;
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Removed */}
-
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View style={[styles.cardsWrapper, { opacity: fadeAnim }]}>
-        {/* Main Title Area */}
         <View style={styles.titleArea}>
           {isWin && <MaterialCommunityIcons name="crown" size={40} color="#f59e0b" style={styles.crownIcon} />}
           <Text style={[styles.mainTitleText, { color: mainColor }]}>{mainTitle}</Text>
@@ -154,11 +238,10 @@ export default function BattleResultScreen({ navigation, route }) {
         </View>
 
         <View style={styles.answerArea}>
-          <Text style={styles.answerText}>To'g'ri javob: <Text style={styles.correctAnswerVal}>{route.params?.actualAnswer}</Text></Text>
-          <Text style={styles.answerText}>Sizning javobingiz: <Text style={[styles.userAnswerVal, { color: isWin ? '#22c55e' : '#ef4444' }]}>{route.params?.userAnswer}</Text></Text>
+          <Text style={styles.answerText}>{t.correctAnswer} <Text style={styles.correctAnswerVal}>{route.params?.actualAnswer}</Text></Text>
+          <Text style={styles.answerText}>{t.yourAnswer} <Text style={[styles.userAnswerVal, { color: isWin ? '#22c55e' : '#ef4444' }]}>{route.params?.userAnswer}</Text></Text>
         </View>
 
-        {/* Player Card */}
         <Animated.View style={[styles.playerCard, { borderColor: playerBorder, shadowColor: playerColor }, { transform: [{ scale: pulseAnim }], shadowOpacity: 0.8, shadowRadius: 20 }]}>
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
@@ -168,11 +251,11 @@ export default function BattleResultScreen({ navigation, route }) {
               <View style={styles.cardDetails}>
                 <View style={styles.nameRow}>
                   <Text style={styles.flag}>🇺🇿</Text>
-                  <Text style={styles.playerName}>{userData?.name || "O'yinchi"}</Text>
+                  <Text style={styles.playerName}>{userData?.name || t.you}</Text>
                 </View>
                 <View style={styles.trophyRow}>
                   <MaterialCommunityIcons name="star" size={12} color="#facc15" />
-                  <Text style={styles.trophyText}>Daraja {userLevel}</Text>
+                  <Text style={styles.trophyText}>{t.level} {userLevel}</Text>
                 </View>
                 <View style={styles.healthBarTrack}>
                   <View style={[styles.healthBarFill, { backgroundColor: playerColor, width: '100%' }]} />
@@ -187,37 +270,35 @@ export default function BattleResultScreen({ navigation, route }) {
           <View style={styles.cardStats}>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="check-circle-outline" size={20} color="#22c55e" />
-              <Text style={styles.statBoxLabel}>To'g'ri javoblar</Text>
+              <Text style={styles.statBoxLabel}>{t.correctAnswers}</Text>
               <Text style={styles.statBoxValue}>{correct}</Text>
             </View>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="close-circle-outline" size={20} color="#ef4444" />
-              <Text style={styles.statBoxLabel}>Xato javoblar</Text>
+              <Text style={styles.statBoxLabel}>{t.wrongAnswers}</Text>
               <Text style={styles.statBoxValue}>{incorrect}</Text>
             </View>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="timer-outline" size={20} color="#9ca3af" />
-              <Text style={styles.statBoxLabel}>O'rtacha vaqt</Text>
+              <Text style={styles.statBoxLabel}>{t.avgTime}</Text>
               <Text style={styles.statBoxValue}>{avgTime}s</Text>
             </View>
             <View style={styles.statBox}>
               <View style={styles.xpIconBadge}>
                 <Text style={styles.xpIconText}>XP</Text>
               </View>
-              <Text style={styles.statBoxLabel}>Olingan XP</Text>
+              <Text style={styles.statBoxLabel}>{t.gainedXp}</Text>
               <Text style={styles.statBoxValue}>{isWin ? `+25` : '-'}</Text>
             </View>
           </View>
         </Animated.View>
 
-        {/* VS Badge */}
         <View style={styles.vsBadgeContainer}>
           <View style={styles.vsBadgeGlow}>
             <Text style={styles.vsBadgeText}>VS</Text>
           </View>
         </View>
 
-        {/* Opponent Card */}
         <Animated.View style={[styles.playerCard, { borderColor: oppBorder, shadowColor: oppColor }]}>
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
@@ -227,11 +308,11 @@ export default function BattleResultScreen({ navigation, route }) {
               <View style={styles.cardDetails}>
                 <View style={styles.nameRow}>
                   <Text style={styles.flag}>🇺🇿</Text>
-                  <Text style={styles.playerName}>Raqib</Text>
+                  <Text style={styles.playerName}>{t.opponent}</Text>
                 </View>
                 <View style={styles.trophyRow}>
                   <MaterialCommunityIcons name="star" size={12} color="#facc15" />
-                  <Text style={styles.trophyText}>Daraja 10</Text>
+                  <Text style={styles.trophyText}>{t.level} 10</Text>
                 </View>
                 <View style={styles.healthBarTrack}>
                   <View style={[styles.healthBarFill, { backgroundColor: oppColor, width: '100%' }]} />
@@ -246,17 +327,17 @@ export default function BattleResultScreen({ navigation, route }) {
           <View style={styles.cardStats}>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="check-circle-outline" size={20} color="#22c55e" />
-              <Text style={styles.statBoxLabel}>To'g'ri javoblar</Text>
+              <Text style={styles.statBoxLabel}>{t.correctAnswers}</Text>
               <Text style={styles.statBoxValue}>{oppCorrect}</Text>
             </View>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="close-circle-outline" size={20} color="#ef4444" />
-              <Text style={styles.statBoxLabel}>Xato javoblar</Text>
+              <Text style={styles.statBoxLabel}>{t.wrongAnswers}</Text>
               <Text style={styles.statBoxValue}>{oppIncorrect}</Text>
             </View>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="timer-outline" size={20} color="#9ca3af" />
-              <Text style={styles.statBoxLabel}>O'rtacha vaqt</Text>
+              <Text style={styles.statBoxLabel}>{t.avgTime}</Text>
               <Text style={styles.statBoxValue}>{oppAvgTime}s</Text>
             </View>
             <View style={styles.statBox}>
