@@ -4,6 +4,7 @@ import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { calculateUserRank } from '../src/utils/rankUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
 
@@ -49,11 +50,13 @@ export default function BattleGameScreen({ navigation, route }) {
   const getAvatarImg = (userData) => {
     if (!userData) return require('../assets/avatar_maks.png');
     if (userData.character) {
-      const found = baseAvatarsList.find(a => a.name === userData.character);
+      const found = baseAvatarsList.find(a => a.name.toLowerCase() === userData.character.toLowerCase());
       if (found) return found.img;
     }
     return require('../assets/avatar_maks.png');
   };
+
+  const userLevel = userData ? calculateUserRank(userData.xp || 0).levelNumber : 1;
 
   useEffect(() => {
     async function fetchUser() {
@@ -265,7 +268,7 @@ export default function BattleGameScreen({ navigation, route }) {
             </View>
             <View style={styles.trophyRow}>
               <MaterialCommunityIcons name="star" size={12} color="#facc15" />
-              <Text style={styles.trophyText}>Daraja {userData?.level || 1}</Text>
+              <Text style={styles.trophyText}>Daraja {userLevel}</Text>
             </View>
             <View style={styles.healthBarTrack}>
               <View style={[styles.healthBarFill, { backgroundColor: '#0ea5e9', width: '80%' }]} />

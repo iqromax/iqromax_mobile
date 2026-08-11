@@ -4,6 +4,7 @@ import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { calculateUserRank } from '../src/utils/rankUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -121,12 +122,14 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
   const getAvatarImg = (userData) => {
     if (!userData) return require('../assets/avatar_maks.png');
     if (userData.character) {
-      const found = baseAvatarsList.find(a => a.name === userData.character);
+      const found = baseAvatarsList.find(a => a.name.toLowerCase() === userData.character.toLowerCase());
       if (found) return found.img;
     }
     return require('../assets/avatar_maks.png');
   };
   
+  const userLevel = userData ? calculateUserRank(userData.xp || 0).levelNumber : 1;
+
   // Animation values
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -254,7 +257,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           <View style={[styles.avatarGlowWrapper, { shadowColor: '#10B981' }]}>
             <Image source={getAvatarImg(userData)} style={styles.fighterAvatar} contentFit="cover" />
             <View style={[styles.fighterLevel, { backgroundColor: '#10B981' }]}>
-              <Text style={styles.fighterLevelText}>{userData?.level || 1}</Text>
+              <Text style={styles.fighterLevelText}>{userLevel}</Text>
             </View>
           </View>
           <Text style={styles.fighterName}>{userData?.name || t.you}</Text>
