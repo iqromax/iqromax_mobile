@@ -411,7 +411,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
               style={[styles.primaryButton, { backgroundColor: 'rgba(56, 189, 248, 0.1)', borderWidth: 1, borderColor: 'rgba(56, 189, 248, 0.3)', paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', borderRadius: 16, shadowOpacity: 0 }]}
             >
               <MaterialCommunityIcons name="lightning-bolt" size={16} color="#38BDF8" />
-              <Text style={[styles.primaryButtonText, { color: '#38BDF8', marginLeft: 4, fontSize: 13 }]}>+1</Text>
+              <Text style={[styles.primaryButtonText, { color: '#38BDF8', marginLeft: 4, fontSize: 13 }]}>+{missionsList.filter(m => !m.isCompleted).length}</Text>
             </View>
           </TouchableOpacity>
         )}
