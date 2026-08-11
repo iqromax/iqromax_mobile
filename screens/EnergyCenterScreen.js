@@ -646,7 +646,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
                       <Image source={
                         mission.type === 'YOUTUBE' ? require('../assets/ec_youtube.png') :
                         mission.type === 'TELEGRAM' ? require('../assets/ec_telegram.png') :
-                        mission.type === 'VIDEO_UPLOAD' ? require('../assets/ec_trophy.png') :
+                        mission.type === 'VIDEO_UPLOAD' ? require('../assets/ec_video.png') :
                         require('../assets/ec_instagram.png')
                       } style={styles.taskIcon} contentFit="contain" />
                     </View>

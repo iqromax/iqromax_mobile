@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlayCircle, Trash2, Video, Plus, Play, MessageCircle, Camera, Link as LinkIcon, CheckCircle2, Upload } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
-type MissionType = 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM';
+type MissionType = 'YOUTUBE' | 'TELEGRAM' | 'INSTAGRAM' | 'VIDEO_UPLOAD';
 
 interface Mission {
   id: string;
@@ -123,8 +123,12 @@ export default function EnergyCenter() {
       alert("Sarlavhani kiriting!");
       return;
     }
-    if (!link.trim()) {
+    if (missionType !== 'VIDEO_UPLOAD' && !link.trim()) {
       alert("Havolani (Link) kiriting!");
+      return;
+    }
+    if (missionType === 'VIDEO_UPLOAD' && (!fileInputRef.current?.files || fileInputRef.current.files.length === 0)) {
+      alert("Video faylni tanlang!");
       return;
     }
 
@@ -132,7 +136,15 @@ export default function EnergyCenter() {
     const formData = new FormData();
     formData.append('type', missionType);
     formData.append('title', title);
-    if (link) formData.append('link', link);
+    
+    if (missionType === 'VIDEO_UPLOAD') {
+      const file = fileInputRef.current?.files?.[0];
+      if (file) {
+        formData.append('video', file);
+      }
+    } else if (link) {
+      formData.append('link', link);
+    }
 
     try {
       const response = await fetch('/api/admin/missions', {
@@ -187,6 +199,7 @@ export default function EnergyCenter() {
       case 'YOUTUBE': return <Play className="w-5 h-5 text-red-500" />;
       case 'TELEGRAM': return <MessageCircle className="w-5 h-5 text-blue-400" />;
       case 'INSTAGRAM': return <Camera className="w-5 h-5 text-pink-500" />;
+      case 'VIDEO_UPLOAD': return <Video className="w-5 h-5 text-green-500" />;
       default: return <LinkIcon className="w-5 h-5 text-gray-400" />;
     }
   };
@@ -313,7 +326,8 @@ export default function EnergyCenter() {
                               </div>
                               <span className="text-sm font-medium text-white">
                                 {mission.type === 'YOUTUBE' ? 'YouTube' :
-                                 mission.type === 'TELEGRAM' ? 'Telegram' : 'Instagram'}
+                                 mission.type === 'TELEGRAM' ? 'Telegram' :
+                                 mission.type === 'VIDEO_UPLOAD' ? 'Video Yuklash' : 'Instagram'}
                               </span>
                             </div>
                           </td>
@@ -390,6 +404,7 @@ export default function EnergyCenter() {
                     <option value="YOUTUBE">YouTube Video Link</option>
                     <option value="TELEGRAM">Telegram Kanalga Obuna</option>
                     <option value="INSTAGRAM">Instagram Sahifaga Obuna</option>
+                    <option value="VIDEO_UPLOAD">Video Yuklash</option>
                   </select>
                 </div>
 
@@ -405,6 +420,18 @@ export default function EnergyCenter() {
                   />
                 </div>
 
+                {missionType === 'VIDEO_UPLOAD' ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Video fayl</label>
+                    <input 
+                      type="file"
+                      accept="video/*"
+                      ref={fileInputRef}
+                      className="w-full text-white"
+                      required
+                    />
+                  </div>
+                ) : (
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Manzil (URL Link)</label>
                     <input 
@@ -420,6 +447,7 @@ export default function EnergyCenter() {
                       required
                     />
                   </div>
+                )}
 
                 <div className="pt-4 flex gap-3">
                   <button
