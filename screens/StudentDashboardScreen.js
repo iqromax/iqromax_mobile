@@ -2689,10 +2689,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       { id: 2, name: 'Creative Mind', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_david.jpg') },
                       { id: 3, name: 'Mental Warrior', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_kevin.png') },
                       { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg') },
-                      { id: 4, name: 'Ochish uchun', rarity: 'COMMON', locked: true, price: '5 800', type: 'coin', avatar: require('../assets/avatar_lily.jpg') },
-                      { id: 5, name: 'Ochish uchun', rarity: 'RARE', locked: true, price: '15 000', type: 'coin', avatar: require('../assets/avatar_maya.jpg') },
-                      { id: 6, name: 'Ochish uchun', rarity: 'EPIC', locked: true, price: '180', type: 'gem', avatar: require('../assets/avatar_emma.jpg') },
-                      { id: 7, name: 'Ochish uchun', rarity: 'EPIC', locked: true, price: '200', type: 'gem', avatar: require('../assets/avatar_sophia.png') },
+                      { id: 4, name: 'Lily', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_lily.jpg') },
+                      { id: 5, name: 'Maya', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_maya.jpg') },
+                      { id: 6, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg') },
+                      { id: 7, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png') },
                     ].map((item) => {
                       const isSelected = activeAvatarIndex === item.id;
                       return (
