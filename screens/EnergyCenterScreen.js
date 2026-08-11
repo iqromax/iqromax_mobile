@@ -385,21 +385,20 @@ export default function EnergyCenterScreen({ navigation, route }) {
         </View>
 
         {/* Generic Missions Card */}
-        <TouchableOpacity 
-          style={styles.taskCard} 
-          activeOpacity={0.8}
-          onPress={() => setIsMissionsModalVisible(true)}
-        >
-          <View style={styles.taskIconContainer}>
-            <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
-          </View>
-          <View style={[styles.taskContent, { flex: 1 }]}>
-            <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{t.missions}</Text>
-            <Text style={styles.taskDesc}>{t.missionsDesc}</Text>
-            
-            {missionsList.length > 0 ? (
+        {missionsList.length > 0 && missionsList.some(m => !m.isCompleted) && (
+          <TouchableOpacity 
+            style={styles.taskCard} 
+            activeOpacity={0.8}
+            onPress={() => setIsMissionsModalVisible(true)}
+          >
+            <View style={styles.taskIconContainer}>
+              <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
+            </View>
+            <View style={[styles.taskContent, { flex: 1 }]}>
+              <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{t.missions}</Text>
+              <Text style={styles.taskDesc}>{t.missionsDesc}</Text>
+              
               <View style={{ marginTop: 8 }}>
-                <Text style={[styles.taskDesc, { color: '#9CA3AF', fontSize: 10, marginBottom: 4 }]}>{t.missionProgress}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                    <View style={{ flex: 1, height: 4, backgroundColor: '#1E293B', borderRadius: 2, marginRight: 8 }}>
                       <View style={{ width: `${(missionsList.filter(m => m.isCompleted).length / missionsList.length) * 100}%`, height: '100%', backgroundColor: '#FBBF24', borderRadius: 2 }} />
@@ -407,17 +406,15 @@ export default function EnergyCenterScreen({ navigation, route }) {
                    <Text style={{ color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' }}>{missionsList.filter(m => m.isCompleted).length} / {missionsList.length}</Text>
                 </View>
               </View>
-            ) : (
-              <Text style={[styles.taskDesc, { marginTop: 4, color: '#9CA3AF' }]}>Tez kunda...</Text>
-            )}
-          </View>
-          <View 
-            style={[styles.primaryButton, { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: '#FBBF24', paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', minWidth: 60 }]}
-          >
-            <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
-            <Text style={[styles.primaryButtonText, { color: '#FBBF24', marginLeft: 4 }]}>+1</Text>
-          </View>
-        </TouchableOpacity>
+            </View>
+            <View 
+              style={[styles.primaryButton, { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: '#FBBF24', paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', minWidth: 60 }]}
+            >
+              <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
+              <Text style={[styles.primaryButtonText, { color: '#FBBF24', marginLeft: 4 }]}>+1</Text>
+            </View>
+          </TouchableOpacity>
+        )}
 
 
         {/* Watch Video */}
