@@ -2758,7 +2758,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </ScrollView>
             </>
           )}
-
+          {inventorySubTab === 'kiyim' && renderKiyimScreen()}
 
             </View>
 
