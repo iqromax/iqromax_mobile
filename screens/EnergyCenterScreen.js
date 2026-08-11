@@ -36,6 +36,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [dailyVideoClaimed, setDailyVideoClaimed] = useState(false);
   const [adVideoUrl, setAdVideoUrl] = useState(null);
   const [isVideoModalVisible, setIsVideoModalVisible] = useState(false);
+  const [isMissionsModalVisible, setIsMissionsModalVisible] = useState(false);
   const [missionsList, setMissionsList] = useState([]);
   
   const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
@@ -368,39 +369,40 @@ export default function EnergyCenterScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Missions */}
-        {missionsList.length > 0 && (
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionHeaderLine} />
-            <Text style={styles.sectionTitle}>{t.missions}</Text>
-            <View style={styles.sectionHeaderLine} />
+        {/* Generic Missions Card */}
+        <TouchableOpacity 
+          style={styles.taskCard} 
+          activeOpacity={0.8}
+          onPress={() => setIsMissionsModalVisible(true)}
+        >
+          <View style={styles.taskIconContainer}>
+            <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
           </View>
-        )}
-
-        {missionsList.map(mission => (
-          <View key={mission.id} style={styles.taskCard}>
-            <View style={styles.taskIconContainer}>
-              <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
-            </View>
-            <View style={[styles.taskContent, { flex: 1 }]}>
-              <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{mission.title}</Text>
-              <Text style={styles.taskDesc}>
-                {mission.type === 'VIDEO_UPLOAD' ? 'Video yuklash' :
-                 mission.type === 'YOUTUBE' ? 'YouTube videoni ko\'rish' :
-                 mission.type === 'TELEGRAM' ? 'Telegram kanalga obuna' : 'Instagram sahifaga obuna'}
-              </Text>
-            </View>
-            <TouchableOpacity 
-              style={[styles.primaryButton, mission.isCompleted ? { backgroundColor: '#334155' } : { backgroundColor: '#38BDF8' }]}
-              disabled={mission.isCompleted}
-              onPress={() => handleCompleteMission(mission)}
-            >
-              <Text style={[styles.primaryButtonText, mission.isCompleted ? { color: '#9CA3AF' } : {}]}>
-                {mission.isCompleted ? t.claimed : "BAJARISH"}
-              </Text>
-            </TouchableOpacity>
+          <View style={[styles.taskContent, { flex: 1 }]}>
+            <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{t.missions}</Text>
+            <Text style={styles.taskDesc}>{t.missionsDesc}</Text>
+            
+            {missionsList.length > 0 ? (
+              <View style={{ marginTop: 8 }}>
+                <Text style={[styles.taskDesc, { color: '#9CA3AF', fontSize: 10, marginBottom: 4 }]}>{t.missionProgress}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                   <View style={{ flex: 1, height: 4, backgroundColor: '#1E293B', borderRadius: 2, marginRight: 8 }}>
+                      <View style={{ width: `${(missionsList.filter(m => m.isCompleted).length / missionsList.length) * 100}%`, height: '100%', backgroundColor: '#FBBF24', borderRadius: 2 }} />
+                   </View>
+                   <Text style={{ color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' }}>{missionsList.filter(m => m.isCompleted).length} / {missionsList.length}</Text>
+                </View>
+              </View>
+            ) : (
+              <Text style={[styles.taskDesc, { marginTop: 4, color: '#9CA3AF' }]}>Tez kunda...</Text>
+            )}
           </View>
-        ))}
+          <View 
+            style={[styles.primaryButton, { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: '#FBBF24', paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', minWidth: 60 }]}
+          >
+            <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
+            <Text style={[styles.primaryButtonText, { color: '#FBBF24', marginLeft: 4 }]}>+1</Text>
+          </View>
+        </TouchableOpacity>
 
 
         {/* Watch Video */}
@@ -568,6 +570,93 @@ export default function EnergyCenterScreen({ navigation, route }) {
                 </View>
               )}
             </View>
+          </SafeAreaView>
+        </View>
+      </Modal>
+
+      {/* MISSIONS MODAL */}
+      <Modal visible={isMissionsModalVisible} transparent={false} animationType="slide" hardwareAccelerated={true}>
+        <View style={{ flex: 1, backgroundColor: '#05050C' }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            {/* Custom Header for Missions Modal */}
+            <View style={{
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              paddingHorizontal: 20, 
+              paddingVertical: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255,255,255,0.05)'
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(56, 189, 248, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                  <Image source={require('../assets/ec_trophy.png')} style={{ width: 20, height: 20 }} contentFit="contain" />
+                </View>
+                <View>
+                  <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_800ExtraBold', textTransform: 'uppercase' }}>
+                    {t.missions}
+                  </Text>
+                  <Text style={{ color: '#38BDF8', fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                    Har bir missiya uchun 1 energiya
+                  </Text>
+                </View>
+              </View>
+              
+              <TouchableOpacity 
+                style={{ 
+                  backgroundColor: 'rgba(255,255,255,0.1)', 
+                  paddingHorizontal: 16, 
+                  paddingVertical: 8, 
+                  borderRadius: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: 'rgba(255,255,255,0.05)'
+                }}
+                onPress={() => setIsMissionsModalVisible(false)}
+              >
+                <Text style={{ color: '#E2E8F0', fontFamily: 'Inter_700Bold', fontSize: 12, marginRight: 6 }}>{t.close}</Text>
+                <Ionicons name="close" size={16} color="#E2E8F0" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Missions List Container */}
+            <ScrollView contentContainerStyle={{ padding: 20 }}>
+              {missionsList.length === 0 ? (
+                <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 100 }}>
+                  <Ionicons name="file-tray-outline" size={48} color="rgba(255,255,255,0.2)" />
+                  <Text style={{ color: 'rgba(255,255,255,0.4)', marginTop: 12, fontFamily: 'Inter_500Medium', fontSize: 13 }}>Hozircha missiyalar yo'q</Text>
+                </View>
+              ) : (
+                missionsList.map(mission => (
+                  <View key={mission.id} style={styles.taskCard}>
+                    <View style={styles.taskIconContainer}>
+                      <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
+                    </View>
+                    <View style={[styles.taskContent, { flex: 1 }]}>
+                      <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{mission.title}</Text>
+                      <Text style={styles.taskDesc}>
+                        {mission.type === 'VIDEO_UPLOAD' ? 'Video yuklash' :
+                         mission.type === 'YOUTUBE' ? 'YouTube videoni ko\'rish' :
+                         mission.type === 'TELEGRAM' ? 'Telegram kanalga obuna' : 'Instagram sahifaga obuna'}
+                      </Text>
+                    </View>
+                    <TouchableOpacity 
+                      style={[styles.primaryButton, mission.isCompleted ? { backgroundColor: '#334155' } : { backgroundColor: '#38BDF8' }]}
+                      disabled={mission.isCompleted}
+                      onPress={() => {
+                        handleCompleteMission(mission);
+                        setIsMissionsModalVisible(false);
+                      }}
+                    >
+                      <Text style={[styles.primaryButtonText, mission.isCompleted ? { color: '#9CA3AF' } : {}]}>
+                        {mission.isCompleted ? t.claimed : "BAJARISH"}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              )}
+            </ScrollView>
           </SafeAreaView>
         </View>
       </Modal>
