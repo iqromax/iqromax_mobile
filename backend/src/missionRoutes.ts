@@ -98,6 +98,12 @@ router.delete('/admin/missions/:id', async (req, res) => {
     // @ts-ignore
     await prisma.userMission.deleteMany({ where: { missionId: id } });
 
+    // Notify users about mission deletion
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('mission_deleted', id);
+    }
+
     res.json({ message: 'Mission deleted successfully' });
   } catch (error) {
     console.error('Error deleting mission:', error);

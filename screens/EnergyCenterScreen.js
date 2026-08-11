@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video } from 'expo-av';
-import { API_URL } from '../src/config/api';
+import { API_URL, SOCKET_URL } from '../src/config/api';
+import { io } from 'socket.io-client';
 import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -44,6 +45,19 @@ export default function EnergyCenterScreen({ navigation, route }) {
   useEffect(() => {
     checkClaims();
 
+    const socket = io(SOCKET_URL, {
+      path: '/api/socket.io',
+      transports: ['websocket', 'polling']
+    });
+
+    socket.on('new_mission_added', () => {
+      checkClaims();
+    });
+
+    socket.on('mission_deleted', () => {
+      checkClaims();
+    });
+
     const sub1 = DeviceEventEmitter.addListener('new_ad_video_uploaded', (data) => {
       if (data && data.url) {
         const baseUrl = API_URL.replace('/api', '');
@@ -61,6 +75,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
     return () => {
       sub1.remove();
       sub2.remove();
+      socket.disconnect();
     };
   }, []);
 
