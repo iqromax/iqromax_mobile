@@ -6,6 +6,7 @@ import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { calculateUserRank } from '../src/utils/rankUtils';
+import { API_URL } from '../src/config/api';
 
 const { width } = Dimensions.get('window');
 
@@ -55,13 +56,34 @@ export default function BattleResultScreen({ navigation, route }) {
   const isWin = correct >= oppCorrect; // Simple logic: whoever has more correct answers wins
 
   useEffect(() => {
-    async function fetchUser() {
+    async function fetchUserAndSaveXP() {
       try {
         const data = await AsyncStorage.getItem('user_data');
-        if (data) setUserData(JSON.parse(data));
+        if (data) {
+          const uData = JSON.parse(data);
+          setUserData(uData);
+
+          if (isWin) {
+            try {
+              const res = await fetch(`${API_URL}/user/xp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customId: uData.customId || uData.id, xpToAdd: 25 })
+              });
+              if (res.ok) {
+                const resData = await res.json();
+                uData.xp = resData.xp;
+                await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                setUserData({ ...uData });
+              }
+            } catch (err) {
+              console.log('Error saving battle win xp', err);
+            }
+          }
+        }
       } catch (e) {}
     }
-    fetchUser();
+    fetchUserAndSaveXP();
 
     async function playResultSound() {
       try {
@@ -183,7 +205,7 @@ export default function BattleResultScreen({ navigation, route }) {
                 <Text style={styles.xpIconText}>XP</Text>
               </View>
               <Text style={styles.statBoxLabel}>Olingan XP</Text>
-              <Text style={styles.statBoxValue}>{isWin ? `+${xp}` : '-'}</Text>
+              <Text style={styles.statBoxValue}>{isWin ? `+25` : '-'}</Text>
             </View>
           </View>
         </Animated.View>

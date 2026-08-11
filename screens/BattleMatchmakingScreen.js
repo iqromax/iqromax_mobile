@@ -262,8 +262,8 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           </View>
           <Text style={styles.fighterName}>{userData?.name || t.you}</Text>
           <View style={styles.fighterRating}>
-            <MaterialCommunityIcons name="trophy" size={14} color="#F59E0B" />
-            <Text style={styles.fighterRatingText}>1250</Text>
+            <MaterialCommunityIcons name="star" size={14} color="#F59E0B" />
+            <Text style={styles.fighterRatingText}>Daraja {userLevel}</Text>
           </View>
           <View style={[styles.fighterStats, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
             <MaterialCommunityIcons name="target" size={12} color="#10B981" />
@@ -293,8 +293,8 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           </View>
           <Text style={styles.fighterName}>{t.opponent}</Text>
           <View style={styles.fighterRating}>
-            <MaterialCommunityIcons name="trophy" size={14} color="#F59E0B" />
-            <Text style={styles.fighterRatingText}>1312</Text>
+            <MaterialCommunityIcons name="star" size={14} color="#F59E0B" />
+            <Text style={styles.fighterRatingText}>Daraja 10</Text>
           </View>
           <View style={[styles.fighterStats, { backgroundColor: 'rgba(239, 68, 68, 0.1)' }]}>
             <MaterialCommunityIcons name="target" size={12} color="#EF4444" />
