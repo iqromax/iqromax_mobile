@@ -390,7 +390,13 @@ export default function EnergyCenterScreen({ navigation, route }) {
           <TouchableOpacity 
             style={[styles.taskCard, { paddingVertical: 20 }]} 
             activeOpacity={0.8}
-            onPress={() => setIsMissionsModalVisible(true)}
+            onPress={() => {
+              if (currentEnergy >= maxEnergy) {
+                setIsAlertVisible(true);
+                return;
+              }
+              setIsMissionsModalVisible(true);
+            }}
           >
             <View style={[styles.taskIconContainer, { backgroundColor: 'rgba(56, 189, 248, 0.1)', borderColor: 'rgba(56, 189, 248, 0.3)' }]}>
               <Image source={require('../assets/ec_missions.png')} style={styles.taskIcon} contentFit="contain" />
