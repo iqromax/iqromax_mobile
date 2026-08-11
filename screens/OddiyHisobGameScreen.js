@@ -302,7 +302,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     setLastElapsed(timeForThisQuestion.toFixed(1));
 
     if (isCorrect) {
-      playSound('correct');
+      if (!isSpeedMode) playSound('correct');
       setCorrectAnswers(prev => prev + 1);
       const wonXp = calculateQuestionXP();
       setXp(prev => prev + wonXp);
@@ -312,7 +312,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         saveXPToBackend(wonXp);
       }
     } else {
-      playSound('wrong');
+      if (!isSpeedMode) playSound('wrong');
       setIncorrectAnswers(prev => prev + 1);
       setCombo(0);
     }
