@@ -2582,7 +2582,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     {t.invActiveChar}
                   </Text>
                   <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, marginBottom: 4 }} numberOfLines={1}>
-                    {activeAvatarIndex === 0 ? 'Alex' : activeAvatarIndex === 1 ? 'Tech Genius' : activeAvatarIndex === 2 ? 'Creative Mind' : activeAvatarIndex === 3 ? 'Mental Warrior' : activeAvatarIndex === 4 ? 'Lily' : activeAvatarIndex === 5 ? 'Maya' : activeAvatarIndex === 6 ? 'Emma' : 'Sophia'}
+                    {activeAvatarIndex === 0 ? 'Alex' : activeAvatarIndex === 1 ? 'Tech Genius' : activeAvatarIndex === 2 ? 'Creative Mind' : activeAvatarIndex === 3 ? 'Mental Warrior' : activeAvatarIndex === 4 ? 'Lily' : activeAvatarIndex === 5 ? 'Maya' : activeAvatarIndex === 6 ? 'Sophia' : 'Emma'}
                   </Text>
                   <View style={{ alignSelf: 'flex-start', backgroundColor: activeAvatarIndex === 1 || activeAvatarIndex === 2 ? '#581C87' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? '#1E3A8A' : '#1F2937', borderRadius: 4, paddingVertical: 2, paddingHorizontal: 6, marginBottom: 6 }}>
                     <Text style={{ color: activeAvatarIndex === 1 || activeAvatarIndex === 2 ? '#D8B4FE' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 8 }}>
@@ -2691,8 +2691,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg') },
                       { id: 4, name: 'Lily', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_lily.jpg') },
                       { id: 5, name: 'Maya', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_maya.jpg') },
-                      { id: 6, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg') },
-                      { id: 7, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png') },
+                      { id: 6, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png') },
+                      { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg') },
                     ].map((item) => {
                       const isSelected = activeAvatarIndex === item.id;
                       return (
