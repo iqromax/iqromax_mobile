@@ -387,31 +387,31 @@ export default function EnergyCenterScreen({ navigation, route }) {
         {/* Generic Missions Card */}
         {missionsList.length > 0 && missionsList.some(m => !m.isCompleted) && (
           <TouchableOpacity 
-            style={styles.taskCard} 
+            style={[styles.taskCard, { paddingVertical: 20 }]} 
             activeOpacity={0.8}
             onPress={() => setIsMissionsModalVisible(true)}
           >
-            <View style={styles.taskIconContainer}>
+            <View style={[styles.taskIconContainer, { backgroundColor: 'rgba(56, 189, 248, 0.1)', borderColor: 'rgba(56, 189, 248, 0.3)' }]}>
               <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
             </View>
-            <View style={[styles.taskContent, { flex: 1 }]}>
+            <View style={[styles.taskContent, { flex: 1, paddingRight: 16 }]}>
               <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{t.missions}</Text>
-              <Text style={styles.taskDesc}>{t.missionsDesc}</Text>
+              <Text style={[styles.taskDesc, { marginBottom: 10, lineHeight: 16 }]}>{t.missionsDesc}</Text>
               
-              <View style={{ marginTop: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                   <View style={{ flex: 1, height: 4, backgroundColor: '#1E293B', borderRadius: 2, marginRight: 8 }}>
-                      <View style={{ width: `${(missionsList.filter(m => m.isCompleted).length / missionsList.length) * 100}%`, height: '100%', backgroundColor: '#FBBF24', borderRadius: 2 }} />
-                   </View>
-                   <Text style={{ color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' }}>{missionsList.filter(m => m.isCompleted).length} / {missionsList.length}</Text>
-                </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                 <View style={{ width: 100, height: 6, backgroundColor: 'rgba(0,0,0,0.3)', borderRadius: 3, marginRight: 8, overflow: 'hidden' }}>
+                    <View style={{ width: `${(missionsList.filter(m => m.isCompleted).length / missionsList.length) * 100}%`, height: '100%', backgroundColor: '#38BDF8', borderRadius: 3 }} />
+                 </View>
+                 <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>
+                   {missionsList.filter(m => m.isCompleted).length} / {missionsList.length}
+                 </Text>
               </View>
             </View>
             <View 
-              style={[styles.primaryButton, { backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: '#FBBF24', paddingHorizontal: 12, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', minWidth: 60 }]}
+              style={[styles.primaryButton, { backgroundColor: 'rgba(56, 189, 248, 0.1)', borderWidth: 1, borderColor: 'rgba(56, 189, 248, 0.3)', paddingHorizontal: 14, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', borderRadius: 16, shadowOpacity: 0 }]}
             >
-              <MaterialCommunityIcons name="lightning-bolt" size={14} color="#FBBF24" />
-              <Text style={[styles.primaryButtonText, { color: '#FBBF24', marginLeft: 4 }]}>+1</Text>
+              <MaterialCommunityIcons name="lightning-bolt" size={16} color="#38BDF8" />
+              <Text style={[styles.primaryButtonText, { color: '#38BDF8', marginLeft: 4, fontSize: 13 }]}>+1</Text>
             </View>
           </TouchableOpacity>
         )}
