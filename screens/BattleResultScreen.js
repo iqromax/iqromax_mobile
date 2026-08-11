@@ -31,6 +31,7 @@ export default function BattleResultScreen({ navigation, route }) {
   useEffect(() => {
     async function playResultSound() {
       try {
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, allowsRecordingIOS: false, staysActiveInBackground: false });
         const soundAsset = isWin ? require('../assets/sounds/correct.wav') : require('../assets/sounds/wrong.wav');
         const { sound } = await Audio.Sound.createAsync(soundAsset);
         await sound.playAsync();

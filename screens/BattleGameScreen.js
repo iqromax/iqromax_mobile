@@ -1,6 +1,8 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform, Modal, StatusBar, Animated } from 'react-native';
+import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import React, { useState, useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
 
@@ -37,6 +39,7 @@ export default function BattleGameScreen({ navigation, route }) {
     let s1;
     async function loadSounds() {
       try {
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, allowsRecordingIOS: false, staysActiveInBackground: false });
         const { sound: sound1 } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
         tickSound.current = sound1;
         s1 = sound1;
