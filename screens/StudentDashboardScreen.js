@@ -2595,22 +2595,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={{ width: 22, height: 22, borderRadius: 11 }} />
                     <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
                   </View>
-
-                  {/* Frame card */}
-                  <View style={{ width: 68, height: 60, borderRadius: 10, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                    <View style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
-                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 2 }}>RAMKA</Text>
-                    <Image source={require('../assets/gold_frame.png')} style={{ width: 24, height: 24 }} contentFit="contain" />
-                    <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
-                  </View>
-
-                  {/* Background card */}
-                  <View style={{ width: 68, height: 60, borderRadius: 10, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                    <View style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
-                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 2 }}>FON</Text>
-                    <Image source={require('../assets/space_bg.jpg')} style={{ width: 24, height: 16, borderRadius: 2 }} />
-                    <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
-                  </View>
                 </View>
 
                 {/* Bottom Left Absolute Overlay: Level Progress */}
@@ -2623,39 +2607,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
 
-              {/* Sub-navigation tabs (PERSONAJ, RAMKA, FON) */}
-              <View style={{ flexDirection: 'row', paddingHorizontal: 15, gap: 6, marginBottom: 15 }}>
-                {[
-                  { key: 'personaj', label: t.invCharacter, icon: 'face-man-profile' },
-                  { key: 'ramka', label: t.invFrame, icon: 'crop-square' },
-                  { key: 'fon', label: t.invBg, icon: 'image-outline' },
-                ].map((item) => {
-                  const isActive = inventorySubTab === item.key;
-                  return (
-                    <TouchableOpacity
-                      key={item.key}
-                      style={{
-                        flex: 1,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                        backgroundColor: isActive ? 'rgba(234, 179, 8, 0.15)' : '#0F111E',
-                        borderWidth: 1,
-                        borderColor: isActive ? '#EAB308' : '#1F2937',
-                      }}
-                      onPress={() => setInventorySubTab(item.key)}
-                      activeOpacity={0.8}
-                    >
-                      <MaterialCommunityIcons name={item.icon} size={14} color={isActive ? '#EAB308' : '#9CA3AF'} style={{ marginRight: 4 }} />
-                      <Text style={{ color: isActive ? '#EAB308' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>
-                        {item.label}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
             </View>
 
             {/* Scrollable part for items grid and skins */}
@@ -2807,9 +2758,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </ScrollView>
             </>
           )}
-          {inventorySubTab === 'ramka' && renderRamkaScreen()}
-          {inventorySubTab === 'fon' && renderFonScreen()}
-          {inventorySubTab === 'kiyim' && renderKiyimScreen()}
+
 
             </View>
 
