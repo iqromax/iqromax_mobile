@@ -553,7 +553,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
             <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
               {(playingMission && playingMission.fileUrl) || adVideoUrl ? (
                 <Video
-                  source={{ uri: playingMission ? `${API_URL.replace('/api', '')}${playingMission.fileUrl}` : adVideoUrl }}
+                  source={{ uri: playingMission ? `${API_URL}${playingMission.fileUrl}` : adVideoUrl }}
                   style={{ width: '100%', flex: 1 }}
                   useNativeControls={true}
                   resizeMode="contain"
