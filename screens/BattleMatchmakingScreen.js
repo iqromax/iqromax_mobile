@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, SafeAreaView, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -104,11 +105,42 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
   const { language = 'uz', examplesCount = 10, operation = 'oddiy', speed = 1, digits = 1 } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
   const [countdown, setCountdown] = useState(9);
+  const [userData, setUserData] = useState(null);
+
+  const baseAvatarsList = [
+    { id: 0, name: 'Alex', img: require('../assets/avatar_alex.jpg') },
+    { id: 1, name: 'Maks', img: require('../assets/avatar_maks.png') },
+    { id: 2, name: 'David', img: require('../assets/avatar_david.jpg') },
+    { id: 3, name: 'Kevin', img: require('../assets/avatar_kevin.png') },
+    { id: 4, name: 'Lily', img: require('../assets/avatar_lily.jpg') },
+    { id: 5, name: 'Maya', img: require('../assets/avatar_maya.jpg') },
+    { id: 6, name: 'Emma', img: require('../assets/avatar_emma.jpg') },
+    { id: 7, name: 'Sophia', img: require('../assets/avatar_sophia.png') }
+  ];
+
+  const getAvatarImg = (userData) => {
+    if (!userData) return require('../assets/avatar_maks.png');
+    if (userData.character) {
+      const found = baseAvatarsList.find(a => a.name === userData.character);
+      if (found) return found.img;
+    }
+    return require('../assets/avatar_maks.png');
+  };
   
   // Animation values
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
   const opponentAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const data = await AsyncStorage.getItem('user_data');
+        if (data) setUserData(JSON.parse(data));
+      } catch (e) {}
+    }
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     if (countdown <= 5) {
@@ -220,12 +252,12 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
         {/* Player (Left) */}
         <View style={[styles.fighterCard, { borderColor: 'rgba(16, 185, 129, 0.4)', shadowColor: '#10B981' }]}>
           <View style={[styles.avatarGlowWrapper, { shadowColor: '#10B981' }]}>
-            <Image source={require('../assets/avatar_maks.png')} style={styles.fighterAvatar} contentFit="cover" />
+            <Image source={getAvatarImg(userData)} style={styles.fighterAvatar} contentFit="cover" />
             <View style={[styles.fighterLevel, { backgroundColor: '#10B981' }]}>
-              <Text style={styles.fighterLevelText}>12</Text>
+              <Text style={styles.fighterLevelText}>{userData?.level || 1}</Text>
             </View>
           </View>
-          <Text style={styles.fighterName}>{t.you}</Text>
+          <Text style={styles.fighterName}>{userData?.name || t.you}</Text>
           <View style={styles.fighterRating}>
             <MaterialCommunityIcons name="trophy" size={14} color="#F59E0B" />
             <Text style={styles.fighterRatingText}>1250</Text>
@@ -251,7 +283,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           ]
         }]}>
           <View style={[styles.avatarGlowWrapper, { shadowColor: '#EF4444' }]}>
-            <Image source={require('../assets/opponent_1.png')} style={styles.fighterAvatar} contentFit="cover" />
+            <Image source={require('../assets/avatar_david.jpg')} style={styles.fighterAvatar} contentFit="cover" />
             <View style={[styles.fighterLevel, { backgroundColor: '#EF4444' }]}>
               <Text style={styles.fighterLevelText}>10</Text>
             </View>

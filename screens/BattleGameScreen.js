@@ -35,6 +35,26 @@ export default function BattleGameScreen({ navigation, route }) {
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
 
+  const baseAvatarsList = [
+    { id: 0, name: 'Alex', img: require('../assets/avatar_alex.jpg') },
+    { id: 1, name: 'Maks', img: require('../assets/avatar_maks.png') },
+    { id: 2, name: 'David', img: require('../assets/avatar_david.jpg') },
+    { id: 3, name: 'Kevin', img: require('../assets/avatar_kevin.png') },
+    { id: 4, name: 'Lily', img: require('../assets/avatar_lily.jpg') },
+    { id: 5, name: 'Maya', img: require('../assets/avatar_maya.jpg') },
+    { id: 6, name: 'Emma', img: require('../assets/avatar_emma.jpg') },
+    { id: 7, name: 'Sophia', img: require('../assets/avatar_sophia.png') }
+  ];
+
+  const getAvatarImg = (userData) => {
+    if (!userData) return require('../assets/avatar_maks.png');
+    if (userData.character) {
+      const found = baseAvatarsList.find(a => a.name === userData.character);
+      if (found) return found.img;
+    }
+    return require('../assets/avatar_maks.png');
+  };
+
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -236,12 +256,12 @@ export default function BattleGameScreen({ navigation, route }) {
         {/* Player Side */}
         <View style={styles.vsSide}>
           <View style={[styles.avatarGlow, { borderColor: '#0ea5e9', shadowColor: '#0ea5e9' }]}>
-            <Image source={userData?.avatar ? { uri: userData.avatar } : require('../assets/avatar_maks.png')} style={styles.avatarImage} />
+            <Image source={getAvatarImg(userData)} style={styles.avatarImage} />
           </View>
           <View style={styles.playerInfo}>
             <View style={styles.nameRow}>
               <Text style={styles.flag}>🇺🇿</Text>
-              <Text style={styles.playerName}>{userData?.firstName || "O'yinchi"}</Text>
+              <Text style={styles.playerName}>{userData?.name || "O'yinchi"}</Text>
             </View>
             <View style={styles.trophyRow}>
               <MaterialCommunityIcons name="star" size={12} color="#facc15" />
@@ -272,7 +292,7 @@ export default function BattleGameScreen({ navigation, route }) {
             </View>
           </View>
           <View style={[styles.avatarGlow, { borderColor: '#ef4444', shadowColor: '#ef4444' }]}>
-            <Image source={require('../assets/opponent_1.png')} style={styles.avatarImage} />
+            <Image source={require('../assets/avatar_david.jpg')} style={styles.avatarImage} />
           </View>
         </View>
       </View>
