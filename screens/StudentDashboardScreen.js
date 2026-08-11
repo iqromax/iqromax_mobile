@@ -227,8 +227,8 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
     3: require('../assets/models/businessman_optimized.glb'),
     4: require('../assets/models/fashion_model_optimized.glb'),
     5: require('../assets/models/casual_outfit_optimized.glb'),
-    6: require('../assets/models/stylized_girl_optimized.glb'),
-    7: require('../assets/models/beige_trench_coat_optimized.glb')
+    6: require('../assets/models/beige_trench_coat_optimized.glb'),
+    7: require('../assets/models/stylized_girl_optimized.glb')
   };
   
   const modelPath = models[characterIndex] || models[0];
