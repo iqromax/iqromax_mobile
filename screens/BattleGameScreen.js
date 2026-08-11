@@ -312,17 +312,25 @@ export default function BattleGameScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.headerContainer, { paddingTop: insets.top + 10 }]}>
-        <View style={styles.headerTitles}>
-          <Text style={styles.battleTitle}>BATTLE <Text style={styles.badge1v1}>1v1</Text></Text>
+      {/* Header */}
+      <View style={[styles.header, { marginTop: Platform.OS === 'android' ? 10 : 0 }]}>
+        <View style={styles.headerCenter}>
+          <View style={styles.battleTitleRow}>
+            <MaterialCommunityIcons name="sword-cross" size={18} color="#f97316" />
+            <Text style={styles.battleTitle}>BATTLE <Text style={styles.badge1v1}>1v1</Text></Text>
+          </View>
           <Text style={styles.battleSubtitle}>{t.realTime}</Text>
         </View>
       </View>
 
-      <View style={styles.playersTopBar}>
-        <View style={[styles.playerProfileCard, { borderColor: '#10B981', shadowColor: '#10B981' }]}>
-          <View style={styles.avatarMiniGlow}>
-            <Image source={getAvatarImg(userData)} style={styles.avatarMini} contentFit="cover" />
+
+
+      {/* VS Bar */}
+      <View style={styles.vsBarContainer}>
+        {/* Player Side */}
+        <View style={styles.vsSide}>
+          <View style={[styles.avatarGlow, { borderColor: '#0ea5e9', shadowColor: '#0ea5e9' }]}>
+            <Image source={getAvatarImg(userData)} style={styles.avatarImage} />
           </View>
           <View style={styles.playerInfo}>
             <View style={styles.nameRow}>
@@ -339,51 +347,51 @@ export default function BattleGameScreen({ navigation, route }) {
           </View>
         </View>
 
-        <View style={[styles.playerProfileCard, { borderColor: '#EF4444', shadowColor: '#EF4444' }]}>
-          <View style={styles.playerInfoRight}>
-            <View style={styles.nameRowRight}>
-              <Text style={styles.playerName}>{t.opponent}</Text>
-              <Text style={styles.flag}>🇺🇿</Text>
-            </View>
-            <View style={styles.trophyRowRight}>
-              <Text style={styles.trophyText}>{t.level} 10</Text>
-              <MaterialCommunityIcons name="star" size={12} color="#facc15" />
-            </View>
-            <View style={styles.healthBarTrack}>
-              <View style={[styles.healthBarFill, { backgroundColor: '#ef4444', width: '60%' }]} />
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.gameAreaWrapper}>
+        {/* Center Timer */}
         <View style={styles.timerWrapper}>
           <View style={styles.timerCircle}>
             <Text style={styles.timerText}>{formatTime(elapsedTime)}</Text>
           </View>
         </View>
-        <View style={styles.gameArea}>
-          {phase === 'countdown' && (
+
+        {/* Opponent Side */}
+        <View style={styles.vsSide}>
+          <View style={styles.opponentInfo}>
+            <View style={[styles.nameRow, { justifyContent: 'flex-end' }]}>
+              <Text style={styles.playerName}>{t.opponent}</Text>
+              <Text style={styles.flag}>🇺🇿</Text>
+            </View>
+            <View style={[styles.healthBarTrack, { alignSelf: 'flex-end' }]}>
+              <View style={[styles.healthBarFill, { backgroundColor: '#ef4444', width: '60%' }]} />
+            </View>
+          </View>
+          <View style={[styles.avatarGlow, { borderColor: '#ef4444', shadowColor: '#ef4444' }]}>
+            <Image source={require('../assets/avatar_david.jpg')} style={styles.avatarImage} />
+          </View>
+        </View>
+      </View>
+
+      {/* Main Game Area */}
+      <View style={styles.gameAreaWrapper}>
+
+        {phase === 'countdown' ? (
+          <View style={styles.gameArea}>
             <Text style={{ fontSize: 120, color: '#f97316', fontFamily: 'Inter_800ExtraBold', textShadowColor: 'rgba(249, 115, 22, 0.5)', textShadowRadius: 20 }}>
               {startCountdown}
             </Text>
-          )}
-          {phase === 'flashing' && (
-            <View style={{ alignItems: 'center' }}>
-              <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.getReady}</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
-                <Text style={styles.mainNumber}>{sequence[seqIndex]?.num || '?'}</Text>
-                {sequence[seqIndex]?.op ? <Text style={styles.operator}>{sequence[seqIndex].op}</Text> : null}
-              </View>
-            </View>
-          )}
-          {phase === 'input' && (
-            <View style={{ alignItems: 'center' }}>
-              <Text style={styles.mainNumber}>{inputValue || '?'}</Text>
-              <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.enterAnswer}</Text>
-            </View>
-          )}
-        </View>
+            <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.getReady}</Text>
+          </View>
+        ) : phase === 'flashing' ? (
+          <View style={styles.gameArea}>
+            <Text style={styles.mainNumber}>{sequence[seqIndex]?.num || '?'}</Text>
+            {sequence[seqIndex]?.op ? <Text style={styles.operator}>{sequence[seqIndex].op}</Text> : null}
+          </View>
+        ) : (
+          <View style={styles.gameArea}>
+            <Text style={styles.mainNumber}>{inputValue || '?'}</Text>
+            <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.enterAnswer}</Text>
+          </View>
+        )}
       </View>
 
       {phase === 'input' ? (
@@ -414,33 +422,38 @@ export default function BattleGameScreen({ navigation, route }) {
           ))}
         </View>
       ) : (
-        <View style={styles.footerActions}>
-          <TouchableOpacity style={styles.chatBtn}>
-            <MaterialCommunityIcons name="chat-processing" size={20} color="#fff" />
-            <Text style={styles.chatBtnText}>{t.chat}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.leaveBtn} onPress={() => setIsExitModalVisible(true)}>
-            <MaterialCommunityIcons name="exit-run" size={20} color="#ef4444" />
-            <Text style={styles.leaveBtnText}>{t.leaveBtn}</Text>
-          </TouchableOpacity>
+        <View style={styles.bottomPanel}>
+          <View style={styles.actionsRow}>
+            <TouchableOpacity style={styles.chatBtn}>
+              <MaterialCommunityIcons name="chat-processing-outline" size={20} color="#d1d5db" />
+              <Text style={styles.chatBtnText}>{t.chat}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.leaveBtn} onPress={() => setIsExitModalVisible(true)}>
+              <MaterialCommunityIcons name="exit-to-app" size={20} color="#ef4444" />
+              <Text style={styles.leaveBtnText}>{t.leaveBtn}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
-      <Modal visible={isExitModalVisible} transparent animationType="fade">
+      {/* Exit Modal */}
+      <Modal transparent visible={isExitModalVisible} animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <MaterialCommunityIcons name="alert-circle-outline" size={48} color="#ef4444" />
-            <Text style={styles.modalTitle}>{t.exitTitle}</Text>
+            <View style={styles.modalHeader}>
+              <MaterialCommunityIcons name="alert-circle-outline" size={32} color="#f97316" />
+              <Text style={styles.modalTitle}>{t.exitTitle}</Text>
+            </View>
             <Text style={styles.modalText}>{t.exitDesc}</Text>
-            <View style={styles.modalActions}>
+            <View style={styles.modalButtons}>
               <TouchableOpacity style={styles.modalBtnNo} onPress={() => setIsExitModalVisible(false)}>
-                <Text style={styles.modalBtnNoText}>Yo'q</Text>
+                <Text style={styles.modalBtnNoText}>{t.no}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.modalBtnYes} onPress={() => {
                 setIsExitModalVisible(false);
-                navigation.navigate('StudentDashboard', { initialTab: 'exercise', initialExerciseType: 'battle' });
+                navigation.goBack();
               }}>
-                <Text style={styles.modalBtnYesText}>Ha</Text>
+                <Text style={styles.modalBtnYesText}>{t.yes}</Text>
               </TouchableOpacity>
             </View>
           </View>

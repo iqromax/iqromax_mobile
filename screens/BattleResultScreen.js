@@ -146,7 +146,7 @@ export default function BattleResultScreen({ navigation, route }) {
   } = route.params || {};
 
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
-  const isWin = correct >= oppCorrect; 
+  const isWin = correct >= oppCorrect; // Simple logic: whoever has more correct answers wins
 
   useEffect(() => {
     async function fetchUserAndSaveXP() {
@@ -193,10 +193,11 @@ export default function BattleResultScreen({ navigation, route }) {
     }
     playResultSound();
 
-    Animated.parallel([
-        Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
-        Animated.timing(slideUpAnim, { toValue: 0, duration: 800, useNativeDriver: true })
-    ]).start();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
 
     Animated.loop(
       Animated.sequence([
@@ -223,14 +224,20 @@ export default function BattleResultScreen({ navigation, route }) {
   const oppColor = !isWin ? winnerColor : loserColor;
   const oppBorder = !isWin ? winnerBorder : loserBorder;
   
-  const mainColor = isWin ? '#f59e0b' : '#ef4444';
+  const userScore = (correct * 100) - (incorrect * 20) + (maxCombo * 5);
+  const oppScore = (oppCorrect * 100) - (oppIncorrect * 20) + (oppMaxCombo * 5);
+
+  const mainColor = isWin ? '#f59e0b' : '#ef4444'; // Orange for Victory, Red for Defeat
   const mainTitle = isWin ? t.winTitle : t.loseTitle;
   const subTitle = isWin ? t.winSub : t.loseSub;
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header Removed */}
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Animated.View style={[styles.cardsWrapper, { opacity: fadeAnim }]}>
+        {/* Main Title Area */}
         <View style={styles.titleArea}>
           {isWin && <MaterialCommunityIcons name="crown" size={40} color="#f59e0b" style={styles.crownIcon} />}
           <Text style={[styles.mainTitleText, { color: mainColor }]}>{mainTitle}</Text>
@@ -242,6 +249,7 @@ export default function BattleResultScreen({ navigation, route }) {
           <Text style={styles.answerText}>{t.yourAnswer} <Text style={[styles.userAnswerVal, { color: isWin ? '#22c55e' : '#ef4444' }]}>{route.params?.userAnswer}</Text></Text>
         </View>
 
+        {/* Player Card */}
         <Animated.View style={[styles.playerCard, { borderColor: playerBorder, shadowColor: playerColor }, { transform: [{ scale: pulseAnim }], shadowOpacity: 0.8, shadowRadius: 20 }]}>
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
@@ -293,12 +301,14 @@ export default function BattleResultScreen({ navigation, route }) {
           </View>
         </Animated.View>
 
+        {/* VS Badge */}
         <View style={styles.vsBadgeContainer}>
           <View style={styles.vsBadgeGlow}>
             <Text style={styles.vsBadgeText}>VS</Text>
           </View>
         </View>
 
+        {/* Opponent Card */}
         <Animated.View style={[styles.playerCard, { borderColor: oppBorder, shadowColor: oppColor }]}>
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
@@ -344,7 +354,7 @@ export default function BattleResultScreen({ navigation, route }) {
               <View style={styles.xpIconBadge}>
                 <Text style={styles.xpIconText}>XP</Text>
               </View>
-              <Text style={styles.statBoxLabel}>Olingan XP</Text>
+              <Text style={styles.statBoxLabel}>{t.gainedXp}</Text>
               <Text style={styles.statBoxValue}>{!isWin ? `+${oppCorrect * 15}` : '-'}</Text>
             </View>
           </View>
@@ -357,17 +367,17 @@ export default function BattleResultScreen({ navigation, route }) {
           <View style={styles.actionButtonsRow}>
           <TouchableOpacity style={styles.chatBtn}>
             <MaterialCommunityIcons name="chat-processing-outline" size={18} color="#d1d5db" />
-            <Text style={styles.chatBtnText}>CHAT</Text>
+            <Text style={styles.chatBtnText}>{t.chat}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.playAgainBtn} onPress={() => navigation.navigate('BattleSettings')}>
-            <Text style={styles.playAgainBtnText}>YANA BIR O'YIN</Text>
+          <TouchableOpacity style={styles.playAgainBtn} onPress={() => navigation.navigate('BattleSettings', { language })}>
+            <Text style={styles.playAgainBtnText}>{t.playAgain}</Text>
             <MaterialCommunityIcons name="refresh" size={18} color="#fff" />
           </TouchableOpacity>
         </View>
 
-          <TouchableOpacity style={styles.homeBtn} onPress={() => navigation.navigate('StudentDashboard', { initialTab: 'exercise', initialExerciseType: 'battle' })}>
+          <TouchableOpacity style={styles.homeBtn} onPress={() => navigation.navigate('StudentDashboard', { initialTab: 'exercise', initialExerciseType: 'battle', language })}>
             <MaterialCommunityIcons name="home" size={20} color="#fff" />
-            <Text style={styles.homeBtnText}>BOSH SAHIFAGA QAYTISH</Text>
+            <Text style={styles.homeBtnText}>{t.home}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
