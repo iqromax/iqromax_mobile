@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform, Modal, StatusBar } from 'react-native';
-import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
 
@@ -31,6 +30,33 @@ export default function BattleGameScreen({ navigation, route }) {
 
 
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+
+  const tickSound = useRef(null);
+
+  useEffect(() => {
+    let s1;
+    async function loadSounds() {
+      try {
+        const { sound: sound1 } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
+        tickSound.current = sound1;
+        s1 = sound1;
+      } catch (e) {
+        console.log('Error loading sounds:', e);
+      }
+    }
+    loadSounds();
+    return () => {
+      if (s1) s1.unloadAsync();
+    };
+  }, []);
+
+  const playSound = async (type) => {
+    try {
+      if (type === 'tick' && tickSound.current) {
+        await tickSound.current.replayAsync();
+      }
+    } catch (e) {}
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -66,6 +92,7 @@ export default function BattleGameScreen({ navigation, route }) {
         setPhase('countdown');
         setStartCountdown(3);
       } else {
+        playSound('tick');
         setPhase('flashing');
         setQuestionStartTime(Date.now());
       }
@@ -81,6 +108,7 @@ export default function BattleGameScreen({ navigation, route }) {
         }, 1000);
         return () => clearTimeout(timer);
       } else {
+        playSound('tick');
         setPhase('flashing');
         setQuestionStartTime(Date.now());
       }
@@ -94,6 +122,7 @@ export default function BattleGameScreen({ navigation, route }) {
         const delay = speed * 1000;
         timeout = setTimeout(() => {
           if (seqIndex + 1 < sequence.length) {
+            playSound('tick');
             setSeqIndex(seqIndex + 1);
           } else {
             setQuestionStartTime(Date.now());
@@ -228,7 +257,7 @@ export default function BattleGameScreen({ navigation, route }) {
             </View>
           </View>
           <View style={[styles.avatarGlow, { borderColor: '#ef4444', shadowColor: '#ef4444' }]}>
-            <Image source={require('../assets/opponent_1.png')} style={styles.avatarImage} />
+            <Image source={require('../assets/bot_chempion.png')} style={styles.avatarImage} />
           </View>
         </View>
       </View>

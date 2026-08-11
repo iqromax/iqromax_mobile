@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform, ScrollView, Animated, StatusBar } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Audio } from 'expo-av';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -12,21 +13,6 @@ export default function BattleResultScreen({ navigation, route }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.05, duration: 800, useNativeDriver: true }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-      ])
-    ).start();
-  }, []);
-  
   const {
     correct = 0,
     incorrect = 0,
@@ -41,6 +27,35 @@ export default function BattleResultScreen({ navigation, route }) {
   } = route.params || {};
 
   const isWin = correct >= oppCorrect; // Simple logic: whoever has more correct answers wins
+
+  useEffect(() => {
+    async function playResultSound() {
+      try {
+        const soundAsset = isWin ? require('../assets/sounds/correct.wav') : require('../assets/sounds/wrong.wav');
+        const { sound } = await Audio.Sound.createAsync(soundAsset);
+        await sound.playAsync();
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.didJustFinish) sound.unloadAsync();
+        });
+      } catch (e) {
+        console.log('Error playing result sound', e);
+      }
+    }
+    playResultSound();
+
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.05, duration: 800, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+      ])
+    ).start();
+  }, [isWin]);
 
   const winnerPhrases = ["A'lo!", "Qoyil!", "Zo'r!", "Yaxshi!"];
   const loserPhrases = ["Afsus", "Taslim bo'lmang!", "Keyingi safar"];
@@ -150,7 +165,7 @@ export default function BattleResultScreen({ navigation, route }) {
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
               <View style={[styles.avatarGlow, { borderColor: oppColor }]}>
-                <Image source={require('../assets/opponent_1.png')} style={styles.avatarImage} />
+                <Image source={require('../assets/bot_chempion.png')} style={styles.avatarImage} />
               </View>
               <View style={styles.cardDetails}>
                 <View style={styles.nameRow}>
