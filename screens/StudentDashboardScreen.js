@@ -2552,29 +2552,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <>
               <View style={{ flex: 0 }}>
             {/* End Global Header */}
-              {/* Tab Title & Stats button */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginVertical: 10, position: 'relative', height: 40 }}>
-                <TouchableOpacity 
-                  style={{ 
-                    flexDirection: 'row', 
-                    alignItems: 'center', 
-                    backgroundColor: '#0F111E', 
-                    borderWidth: 1, 
-                    borderColor: '#1F2937', 
-                    borderRadius: 8, 
-                    paddingVertical: 6, 
-                    paddingHorizontal: 12, 
-                    position: 'absolute', 
-                    right: 15,
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <MaterialCommunityIcons name="chart-bar" size={14} color="#A855F7" style={{ marginRight: 6 }} />
-                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 10, letterSpacing: 0.5 }}>
-                    {t.stats}
-                  </Text>
-                </TouchableOpacity>
-              </View>
 
               {/* Showcase Container */}
               <View style={{ height: 350, position: 'relative', marginHorizontal: 15, borderRadius: 16, overflow: 'hidden', marginBottom: 15 }}>
