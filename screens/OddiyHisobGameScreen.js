@@ -65,18 +65,47 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
 
+  const tickSound = useRef(null);
+  const correctSound = useRef(null);
+  const wrongSound = useRef(null);
+
+  useEffect(() => {
+    let s1, s2, s3;
+    async function loadSounds() {
+      try {
+        const { sound: sound1 } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
+        tickSound.current = sound1;
+        s1 = sound1;
+        
+        const { sound: sound2 } = await Audio.Sound.createAsync(require('../assets/sounds/correct.wav'));
+        correctSound.current = sound2;
+        s2 = sound2;
+        
+        const { sound: sound3 } = await Audio.Sound.createAsync(require('../assets/sounds/wrong.wav'));
+        wrongSound.current = sound3;
+        s3 = sound3;
+      } catch (e) {
+        console.log('Error loading sounds:', e);
+      }
+    }
+    loadSounds();
+    
+    return () => {
+      if (s1) s1.unloadAsync();
+      if (s2) s2.unloadAsync();
+      if (s3) s3.unloadAsync();
+    };
+  }, []);
+
   const playSound = async (type) => {
     try {
-      let soundAsset;
-      if (type === 'tick') soundAsset = require('../assets/sounds/tick.wav');
-      else if (type === 'correct') soundAsset = require('../assets/sounds/correct.wav');
-      else if (type === 'wrong') soundAsset = require('../assets/sounds/wrong.wav');
-      
-      const { sound } = await Audio.Sound.createAsync(soundAsset);
-      await sound.playAsync();
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) sound.unloadAsync();
-      });
+      if (type === 'tick' && tickSound.current) {
+        await tickSound.current.replayAsync();
+      } else if (type === 'correct' && correctSound.current) {
+        await correctSound.current.replayAsync();
+      } else if (type === 'wrong' && wrongSound.current) {
+        await wrongSound.current.replayAsync();
+      }
     } catch (e) {
       console.log('Error playing sound', e);
     }
