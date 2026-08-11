@@ -744,16 +744,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [userRankInfo?.levelNumber]);
 
   const framesData = [
-    { id: 1, name: 'Tech Frame', rarity: 'EPIC', color: '#A855F7', state: 'AKTIV', image: require('../assets/gold_frame.png') },
-    { id: 2, name: 'Neon Frame', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/gold_frame.png') },
-    { id: 3, name: 'Cyber Frame', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/gold_frame.png') },
-    { id: 4, name: 'Warrior Frame', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/gold_frame.png') },
-    { id: 5, name: 'Elite Frame', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '10 000', image: require('../assets/gold_frame.png') },
-    { id: 6, name: 'Golden Frame', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '8 000', image: require('../assets/gold_frame.png') },
-    { id: 7, name: 'Flame Frame', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/gold_frame.png') },
-    { id: 8, name: 'Ice Frame', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/gold_frame.png') },
-    { id: 9, name: 'Shadow Frame', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/gold_frame.png') },
-    { id: 10, name: 'Hero Frame', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '15 000', image: require('../assets/gold_frame.png') },
+    { id: 1, name: 'Ramka 1', rarity: 'EPIC', color: '#A855F7', state: 'AKTIV', image: require('../assets/ramka1.png') },
+    { id: 2, name: 'Ramka 2', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/ramka2.png') },
+    { id: 3, name: 'Ramka 3', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/ramka3.png') },
+    { id: 4, name: 'Ramka 4', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/ramka4.png') },
   ];
 
   const [activeFonFilter, setActiveFonFilter] = useState('BARCHASI');
@@ -2678,9 +2672,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase' }}>
                       {t.characters}
                     </Text>
-                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10 }}>
-                      {`${t.invUnlocked} 3 / 8`}
-                    </Text>
+
                   </View>
 
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
