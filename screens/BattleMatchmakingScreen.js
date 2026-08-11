@@ -251,7 +251,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           ]
         }]}>
           <View style={[styles.avatarGlowWrapper, { shadowColor: '#EF4444' }]}>
-            <Image source={require('../assets/bot_chempion.png')} style={styles.fighterAvatar} contentFit="cover" />
+            <Image source={require('../assets/opponent_1.png')} style={styles.fighterAvatar} contentFit="cover" />
             <View style={[styles.fighterLevel, { backgroundColor: '#EF4444' }]}>
               <Text style={styles.fighterLevelText}>10</Text>
             </View>

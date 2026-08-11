@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform, ScrollView, Animated, StatusBar } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
@@ -12,6 +13,8 @@ export default function BattleResultScreen({ navigation, route }) {
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
+  
+  const [userData, setUserData] = useState(null);
 
   const {
     correct = 0,
@@ -29,6 +32,14 @@ export default function BattleResultScreen({ navigation, route }) {
   const isWin = correct >= oppCorrect; // Simple logic: whoever has more correct answers wins
 
   useEffect(() => {
+    async function fetchUser() {
+      try {
+        const data = await AsyncStorage.getItem('user_data');
+        if (data) setUserData(JSON.parse(data));
+      } catch (e) {}
+    }
+    fetchUser();
+
     async function playResultSound() {
       try {
         await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, allowsRecordingIOS: false, staysActiveInBackground: false });
@@ -107,16 +118,16 @@ export default function BattleResultScreen({ navigation, route }) {
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
               <View style={[styles.avatarGlow, { borderColor: playerColor }]}>
-                <Image source={require('../assets/avatar_maks.png')} style={styles.avatarImage} />
+                <Image source={userData?.avatar ? { uri: userData.avatar } : require('../assets/avatar_maks.png')} style={styles.avatarImage} />
               </View>
               <View style={styles.cardDetails}>
                 <View style={styles.nameRow}>
                   <Text style={styles.flag}>🇺🇿</Text>
-                  <Text style={styles.playerName}>IQROMAX</Text>
+                  <Text style={styles.playerName}>{userData?.firstName || "O'yinchi"}</Text>
                 </View>
                 <View style={styles.trophyRow}>
-                  <MaterialCommunityIcons name="trophy" size={12} color="#facc15" />
-                  <Text style={styles.trophyText}>1 248 <Text style={{ color: isWin ? '#22c55e' : '#ef4444' }}>{isWin ? '+18' : '-18'}</Text></Text>
+                  <MaterialCommunityIcons name="star" size={12} color="#facc15" />
+                  <Text style={styles.trophyText}>Daraja {userData?.level || 1}</Text>
                 </View>
                 <View style={styles.healthBarTrack}>
                   <View style={[styles.healthBarFill, { backgroundColor: playerColor, width: '100%' }]} />
@@ -166,7 +177,7 @@ export default function BattleResultScreen({ navigation, route }) {
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
               <View style={[styles.avatarGlow, { borderColor: oppColor }]}>
-                <Image source={require('../assets/bot_chempion.png')} style={styles.avatarImage} />
+                <Image source={require('../assets/opponent_1.png')} style={styles.avatarImage} />
               </View>
               <View style={styles.cardDetails}>
                 <View style={styles.nameRow}>
@@ -174,8 +185,8 @@ export default function BattleResultScreen({ navigation, route }) {
                   <Text style={styles.playerName}>Raqib</Text>
                 </View>
                 <View style={styles.trophyRow}>
-                  <MaterialCommunityIcons name="trophy" size={12} color="#facc15" />
-                  <Text style={styles.trophyText}>1 312 <Text style={{ color: !isWin ? '#22c55e' : '#ef4444' }}>{!isWin ? '+18' : '-18'}</Text></Text>
+                  <MaterialCommunityIcons name="star" size={12} color="#facc15" />
+                  <Text style={styles.trophyText}>Daraja 10</Text>
                 </View>
                 <View style={styles.healthBarTrack}>
                   <View style={[styles.healthBarFill, { backgroundColor: oppColor, width: '100%' }]} />

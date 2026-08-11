@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Pla
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
 
@@ -32,6 +33,17 @@ export default function BattleGameScreen({ navigation, route }) {
 
 
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const data = await AsyncStorage.getItem('user_data');
+        if (data) setUserData(JSON.parse(data));
+      } catch (e) {}
+    }
+    fetchUser();
+  }, []);
 
   const tickSound = useRef(null);
 
@@ -224,16 +236,16 @@ export default function BattleGameScreen({ navigation, route }) {
         {/* Player Side */}
         <View style={styles.vsSide}>
           <View style={[styles.avatarGlow, { borderColor: '#0ea5e9', shadowColor: '#0ea5e9' }]}>
-            <Image source={require('../assets/avatar_maks.png')} style={styles.avatarImage} />
+            <Image source={userData?.avatar ? { uri: userData.avatar } : require('../assets/avatar_maks.png')} style={styles.avatarImage} />
           </View>
           <View style={styles.playerInfo}>
             <View style={styles.nameRow}>
               <Text style={styles.flag}>🇺🇿</Text>
-              <Text style={styles.playerName}>IQROMAX</Text>
+              <Text style={styles.playerName}>{userData?.firstName || "O'yinchi"}</Text>
             </View>
             <View style={styles.trophyRow}>
-              <MaterialCommunityIcons name="trophy" size={12} color="#facc15" />
-              <Text style={styles.trophyText}>1 246</Text>
+              <MaterialCommunityIcons name="star" size={12} color="#facc15" />
+              <Text style={styles.trophyText}>Daraja {userData?.level || 1}</Text>
             </View>
             <View style={styles.healthBarTrack}>
               <View style={[styles.healthBarFill, { backgroundColor: '#0ea5e9', width: '80%' }]} />
@@ -260,7 +272,7 @@ export default function BattleGameScreen({ navigation, route }) {
             </View>
           </View>
           <View style={[styles.avatarGlow, { borderColor: '#ef4444', shadowColor: '#ef4444' }]}>
-            <Image source={require('../assets/bot_chempion.png')} style={styles.avatarImage} />
+            <Image source={require('../assets/opponent_1.png')} style={styles.avatarImage} />
           </View>
         </View>
       </View>
