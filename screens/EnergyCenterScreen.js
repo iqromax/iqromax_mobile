@@ -392,7 +392,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
             onPress={() => setIsMissionsModalVisible(true)}
           >
             <View style={[styles.taskIconContainer, { backgroundColor: 'rgba(56, 189, 248, 0.1)', borderColor: 'rgba(56, 189, 248, 0.3)' }]}>
-              <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
+              <Image source={require('../assets/ec_missions.png')} style={styles.taskIcon} contentFit="contain" />
             </View>
             <View style={[styles.taskContent, { flex: 1, paddingRight: 16 }]}>
               <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{t.missions}</Text>
