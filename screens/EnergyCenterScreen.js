@@ -646,7 +646,12 @@ export default function EnergyCenterScreen({ navigation, route }) {
                 missionsList.map(mission => (
                   <View key={mission.id} style={styles.taskCard}>
                     <View style={styles.taskIconContainer}>
-                      <Image source={require('../assets/ec_trophy.png')} style={styles.taskIcon} contentFit="contain" />
+                      <Image source={
+                        mission.type === 'YOUTUBE' ? require('../assets/ec_youtube.png') :
+                        mission.type === 'TELEGRAM' ? require('../assets/ec_telegram.png') :
+                        mission.type === 'VIDEO_UPLOAD' ? require('../assets/ec_trophy.png') :
+                        require('../assets/ec_instagram.png')
+                      } style={styles.taskIcon} contentFit="contain" />
                     </View>
                     <View style={[styles.taskContent, { flex: 1 }]}>
                       <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{mission.title}</Text>
