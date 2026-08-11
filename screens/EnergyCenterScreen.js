@@ -39,6 +39,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [isVideoModalVisible, setIsVideoModalVisible] = useState(false);
   const [isMissionsModalVisible, setIsMissionsModalVisible] = useState(false);
   const [missionsList, setMissionsList] = useState([]);
+  const [playingMission, setPlayingMission] = useState(null);
   
   const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
 
@@ -519,7 +520,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
                 </View>
                 <View>
                   <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_800ExtraBold', textTransform: 'uppercase' }}>
-                    {t.watchVideo}
+                    {playingMission ? playingMission.title : t.watchVideo}
                   </Text>
                   <Text style={{ color: '#FBBF24', fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
                     Mukofot: +1 Energiya
@@ -538,7 +539,10 @@ export default function EnergyCenterScreen({ navigation, route }) {
                   borderWidth: 1,
                   borderColor: 'rgba(255,255,255,0.05)'
                 }}
-                onPress={() => setIsVideoModalVisible(false)}
+                onPress={() => {
+                  setIsVideoModalVisible(false);
+                  setPlayingMission(null);
+                }}
               >
                 <Text style={{ color: '#E2E8F0', fontFamily: 'Inter_700Bold', fontSize: 12, marginRight: 6 }}>{t.close}</Text>
                 <Ionicons name="close" size={16} color="#E2E8F0" />
@@ -547,9 +551,9 @@ export default function EnergyCenterScreen({ navigation, route }) {
 
             {/* Video Container */}
             <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
-              {adVideoUrl ? (
+              {(playingMission && playingMission.fileUrl) || adVideoUrl ? (
                 <Video
-                  source={{ uri: adVideoUrl }}
+                  source={{ uri: playingMission ? `${API_URL.replace('/api', '')}${playingMission.fileUrl}` : adVideoUrl }}
                   style={{ width: '100%', flex: 1 }}
                   useNativeControls={true}
                   resizeMode="contain"
@@ -558,19 +562,25 @@ export default function EnergyCenterScreen({ navigation, route }) {
                     console.error('Video error:', error);
                     alert('Video o\'qishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko\'ring.');
                     setIsVideoModalVisible(false);
+                    setPlayingMission(null);
                   }}
                   onPlaybackStatusUpdate={async (status) => {
                     if (status.didJustFinish) {
                       setIsVideoModalVisible(false);
                       try {
-                        await addEnergy(1);
-                        await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
-                        if (adVideoTimestamp) {
-                          await AsyncStorage.setItem('claimed_video_timestamp', String(adVideoTimestamp));
+                        if (playingMission) {
+                          handleCompleteMission(playingMission);
+                          setPlayingMission(null);
+                        } else {
+                          await addEnergy(1);
+                          await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
+                          if (adVideoTimestamp) {
+                            await AsyncStorage.setItem('claimed_video_timestamp', String(adVideoTimestamp));
+                          }
+                          setDailyVideoClaimed(true);
                         }
-                        setDailyVideoClaimed(true);
                       } catch (e) {
-                        console.error('Error claiming ad video:', e);
+                        console.error('Error claiming video:', e);
                       }
                     }
                   }}
@@ -602,7 +612,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
             }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(56, 189, 248, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
-                  <Image source={require('../assets/ec_trophy.png')} style={{ width: 20, height: 20 }} contentFit="contain" />
+                  <Image source={require('../assets/ec_missions.png')} style={{ width: 20, height: 20 }} contentFit="contain" />
                 </View>
                 <View>
                   <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_800ExtraBold', textTransform: 'uppercase' }}>
@@ -653,7 +663,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
                     <View style={[styles.taskContent, { flex: 1 }]}>
                       <Text style={[styles.taskTitle, { color: '#38BDF8' }]}>{mission.title}</Text>
                       <Text style={styles.taskDesc}>
-                        {mission.type === 'VIDEO_UPLOAD' ? 'Video yuklash' :
+                        {mission.type === 'VIDEO_UPLOAD' ? 'Video ko\'rish' :
                          mission.type === 'YOUTUBE' ? 'YouTube videoni ko\'rish' :
                          mission.type === 'TELEGRAM' ? 'Telegram kanalga obuna' : 'Instagram sahifaga obuna'}
                       </Text>
@@ -662,8 +672,14 @@ export default function EnergyCenterScreen({ navigation, route }) {
                       style={[styles.primaryButton, mission.isCompleted ? { backgroundColor: '#334155' } : { backgroundColor: '#38BDF8' }]}
                       disabled={mission.isCompleted}
                       onPress={() => {
-                        handleCompleteMission(mission);
-                        setIsMissionsModalVisible(false);
+                        if (mission.type === 'VIDEO_UPLOAD') {
+                          setIsMissionsModalVisible(false);
+                          setPlayingMission(mission);
+                          setIsVideoModalVisible(true);
+                        } else {
+                          handleCompleteMission(mission);
+                          setIsMissionsModalVisible(false);
+                        }
                       }}
                     >
                       <Text style={[styles.primaryButtonText, mission.isCompleted ? { color: '#9CA3AF' } : {}]}>
