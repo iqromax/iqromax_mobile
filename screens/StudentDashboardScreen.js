@@ -2529,39 +2529,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
               ) : (
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderRadius: 12, padding: 8, paddingRight: 32, paddingLeft: 10 }}>
                   <View style={{ width: 60, height: 60, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
-                    <Image source={require('../assets/avatar_maks.png')} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
+                    <Image source={baseAvatarsList.find(a => a.id === activeAvatarIndex)?.img || require('../assets/avatar_maks.png')} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
                     <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 60, height: 60, resizeMode: 'contain', zIndex: 2 }} />
                   </View>
                   <View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
                       <Text style={{ fontSize: 12, marginRight: 4 }}>🇺🇿</Text>
-                      <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>IQROMAX</Text>
+                      <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>{user?.name || "Player"}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Ionicons name="trophy" size={13} color="#FBBF24" style={{ marginRight: 4 }} />
-                      <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>1 248</Text>
+                      <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>{userRankInfo.levelNumber}</Text>
                     </View>
                   </View>
                 </View>
               )}
             </View>
 
-            {/* Grouped Right Side: Energy & Coins */}
-            <View style={{ flexDirection: 'row', gap: 6 }}>
-              {/* 2. Energy Widget */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 15, 5, 0.5)', borderWidth: 1, borderColor: '#D97706', borderRadius: 10, padding: 6, paddingHorizontal: 8 }}>
-                <Ionicons name="flash" size={14} color="#F59E0B" style={{ marginRight: 5 }} />
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>2</Text>
-                <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 14 }}>+</Text>
-              </View>
-
-              {/* 3. Coins Widget */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(20, 15, 5, 0.5)', borderWidth: 1, borderColor: '#D97706', borderRadius: 10, padding: 6, paddingHorizontal: 8 }}>
-                <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, marginRight: 5 }} contentFit="contain" />
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>12k</Text>
-                <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 14 }}>+</Text>
-              </View>
-            </View>
           </View>
 
           {(inventorySubTab === 'personaj' || inventorySubTab === 'avatar') && (
@@ -2663,11 +2647,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* Bottom Left Absolute Overlay: Level Progress */}
                 <View style={{ position: 'absolute', bottom: 15, left: 15, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', borderRadius: 12, padding: 8, width: 120, zIndex: 3 }}>
-                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 11 }}>LEVEL 24</Text>
+                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 11 }}>{t.levelText} {userRankInfo.levelNumber}</Text>
                   <View style={{ height: 4, backgroundColor: '#1A1B2D', borderRadius: 2, width: '100%', marginVertical: 4 }}>
-                    <View style={{ height: 4, backgroundColor: '#EAB308', borderRadius: 2, width: '78%' }} />
+                    <View style={{ height: 4, backgroundColor: '#EAB308', borderRadius: 2, width: `${userRankInfo.progressPercent}%` }} />
                   </View>
-                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 8 }}>7 850 / 10 000</Text>
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 8 }}>{Math.floor(userXp)} / {userRankInfo.isMax ? Math.floor(userXp) : userRankInfo.nextRankXP}</Text>
                 </View>
               </View>
 
