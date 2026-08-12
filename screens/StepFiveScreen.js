@@ -1,5 +1,6 @@
 import React, { useState, Suspense, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, StatusBar, Platform, ScrollView, ActivityIndicator, Alert, Modal } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Platform, ScrollView, ActivityIndicator, Alert, Modal } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image, ImageBackground } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -457,21 +458,21 @@ export default function StepFiveScreen({ navigation, route }) {
                   <View style={[styles.charAvatarWrapper, isSelected && styles.charAvatarWrapperSelected]}>
                     <View style={[styles.charAvatar, { backgroundColor: bgCol, overflow: 'hidden' }]}>
                       {actualIndex === 0 ? (
-                        <Image source={require('../assets/avatar_alex.jpg')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_alex.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : actualIndex === 1 ? (
-                        <Image source={require('../assets/avatar_maks.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_maks.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : actualIndex === 2 ? (
-                        <Image source={require('../assets/avatar_david.jpg')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_david.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : actualIndex === 3 ? (
-                        <Image source={require('../assets/avatar_kevin.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_kevin.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : actualIndex === 4 ? (
-                        <Image source={require('../assets/avatar_lily.jpg')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_lily.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : actualIndex === 5 ? (
-                        <Image source={require('../assets/avatar_maya.jpg')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_maya.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : actualIndex === 6 ? (
-                        <Image source={require('../assets/avatar_emma.jpg')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_emma.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : actualIndex === 7 ? (
-                        <Image source={require('../assets/avatar_sophia.png')} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                        <Image source={require('../assets/avatar_sophia.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : (
                         <Ionicons name="person" size={32} color="#FFF" />
                       )}

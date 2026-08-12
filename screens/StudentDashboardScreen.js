@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image, ImageBackground } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as THREE from 'three';
@@ -804,7 +805,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                <MaterialCommunityIcons name="check" size={10} color="#000" />
              </View>
           )}
-          <Image source={item.image} style={{ width: '80%', height: '50%', resizeMode: 'contain', marginTop: 5 }} />
+          <Image source={item.image} style={{ width: '80%', height: '50%', marginTop: 5 }} contentFit="contain" />
           <View style={{ alignItems: 'center', width: '100%', marginTop: 2, marginBottom: 2 }}>
             <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
             <Text style={{ color: item.color, fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 6 }}>{item.rarity}</Text>
@@ -839,10 +840,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <View style={{ flexDirection: 'row', paddingHorizontal: 15, marginTop: 10, height: 260 }}>
 
 
-          <ImageBackground source={require('../assets/character_bg.png')} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 16, overflow: 'hidden', marginHorizontal: 10, marginVertical: 5 }} imageStyle={{ borderRadius: 16, resizeMode: 'cover', transform: [{ translateY: -40 }, { scale: 1.1 }] }}>
+          <ImageBackground source={require('../assets/character_bg.png')} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 16, overflow: 'hidden', marginHorizontal: 10, marginVertical: 5 }} imageStyle={{ borderRadius: 16, transform: [{ translateY: -40 }, { scale: 1.1 }] }}>
             <View style={{ width: 160, height: 160, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
                <Image source={require('../assets/avatar_maks.png')} style={{ width: 110, height: 110, borderRadius: 55 }} />
-               <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 160, height: 160, resizeMode: 'contain' }} />
+               <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 160, height: 160 }} contentFit="contain" />
                <View style={{ position: 'absolute', bottom: -20, width: 180, height: 40, borderRadius: 90, borderWidth: 1, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: 10 }} />
                <View style={{ position: 'absolute', bottom: -20, width: 140, height: 30, borderRadius: 70, borderWidth: 2, borderColor: '#60A5FA', transform: [{ scaleY: 0.3 }], shadowColor: '#60A5FA', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
             </View>
@@ -1168,7 +1169,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                <MaterialCommunityIcons name="check" size={10} color="#000" />
              </View>
           )}
-          <Image source={item.image} style={{ width: '100%', height: '55%', borderRadius: 6, resizeMode: 'cover', marginTop: 2 }} />
+          <Image source={item.image} style={{ width: '100%', height: '55%', borderRadius: 6, marginTop: 2 }} contentFit="cover" />
           <View style={{ alignItems: 'center', width: '100%', marginTop: 6, marginBottom: 2 }}>
             <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
             <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 6 }}>
@@ -2531,7 +2532,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderRadius: 12, padding: 8, paddingRight: 32, paddingLeft: 10 }}>
                   <View style={{ width: 60, height: 60, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
                     <Image source={baseAvatarsList.find(a => a.id === activeAvatarIndex)?.img || require('../assets/avatar_maks.png')} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
-                    <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 60, height: 60, resizeMode: 'contain', zIndex: 2 }} />
+                    <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 60, height: 60, zIndex: 2 }} contentFit="contain" />
                   </View>
                   <View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
