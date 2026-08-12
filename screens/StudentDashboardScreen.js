@@ -1639,7 +1639,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
               <View style={[styles.exerciseCardContent, activeExerciseType === 'speed' && { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
-                  <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.speedTitle}</Text>
+                  <Text style={styles.exerciseCardTitle} numberOfLines={2}>{ext.speedTitle}</Text>
                   <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.speedDesc}</Text>
                 </View>
                 <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#104414' }]}>
