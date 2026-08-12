@@ -1631,7 +1631,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
       {/* Exercise Tab Content */}
       <View style={[styles.mainContent, { display: activeTab === 'exercise' ? 'flex' : 'none' }]}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 0 }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 6 : 10, paddingBottom: 0 }}>
           <View style={styles.exHeaderRow}>
             <TouchableOpacity style={styles.exBackButton} activeOpacity={0.7} onPress={() => setActiveTab('home')}>
               <Ionicons name="arrow-back" size={20} color="#FFF" />
@@ -1747,7 +1747,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
         </View>
 
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 280, paddingBottom: 120, paddingHorizontal: 20 }}>
+        <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 310 : 280, paddingBottom: 170, paddingHorizontal: 20 }}>
         
         {activeExerciseType === 'abacus' && (
           <View style={{ marginTop: 10 }}>
@@ -2472,7 +2472,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         <View style={{ height: 100 }} />
         </ScrollView>
-        <View style={{ position: 'absolute', bottom: 45, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 0, backgroundColor: '#05050C', zIndex: 100 }}>
+        <View style={{ position: 'absolute', bottom: 82, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
           {/* START EXERCISE BUTTON */}
           {activeExerciseType === 'battle' ? (
             <TouchableOpacity 
@@ -4038,6 +4038,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: 10,
+    zIndex: 100,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     borderTopWidth: 1,
