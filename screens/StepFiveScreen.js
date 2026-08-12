@@ -33,6 +33,27 @@ function CharacterModel({ onLoad, characterIndex }) {
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
   
+  React.useMemo(() => {
+    if (scene) {
+      scene.traverse((child) => {
+        if (child.isMesh && child.material) {
+           const mats = Array.isArray(child.material) ? child.material : [child.material];
+           mats.forEach(mat => {
+              if (mat.name) mat.name = mat.name.replace(/-/g, '_');
+              if (mat.metalness !== undefined && mat.metalness > 0.15) {
+                mat.metalness = 0.05;
+              }
+              if (mat.roughness !== undefined && mat.roughness < 0.5) {
+                mat.roughness = 0.8;
+              }
+              mat.side = THREE.DoubleSide;
+              mat.needsUpdate = true;
+           });
+        }
+      });
+    }
+  }, [scene]);
+
   React.useEffect(() => {
     if (scene) {
       onLoad();

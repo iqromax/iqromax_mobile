@@ -234,19 +234,26 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
 
-  // Fix for WebGL Shader Error: ERROR___ERROR_IN_EXPONENT caused by hyphens (e-5) in material names
+  // Fix for WebGL Shader Error and Android metallic silver texture bug
   React.useMemo(() => {
     scene.traverse((child) => {
       if (child.isMesh && child.material) {
-         if (Array.isArray(child.material)) {
-            child.material.forEach(mat => {
-               if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-               mat.needsUpdate = true;
-            });
-         } else {
-            if (child.material.name) child.material.name = child.material.name.replace(/-/g, '_');
-            child.material.needsUpdate = true;
-         }
+         const mats = Array.isArray(child.material) ? child.material : [child.material];
+         mats.forEach(mat => {
+            if (mat.name) mat.name = mat.name.replace(/-/g, '_');
+            
+            // Fix Android EXGL metallic chrome rendering bug:
+            // High metalness without environment reflections causes EXGL on Android to render models as shiny silver metal.
+            // Capping metalness and setting roughness restores full, rich clothing & skin textures!
+            if (mat.metalness !== undefined && mat.metalness > 0.15) {
+              mat.metalness = 0.05;
+            }
+            if (mat.roughness !== undefined && mat.roughness < 0.5) {
+              mat.roughness = 0.8;
+            }
+            mat.side = THREE.DoubleSide;
+            mat.needsUpdate = true;
+         });
       }
     });
   }, [scene]);
@@ -3460,7 +3467,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#05050C',
-    paddingTop: 0,
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 4 : 0,
   },
   header: {
     paddingHorizontal: 16,
