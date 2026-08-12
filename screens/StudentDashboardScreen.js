@@ -1445,7 +1445,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Canvas Container */}
             <View style={{ position: 'absolute', top: -50, bottom: -20, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="none">
-              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="none" gl={{ alpha: true }}>
+              <Canvas frameloop="always" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="none" gl={{ alpha: true }}>
                 <ambientLight intensity={2} color="#ffffff" />
                 <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
@@ -1487,7 +1487,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
 
         {/* Level Progress Bar Section */}
-        <View style={styles.levelBarContainer}>
+        <View style={styles.levelBarContainer} pointerEvents="box-none">
           <View style={styles.levelCardWrapper}>
             <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
               
