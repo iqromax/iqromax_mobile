@@ -1613,7 +1613,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('calc')}
           >
-            <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
+            <ImageBackground source={require('../assets/card_speed.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
               <View style={[styles.exerciseCardContent, activeExerciseType === 'calc' && { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.calcTitle}</Text>
@@ -1636,7 +1636,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('speed')}
           >
-            <ImageBackground source={require('../assets/card_speed.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
+            <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
               <View style={[styles.exerciseCardContent, activeExerciseType === 'speed' && { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.speedTitle}</Text>
