@@ -6,6 +6,7 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
+import * as THREE from 'three';
 import { API_URL } from '../src/config/api';
 
 // Preload 3D models for much faster rendering
