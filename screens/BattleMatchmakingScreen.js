@@ -105,7 +105,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { language = 'uz', examplesCount = 10, operation = 'oddiy', speed = 1, digits = 1 } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
-  const [countdown, setCountdown] = useState(9);
+  const [countdown, setCountdown] = useState(1);
   const [userData, setUserData] = useState(null);
 
   const baseAvatarsList = [
@@ -146,7 +146,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
-    if (countdown <= 5) {
+    if (countdown >= 5) {
       Animated.spring(opponentAnim, {
         toValue: 1,
         friction: 5,
@@ -189,9 +189,9 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
   useEffect(() => {
     const timer = setInterval(() => {
       setCountdown((prev) => {
-        if (prev <= 1) {
+        if (prev >= 10) {
           clearInterval(timer);
-          // Auto-navigate when timer reaches 0
+          // Auto-navigate when timer reaches 10
           setTimeout(() => {
             navigation.replace('BattleGame', {
               mode: 'battle',
@@ -202,9 +202,9 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
               language
             });
           }, 500);
-          return 0;
+          return 10;
         }
-        return prev - 1;
+        return prev + 1;
       });
     }, 1000);
 
@@ -248,7 +248,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
             </View>
           </Animated.View>
         </View>
-        <Text style={styles.opponentFoundText}>{countdown <= 5 ? t.found : t.search}</Text>
+        <Text style={styles.opponentFoundText}>{countdown >= 5 ? t.found : t.search}</Text>
       </View>
 
       <View style={{ flex: 1, justifyContent: 'center' }}>
