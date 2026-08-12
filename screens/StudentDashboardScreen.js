@@ -1399,51 +1399,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           <View style={styles.contentOverlay} pointerEvents="box-none">
             
-            {/* Left Panel Container */}
-            <View style={styles.leftPanelContainer}>
-              <Text style={styles.leftPanelTitle}>{t.characters || 'PERSONAJLAR'}</Text>
-              
-              <View style={styles.leftPanel}>
-                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.avatarList}>
-                  {avatarsList.map((avatar, index) => {
-                    const isSelected = activeAvatarIndex === avatar.id;
-                    if (!isDropdownOpen && index !== 0) return null; // Hide non-selected ones if closed
-                    
-                    return (
-                      <TouchableOpacity 
-                        key={avatar.id} 
-                        style={[
-                          styles.avatarItem, 
-                          isSelected && styles.avatarItemSelected,
-                          index !== 0 && { marginTop: 4 } // Slight spacing for dropdown items
-                        ]}
-                        onPress={() => {
-                          if (index === 0) {
-                            toggleDropdown();
-                          } else {
-                            setActiveAvatarIndex(avatar.id);
-                            updateCharacterOnServer(avatar.id);
-                            toggleDropdown();
-                          }
-                        }}
-                        activeOpacity={0.8}
-                      >
-                        <Image source={avatar.img} style={styles.avatarImage} contentFit="cover" />
-                        {index === 0 && (
-                          <View style={styles.dropdownIconContainer}>
-                            <Feather name={isDropdownOpen ? "chevron-up" : "chevron-down"} size={14} color="#FFF" />
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    )
-                  })}
-                </ScrollView>
-                <TouchableOpacity style={styles.barchaButton} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
-                  <Text style={styles.barchaText}>{t.all || 'BARCHA'}</Text>
-                  <Feather name="chevron-right" size={12} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
+
 
             {/* Canvas Container */}
             <View style={{ position: 'absolute', top: -50, bottom: -20, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="none">
