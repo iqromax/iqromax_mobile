@@ -2513,7 +2513,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             style={{ 
               flexDirection: 'row', 
               paddingHorizontal: 15, 
-              paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) - 4 : 20, 
+              paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 12 : 20, 
               paddingBottom: 15, 
               justifyContent: 'space-between', 
               alignItems: 'center', 
@@ -2772,7 +2772,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* RANKING TAB CONTENT */}
         <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
-          <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) - 4 : 10, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 12 : 10, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 {/* Top Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
               <TouchableOpacity style={styles.rankingBackBtn} onPress={() => setActiveTab('home')}>
@@ -3037,7 +3037,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* PROFILE TAB CONTENT */}
         
-        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) - 4 : 40 }}>
+        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 12 : 40 }}>
           
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 20 }}>
             {/* Header: Title */}
