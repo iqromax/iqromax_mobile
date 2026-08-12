@@ -1337,7 +1337,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       {/* Home Tab Content */}
       <View style={{ flex: 1, display: activeTab === 'home' ? 'flex' : 'none' }}>
       {/* HEADER PART */}
-      <View style={[styles.header, { paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 2 : 10 }]}>
+      <View style={[styles.header, { paddingTop: 10 }]}>
         {/* Top Row: Logo, Icons */}
         <View style={styles.topRow}>
           {/* Logo */}
@@ -1632,7 +1632,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
       {/* Exercise Tab Content */}
       <View style={[styles.mainContent, { display: activeTab === 'exercise' ? 'flex' : 'none' }]}>
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 2 : 10, paddingBottom: 0 }}>
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, backgroundColor: '#05050C', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 0 }}>
           <View style={styles.exHeaderRow}>
             <TouchableOpacity style={styles.exBackButton} activeOpacity={0.7} onPress={() => setActiveTab('home')}>
               <Ionicons name="arrow-back" size={20} color="#FFF" />
@@ -2513,7 +2513,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             style={{ 
               flexDirection: 'row', 
               paddingHorizontal: 15, 
-              paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 2 : 20, 
+              paddingTop: 10, 
               paddingBottom: 15, 
               justifyContent: 'space-between', 
               alignItems: 'center', 
@@ -2772,7 +2772,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* RANKING TAB CONTENT */}
         <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
-          <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 2 : 10, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+          <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 {/* Top Header */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
               <TouchableOpacity style={styles.rankingBackBtn} onPress={() => setActiveTab('home')}>
@@ -3037,7 +3037,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* PROFILE TAB CONTENT */}
         
-        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 24) + 2 : 40 }}>
+        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingTop: 10 }}>
           
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 20 }}>
             {/* Header: Title */}
