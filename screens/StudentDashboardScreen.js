@@ -2774,7 +2774,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
           <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: Platform.OS === 'android' ? 2 : 10, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 {/* Top Header */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop: Platform.OS === 'android' ? -12 : 0 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, marginTop: Platform.OS === 'android' ? -4 : 0 }}>
               <TouchableOpacity style={styles.rankingBackBtn} onPress={() => setActiveTab('home')}>
                 <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
               </TouchableOpacity>
