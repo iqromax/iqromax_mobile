@@ -1393,9 +1393,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {/* Fixed Top Section */}
         <View style={styles.fixedTopSection} pointerEvents="box-none">
           {/* Black Mask to hide scrolling content under the fixed top section */}
-          <View style={styles.scrollMask} />
+          <View style={styles.scrollMask} pointerEvents="none" />
 
-          <View style={styles.contentOverlay}>
+          <View style={styles.contentOverlay} pointerEvents="box-none">
             
             {/* Left Panel Container */}
             <View style={styles.leftPanelContainer}>
@@ -1436,7 +1436,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     )
                   })}
                 </ScrollView>
-                <TouchableOpacity style={styles.barchaButton} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.barchaButton} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
                   <Text style={styles.barchaText}>{t.all || 'BARCHA'}</Text>
                   <Feather name="chevron-right" size={12} color="#FFF" />
                 </TouchableOpacity>
@@ -1444,11 +1444,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
 
             {/* Canvas Container */}
-            <View style={{ position: 'absolute', top: -50, bottom: -20, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
-              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
+            <View style={{ position: 'absolute', top: -50, bottom: -20, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="none">
+              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="none" gl={{ alpha: true }}>
                 <ambientLight intensity={2} color="#ffffff" />
                 <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                <Environment preset="city" />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
                 <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                 <Suspense fallback={null}>
@@ -1472,13 +1471,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Buttons Row */}
             <View style={styles.buttonsRow}>
-              <TouchableOpacity style={styles.actionButton} activeOpacity={0.8}>
+              <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
                 <View style={styles.notificationDotRed} />
                 <Ionicons name="shirt" size={16} color="#FFF" />
                 <Text style={styles.actionButtonText}>{t.clothes}</Text>
               </TouchableOpacity>
               
-              <TouchableOpacity style={styles.actionButton} activeOpacity={0.8}>
+              <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
                 <Ionicons name="briefcase" size={16} color="#FFF" />
                 <Text style={styles.actionButtonText}>{t.accessories}</Text>
               </TouchableOpacity>
@@ -1538,26 +1537,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 510, paddingBottom: 110 }}>
           {/* Action Cards Section */}
           <View style={styles.actionCardsContainer}>
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('exercise')}>
               <ImageBackground source={require('../assets/card_mashq.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navExercise}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('exercise')}>
               <View style={styles.notificationDotCard} />
               <ImageBackground source={require('../assets/card_missiya.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.missions}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('ranking')}>
               <ImageBackground source={require('../assets/card_reyting.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navRanking}</Text>
               </ImageBackground>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
               <ImageBackground source={require('../assets/card_inventar.png')} style={styles.actionImage} contentFit="fill">
                 <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navInventory}</Text>
               </ImageBackground>
