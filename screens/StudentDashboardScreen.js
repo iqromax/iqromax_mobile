@@ -1458,33 +1458,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </Canvas>
             </View>
             
-            <View style={styles.rightPanel}>
-            {/* Announcement Card */}
-            <View style={styles.glassCard}>
-              <View style={styles.cardHeader}>
-                <Image source={require('../assets/math_master_logo.png')} style={styles.mathMasterLogo} contentFit="contain" />
-                <View style={styles.cardTitles}>
-                  <Text style={styles.cardTitle}>{t.title}</Text>
-                  <Text style={styles.cardSubtitle}>{t.levelText} {userRankInfo.levelNumber}</Text>
-                </View>
-              </View>
-              <Text style={styles.cardDesc}>{t.desc}</Text>
-            </View>
 
-            {/* Buttons Row */}
-            <View style={styles.buttonsRow}>
-              <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
-                <View style={styles.notificationDotRed} />
-                <Ionicons name="shirt" size={16} color="#FFF" />
-                <Text style={styles.actionButtonText}>{t.clothes}</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.actionButton} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
-                <Ionicons name="briefcase" size={16} color="#FFF" />
-                <Text style={styles.actionButtonText}>{t.accessories}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
           
         </View>
 
