@@ -1584,30 +1584,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <Text style={styles.exerciseSectionTitle}>{ext.title}</Text>
           <View style={styles.exerciseTypesRow}>
           
-          {/* Card 1 */}
-          <TouchableOpacity 
-            style={styles.exerciseCard} 
-            activeOpacity={0.8}
-            onPress={() => setActiveExerciseType('calc')}
-          >
-            <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
-              <View style={[styles.exerciseCardContent, activeExerciseType === 'calc' && { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
-                <View style={styles.exerciseCardTextContainer}>
-                  <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.calcTitle}</Text>
-                  <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.calcDesc}</Text>
-                </View>
-                <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#310787' }]}>
-                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
-                  <Text style={styles.exerciseCardEnergyText}>1</Text>
-                </View>
-              </View>
-            </ImageBackground>
-            {activeExerciseType === 'calc' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', borderRadius: 10, shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
-            )}
-          </TouchableOpacity>
-
-          {/* Card 2 */}
+          {/* Card 1: Abakus */}
           <TouchableOpacity 
             style={styles.exerciseCard} 
             activeOpacity={0.8}
@@ -1630,7 +1607,30 @@ export default function StudentDashboardScreen({ navigation, route }) {
             )}
           </TouchableOpacity>
 
-          {/* Card 3 */}
+          {/* Card 2: Oddiy hisob */}
+          <TouchableOpacity 
+            style={styles.exerciseCard} 
+            activeOpacity={0.8}
+            onPress={() => setActiveExerciseType('calc')}
+          >
+            <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
+              <View style={[styles.exerciseCardContent, activeExerciseType === 'calc' && { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
+                <View style={styles.exerciseCardTextContainer}>
+                  <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.calcTitle}</Text>
+                  <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.calcDesc}</Text>
+                </View>
+                <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#310787' }]}>
+                  <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
+                  <Text style={styles.exerciseCardEnergyText}>1</Text>
+                </View>
+              </View>
+            </ImageBackground>
+            {activeExerciseType === 'calc' && (
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', borderRadius: 10, shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+            )}
+          </TouchableOpacity>
+
+          {/* Card 3: Ko'paytirish va bo'lish */}
           <TouchableOpacity 
             style={styles.exerciseCard} 
             activeOpacity={0.8}
@@ -1653,7 +1653,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             )}
           </TouchableOpacity>
 
-          {/* Card 4 */}
+          {/* Card 4: Battle */}
           <TouchableOpacity 
             style={styles.exerciseCard} 
             activeOpacity={0.8}
