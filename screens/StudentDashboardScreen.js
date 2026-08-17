@@ -1460,7 +1460,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
         {/* Level Progress Bar Section */}
-        <View style={styles.levelBarContainer} pointerEvents="box-none">
+        <View style={[styles.levelBarContainer, { marginTop: 35 }]} pointerEvents="box-none">
           <View style={styles.levelCardWrapper}>
             <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
               
@@ -1508,67 +1508,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* Scrollable Bottom Section */}
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 510, paddingBottom: 110 }}>
-
-
-        {/* Statistics Section */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statsHeader}>
-            <Text style={styles.statsTitle}>{t.stats}</Text>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.seeAllText}>{t.seeAll}</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.statsRow}>
-            {/* Card 1: Logic */}
-            <View style={[styles.statCardBlock, { borderColor: '#1E3A8A' }]}>
-               <View style={styles.statCardInner}>
-                 <MaterialCommunityIcons name="brain" size={24} color="#3B82F6" style={styles.statIconLeft} />
-                 <View style={styles.statTextRight}>
-                   <Text style={styles.statTopLabel} numberOfLines={1} adjustsFontSizeToFit>{t.logic}</Text>
-                   <Text style={styles.statMainNumber}>92</Text>
-                   <Text style={[styles.statBottomLabel, { color: '#3B82F6' }]} numberOfLines={1} adjustsFontSizeToFit>{t.logicDesc}</Text>
-                 </View>
-               </View>
-            </View>
-
-            {/* Card 2: Speed */}
-            <View style={[styles.statCardBlock, { borderColor: '#14532D' }]}>
-               <View style={styles.statCardInner}>
-                 <Ionicons name="flash" size={24} color="#22C55E" style={styles.statIconLeft} />
-                 <View style={styles.statTextRight}>
-                   <Text style={styles.statTopLabel} numberOfLines={1} adjustsFontSizeToFit>{t.speed}</Text>
-                   <Text style={styles.statMainNumber}>88</Text>
-                   <Text style={[styles.statBottomLabel, { color: '#22C55E' }]} numberOfLines={1} adjustsFontSizeToFit>{t.speedDesc}</Text>
-                 </View>
-               </View>
-            </View>
-
-            {/* Card 3: Accuracy */}
-            <View style={[styles.statCardBlock, { borderColor: '#78350F' }]}>
-               <View style={styles.statCardInner}>
-                 <MaterialCommunityIcons name="target" size={24} color="#F59E0B" style={styles.statIconLeft} />
-                 <View style={styles.statTextRight}>
-                   <Text style={styles.statTopLabel} numberOfLines={1} adjustsFontSizeToFit>{t.accuracy}</Text>
-                   <Text style={styles.statMainNumber}>95</Text>
-                   <Text style={[styles.statBottomLabel, { color: '#F59E0B' }]} numberOfLines={1} adjustsFontSizeToFit>{t.accuracyDesc}</Text>
-                 </View>
-               </View>
-            </View>
-
-            {/* Card 4: Streak */}
-            <View style={[styles.statCardBlock, { borderColor: '#4C1D95' }]}>
-               <View style={styles.statCardInner}>
-                 <MaterialCommunityIcons name="fire" size={24} color="#EF4444" style={styles.statIconLeft} />
-                 <View style={styles.statTextRight}>
-                   <Text style={styles.statTopLabel} numberOfLines={1} adjustsFontSizeToFit>{t.streak}</Text>
-                   <Text style={styles.statMainNumber}>14</Text>
-                   <Text style={[styles.statBottomLabel, { color: '#A855F7' }]} numberOfLines={1} adjustsFontSizeToFit>{t.streakDesc}</Text>
-                 </View>
-               </View>
-            </View>
-          </View>
-        </View>
         </ScrollView>
         </View>
       </View>
