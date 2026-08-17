@@ -246,13 +246,9 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
             
             // Fix Android EXGL metallic chrome rendering bug:
             // High metalness without environment reflections causes EXGL on Android to render models as shiny silver metal.
-            // Capping metalness and setting roughness restores full, rich clothing & skin textures!
-            if (mat.metalness !== undefined && mat.metalness > 0.15) {
-              mat.metalness = 0.05;
-            }
-            if (mat.roughness !== undefined && mat.roughness < 0.5) {
-              mat.roughness = 0.8;
-            }
+            // Explicitly force metalness to 0.0 and roughness to 0.9 on Android EXGL for perfectly rendered textures!
+            mat.metalness = 0.0;
+            mat.roughness = 0.9;
             mat.side = THREE.DoubleSide;
             mat.needsUpdate = true;
          });
@@ -429,7 +425,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       if (interval) clearInterval(interval);
     };
   }, [activeTab]);
-  const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'calc');
+  const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'abacus');
   const [user, setUser] = useState(route.params?.user);
 
   const updateCharacterOnServer = async (index) => {
@@ -1402,8 +1398,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
 
             {/* Canvas Container */}
-            <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="none">
-              <Canvas frameloop="always" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="none" gl={{ alpha: true }}>
+            <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
+              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
                 <ambientLight intensity={2} color="#ffffff" />
                 <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
@@ -1450,7 +1446,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
         {/* Level Progress Bar Section */}
-        <View style={[styles.levelBarContainer, { marginTop: 15 }]} pointerEvents="box-none">
+        <View style={[styles.levelBarContainer, { marginTop: 25 }]} pointerEvents="box-none">
           <View style={styles.levelCardWrapper}>
             <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
               
@@ -1536,7 +1532,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <View style={[styles.exerciseCardContent, activeExerciseType === 'abacus' && { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.abacusTitle}</Text>
-                  <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.abacusDesc}</Text>
                 </View>
                 <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#0A2B66' }]}>
                   <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
@@ -1545,11 +1540,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'abacus' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#3B82F6', borderRadius: 10, shadowColor: '#3B82F6', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#3B82F6', shadowColor: '#3B82F6', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
-          {/* Card 2: Oddiy hisob */}
+          {/* Card 2: Tasavvur (Oddiy hisob) -> Green button for 1 energy */}
           <TouchableOpacity 
             style={styles.exerciseCard} 
             activeOpacity={0.8}
@@ -1559,20 +1554,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <View style={[styles.exerciseCardContent, activeExerciseType === 'calc' && { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.calcTitle}</Text>
-                  <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.calcDesc}</Text>
                 </View>
-                <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#310787' }]}>
+                <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#104414' }]}>
                   <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
                   <Text style={styles.exerciseCardEnergyText}>1</Text>
                 </View>
               </View>
             </ImageBackground>
             {activeExerciseType === 'calc' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', borderRadius: 10, shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
-          {/* Card 3: Ko'paytirish va bo'lish */}
+          {/* Card 3: Ko'paytirish va bo'lish -> Blue button for 2 energy */}
           <TouchableOpacity 
             style={styles.exerciseCard} 
             activeOpacity={0.8}
@@ -1582,16 +1576,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <View style={[styles.exerciseCardContent, activeExerciseType === 'speed' && { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={2}>{ext.speedTitle}</Text>
-                  <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.speedDesc}</Text>
                 </View>
-                <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#104414' }]}>
+                <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#0A2B66' }]}>
                   <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
                   <Text style={styles.exerciseCardEnergyText}>2</Text>
                 </View>
               </View>
             </ImageBackground>
             {activeExerciseType === 'speed' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#22C55E', borderRadius: 10, shadowColor: '#22C55E', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#22C55E', shadowColor: '#22C55E', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
@@ -1605,7 +1598,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <View style={[styles.exerciseCardContent, activeExerciseType === 'battle' && { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.battleTitle}</Text>
-                  <Text style={styles.exerciseCardDesc} numberOfLines={2} adjustsFontSizeToFit>{ext.battleDesc}</Text>
                 </View>
                 <View style={[styles.exerciseCardEnergyBtn, { backgroundColor: '#6B2A03' }]}>
                   <Image source={require('../assets/energy_icon.png')} style={{ width: 10, height: 10 }} contentFit="contain" />
@@ -1614,7 +1606,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'battle' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#D97706', borderRadius: 10, shadowColor: '#D97706', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#D97706', shadowColor: '#D97706', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
         </View>
@@ -1714,6 +1706,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.examplesPickerExpanded}>
                   <ScrollView 
                     style={styles.examplesPickerScroll} 
+                    nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     snapToInterval={40}
                     decelerationRate="fast"
@@ -1777,7 +1770,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <MaterialCommunityIcons name="plus" size={32} color={selectedOperation === 'oddiy' ? '#A855F7' : '#9CA3AF'} />
                   </View>
                   <Text style={[styles.opsCardTitle, selectedOperation === 'oddiy' && styles.opsCardTitleSelected]}>{t.opsOddiy}</Text>
-                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsOddiyDesc}</Text>
                 </TouchableOpacity>
 
                 {/* Formula 5 */}
@@ -1795,7 +1787,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <Text style={[styles.opsFormulaIcon, selectedOperation === 'f5' && styles.opsFormulaIconSelected]}>f(x)</Text>
                   </View>
                   <Text style={[styles.opsCardTitle, selectedOperation === 'f5' && styles.opsCardTitleSelected]}>{t.opsF5}</Text>
-                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsF5Desc}</Text>
                 </TouchableOpacity>
 
                 {/* Formula 10 */}
@@ -1813,7 +1804,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <Text style={[styles.opsFormulaIcon, selectedOperation === 'f10' && styles.opsFormulaIconSelected]}>f(x)</Text>
                   </View>
                   <Text style={[styles.opsCardTitle, selectedOperation === 'f10' && styles.opsCardTitleSelected]}>{t.opsF10}</Text>
-                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsF10Desc}</Text>
                 </TouchableOpacity>
 
                 {/* Aralash */}
@@ -1831,7 +1821,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <MaterialCommunityIcons name="shuffle-variant" size={28} color={selectedOperation === 'aralash' ? '#A855F7' : '#9CA3AF'} />
                   </View>
                   <Text style={[styles.opsCardTitle, selectedOperation === 'aralash' && styles.opsCardTitleSelected]}>{t.opsAralash}</Text>
-                  <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsAralashDesc}</Text>
                 </TouchableOpacity>
 
               </View>
@@ -1864,6 +1853,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.examplesPickerExpanded}>
                   <ScrollView 
                     style={styles.examplesPickerScroll} 
+                    nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     snapToInterval={40}
                     decelerationRate="fast"
@@ -1926,6 +1916,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.examplesPickerExpanded}>
                   <ScrollView
                     style={styles.examplesPickerScroll}
+                    nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     snapToInterval={40}
                   >
@@ -2023,6 +2014,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={[styles.examplesPickerExpanded, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
                   <ScrollView
                     style={styles.examplesPickerScroll}
+                    nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     snapToInterval={40}
                   >
@@ -2082,6 +2074,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={[styles.examplesPickerExpanded, { backgroundColor: '#05050C', borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
                   <ScrollView 
                     style={styles.examplesPickerScroll} 
+                    nestedScrollEnabled={true}
                     showsVerticalScrollIndicator={false}
                     snapToInterval={40}
                     decelerationRate="fast"
@@ -2345,7 +2338,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         <View style={{ height: 100 }} />
         </ScrollView>
-        <View style={{ position: 'absolute', bottom: 82, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
+        <View style={{ position: 'absolute', bottom: 46, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
           {/* START EXERCISE BUTTON */}
           {activeExerciseType === 'battle' ? (
             <TouchableOpacity 
@@ -2506,17 +2499,22 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                   </View>
 
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                    {[
-                      { id: 1, name: 'Tech Genius', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_maks.png') },
-                      { id: 2, name: 'Creative Mind', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_david.jpg') },
-                      { id: 3, name: 'Mental Warrior', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_kevin.png') },
-                      { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg') },
-                      { id: 4, name: 'Lily', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_lily.jpg') },
-                      { id: 5, name: 'Maya', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_maya.jpg') },
-                      { id: 6, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png') },
-                      { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg') },
-                    ].map((item) => {
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 8 }}>
+                      {[
+                        { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg'), gender: 'boys' },
+                        { id: 1, name: 'Tech Genius', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_maks.png'), gender: 'boys' },
+                        { id: 2, name: 'Creative Mind', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_david.jpg'), gender: 'boys' },
+                        { id: 3, name: 'Mental Warrior', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_kevin.png'), gender: 'boys' },
+                        { id: 4, name: 'Lily', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_lily.jpg'), gender: 'girls' },
+                        { id: 5, name: 'Maya', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_maya.jpg'), gender: 'girls' },
+                        { id: 6, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png'), gender: 'girls' },
+                        { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg'), gender: 'girls' },
+                      ]
+                      .filter(item => {
+                        const userGender = route.params?.gender || (activeAvatarIndex < 4 ? 'boys' : 'girls');
+                        return item.gender === userGender;
+                      })
+                      .map((item) => {
                       const isSelected = activeAvatarIndex === item.id;
                       return (
                         <TouchableOpacity
@@ -3457,7 +3455,7 @@ const styles = StyleSheet.create({
   },
   scrollMask: {
     position: 'absolute',
-    top: 460, 
+    top: 475, 
     left: 0,
     right: 0,
     height: 160, 
@@ -3470,11 +3468,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: '100%',
-    height: 460, // Adjusted height for ideal positioning
+    height: 475, // Slightly increased height for ideal positioning
     resizeMode: 'cover',
   },
   contentOverlay: {
-    height: 460, // Match the background image height
+    height: 475, // Match the background image height
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingRight: 10,

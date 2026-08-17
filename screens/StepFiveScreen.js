@@ -42,12 +42,8 @@ function CharacterModel({ onLoad, characterIndex }) {
            const mats = Array.isArray(child.material) ? child.material : [child.material];
            mats.forEach(mat => {
               if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-              if (mat.metalness !== undefined && mat.metalness > 0.15) {
-                mat.metalness = 0.05;
-              }
-              if (mat.roughness !== undefined && mat.roughness < 0.5) {
-                mat.roughness = 0.8;
-              }
+              mat.metalness = 0.0;
+              mat.roughness = 0.9;
               mat.side = THREE.DoubleSide;
               mat.needsUpdate = true;
            });
