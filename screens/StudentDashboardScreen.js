@@ -235,14 +235,6 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
-  const groupRef = React.useRef();
-
-  // Slow smooth auto-rotation
-  useFrame((state, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.35; // Gentle smooth rotation
-    }
-  });
 
   // Fix for WebGL Shader Error and Android metallic silver texture bug
   React.useMemo(() => {
@@ -272,7 +264,7 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   if (characterIndex === 1) yPos = 1.2 + yOffset; // Maks is positioned lower by default, so we move him up
 
   return (
-    <group ref={groupRef}>
+    <>
       <primitive object={scene} scale={5.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
       {accessoryPath && <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} />}
       <OrbitControls 
@@ -283,7 +275,7 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
         rotateSpeed={25}
         target={[0, 0, 0]}
       />
-    </group>
+    </>
   );
 }
 
@@ -1427,7 +1419,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <View style={styles.rightSideStatsPanel}>
               {/* Card 1: Logic */}
               <View style={[styles.rightStatBlock, { borderColor: '#1E3A8A' }]}>
-                <MaterialCommunityIcons name="brain" size={16} color="#3B82F6" />
+                <MaterialCommunityIcons name="brain" size={18} color="#3B82F6" />
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.logic}</Text>
                   <Text style={styles.rightStatNumber}>92</Text>
@@ -1437,7 +1429,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
               {/* Card 2: Speed */}
               <View style={[styles.rightStatBlock, { borderColor: '#14532D' }]}>
-                <Ionicons name="flash" size={16} color="#22C55E" />
+                <Ionicons name="flash" size={18} color="#22C55E" />
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.speed}</Text>
                   <Text style={styles.rightStatNumber}>88</Text>
@@ -1447,21 +1439,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
               {/* Card 3: Accuracy */}
               <View style={[styles.rightStatBlock, { borderColor: '#78350F' }]}>
-                <MaterialCommunityIcons name="target" size={16} color="#F59E0B" />
+                <MaterialCommunityIcons name="target" size={18} color="#F59E0B" />
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.accuracy}</Text>
                   <Text style={styles.rightStatNumber}>95</Text>
                   <Text style={[styles.rightStatSubLabel, { color: '#F59E0B' }]} numberOfLines={1}>{t.accuracyDesc}</Text>
-                </View>
-              </View>
-
-              {/* Card 4: Streak */}
-              <View style={[styles.rightStatBlock, { borderColor: '#4C1D95' }]}>
-                <MaterialCommunityIcons name="fire" size={16} color="#EF4444" />
-                <View style={styles.rightStatTextCol}>
-                  <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.streak}</Text>
-                  <Text style={styles.rightStatNumber}>14</Text>
-                  <Text style={[styles.rightStatSubLabel, { color: '#A855F7' }]} numberOfLines={1}>{t.streakDesc}</Text>
                 </View>
               </View>
             </View>
@@ -3586,17 +3568,17 @@ const styles = StyleSheet.create({
   rightSideStatsPanel: {
     position: 'absolute',
     right: 12,
-    top: 45,
-    width: 100,
+    top: 110,
+    width: 112,
     zIndex: 10,
-    gap: 6,
+    gap: 10,
   },
   rightStatBlock: {
-    backgroundColor: 'rgba(7, 7, 22, 0.85)',
+    backgroundColor: 'rgba(7, 7, 22, 0.88)',
     borderWidth: 1.5,
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 8,
+    borderRadius: 12,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',
     shadowColor: '#000',
@@ -3606,24 +3588,24 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   rightStatTextCol: {
-    marginLeft: 6,
+    marginLeft: 8,
     flex: 1,
   },
   rightStatTopLabel: {
     color: '#9CA3AF',
-    fontSize: 7,
+    fontSize: 8,
     fontFamily: 'Inter_700Bold',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   rightStatNumber: {
     color: '#FFF',
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: 'Inter_900Black',
-    lineHeight: 14,
+    lineHeight: 16,
   },
   rightStatSubLabel: {
-    fontSize: 7,
+    fontSize: 8,
     fontFamily: 'Inter_600SemiBold',
   },
   rightPanel: {
