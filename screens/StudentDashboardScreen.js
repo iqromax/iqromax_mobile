@@ -1467,35 +1467,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* Scrollable Bottom Section */}
         <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 510, paddingBottom: 110 }}>
-          {/* Action Cards Section */}
-          <View style={styles.actionCardsContainer}>
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('exercise')}>
-              <ImageBackground source={require('../assets/card_mashq.png')} style={styles.actionImage} contentFit="fill">
-                <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navExercise}</Text>
-              </ImageBackground>
-            </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('exercise')}>
-              <View style={styles.notificationDotCard} />
-              <ImageBackground source={require('../assets/card_missiya.png')} style={styles.actionImage} contentFit="fill">
-                <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.missions}</Text>
-              </ImageBackground>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('ranking')}>
-              <ImageBackground source={require('../assets/card_reyting.png')} style={styles.actionImage} contentFit="fill">
-                <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navRanking}</Text>
-              </ImageBackground>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionCardWrapper} activeOpacity={0.8} onPress={() => setActiveTab('inventory')}>
-              <ImageBackground source={require('../assets/card_inventar.png')} style={styles.actionImage} contentFit="fill">
-                <Text style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit>{t.navInventory}</Text>
-              </ImageBackground>
-            </TouchableOpacity>
-          </View>
-
-          {/* Statistics Section will follow here */}
 
         {/* Statistics Section */}
         <View style={styles.statsContainer}>
