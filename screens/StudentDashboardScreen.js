@@ -10,7 +10,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Canvas } from '@react-three/fiber/native';
+import { Canvas, useFrame } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL } from '../src/config/api';
@@ -235,6 +235,14 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
+  const groupRef = React.useRef();
+
+  // Slow smooth auto-rotation
+  useFrame((state, delta) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += delta * 0.35; // Gentle smooth rotation
+    }
+  });
 
   // Fix for WebGL Shader Error and Android metallic silver texture bug
   React.useMemo(() => {
@@ -264,7 +272,7 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   if (characterIndex === 1) yPos = 1.2 + yOffset; // Maks is positioned lower by default, so we move him up
 
   return (
-    <>
+    <group ref={groupRef}>
       <primitive object={scene} scale={5.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
       {accessoryPath && <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} />}
       <OrbitControls 
@@ -275,7 +283,7 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
         rotateSpeed={25}
         target={[0, 0, 0]}
       />
-    </>
+    </group>
   );
 }
 
