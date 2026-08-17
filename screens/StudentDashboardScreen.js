@@ -1460,7 +1460,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
         {/* Level Progress Bar Section */}
-        <View style={[styles.levelBarContainer, { marginTop: 20 }]} pointerEvents="box-none">
+        <View style={[styles.levelBarContainer, { marginTop: 45 }]} pointerEvents="box-none">
           <View style={styles.levelCardWrapper}>
             <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
               
@@ -3467,7 +3467,7 @@ const styles = StyleSheet.create({
   },
   scrollMask: {
     position: 'absolute',
-    top: 430, 
+    top: 500, 
     left: 0,
     right: 0,
     height: 160, 
@@ -3480,11 +3480,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: '100%',
-    height: 430, // Increased height to fit larger character and bring level bar lower
+    height: 500, // Increased height to bring level bar and start button further down
     resizeMode: 'cover',
   },
   contentOverlay: {
-    height: 430, // Match the background image height
+    height: 500, // Match the background image height
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingRight: 10,
