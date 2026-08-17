@@ -1415,8 +1415,49 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
             
 
-          
-        </View>
+            {/* Right Panel with Vertical Stats */}
+            <View style={styles.rightSideStatsPanel}>
+              {/* Card 1: Logic */}
+              <View style={[styles.rightStatBlock, { borderColor: '#1E3A8A' }]}>
+                <MaterialCommunityIcons name="brain" size={16} color="#3B82F6" />
+                <View style={styles.rightStatTextCol}>
+                  <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.logic}</Text>
+                  <Text style={styles.rightStatNumber}>92</Text>
+                  <Text style={[styles.rightStatSubLabel, { color: '#3B82F6' }]} numberOfLines={1}>{t.logicDesc}</Text>
+                </View>
+              </View>
+
+              {/* Card 2: Speed */}
+              <View style={[styles.rightStatBlock, { borderColor: '#14532D' }]}>
+                <Ionicons name="flash" size={16} color="#22C55E" />
+                <View style={styles.rightStatTextCol}>
+                  <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.speed}</Text>
+                  <Text style={styles.rightStatNumber}>88</Text>
+                  <Text style={[styles.rightStatSubLabel, { color: '#22C55E' }]} numberOfLines={1}>{t.speedDesc}</Text>
+                </View>
+              </View>
+
+              {/* Card 3: Accuracy */}
+              <View style={[styles.rightStatBlock, { borderColor: '#78350F' }]}>
+                <MaterialCommunityIcons name="target" size={16} color="#F59E0B" />
+                <View style={styles.rightStatTextCol}>
+                  <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.accuracy}</Text>
+                  <Text style={styles.rightStatNumber}>95</Text>
+                  <Text style={[styles.rightStatSubLabel, { color: '#F59E0B' }]} numberOfLines={1}>{t.accuracyDesc}</Text>
+                </View>
+              </View>
+
+              {/* Card 4: Streak */}
+              <View style={[styles.rightStatBlock, { borderColor: '#4C1D95' }]}>
+                <MaterialCommunityIcons name="fire" size={16} color="#EF4444" />
+                <View style={styles.rightStatTextCol}>
+                  <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.streak}</Text>
+                  <Text style={styles.rightStatNumber}>14</Text>
+                  <Text style={[styles.rightStatSubLabel, { color: '#A855F7' }]} numberOfLines={1}>{t.streakDesc}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
 
         {/* Level Progress Bar Section */}
         <View style={styles.levelBarContainer} pointerEvents="box-none">
@@ -3594,6 +3635,49 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
     marginRight: 2,
+  },
+  rightSideStatsPanel: {
+    position: 'absolute',
+    right: 12,
+    top: 45,
+    width: 100,
+    zIndex: 10,
+    gap: 6,
+  },
+  rightStatBlock: {
+    backgroundColor: 'rgba(7, 7, 22, 0.85)',
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  rightStatTextCol: {
+    marginLeft: 6,
+    flex: 1,
+  },
+  rightStatTopLabel: {
+    color: '#9CA3AF',
+    fontSize: 7,
+    fontFamily: 'Inter_700Bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  rightStatNumber: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Inter_900Black',
+    lineHeight: 14,
+  },
+  rightStatSubLabel: {
+    fontSize: 7,
+    fontFamily: 'Inter_600SemiBold',
   },
   rightPanel: {
     width: 135, // Set fixed width so card and buttons align perfectly
