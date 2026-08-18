@@ -40,13 +40,22 @@ function CharacterModel({ onLoad, characterIndex }) {
       scene.traverse((child) => {
         if (child.isMesh && child.material) {
            const mats = Array.isArray(child.material) ? child.material : [child.material];
-           mats.forEach(mat => {
-              if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-              mat.metalness = 0.0;
-              mat.roughness = 0.9;
+           const newMats = mats.map(mat => {
+              if (mat.map) {
+                return new THREE.MeshBasicMaterial({
+                  map: mat.map,
+                  side: THREE.DoubleSide,
+                  transparent: mat.transparent || false,
+                  alphaTest: mat.alphaTest || 0,
+                });
+              }
+              mat.metalness = 0;
+              mat.roughness = 1;
               mat.side = THREE.DoubleSide;
               mat.needsUpdate = true;
+              return mat;
            });
+           child.material = Array.isArray(child.material) ? newMats : newMats[0];
         }
       });
     }

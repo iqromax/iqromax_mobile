@@ -18,11 +18,11 @@ const TRANSLATIONS = {
   ko: { title: "주판 시뮬레이터", subtitle: "교육 모드", reset: "초기화" },
 };
 
-const BEAD_WIDTH = 56;
-const BEAD_HEIGHT = 24;
+const BEAD_WIDTH = 62;
+const BEAD_HEIGHT = 30;
 const ROD_WIDTH = 8;
 const TOP_SLIDE_DISTANCE = 30;
-const BOTTOM_SLIDE_DISTANCE = 40;
+const BOTTOM_SLIDE_DISTANCE = 118;
 
 const TopBead = ({ onValueChange, resetFlag }) => {
   const panY = useRef(new Animated.Value(0)).current; // 0 = UP (rest), TOP_SLIDE_DISTANCE = DOWN (active)
@@ -57,7 +57,7 @@ const TopBead = ({ onValueChange, resetFlag }) => {
 
   return (
     <Animated.View style={[styles.beadWrapper, { transform: [{ translateY: panY }] }]} {...panResponder.panHandlers}>
-      <LinearGradient colors={['#D97706', '#FDE047', '#D97706']} locations={[0, 0.4, 1]} style={styles.bead} />
+      <LinearGradient colors={['#FFF176', '#F59E0B', '#B45309', '#78350F']} locations={[0, 0.35, 0.75, 1]} style={styles.bead} />
     </Animated.View>
   );
 };
@@ -117,7 +117,7 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
           style={[styles.beadWrapper, { transform: [{ translateY: beadAnims[i] }] }]} 
           {...responders[i].panHandlers}
         >
-          <LinearGradient colors={['#D97706', '#FDE047', '#D97706']} locations={[0, 0.4, 1]} style={styles.bead} />
+          <LinearGradient colors={['#FFF176', '#F59E0B', '#B45309', '#78350F']} locations={[0, 0.35, 0.75, 1]} style={styles.bead} />
         </Animated.View>
       ))}
     </View>
@@ -134,11 +134,6 @@ const AbacusColumn = ({ label, onValueChange, resetFlag }) => {
 
   return (
     <View style={styles.column}>
-      {/* Label Box */}
-      <View style={styles.labelBox}>
-        <Text style={styles.labelText}>{label}</Text>
-      </View>
-      
       {/* Top Section */}
       <View style={styles.topSection}>
         <LinearGradient colors={['#3E2723', '#5D4037', '#3E2723']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.rod} />
@@ -196,10 +191,6 @@ export default function AbacusSimulatorScreen() {
 
         {/* Main Content Area */}
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', paddingBottom: 40 }}>
-          {/* Value Display (Optional, useful for teaching mode) */}
-          <View style={styles.valueDisplayContainer}>
-           <Text style={styles.valueText}>{totalValue}</Text>
-        </View>
 
         {/* Abacus Frame */}
         <View style={styles.abacusContainer}>
@@ -218,10 +209,10 @@ export default function AbacusSimulatorScreen() {
 
                 {/* Columns */}
                 <View style={styles.columnsRow}>
-                  <AbacusColumn label="1000" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 1000: v}))} />
-                  <AbacusColumn label="100" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 100: v}))} />
-                  <AbacusColumn label="10" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 10: v}))} />
-                  <AbacusColumn label="1" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 1: v}))} />
+                  <AbacusColumn label="" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 1000: v}))} />
+                  <AbacusColumn label="" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 100: v}))} />
+                  <AbacusColumn label="" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 10: v}))} />
+                  <AbacusColumn label="" resetFlag={resetFlag} onValueChange={(v) => setValues(prev => ({...prev, 1: v}))} />
                 </View>
 
               </View>
@@ -443,13 +434,14 @@ const styles = StyleSheet.create({
   },
   bead: {
     flex: 1,
-    borderRadius: 12,
-    // Add a slight shadow to make it pop
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#FEF08A',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 3,
-    elevation: 5,
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
+    elevation: 6,
   },
   bottomControls: {
     flexDirection: 'row',

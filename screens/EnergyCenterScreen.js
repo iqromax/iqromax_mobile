@@ -270,7 +270,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor="#05050C" />
       
       {/* HEADER */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Platform.OS === 'android' ? 10 : 15 }]}>
         <View style={styles.headerLeft}>
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#FFF" />

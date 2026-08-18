@@ -236,22 +236,28 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
 
-  // Fix for WebGL Shader Error and Android metallic silver texture bug
+  // Android EXGL chrome texture fix: Convert materials to MeshBasicMaterial with original map texture
   React.useMemo(() => {
     scene.traverse((child) => {
       if (child.isMesh && child.material) {
          const mats = Array.isArray(child.material) ? child.material : [child.material];
-         mats.forEach(mat => {
-            if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-            
-            // Fix Android EXGL metallic chrome rendering bug:
-            // High metalness without environment reflections causes EXGL on Android to render models as shiny silver metal.
-            // Explicitly force metalness to 0.0 and roughness to 0.9 on Android EXGL for perfectly rendered textures!
-            mat.metalness = 0.0;
-            mat.roughness = 0.9;
+         const newMats = mats.map(mat => {
+            if (mat.map) {
+              const basicMat = new THREE.MeshBasicMaterial({
+                map: mat.map,
+                side: THREE.DoubleSide,
+                transparent: mat.transparent || false,
+                alphaTest: mat.alphaTest || 0,
+              });
+              return basicMat;
+            }
+            mat.metalness = 0;
+            mat.roughness = 1;
             mat.side = THREE.DoubleSide;
             mat.needsUpdate = true;
+            return mat;
          });
+         child.material = Array.isArray(child.material) ? newMats : newMats[0];
       }
     });
   }, [scene]);
@@ -1400,10 +1406,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Canvas Container */}
             <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
               <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                <ambientLight intensity={2} color="#ffffff" />
-                <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                <ambientLight intensity={2.5} color="#ffffff" />
+                <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#444444" />
+                <Environment preset="city" />
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
+                <directionalLight position={[-10, 10, -5]} intensity={1.5} color="#ffffff" />
                 <Suspense fallback={null}>
                   <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} />
                 </Suspense>
@@ -1612,7 +1619,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
         </View>
 
-        <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 310 : 280, paddingBottom: 170, paddingHorizontal: 20 }}>
+        <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 220 : 280, paddingBottom: 170, paddingHorizontal: 20 }}>
         
         {activeExerciseType === 'abacus' && (
           <View style={{ marginTop: 10 }}>
@@ -4967,33 +4974,34 @@ const styles = StyleSheet.create({
   },
   rankingGoldenFrame: {
     width: '100%',
-    height: 130, // Reduced height for the frame
+    minHeight: 130, // Responsive height
     flexDirection: 'row',
     alignItems: 'center',
+    paddingRight: 10,
   },
   rankingFrameLeft: {
-    width: 115, // Adjusted to match the new height
+    width: 100, 
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
   rankingAvatar: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    marginTop: -28, // Shifted even further upwards
-    marginLeft: 34,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    marginTop: -24, 
+    marginLeft: 26,
   },
   rankingFrameMiddle: {
-    flex: 1,
+    flex: 1.1,
     justifyContent: 'center',
-    paddingLeft: 26, // Shifted even further right
+    paddingLeft: 12, 
   },
   rankingUserName: {
     color: '#FFF',
-    fontSize: 14, // Slightly reduced
+    fontSize: 13, 
     fontFamily: 'Inter_800ExtraBold',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   rankingUserPosition: {
     flexDirection: 'row',
