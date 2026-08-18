@@ -353,6 +353,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
   
   const [userXp, setUserXp] = useState(user?.xp || 0);
   
+  // Dynamic real game stats state for right panel (Mantiq, Tezlik, Aniqlik)
+  const [realStats, setRealStats] = useState({ logic: 92, speedTime: '1.8', accuracy: 95 });
+
+  useFocusEffect(
+    useCallback(() => {
+      import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
+        AsyncStorage.getItem('user_game_stats').then(val => {
+          if (val) {
+            const parsed = JSON.parse(val);
+            setRealStats({
+              logic: parsed.logic !== undefined ? parsed.logic : 92,
+              speedTime: parsed.speedTime !== undefined ? parsed.speedTime : '1.8',
+              accuracy: parsed.accuracy !== undefined ? parsed.accuracy : 95
+            });
+          }
+        }).catch(e => console.log(e));
+      });
+    }, [])
+  );
+
   useEffect(() => {
     if (user?.xp !== undefined) {
       setUserXp(user.xp);
@@ -433,6 +453,25 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'abacus');
   const [user, setUser] = useState(route.params?.user);
+
+  const [isPersonajOpen, setIsPersonajOpen] = useState(false);
+  const [isSkinlarOpen, setIsSkinlarOpen] = useState(false);
+
+  const togglePersonajAccordion = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsPersonajOpen(prev => {
+      if (!prev) setIsSkinlarOpen(false);
+      return !prev;
+    });
+  };
+
+  const toggleSkinlarAccordion = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsSkinlarOpen(prev => {
+      if (!prev) setIsPersonajOpen(false);
+      return !prev;
+    });
+  };
 
   const updateCharacterOnServer = async (index) => {
     const charNames = {
@@ -1425,7 +1464,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <MaterialCommunityIcons name="brain" size={18} color="#3B82F6" />
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.logic}</Text>
-                  <Text style={styles.rightStatNumber}>92</Text>
+                  <Text style={styles.rightStatNumber}>{realStats.logic}%</Text>
                   <Text style={[styles.rightStatSubLabel, { color: '#3B82F6' }]} numberOfLines={1}>{t.logicDesc}</Text>
                 </View>
               </View>
@@ -1435,7 +1474,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <Ionicons name="flash" size={18} color="#22C55E" />
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.speed}</Text>
-                  <Text style={styles.rightStatNumber}>88</Text>
+                  <Text style={styles.rightStatNumber}>{realStats.speedTime}s</Text>
                   <Text style={[styles.rightStatSubLabel, { color: '#22C55E' }]} numberOfLines={1}>{t.speedDesc}</Text>
                 </View>
               </View>
@@ -1445,7 +1484,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <MaterialCommunityIcons name="target" size={18} color="#F59E0B" />
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.accuracy}</Text>
-                  <Text style={styles.rightStatNumber}>95</Text>
+                  <Text style={styles.rightStatNumber}>{realStats.accuracy}%</Text>
                   <Text style={[styles.rightStatSubLabel, { color: '#F59E0B' }]} numberOfLines={1}>{t.accuracyDesc}</Text>
                 </View>
               </View>
@@ -1536,7 +1575,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             onPress={() => setActiveExerciseType('abacus')}
           >
             <ImageBackground source={require('../assets/card_abacus.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
-              <View style={[styles.exerciseCardContent, activeExerciseType === 'abacus' && { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
+              <View style={styles.exerciseCardContent}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.abacusTitle}</Text>
                 </View>
@@ -1551,14 +1590,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
             )}
           </TouchableOpacity>
 
-          {/* Card 2: Tasavvur (Oddiy hisob) -> Green button for 1 energy */}
+          {/* Card 2: Tasavvur (Oddiy hisob) */}
           <TouchableOpacity 
             style={styles.exerciseCard} 
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('calc')}
           >
             <ImageBackground source={require('../assets/card_speed.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
-              <View style={[styles.exerciseCardContent, activeExerciseType === 'calc' && { backgroundColor: 'rgba(168, 85, 247, 0.15)' }]}>
+              <View style={styles.exerciseCardContent}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.calcTitle}</Text>
                 </View>
@@ -1569,18 +1608,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'calc' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#22C55E', shadowColor: '#22C55E', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
-          {/* Card 3: Ko'paytirish va bo'lish -> Blue button for 2 energy */}
+          {/* Card 3: Ko'paytirish va bo'lish */}
           <TouchableOpacity 
             style={styles.exerciseCard} 
             activeOpacity={0.8}
             onPress={() => setActiveExerciseType('speed')}
           >
             <ImageBackground source={require('../assets/card_calc.png')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
-              <View style={[styles.exerciseCardContent, activeExerciseType === 'speed' && { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
+              <View style={styles.exerciseCardContent}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={2}>{ext.speedTitle}</Text>
                 </View>
@@ -1591,7 +1630,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'speed' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#22C55E', shadowColor: '#22C55E', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
@@ -1602,7 +1641,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             onPress={() => setActiveExerciseType('battle')}
           >
             <ImageBackground source={require('../assets/card_battle.jpg')} style={styles.exerciseCardBg} imageStyle={{ borderRadius: 10 }} contentFit="cover">
-              <View style={[styles.exerciseCardContent, activeExerciseType === 'battle' && { backgroundColor: 'rgba(217, 119, 6, 0.15)' }]}>
+              <View style={styles.exerciseCardContent}>
                 <View style={styles.exerciseCardTextContainer}>
                   <Text style={styles.exerciseCardTitle} numberOfLines={1} adjustsFontSizeToFit>{ext.battleTitle}</Text>
                 </View>
@@ -2492,113 +2531,174 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Scrollable part for items grid and skins */}
             <ScrollView 
               style={{ flex: 1 }} 
-              contentContainerStyle={{ paddingBottom: 110 }} 
+              contentContainerStyle={{ paddingBottom: 110, paddingHorizontal: 15 }} 
               showsVerticalScrollIndicator={false}
             >
 
-              {/* Category Grid Section */}
-              {inventorySubTab === 'personaj' && (
-                <View style={{ paddingHorizontal: 15 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase' }}>
-                      {t.characters}
-                    </Text>
-
+              {/* 1. PERSONAJLAR ACCORDION DROPDOWN BUTTON */}
+              <TouchableOpacity
+                style={{
+                  flexDirection: 'row',
+                  justify: 'space-between',
+                  alignItems: 'center',
+                  backgroundColor: '#0F111E',
+                  borderWidth: 1.5,
+                  borderColor: isPersonajOpen ? '#EAB308' : '#1F2937',
+                  borderRadius: 14,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  marginTop: 10,
+                  marginBottom: 10,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.4,
+                  shadowRadius: 4,
+                  elevation: 4,
+                }}
+                activeOpacity={0.8}
+                onPress={togglePersonajAccordion}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(234, 179, 8, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                    <MaterialCommunityIcons name="account-group" size={20} color="#EAB308" />
                   </View>
-
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 8 }}>
-                      {[
-                        { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg'), gender: 'boys' },
-                        { id: 1, name: 'Tech Genius', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_maks.png'), gender: 'boys' },
-                        { id: 2, name: 'Creative Mind', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_david.jpg'), gender: 'boys' },
-                        { id: 3, name: 'Mental Warrior', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_kevin.png'), gender: 'boys' },
-                        { id: 4, name: 'Lily', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_lily.jpg'), gender: 'girls' },
-                        { id: 5, name: 'Maya', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_maya.jpg'), gender: 'girls' },
-                        { id: 6, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png'), gender: 'girls' },
-                        { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg'), gender: 'girls' },
-                      ]
-                      .filter(item => {
-                        const userGender = route.params?.gender || (activeAvatarIndex < 4 ? 'boys' : 'girls');
-                        return item.gender === userGender;
-                      })
-                      .map((item) => {
-                      const isSelected = activeAvatarIndex === item.id;
-                      return (
-                        <TouchableOpacity
-                          key={item.id}
-                          style={{
-                            width: '23%',
-                            aspectRatio: 0.75,
-                            backgroundColor: '#0F111E',
-                            borderWidth: 1,
-                            borderColor: isSelected ? '#EAB308' : '#1F2937',
-                            borderRadius: 10,
-                            padding: 4,
-                            alignItems: 'center',
-                            justifyContent: 'flex-start',
-                            marginBottom: 8,
-                            position: 'relative',
-                          }}
-                          onPress={() => {
-                            if (!item.locked) {
-                              setActiveAvatarIndex(item.id);
-                              updateCharacterOnServer(item.id);
-                            }
-                          }}
-                          activeOpacity={item.locked ? 1 : 0.7}
-                        >
-                          {/* Checked badge */}
-                          {isSelected && (
-                            <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EAB308', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
-                              <MaterialCommunityIcons name="check" size={10} color="#000" />
-                            </View>
-                          )}
-
-                          {/* Image */}
-                          <View style={{ width: 56, height: 56, borderRadius: 28, overflow: 'hidden', marginTop: 6, opacity: item.locked ? 0.4 : 1, position: 'relative', alignSelf: 'center', backgroundColor: '#151624', borderWidth: 1, borderColor: isSelected ? '#EAB308' : '#22253B', justifyContent: 'center', alignItems: 'center' }}>
-                            <Image source={item.avatar} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                            {item.locked && (
-                              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                                <Ionicons name="lock-closed" size={12} color="#9CA3AF" />
-                              </View>
-                            )}
-                          </View>
-
-                          <View style={{ width: '100%', alignItems: 'center', marginTop: 6 }}>
-                            <Text style={{ color: isSelected ? '#EAB308' : '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9, textAlign: 'center', marginBottom: 3 }} numberOfLines={1}>
-                              {item.name}
-                            </Text>
-
-                            {item.locked ? (
-                              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                {item.type === 'coin' ? (
-                                  <Image source={require('../assets/s_coin.png')} style={{ width: 8, height: 8, marginRight: 2 }} />
-                                ) : (
-                                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#A855F7', marginRight: 2 }} />
-                                )}
-                                <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{item.price}</Text>
-                              </View>
-                            ) : (
-                              <View style={{ backgroundColor: item.rarity === 'EPIC' ? '#581C87' : item.rarity === 'RARE' ? '#1E3A8A' : '#1F2937', borderRadius: 3, paddingVertical: 1, paddingHorizontal: 4 }}>
-                                <Text style={{ color: item.rarity === 'EPIC' ? '#D8B4FE' : item.rarity === 'RARE' ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 7 }}>
-                                  {item.rarity}
-                                </Text>
-                              </View>
-                            )}
-                          </View>
-                        </TouchableOpacity>
-                      );
-                    })}
+                  <View>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      {t.characters || 'PERSONAJLAR'}
+                    </Text>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }}>
+                      {isPersonajOpen ? "Yopish uchun bosing" : "Personajlarni ko'rish va almashtirish"}
+                    </Text>
                   </View>
                 </View>
-              )}
+              </TouchableOpacity>
 
-              {/* SKINLAR footer section */}
-              <View style={{ marginTop: 15, paddingHorizontal: 15 }}>
-                <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase', marginBottom: 10 }}>
-                  {t.invSkins}
-                </Text>
+              {/* PERSONAJLAR GRID CONTENT */}
+              {isPersonajOpen && inventorySubTab === 'personaj' && (
+                <View style={{ marginBottom: 15, paddingHorizontal: 2 }}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 8 }}>
+                    {[
+                      { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg'), gender: 'boys' },
+                      { id: 1, name: 'Tech Genius', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_maks.png'), gender: 'boys' },
+                      { id: 2, name: 'Creative Mind', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_david.jpg'), gender: 'boys' },
+                      { id: 3, name: 'Mental Warrior', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_kevin.png'), gender: 'boys' },
+                      { id: 4, name: 'Lily', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_lily.jpg'), gender: 'girls' },
+                      { id: 5, name: 'Maya', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_maya.jpg'), gender: 'girls' },
+                      { id: 6, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png'), gender: 'girls' },
+                      { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg'), gender: 'girls' },
+                    ]
+                    .filter(item => {
+                      const userGender = route.params?.gender || (activeAvatarIndex < 4 ? 'boys' : 'girls');
+                      return item.gender === userGender;
+                    })
+                    .map((item) => {
+                    const isSelected = activeAvatarIndex === item.id;
+                    return (
+                      <TouchableOpacity
+                        key={item.id}
+                        style={{
+                          width: '23%',
+                          aspectRatio: 0.75,
+                          backgroundColor: '#0F111E',
+                          borderWidth: 1,
+                          borderColor: isSelected ? '#EAB308' : '#1F2937',
+                          borderRadius: 10,
+                          padding: 4,
+                          alignItems: 'center',
+                          justify: 'flex-start',
+                          marginBottom: 8,
+                          position: 'relative',
+                        }}
+                        onPress={() => {
+                          if (!item.locked) {
+                            setActiveAvatarIndex(item.id);
+                            updateCharacterOnServer(item.id);
+                          }
+                        }}
+                        activeOpacity={item.locked ? 1 : 0.7}
+                      >
+                        {/* Checked badge */}
+                        {isSelected && (
+                          <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EAB308', alignItems: 'center', justifyContent: 'center', zIndex: 5 }}>
+                            <MaterialCommunityIcons name="check" size={10} color="#000" />
+                          </View>
+                        )}
 
+                        {/* Image */}
+                        <View style={{ width: 56, height: 56, borderRadius: 28, overflow: 'hidden', marginTop: 6, opacity: item.locked ? 0.4 : 1, position: 'relative', alignSelf: 'center', backgroundColor: '#151624', borderWidth: 1, borderColor: isSelected ? '#EAB308' : '#22253B', justifyContent: 'center', alignItems: 'center' }}>
+                          <Image source={item.avatar} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                          {item.locked && (
+                            <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                              <Ionicons name="lock-closed" size={12} color="#9CA3AF" />
+                            </View>
+                          )}
+                        </View>
+
+                        <View style={{ width: '100%', alignItems: 'center', marginTop: 6 }}>
+                          {item.locked ? (
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                              {item.type === 'coin' ? (
+                                <Image source={require('../assets/s_coin.png')} style={{ width: 8, height: 8, marginRight: 2 }} />
+                              ) : (
+                                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#A855F7', marginRight: 2 }} />
+                              )}
+                              <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{item.price}</Text>
+                            </View>
+                          ) : (
+                            <View style={{ backgroundColor: item.rarity === 'EPIC' ? '#581C87' : item.rarity === 'RARE' ? '#1E3A8A' : '#1F2937', borderRadius: 3, paddingVertical: 1, paddingHorizontal: 4 }}>
+                              <Text style={{ color: item.rarity === 'EPIC' ? '#D8B4FE' : item.rarity === 'RARE' ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 7 }}>
+                                {item.rarity}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+
+            {/* 2. SKINLAR ACCORDION DROPDOWN BUTTON */}
+            <TouchableOpacity
+              style={{
+                flexDirection: 'row',
+                justify: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#0F111E',
+                borderWidth: 1.5,
+                borderColor: isSkinlarOpen ? '#A855F7' : '#1F2937',
+                borderRadius: 14,
+                paddingHorizontal: 16,
+                paddingVertical: 14,
+                marginBottom: 10,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.4,
+                shadowRadius: 4,
+                elevation: 4,
+              }}
+              activeOpacity={0.8}
+              onPress={toggleSkinlarAccordion}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
+                  <MaterialCommunityIcons name="tshirt-crew" size={20} color="#A855F7" />
+                </View>
+                <View>
+                  <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    {t.invSkins || 'SKINLAR'}
+                  </Text>
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }}>
+                    {isSkinlarOpen ? "Yopish uchun bosing" : "Kiyimlar, poyabzal va aksessuarlar kiyish"}
+                  </Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+
+            {/* SKINLAR GRID CONTENT */}
+            {isSkinlarOpen && (
+              <View style={{ marginBottom: 15, paddingHorizontal: 2 }}>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {[
                     { keyId: 'ustki_kiyim', label: t.invTopWear,     icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: '8 / 24' },
@@ -2640,7 +2740,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   ))}
                 </View>
               </View>
-              </ScrollView>
+            )}
+            </ScrollView>
             </>
           )}
           {inventorySubTab === 'kiyim' && renderKiyimScreen()}
@@ -2649,9 +2750,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* RANKING TAB CONTENT */}
         <View style={{ flex: 1, display: activeTab === 'ranking' ? 'flex' : 'none', backgroundColor: '#05050C' }}>
-          <ScrollView style={{ flexShrink: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-{/* Top Header */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+          {/* STATIC TOP SECTION: Header, Golden Frame, Podium & Search Bar */}
+          <View style={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: 10 }}>
+            {/* Top Header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
               <TouchableOpacity style={styles.rankingBackBtn} onPress={() => setActiveTab('home')}>
                 <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
               </TouchableOpacity>
@@ -2664,7 +2766,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <Text style={styles.rankingTopSubtitle}>{t.rankingSubtitle || "Eng kuchli matematiklar"}</Text>
               </View>
               <View style={{ width: 44 }} />
-{/* Dummy view for centering */}
             </View>
 
 {(() => {
@@ -2685,7 +2786,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* Middle: User Info */}
         <View style={styles.rankingFrameMiddle}>
-          <Text style={styles.rankingUserName}>{top1.name}</Text>
+          <Text style={styles.rankingUserName} numberOfLines={1}>{top1.name}</Text>
           <View style={styles.rankingUserPosition}>
             <MaterialCommunityIcons name="trophy" size={16} color="#F59E0B" />
             <Text style={styles.rankingPositionNumber}>#1</Text>
@@ -2762,24 +2863,24 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {/* User Info Under Podium */}
         <View style={styles.podiumInfoRow}>
           {/* 2nd Place Info */}
-          <View style={[styles.podiumInfoBox, { marginTop: -45, marginLeft: 5 }]}>
-            <Text style={styles.podiumInfoName}>{top2.name}</Text>
+          <View style={[styles.podiumInfoBox, { marginTop: -50, marginLeft: 5 }]}>
+            <Text style={styles.podiumInfoName} numberOfLines={1}>{top2.name}</Text>
             <View style={styles.podiumInfoXpBadge}>
               <Text style={styles.podiumInfoXpText}>{top2.xp} XP</Text>
             </View>
           </View>
 
           {/* 1st Place Info */}
-          <View style={[styles.podiumInfoBox, { marginTop: -30 }]}>
-            <Text style={[styles.podiumInfoName, { color: '#F59E0B' }]}>{top1.name}</Text>
+          <View style={[styles.podiumInfoBox, { marginTop: -42 }]}>
+            <Text style={[styles.podiumInfoName, { color: '#F59E0B' }]} numberOfLines={1}>{top1.name}</Text>
             <View style={styles.podiumInfoXpBadge}>
               <Text style={styles.podiumInfoXpText}>{top1.xp} XP</Text>
             </View>
           </View>
 
           {/* 3rd Place Info */}
-          <View style={[styles.podiumInfoBox, { marginTop: -48, marginRight: 5 }]}>
-            <Text style={styles.podiumInfoName}>{top3.name}</Text>
+          <View style={[styles.podiumInfoBox, { marginTop: -52, marginRight: 5 }]}>
+            <Text style={styles.podiumInfoName} numberOfLines={1}>{top3.name}</Text>
             <View style={styles.podiumInfoXpBadge}>
               <Text style={styles.podiumInfoXpText}>{top3.xp} XP</Text>
             </View>
@@ -2790,91 +2891,92 @@ export default function StudentDashboardScreen({ navigation, route }) {
   );
 })()}
 
-          </ScrollView>
-
-          {/* Sticky Search Bar */}
-          <View style={styles.leaderboardSearchContainer}>
-            <View style={{ flex: 1, marginRight: 12, borderRadius: 14, overflow: 'hidden', backgroundColor: 'rgba(192, 132, 252, 0.1)', position: 'relative', elevation: 4, shadowColor: '#C084FC', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.3, shadowRadius: 6 }}>
-              <Animated.View style={{
-                position: 'absolute',
-                top: '-50%', left: '-50%', right: '-50%', bottom: '-50%',
-                justifyContent: 'center',
-                alignItems: 'center',
-                transform: [{ rotate: searchSpin }]
-              }}>
-                <LinearGradient
-                  colors={['transparent', '#C084FC', 'transparent']}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={{ width: '100%', height: 40 }}
-                />
-              </Animated.View>
-              <View style={[styles.leaderboardSearchBox, { flex: 1, margin: 1.5, borderWidth: 0, paddingVertical: 8 }]}>
-                <Text style={styles.leaderboardSearchIcon}>🔍</Text>
-                <TextInput
-                  style={styles.leaderboardSearchInput}
-                  placeholder={t.searchPlaceholder}
-                  placeholderTextColor="rgba(255,255,255,0.35)"
-                  value={leaderboardSearch}
-                  onChangeText={setLeaderboardSearch}
-                  keyboardType="default"
-                  returnKeyType="search"
-                />
-                {leaderboardSearch.length > 0 && (
-                  <TouchableOpacity onPress={() => setLeaderboardSearch('')} style={styles.leaderboardSearchClear}>
-                    <Text style={styles.leaderboardSearchClearText}>✕</Text>
-                  </TouchableOpacity>
-                )}
+            {/* Search Bar (STATIC FIXED) */}
+            <View style={[styles.leaderboardSearchContainer, { marginTop: 0, paddingHorizontal: 0 }]}>
+              <View style={{ flex: 1, marginRight: 12, borderRadius: 14, overflow: 'hidden', backgroundColor: 'rgba(192, 132, 252, 0.1)', position: 'relative', elevation: 4, shadowColor: '#C084FC', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.3, shadowRadius: 6 }}>
+                <Animated.View style={{
+                  position: 'absolute',
+                  top: '-50%', left: '-50%', right: '-50%', bottom: '-50%',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  transform: [{ rotate: searchSpin }]
+                }}>
+                  <LinearGradient
+                    colors={['transparent', '#C084FC', 'transparent']}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={{ width: '100%', height: 40 }}
+                  />
+                </Animated.View>
+                <View style={[styles.leaderboardSearchBox, { flex: 1, margin: 1.5, borderWidth: 0, paddingVertical: 8 }]}>
+                  <Text style={styles.leaderboardSearchIcon}>🔍</Text>
+                  <TextInput
+                    style={styles.leaderboardSearchInput}
+                    placeholder={t.searchPlaceholder}
+                    placeholderTextColor="rgba(255,255,255,0.35)"
+                    value={leaderboardSearch}
+                    onChangeText={setLeaderboardSearch}
+                    keyboardType="default"
+                    returnKeyType="search"
+                  />
+                  {leaderboardSearch.length > 0 && (
+                    <TouchableOpacity onPress={() => setLeaderboardSearch('')} style={styles.leaderboardSearchClear}>
+                      <Text style={styles.leaderboardSearchClearText}>✕</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
+
+              {/* My Profile Button */}
+              <TouchableOpacity 
+                style={styles.floatingMyProfileBtn}
+                onPress={() => {
+                  if (!user?.customId) {
+                    Alert.alert('Ogohlantirish', 'Foydalanuvchi ma\'lumotlari topilmadi!');
+                    return;
+                  }
+                  const userIndex = filteredLeaderboard.findIndex(item => item.customId === user.customId);
+                  if (userIndex !== -1) {
+                    setHighlightedUserId(user.customId);
+                    
+                    const ITEM_HEIGHT = 67; 
+                    
+                    leaderboardScrollRef.current?.scrollTo({ y: userIndex * ITEM_HEIGHT, animated: true });
+                    
+                    highlightAnim.setValue(0);
+                    Animated.sequence([
+                      Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+                      Animated.timing(highlightAnim, { toValue: 0.2, duration: 400, useNativeDriver: false }),
+                      Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+                      Animated.timing(highlightAnim, { toValue: 0.2, duration: 400, useNativeDriver: false }),
+                      Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+                      Animated.timing(highlightAnim, { toValue: 0, duration: 500, useNativeDriver: false })
+                    ]).start();
+
+                    setTimeout(() => {
+                      setHighlightedUserId(null);
+                    }, 3000);
+                  } else {
+                    Alert.alert('Ogohlantirish', 'Siz reyting jadvalidan topilmadingiz yoki qidiruv natijasiga mos kelmadingiz!');
+                  }
+                }}
+                activeOpacity={0.8}
+              >
+                <View style={styles.floatingMyProfileInner}>
+                  <Feather name="user" size={24} color="#C084FC" />
+                </View>
+              </TouchableOpacity>
             </View>
-
-            {/* My Profile Button */}
-            <TouchableOpacity 
-              style={styles.floatingMyProfileBtn}
-              onPress={() => {
-                if (!user?.customId) {
-                  Alert.alert('Ogohlantirish', 'Foydalanuvchi ma\'lumotlari topilmadi!');
-                  return;
-                }
-                const userIndex = filteredLeaderboard.findIndex(item => item.customId === user.customId);
-                if (userIndex !== -1) {
-                  setHighlightedUserId(user.customId);
-                  
-                  const ITEM_HEIGHT = 67; // row height
-                  const OFFSET_Y = 23; // container marginTop(12) + border(1) + paddingTop(10)
-                  
-                  // Scroll to user position
-                  leaderboardScrollRef.current?.scrollTo({ y: OFFSET_Y + (userIndex * ITEM_HEIGHT), animated: true });
-                  
-                  // Dedicated Blinking animation
-                  highlightAnim.setValue(0);
-                  Animated.sequence([
-                    Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
-                    Animated.timing(highlightAnim, { toValue: 0.2, duration: 400, useNativeDriver: false }),
-                    Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
-                    Animated.timing(highlightAnim, { toValue: 0.2, duration: 400, useNativeDriver: false }),
-                    Animated.timing(highlightAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
-                    Animated.timing(highlightAnim, { toValue: 0, duration: 500, useNativeDriver: false })
-                  ]).start();
-
-                  setTimeout(() => {
-                    setHighlightedUserId(null);
-                  }, 3000);
-                } else {
-                  Alert.alert('Ogohlantirish', 'Siz reyting jadvalidan topilmadingiz yoki qidiruv natijasiga mos kelmadingiz!');
-                }
-              }}
-              activeOpacity={0.8}
-            >
-              <View style={styles.floatingMyProfileInner}>
-                <Feather name="user" size={24} color="#C084FC" />
-              </View>
-            </TouchableOpacity>
           </View>
 
-          {/* Leaderboard Table - scrollable separately */}
-          <ScrollView ref={leaderboardScrollRef} style={{ flex: 1 }} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-            <View style={styles.leaderboardContainer}>
+          {/* ONLY LEADERBOARD TABLE IS SCROLLABLE */}
+          <ScrollView 
+            ref={leaderboardScrollRef} 
+            style={{ flex: 1 }} 
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 110 }} 
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={[styles.leaderboardContainer, { marginTop: 0 }]}>
               {filteredLeaderboard.length > 0 ? (
                 filteredLeaderboard.map((item, index) => (
                   <Animated.View key={item.customId || index} style={[
@@ -2890,7 +2992,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         outputRange: ['rgba(192, 132, 252, 0.3)', 'rgba(192, 132, 252, 1)']
                       }),
                       borderWidth: 2,
-                      borderBottomWidth: 2, // Explicitly override bottom width
+                      borderBottomWidth: 2, 
                       borderRadius: 12,
                       zIndex: 10,
                       elevation: 10,
@@ -4440,6 +4542,71 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 11,
   },
+  // PODIUM STYLES
+  podiumContainer: {
+    marginTop: -5, // Clean separation from golden frame
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  podiumImage: {
+    width: '100%',
+    height: 230,
+    position: 'relative',
+  },
+  podiumFirst: {
+    position: 'absolute',
+    top: '19%', 
+    left: '50%',
+    marginLeft: -33, 
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  podiumAvatarFirst: {
+    width: '100%',
+    height: '100%',
+  },
+  podiumSecond: {
+    position: 'absolute',
+    top: '34%', 
+    left: '11%',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  podiumThird: {
+    position: 'absolute',
+    top: '32%', 
+    right: '11%',
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  podiumAvatar: {
+    width: '100%',
+    height: '100%',
+  },
+  podiumInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10,
+    marginTop: -75, // Position name badges cleanly inside the pedestal blocks
+  },
+  podiumInfoBox: {
+    alignItems: 'center',
+    width: '30%',
+  },
   // ABACUS SECTION STYLES
   abacusSectionTitle: {
     color: '#FFF',
@@ -4974,34 +5141,34 @@ const styles = StyleSheet.create({
   },
   rankingGoldenFrame: {
     width: '100%',
-    minHeight: 130, // Responsive height
+    height: 140, // Uniform fixed height for golden card image
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: 10,
+    paddingRight: 15,
   },
   rankingFrameLeft: {
-    width: 100, 
+    width: 112, 
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },
   rankingAvatar: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    marginTop: -24, 
-    marginLeft: 26,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    marginTop: -22, 
+    marginLeft: 36,
   },
   rankingFrameMiddle: {
     flex: 1.1,
     justifyContent: 'center',
-    paddingLeft: 12, 
+    paddingLeft: 34, 
   },
   rankingUserName: {
     color: '#FFF',
-    fontSize: 13, 
+    fontSize: 12, 
     fontFamily: 'Inter_800ExtraBold',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   rankingUserPosition: {
     flexDirection: 'row',
@@ -5010,27 +5177,28 @@ const styles = StyleSheet.create({
   },
   rankingPositionNumber: {
     color: '#F59E0B',
-    fontSize: 18, // Slightly reduced
+    fontSize: 16, 
     fontFamily: 'Inter_800ExtraBold',
-    marginLeft: 6,
+    marginLeft: 4,
   },
   rankingUserXpBadge: {
     backgroundColor: '#4C1D95',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
     alignSelf: 'flex-start',
-    marginTop: 6,
+    marginTop: 4,
   },
   rankingUserXpText: {
     color: '#FFF',
-    fontSize: 10, // Slightly reduced
+    fontSize: 9, 
     fontFamily: 'Inter_700Bold',
   },
   rankingFrameRight: {
-    flex: 1.2,
+    flex: 1.3,
     justifyContent: 'center',
-    paddingRight: 15,
+    paddingRight: 10,
+    paddingLeft: 5,
   },
   rankingBadgeRow: {
     flexDirection: 'row',
@@ -5171,7 +5339,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     paddingTop: 12,
-    marginTop: -320,
+    marginTop: 0,
     backgroundColor: '#05050C',
     width: '100%',
   },

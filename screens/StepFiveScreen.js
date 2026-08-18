@@ -488,7 +488,6 @@ export default function StepFiveScreen({ navigation, route }) {
                       </View>
                     )}
                   </View>
-                  <Text style={[styles.charName, isSelected && styles.charNameSelected]} numberOfLines={1}>{charName}</Text>
                   {isSelected ? (
                     <Text style={styles.charSelectedText}>{t.selected}</Text>
                   ) : (

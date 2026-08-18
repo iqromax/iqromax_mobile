@@ -11,17 +11,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
 
 const TRANSLATIONS = {
-  en: { getReady: "GET READY", rememberNumber: "REMEMBER THE NUMBER!", correctAnswer: "Correct answer!", incorrectAnswer: "Incorrect answer", awesome: "Awesome!", oops: "Oops...", exerciseCompleted: "Exercise completed successfully", tryAgainFeedback: "Try again!", correctLabel: "Correct answer:", yourAnswer: "Your answer:", answerTime: "Answer time:", sequence: "Sequence of examples:", iqromaxRecommendation: "IQROMAX recommendation", championText: "Great job!\nYou are a real IQROMAX champion!", rushText: "Don't rush!\nFocus and try again.", back: "Back", nextExercise: "Next exercise", retry: "Try again", newExercise: "New exercise", enterAnswer: "Enter answer...", timeLabel: "Time", accuracy: "ACCURACY", averageTime: "AVERAGE TIME", gameTitle: "SIMPLE MATH", speedGameTitle: "SPEED MATH", tipTitle: "Tip", tipDesc: "Helps in the next question", countdown3: "Focus your mind...", countdown2: "Get ready...", countdown1: "Let's go!" },
-  ru: { getReady: "ПРИГОТОВЬТЕСЬ", rememberNumber: "ЗАПОМНИТЕ ЧИСЛО!", correctAnswer: "Правильный ответ!", incorrectAnswer: "Неправильный ответ", awesome: "Отлично!", oops: "Увы...", exerciseCompleted: "Упражнение успешно завершено", tryAgainFeedback: "Попробуйте еще раз!", correctLabel: "Правильный ответ:", yourAnswer: "Ваш ответ:", answerTime: "Время ответа:", sequence: "Последовательность примеров:", iqromaxRecommendation: "Рекомендация IQROMAX", championText: "Отличная работа!\nВы настоящий чемпион IQROMAX!", rushText: "Не торопитесь!\nСосредоточьтесь и попробуйте снова.", back: "Назад", nextExercise: "След. упражнение", retry: "Повторить", newExercise: "Новое упражнение", enterAnswer: "Введите ответ...", timeLabel: "Время", accuracy: "ТОЧНОСТЬ", averageTime: "СРЕДНЕЕ ВРЕМЯ", gameTitle: "ПРОСТОЙ СЧЕТ", speedGameTitle: "БЫСТРЫЙ СЧЕТ", tipTitle: "Подсказка", tipDesc: "Поможет в следующем вопросе", countdown3: "Соберитесь...", countdown2: "Приготовьтесь...", countdown1: "Поехали!" },
-  uz: { getReady: "TAYYORLANING", rememberNumber: "SONNI YODDA SAQLANG!", correctAnswer: "To'g'ri javob!", incorrectAnswer: "Noto'g'ri javob", awesome: "Ajoyib!", oops: "Afsus...", exerciseCompleted: "Mashq muvaffaqiyatli yakunlandi", tryAgainFeedback: "Yana urinib ko'ring!", correctLabel: "To'g'ri javob:", yourAnswer: "Sizning javobingiz:", answerTime: "Javob vaqti:", sequence: "Misollar ketma-ketligi:", iqromaxRecommendation: "IQROMAX tavsiya", championText: "Ajoyib ish!\nSiz haqiqiy IQROMAX chempionisiz!", rushText: "Shoshilmang!\nDiqqatni jamlab, qaytadan urinib ko'ring.", back: "Orqaga", nextExercise: "Keyingi mashq", retry: "Qayta urinish", newExercise: "Yangi mashq", enterAnswer: "Javob kiriting...", timeLabel: "Vaqt", accuracy: "ANIQLIK", averageTime: "O'RTACHA VAQT", gameTitle: "ODDIY HISOB", speedGameTitle: "TEZKOR HISOB", tipTitle: "Maslahat", tipDesc: "Keyingi savolda yordam beradi", countdown3: "Fikringizni jamlang...", countdown2: "Tayyorlaning...", countdown1: "Boshladik!" },
-  ar: { getReady: "استعد", rememberNumber: "تذكر الرقم!", correctAnswer: "إجابة صحيحة!", incorrectAnswer: "إجابة خاطئة", awesome: "رائع!", oops: "عذراً...", exerciseCompleted: "تم إكمال التمرين بنجاح", tryAgainFeedback: "حاول مرة أخرى!", correctLabel: "الإجابة الصحيحة:", yourAnswer: "إجابتك:", answerTime: "وقت الإجابة:", sequence: "تسلسل الأمثلة:", iqromaxRecommendation: "توصية IQROMAX", championText: "عمل رائع!\nأنت بطل IQROMAX الحقيقي!", rushText: "لا تتعجل!\nركز وحاول مرة أخرى.", back: "رجوع", nextExercise: "التمرين التالي", retry: "حاول مجدداً", newExercise: "تمرين جديد", enterAnswer: "أدخل الإجابة...", timeLabel: "وقت", accuracy: "دقة", averageTime: "متوسط الوقت", gameTitle: "حساب بسيط", speedGameTitle: "حساب سريع", tipTitle: "تلميح", tipDesc: "يساعد في السؤال التالي", countdown3: "ركز عقلك...", countdown2: "استعد...", countdown1: "لنبدأ!" },
-  tr: { getReady: "HAZIRLAN", rememberNumber: "SAYIYI UNUTMA!", correctAnswer: "Doğru cevap!", incorrectAnswer: "Yanlış cevap", awesome: "Harika!", oops: "Maalesef...", exerciseCompleted: "Egzersiz başarıyla tamamlandı", tryAgainFeedback: "Tekrar dene!", correctLabel: "Doğru cevap:", yourAnswer: "Senin cevabın:", answerTime: "Cevap süresi:", sequence: "Örnek sırası:", iqromaxRecommendation: "IQROMAX tavsiyesi", championText: "Harika iş!\nSen gerçek bir IQROMAX şampiyonusun!", rushText: "Acele etme!\nOdaklan ve tekrar dene.", back: "Geri", nextExercise: "Sonraki egzersiz", retry: "Tekrar dene", newExercise: "Yeni egzersiz", enterAnswer: "Cevabı girin...", timeLabel: "Zaman", accuracy: "DOĞRULUK", averageTime: "ORTALAMA SÜRE", gameTitle: "BASİT HESAP", speedGameTitle: "HIZLI HESAP", tipTitle: "İpucu", tipDesc: "Sonraki soruda yardımcı olur", countdown3: "Zihnini topla...", countdown2: "Hazırlan...", countdown1: "Başlıyoruz!" },
-  zh: { getReady: "准备", rememberNumber: "记住数字！", correctAnswer: "回答正确！", incorrectAnswer: "回答错误", awesome: "太棒了！", oops: "哎呀...", exerciseCompleted: "练习圆满完成", tryAgainFeedback: "再试一次！", correctLabel: "正确答案：", yourAnswer: "你的答案：", answerTime: "回答时间：", sequence: "示例顺序：", iqromaxRecommendation: "IQROMAX 建议", championText: "做得好！\n你是真正的 IQROMAX 冠军！", rushText: "别着急！\n集中注意力再试一次。", back: "返回", nextExercise: "下一个练习", retry: "重试", newExercise: "新练习", enterAnswer: "输入答案...", timeLabel: "时间", accuracy: "准确率", averageTime: "平均时间", gameTitle: "简单算术", speedGameTitle: "快速算术", tipTitle: "提示", tipDesc: "在下一个问题中会有帮助", countdown3: "集中注意力...", countdown2: "准备好...", countdown1: "开始！" },
-  ky: { getReady: "ДАЯРДАН", rememberNumber: "САНДЫ ЭСТЕП КАЛ!", correctAnswer: "Туура жооп!", incorrectAnswer: "Туура эмес жооп", awesome: "Сонун!", oops: "Аттиң...", exerciseCompleted: "Көнүгүү ийгиликтүү аяктады", tryAgainFeedback: "Дагы аракет кыл!", correctLabel: "Туура жооп:", yourAnswer: "Сенин жообуң:", answerTime: "Жооп убактысы:", sequence: "Мисалдардын ырааты:", iqromaxRecommendation: "IQROMAX сунушу", championText: "Мыкты жумуш!\nСен чыныгы IQROMAX чемпионусуң!", rushText: "Шашпа!\nКөңүлүңдү топтоп, кайра аракет кыл.", back: "Артка", nextExercise: "Кийинки көнүгүү", retry: "Кайра аракет кыл", newExercise: "Жаңы көнүгүү", enterAnswer: "Жоопту киргиз...", timeLabel: "Убакыт", accuracy: "ТАКТЫК", averageTime: "ОРТОЧО УБАКЫТ", gameTitle: "ЖӨНӨКӨЙ ЭСЕП", speedGameTitle: "ТЕЗ ЭСЕПТӨӨ", tipTitle: "Кеңеш", tipDesc: "Кийинки суроодо жардам берет", countdown3: "Оюңузду жыйыңыз...", countdown2: "Даярданыңыз...", countdown1: "Баштадык!" },
-  kk: { getReady: "ДАЙЫНДЫЛ", rememberNumber: "САНДЫ ЕСТЕ САҚТА!", correctAnswer: "Дұрыс жауап!", incorrectAnswer: "Қате жауап", awesome: "Керемет!", oops: "Әттең...", exerciseCompleted: "Жаттығу сәтті аяқталды", tryAgainFeedback: "Қайта байқап көр!", correctLabel: "Дұрыс жауап:", yourAnswer: "Сенің жауабың:", answerTime: "Жауап уақыты:", sequence: "Мысалдар реті:", iqromaxRecommendation: "IQROMAX ұсынысы", championText: "Керемет жұмыс!\nСен нағыз IQROMAX чемпионысың!", rushText: "Асықпа!\nНазарыңды жинап, қайта байқап көр.", back: "Артқа", nextExercise: "Келесі жаттығу", retry: "Қайта байқап көр", newExercise: "Жаңа жаттығу", enterAnswer: "Жауапты енгіз...", timeLabel: "Уақыт", accuracy: "ДӘЛДІК", averageTime: "ОРТАША УАҚЫТ", gameTitle: "ҚАРАПАЙЫМ ЕСЕП", speedGameTitle: "ЖЫЛДАМ ЕСЕПТЕУ", tipTitle: "Кеңес", tipDesc: "Келесі сұрақта көмектеседі", countdown3: "Ойыңызды жинақтаңыз...", countdown2: "Дайындалыңыз...", countdown1: "Бастадық!" },
-  tg: { getReady: "ТАЙЁР ШАВЕД", rememberNumber: "РАҚАМРО ДАР ХОТИР НИГОҲ ДОРЕД!", correctAnswer: "Ҷавоби дуруст!", incorrectAnswer: "Ҷавоби нодуруст", awesome: "Олӣ!", oops: "Мутаассифона...", exerciseCompleted: "Машқ бомуваффақият ба анҷом расид", tryAgainFeedback: "Боз кӯшиш кунед!", correctLabel: "Ҷавоби дуруст:", yourAnswer: "Ҷавоби шумо:", answerTime: "Вақти ҷавоб:", sequence: "Пайдарпайии мисолҳо:", iqromaxRecommendation: "Тавсияи IQROMAX", championText: "Кори олӣ!\nШумо қаҳрамони воқеии IQROMAX ҳастед!", rushText: "Шитоб накунед!\nТаваҷҷӯҳ кунед ва боз кӯшиш кунед.", back: "Ба қафо", nextExercise: "Машқи навбатӣ", retry: "Боз кӯшиш кунед", newExercise: "Машқи нав", enterAnswer: "Ҷавобро ворид кунед...", timeLabel: "Вақт", accuracy: "ДАҚИҚИЯТ", averageTime: "ВАҚТИ МИЁНА", gameTitle: "ҲИСОБИ ОДДӢ", speedGameTitle: "ҲИСОБИ ТЕЗ", tipTitle: "Маслиҳат", tipDesc: "Дар саволи навбатӣ кӯмак мекунад", countdown3: "Диққатро ҷамъ кунед...", countdown2: "Омода шавед...", countdown1: "Оғоз кардем!" },
-  ja: { getReady: "準備", rememberNumber: "数字を覚えて！", correctAnswer: "正解！", incorrectAnswer: "不正解", awesome: "素晴らしい！", oops: "おっと...", exerciseCompleted: "演習が正常に完了しました", tryAgainFeedback: "もう一度お試しください！", correctLabel: "正解：", yourAnswer: "あなたの答え：", answerTime: "回答時間：", sequence: "問題の順序：", iqromaxRecommendation: "IQROMAX のおすすめ", championText: "よくできました！\nあなたは真の IQROMAX チャンピオンです！", rushText: "焦らないで！\n集中してもう一度お試しください。", back: "戻る", nextExercise: "次の演習", retry: "再試行", newExercise: "新しい演習", enterAnswer: "答えを入力...", timeLabel: "時間", accuracy: "正確さ", averageTime: "平均時間", gameTitle: "簡単な計算", speedGameTitle: "スピード計算", tipTitle: "ヒント", tipDesc: "次の問題で役立ちます", countdown3: "集中して...", countdown2: "準備して...", countdown1: "スタート！" },
-  ko: { getReady: "준비", rememberNumber: "숫자를 기억하세요!", correctAnswer: "정답!", incorrectAnswer: "오답", awesome: "멋져요!", oops: "이런...", exerciseCompleted: "연습이 성공적으로 완료되었습니다", tryAgainFeedback: "다시 시도하세요!", correctLabel: "정답:", yourAnswer: "귀하의 답변:", answerTime: "답변 시간:", sequence: "문제 순서:", iqromaxRecommendation: "IQROMAX 추천", championText: "잘했어요!\n당신은 진정한 IQROMAX 챔피언입니다!", rushText: "서두르지 마세요!\n집중해서 다시 시도하세요.", back: "뒤로", nextExercise: "다음 연습", retry: "다시 시도", newExercise: "새로운 연습", enterAnswer: "답변 입력...", timeLabel: "시간", accuracy: "정확도", averageTime: "평균 시간", gameTitle: "간단한 계산", speedGameTitle: "스피드 계산", tipTitle: "팁", tipDesc: "다음 질문에 도움이 됩니다", countdown3: "집중하세요...", countdown2: "준비하세요...", countdown1: "출발!" }
+  en: { getReady: "GET READY", rememberNumber: "REMEMBER THE NUMBER!", correctAnswer: "Correct answer!", incorrectAnswer: "Incorrect answer", awesome: "Awesome!", oops: "Oops...", exerciseCompleted: "Exercise completed successfully", tryAgainFeedback: "Try again!", correctLabel: "Correct answer:", yourAnswer: "Your answer:", answerTime: "Answer time:", sequence: "Sequence of examples:", iqromaxRecommendation: "IQROMAX recommendation", championText: "Great job!\nYou are a real IQROMAX champion!", rushText: "Don't rush!\nFocus and try again.", back: "Back", nextExercise: "Next exercise", retry: "Try again", newExercise: "New exercise", enterAnswer: "Enter answer...", timeLabel: "Time", accuracy: "ACCURACY", averageTime: "AVERAGE TIME", gameTitle: "SIMPLE MATH", speedGameTitle: "MULTIPLICATION & DIVISION", tipTitle: "Tip", tipDesc: "Helps in the next question", countdown3: "Focus your mind...", countdown2: "Get ready...", countdown1: "Let's go!", summaryTitle: "RESULTS SUMMARY", accuracyLabel: "Accuracy", correctTasksLabel: "correct tasks", earnedXPLabel: "EARNED XP" },
+  ru: { getReady: "ПРИГОТОВЬТЕСЬ", rememberNumber: "ЗАПОМНИТЕ ЧИСЛО!", correctAnswer: "Правильный ответ!", incorrectAnswer: "Неправильный ответ", awesome: "Отлично!", oops: "Увы...", exerciseCompleted: "Упражнение успешно завершено", tryAgainFeedback: "Попробуйте еще раз!", correctLabel: "Правильный ответ:", yourAnswer: "Ваш ответ:", answerTime: "Время ответа:", sequence: "Последовательность примеров:", iqromaxRecommendation: "Рекомендация IQROMAX", championText: "Отличная работа!\nВы настоящий чемпион IQROMAX!", rushText: "Не торопитесь!\nСосредоточьтесь и попробуйте снова.", back: "Назад", nextExercise: "След. упражнение", retry: "Повторить", newExercise: "Новое упражнение", enterAnswer: "Введите ответ...", timeLabel: "Время", accuracy: "ТОЧНОСТЬ", averageTime: "СРЕДНЕЕ ВРЕМЯ", gameTitle: "ПРОСТОЙ СЧЕТ", speedGameTitle: "УМНОЖЕНИЕ И ДЕЛЕНИЕ", tipTitle: "Подсказка", tipDesc: "Поможет в следующем вопросе", countdown3: "Соберитесь...", countdown2: "Приготовьтесь...", countdown1: "Поехали!", summaryTitle: "ИТОГИ РЕЗУЛЬТАТОВ", accuracyLabel: "Точность", correctTasksLabel: "правильных заданий", earnedXPLabel: "ПОЛУЧЕНО XP" },
+  uz: { getReady: "TAYYORLANING", rememberNumber: "SONNI YODDA SAQLANG!", correctAnswer: "To'g'ri javob!", incorrectAnswer: "Noto'g'ri javob", awesome: "Ajoyib!", oops: "Afsus...", exerciseCompleted: "Mashq muvaffaqiyatli yakunlandi", tryAgainFeedback: "Yana urinib ko'ring!", correctLabel: "To'g'ri javob:", yourAnswer: "Sizning javobingiz:", answerTime: "Javob vaqti:", sequence: "Misollar ketma-ketligi:", iqromaxRecommendation: "IQROMAX tavsiya", championText: "Ajoyib ish!\nSiz haqiqiy IQROMAX chempionisiz!", rushText: "Shoshilmang!\nDiqqatni jamlab, qaytadan urinib ko'ring.", back: "Orqaga", nextExercise: "Keyingi mashq", retry: "Qayta urinish", newExercise: "Yangi mashq", enterAnswer: "Javob kiriting...", timeLabel: "Vaqt", accuracy: "ANIQLIK", averageTime: "O'RTACHA VAQT", gameTitle: "ODDIY HISOB", speedGameTitle: "KO'PAYTIRISH VA BO'LISH", tipTitle: "Maslahat", tipDesc: "Keyingi savolda yordam beradi", countdown3: "Fikringizni jamlang...", countdown2: "Tayyorlaning...", countdown1: "Boshladik!", summaryTitle: "NATIJALAR XULOSASI", accuracyLabel: "Aniqlik", correctTasksLabel: "ta to'g'ri topshiriq", earnedXPLabel: "TO'PLANGAN XP" },
+  ar: { getReady: "استعد", rememberNumber: "تذكر الرقم!", correctAnswer: "إجابة صحيحة!", incorrectAnswer: "إجابة خاطئة", awesome: "رائع!", oops: "عذراً...", exerciseCompleted: "تم إكمال التمرين بنجاح", tryAgainFeedback: "حاول مرة أخرى!", correctLabel: "الإجابة الصحيحة:", yourAnswer: "إجابتك:", answerTime: "وقت الإجابة:", sequence: "تسلسل الأمثلة:", iqromaxRecommendation: "توصية IQROMAX", championText: "عمل رائع!\nأنت بطل IQROMAX الحقيقي!", rushText: "لا تتعجل!\nركز وحاول مرة أخرى.", back: "رجوع", nextExercise: "التمرين التالي", retry: "حاول مجدداً", newExercise: "تمرين جديد", enterAnswer: "أدخل الإجابة...", timeLabel: "وقت", accuracy: "دقة", averageTime: "متوسط الوقت", gameTitle: "حساب بسيط", speedGameTitle: "الضرب والقسمة", tipTitle: "تلميح", tipDesc: "يساعد في السؤال التالي", countdown3: "ركز عقلك...", countdown2: "استعد...", countdown1: "لنبدأ!", summaryTitle: "ملخص النتائج", accuracyLabel: "دقة", correctTasksLabel: "مهام صحيحة", earnedXPLabel: "نقاط XP المكتسبة" },
+  tr: { getReady: "HAZIRLAN", rememberNumber: "SAYIYI UNUTMA!", correctAnswer: "Doğru cevap!", incorrectAnswer: "Yanlış cevap", awesome: "Harika!", oops: "Maalesef...", exerciseCompleted: "Egzersiz başarıyla tamamlandı", tryAgainFeedback: "Tekrar dene!", correctLabel: "Doğru cevap:", yourAnswer: "Senin cevabın:", answerTime: "Cevap süresi:", sequence: "Örnek sırası:", iqromaxRecommendation: "IQROMAX tavsiyesi", championText: "Harika iş!\nSen gerçek bir IQROMAX şampiyonusun!", rushText: "Acele etme!\nOdaklan ve tekrar dene.", back: "Geri", nextExercise: "Sonraki egzersiz", retry: "Tekrar dene", newExercise: "Yeni egzersiz", enterAnswer: "Cevabı girin...", timeLabel: "Zaman", accuracy: "DOĞRULUK", averageTime: "ORTALAMA SÜRE", gameTitle: "BASİT HESAP", speedGameTitle: "ÇARPMA VE BÖLME", tipTitle: "İpucu", tipDesc: "Sonraki soruda yardımcı olur", countdown3: "Zihnini topla...", countdown2: "Hazırlan...", countdown1: "Başlıyoruz!", summaryTitle: "SONUÇ ÖZETİ", accuracyLabel: "Doğruluk", correctTasksLabel: "doğru görev", earnedXPLabel: "KAZANILAN XP" },
+  zh: { getReady: "准备", rememberNumber: "记住数字！", correctAnswer: "回答正确！", incorrectAnswer: "回答错误", awesome: "太棒了！", oops: "哎呀...", exerciseCompleted: "练习圆满完成", tryAgainFeedback: "再试一次！", correctLabel: "正确答案：", yourAnswer: "你的答案：", answerTime: "回答时间：", sequence: "示例顺序：", iqromaxRecommendation: "IQROMAX 建议", championText: "做得好！\n你是真正的 IQROMAX 冠军！", rushText: "别着急！\n集中注意力再试一次。", back: "返回", nextExercise: "下一个练习", retry: "重试", newExercise: "新练习", enterAnswer: "输入答案...", timeLabel: "时间", accuracy: "准确率", averageTime: "平均时间", gameTitle: "简单算术", speedGameTitle: "乘法与除法", tipTitle: "提示", tipDesc: "在下一个问题中会有帮助", countdown3: "集中注意力...", countdown2: "准备好...", countdown1: "开始！", summaryTitle: "结果汇总", accuracyLabel: "准确率", correctTasksLabel: "正确题目", earnedXPLabel: "获得 XP" },
+  ky: { getReady: "ДАЯРДАН", rememberNumber: "САНДЫ ЭСТЕП КАЛ!", correctAnswer: "Туура жооп!", incorrectAnswer: "Туура эмес жооп", awesome: "Сонун!", oops: "Аттиң...", exerciseCompleted: "Көнүгүү ийгиликтүү аяктады", tryAgainFeedback: "Дагы аракет кыл!", correctLabel: "Туура жооп:", yourAnswer: "Сенин жообуң:", answerTime: "Жооп убактысы:", sequence: "Мисалдардын ырааты:", iqromaxRecommendation: "IQROMAX сунушу", championText: "Мыкты жумуш!\nСен чыныгы IQROMAX чемпионусуң!", rushText: "Шашпа!\nКөңүлүңдү топтоп, кайра аракет кыл.", back: "Артка", nextExercise: "Кийинки көнүгүү", retry: "Кайра аракет кыл", newExercise: "Жаңы көнүгүү", enterAnswer: "Жоопту киргиз...", timeLabel: "Убакыт", accuracy: "ТАКТЫК", averageTime: "ОРТОЧО УБАКЫТ", gameTitle: "ЖӨНӨКӨЙ ЭСЕП", speedGameTitle: "КӨБӨЙТҮҮ ЖАНА БӨЛҮҮ", tipTitle: "Кеңеш", tipDesc: "Кийинки суроодо жардам берет", countdown3: "Оюңузду жыйыңыз...", countdown2: "Даярданыңыз...", countdown1: "Баштадык!", summaryTitle: "ЖЫЙЫНТЫК ЖЫЙЫНТЫГЫ", accuracyLabel: "Тактык", correctTasksLabel: "туура тапшырма", earnedXPLabel: "ТОПТОЛГОН XP" },
+  kk: { getReady: "ДАЙЫНДЫЛ", rememberNumber: "САНДЫ ЕСТЕ САҚТА!", correctAnswer: "Дұрыс жауап!", incorrectAnswer: "Қате жауап", awesome: "Керемет!", oops: "Әттең...", exerciseCompleted: "Жаттығу сәтті аяқталды", tryAgainFeedback: "Қайта байқап көр!", correctLabel: "Дұрыс жауап:", yourAnswer: "Сенің жауабың:", answerTime: "Жауап уақыты:", sequence: "Мысалдар реті:", iqromaxRecommendation: "IQROMAX ұсынысы", championText: "Керемет жұмыс!\nСен нағыз IQROMAX чемпионысың!", rushText: "Асықпа!\nНазарыңды жинап, қайта байқап көр.", back: "Артқа", nextExercise: "Келесі жаттығу", retry: "Қайта байқап көр", newExercise: "Жаңа жаттығу", enterAnswer: "Жауапты енгіз...", timeLabel: "Уақыт", accuracy: "ДӘЛДІК", averageTime: "ОРТАША УАҚЫТ", gameTitle: "ҚАРАПАЙЫМ ЕСЕП", speedGameTitle: "КӨБЕЙТУ ЖӘНЕ БӨЛУ", tipTitle: "Кеңес", tipDesc: "Келесі сұрақта көмектеседі", countdown3: "Ойыңызды жинақтаңыз...", countdown2: "Дайындалыңыз...", countdown1: "Бастадық!", summaryTitle: "НӘТИЖЕЛЕР САРТАМАСЫ", accuracyLabel: "Дәлдік", correctTasksLabel: "дұрыс тапсырма", earnedXPLabel: "ЖИНАЛҒАН XP" },
+  tg: { getReady: "ТАЙЁР ШАВЕД", rememberNumber: "РАҚАМРО ДАР ХОТИР НИГОҲ ДОРЕД!", correctAnswer: "Ҷавоби дуруст!", incorrectAnswer: "Ҷавоби нодуруст", awesome: "Олӣ!", oops: "Мутаассифона...", exerciseCompleted: "Машқ бомуваффақият ба анҷом расид", tryAgainFeedback: "Боз кӯшиш кунед!", correctLabel: "Ҷавоби дуруст:", yourAnswer: "Ҷавоби шумо:", answerTime: "Вақти ҷавоб:", sequence: "Пайдарпайии мисолҳо:", iqromaxRecommendation: "Тавсияи IQROMAX", championText: "Кори олӣ!\nШумо қаҳрамони воқеии IQROMAX ҳастед!", rushText: "Шитоб накунед!\nТаваҷҷӯҳ кунед ва боз кӯшиш кунед.", back: "Ба қафо", nextExercise: "Машқи навбатӣ", retry: "Боз кӯшиш кунед", newExercise: "Машқи нав", enterAnswer: "Ҷавобро ворид кунед...", timeLabel: "Вақт", accuracy: "ДАҚИҚИЯТ", averageTime: "ВАҚТИ МИЁНА", gameTitle: "ҲИСОБИ ОДДӢ", speedGameTitle: "ЗАРБ ВА ТАҚСИМ", tipTitle: "Маслиҳат", tipDesc: "Дар саволи навбатӣ кӯмак мекунад", countdown3: "Диққатро ҷамъ кунед...", countdown2: "Омода шавед...", countdown1: "Оғоз кардем!", summaryTitle: "ХУЛОСАИ НАТИҶАҲО", accuracyLabel: "Дақиқият", correctTasksLabel: "супориши дуруст", earnedXPLabel: "XP-И ҶАМЪШУДА" },
+  ja: { getReady: "準備", rememberNumber: "数字を覚えて！", correctAnswer: "正解！", incorrectAnswer: "不正解", awesome: "素晴らしい！", oops: "おっと...", exerciseCompleted: "演習が正常に完了しました", tryAgainFeedback: "もう一度お試しください！", correctLabel: "正解：", yourAnswer: "あなたの答え：", answerTime: "回答時間：", sequence: "問題の順序：", iqromaxRecommendation: "IQROMAX のおすすめ", championText: "よくできました！\nあなたは真の IQROMAX チャンピオンです！", rushText: "焦らないで！\n集中してもう一度お試しください。", back: "戻る", nextExercise: "次の演習", retry: "再試行", newExercise: "新しい演習", enterAnswer: "答えを入力...", timeLabel: "時間", accuracy: "正確さ", averageTime: "平均時間", gameTitle: "簡単な計算", speedGameTitle: "掛け算と割り算", tipTitle: "ヒント", tipDesc: "次の問題で役立ちます", countdown3: "集中して...", countdown2: "準備して...", countdown1: "スタート！", summaryTitle: "結果サマリー", accuracyLabel: "正確さ", correctTasksLabel: "正解数", earnedXPLabel: "獲得 XP" },
+  ko: { getReady: "준비", rememberNumber: "숫자를 기억하세요!", correctAnswer: "정답!", incorrectAnswer: "오답", awesome: "멋져요!", oops: "이런...", exerciseCompleted: "연습이 성공적으로 완료되었습니다", tryAgainFeedback: "다시 시도하세요!", correctLabel: "정답:", yourAnswer: "귀하의 답변:", answerTime: "답변 시간:", sequence: "문제 순서:", iqromaxRecommendation: "IQROMAX 추천", championText: "잘했어요!\n당신은 진정한 IQROMAX 챔피언입니다!", rushText: "서두르지 마세요!\n집중해서 다시 시도하세요.", back: "뒤로", nextExercise: "다음 연습", retry: "다시 시도", newExercise: "새로운 연습", enterAnswer: "답변 입력...", timeLabel: "시간", accuracy: "정확도", averageTime: "평균 시간", gameTitle: "간단한 계산", speedGameTitle: "곱셈과 나눗셈", tipTitle: "팁", tipDesc: "다음 질문에 도움이 됩니다", countdown3: "집중하세요...", countdown2: "준비하세요...", countdown1: "출발!", summaryTitle: "결과 요약", accuracyLabel: "정확도", correctTasksLabel: "정답 문제", earnedXPLabel: "획득한 XP" }
 };
 
 const { width, height } = Dimensions.get('window');
@@ -55,6 +55,16 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const translateYAnim = useRef(new Animated.Value(50)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const flashAnim = useRef(new Animated.Value(0)).current;
+  const pulseGlowAnim = useRef(new Animated.Value(0.4)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseGlowAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
+        Animated.timing(pulseGlowAnim, { toValue: 0.4, duration: 1200, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
 
   // Stats
   const [correctAnswers, setCorrectAnswers] = useState(0);
@@ -232,10 +242,9 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   useEffect(() => {
     if (questions.length > 0 && currentQIndex < questions.length) {
       const q = questions[currentQIndex];
-      // For add-sub, split by spaces (e.g. "15 + 12 - 5" -> ["15", "+", "12", "-", "5"])
-      // For multiply/divide, maybe just show the whole string, but let's parse it too.
       let parts = q.display.split(' ');
       let newSeq = [];
+      const isDirectInputMode = ['multiply', 'kopaytirish', 'divide', 'bolish', 'aralash'].includes(operation) || isSpeedMode;
       if (['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation)) {
          newSeq = [{ num: parts[0], op: '' }, { num: parts[2], op: parts[1] }];
       } else {
@@ -246,12 +255,18 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       }
       setSequence(newSeq);
       setSeqIndex(0);
-      if (currentQIndex === 0) {
-        setPhase('countdown');
-        setCountdown(3);
+      
+      if (isDirectInputMode) {
+        setQuestionStartTime(Date.now());
+        setPhase('input');
       } else {
-        playSound('tick');
-        setPhase('flashing');
+        if (currentQIndex === 0) {
+          setPhase('countdown');
+          setCountdown(3);
+        } else {
+          playSound('tick');
+          setPhase('flashing');
+        }
       }
       setInputValue('');
     }
@@ -336,6 +351,30 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     }
   };
 
+  // Save game statistics locally when summary phase is reached
+  useEffect(() => {
+    if (phase === 'summary' && speedResults.length > 0) {
+      const totalQuestions = speedResults.length;
+      const correctCount = speedResults.filter(r => r.isCorrect).length;
+      const accuracyPercent = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+      const validTimes = speedResults.map(r => parseFloat(r.time)).filter(t => !isNaN(t) && t > 0);
+      const avgTimeVal = validTimes.length > 0 ? (validTimes.reduce((a, b) => a + b, 0) / validTimes.length).toFixed(1) : '1.8';
+      const logicScore = accuracyPercent;
+
+      import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
+        AsyncStorage.getItem('user_game_stats').then(existing => {
+          let stats = existing ? JSON.parse(existing) : { logic: logicScore, speedTime: avgTimeVal, accuracy: accuracyPercent };
+          stats = {
+            logic: Math.round((stats.logic + logicScore) / 2),
+            speedTime: avgTimeVal,
+            accuracy: Math.round((stats.accuracy + accuracyPercent) / 2)
+          };
+          AsyncStorage.setItem('user_game_stats', JSON.stringify(stats)).catch(e => console.log(e));
+        }).catch(e => console.log(e));
+      });
+    }
+  }, [phase, speedResults]);
+
   const handleNextQuestion = () => {
     if (currentQIndex + 1 < questions.length) {
       setCurrentQIndex(prev => prev + 1);
@@ -352,17 +391,26 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     return `${m}:${s}`;
   };
 
-  const renderTopBar = () => (
-    <View style={styles.topBar}>
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-        <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
-      </TouchableOpacity>
-      <View style={[styles.titleContainer, {flex: 1, justifyContent: 'center', marginRight: 40}]}>
-        <MaterialCommunityIcons name="calculator" size={20} color="#3B82F6" />
-        <Text style={styles.titleText}>{isSpeedMode ? "TEZKOR HISOB" : t.gameTitle}</Text>
+  const renderTopBar = () => {
+    let headerTitle = t.gameTitle;
+    if (['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation)) {
+      headerTitle = t.speedGameTitle || "KO'PAYTIRISH VA BO'LISH";
+    } else if (isSpeedMode) {
+      headerTitle = t.speedGameTitle || "KO'PAYTIRISH VA BO'LISH";
+    }
+
+    return (
+      <View style={styles.topBar}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
+        </TouchableOpacity>
+        <View style={[styles.titleContainer, {flex: 1, justifyContent: 'center', marginRight: 40}]}>
+          <MaterialCommunityIcons name="calculator" size={20} color="#3B82F6" />
+          <Text style={styles.titleText}>{headerTitle}</Text>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const renderStatsHeader = () => null;
 
@@ -571,8 +619,41 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
 
   const renderInputArea = () => {
     const currentQ = questions[currentQIndex];
+    const isDirectMode = ['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation);
     return (
     <View style={styles.inputPhaseWrapper}>
+      {/* Current Math Question display with Glowing Card (only for Multiplication & Division direct input mode) */}
+      {isDirectMode && currentQ && (
+        <View style={{ alignItems: 'center', marginBottom: 16 }}>
+          <Animated.View style={{
+            paddingHorizontal: 36,
+            paddingVertical: 14,
+            backgroundColor: '#0F1123',
+            borderRadius: 20,
+            borderWidth: 2,
+            borderColor: '#FBBF24',
+            shadowColor: '#FBBF24',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: pulseGlowAnim,
+            shadowRadius: 16,
+            elevation: 10,
+            alignItems: 'center',
+            justify: 'center',
+          }}>
+            <Text style={{
+              color: '#FBBF24',
+              fontFamily: 'Inter_900Black',
+              fontSize: 42,
+              letterSpacing: 4,
+              textShadowColor: 'rgba(251, 191, 36, 0.6)',
+              textShadowOffset: { width: 0, height: 2 },
+              textShadowRadius: 10
+            }}>
+              {currentQ.display}
+            </Text>
+          </Animated.View>
+        </View>
+      )}
       <View style={styles.inputSection}>
         <Text style={styles.inputSectionTitle}>{t.enterAnswer}</Text>
         <View style={styles.inputField}>
@@ -642,32 +723,117 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   };
 
   const renderSummaryArea = () => {
+    const totalQuestions = speedResults.length;
+    const correctCount = speedResults.filter(r => r.isCorrect).length;
+    const accuracyPercent = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+    const totalGainedXP = speedResults.filter(r => r.isCorrect).length * calculateQuestionXP();
+    const isHighPerformance = accuracyPercent >= 70;
+
     return (
-      <View style={styles.feedbackContainer}>
-        <View style={[styles.feedbackHeader, { alignItems: 'center', marginBottom: 10 }]}>
-          <MaterialCommunityIcons name="trophy-award" size={80} color="#FBBF24" style={{ textShadowColor: 'rgba(251, 191, 36, 0.5)', textShadowOffset: { width: 0, height: 4 }, textShadowRadius: 10 }} />
-        </View>
-        <ScrollView style={{width: '100%', marginTop: 20}}>
+      <View style={{ flex: 1, paddingHorizontal: 15, paddingTop: 10 }}>
+        {/* PREMIUM SCORE BANNER CARD */}
+        <LinearGradient
+          colors={isHighPerformance ? ['#3B82F6', '#1D4ED8', '#1E1B4B'] : ['#8B5CF6', '#6D28D9', '#0F172A']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 20,
+            borderWidth: 1.5,
+            borderColor: isHighPerformance ? 'rgba(59, 130, 246, 0.4)' : 'rgba(139, 92, 246, 0.4)',
+            shadowColor: isHighPerformance ? '#3B82F6' : '#8B5CF6',
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.5,
+            shadowRadius: 16,
+            elevation: 10,
+          }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* Left side: Stats summary */}
+            <View>
+              <Text style={{ color: '#93C5FD', fontFamily: 'Inter_700Bold', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
+                {t.summaryTitle || "NATIJALAR XULOSASI"}
+              </Text>
+              <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_900Black', fontSize: 26 }}>
+                {accuracyPercent}% <Text style={{ color: '#93C5FD', fontSize: 14, fontFamily: 'Inter_600SemiBold' }}>{t.accuracyLabel || "Aniqlik"}</Text>
+              </Text>
+              <Text style={{ color: '#E2E8F0', fontFamily: 'Inter_500Medium', fontSize: 12, marginTop: 4 }}>
+                {correctCount} / {totalQuestions} {t.correctTasksLabel || "ta to'g'ri topshiriq"}
+              </Text>
+            </View>
+
+            {/* Right side: XP Badge */}
+            <View style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.35)',
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.15)',
+              alignItems: 'center',
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Image source={require('../assets/xp_icon.jpg')} style={{ width: 22, height: 22, borderRadius: 11, marginRight: 6 }} contentFit="cover" />
+                <Text style={{ color: '#FBBF24', fontFamily: 'Inter_900Black', fontSize: 20 }}>+{totalGainedXP}</Text>
+              </View>
+              <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 9, marginTop: 2, textTransform: 'uppercase' }}>{t.earnedXPLabel || "TO'PLANGAN XP"}</Text>
+            </View>
+          </View>
+        </LinearGradient>
+
+        {/* RESULTS LIST */}
+        <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10, paddingLeft: 4 }}>
+          {t.sequence || "Misollar ketma-ketligi"}
+        </Text>
+
+        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
           {speedResults.map((res, i) => (
-             <View key={i} style={{flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'rgba(255,255,255,0.05)', padding: 15, borderRadius: 12, marginBottom: 10, alignItems: 'center'}}>
-                <Text style={{color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold', width: 120}}>{res.q.display}</Text>
-                <View style={{alignItems: 'center', width: 60}}>
-                  <MaterialCommunityIcons name={res.isCorrect ? "check-circle" : "close-circle"} size={24} color={res.isCorrect ? "#10B981" : "#EF4444"} />
-                  <Text style={{color: res.isCorrect ? "#10B981" : "#EF4444", fontSize: 14, fontFamily: 'Inter_500Medium'}}>{res.userAnswer}</Text>
+            <View 
+              key={i} 
+              style={{
+                flexDirection: 'row', 
+                justify: 'space-between', 
+                alignItems: 'center',
+                backgroundColor: res.isCorrect ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)', 
+                borderWidth: 1,
+                borderColor: res.isCorrect ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)',
+                paddingHorizontal: 16,
+                paddingVertical: 12, 
+                borderRadius: 16, 
+                marginBottom: 10,
+              }}
+            >
+              {/* Question Equation */}
+              <View style={{ width: '32%' }}>
+                <Text style={{ color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                  {res.q.display}
+                </Text>
+              </View>
+
+              {/* User Answer Status */}
+              <View style={{ width: '33%', justifyContent: 'center' }}>
+                <Text style={{ color: res.isCorrect ? "#10B981" : "#EF4444", fontSize: 18, fontFamily: 'Inter_800ExtraBold' }}>
+                  {res.userAnswer || '—'}
+                </Text>
+                {!res.isCorrect && (
+                  <Text style={{ color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_500Medium', marginTop: 1 }}>
+                    ({res.q.answer})
+                  </Text>
+                )}
+              </View>
+
+              {/* Time */}
+              <View style={{ alignItems: 'flex-end', width: '30%' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <MaterialCommunityIcons name="clock-outline" size={13} color="#FBBF24" style={{ marginRight: 3 }} />
+                  <Text style={{ color: '#FBBF24', fontSize: 14, fontFamily: 'Inter_700Bold' }}>{res.time}s</Text>
                 </View>
-                <View style={{alignItems: 'center', width: 60}}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 20, height: 20, borderRadius: 10, marginRight: 6 }} />
-                    <Text style={{ color: res.isCorrect ? '#10B981' : '#EF4444', fontSize: 16, fontFamily: 'Inter_700Bold' }}>
-                      {res.isCorrect ? '+' + calculateQuestionXP() : '0'} XP
-                    </Text>
-                  </View>
-                </View>
-                <View style={{alignItems: 'flex-end', width: 60}}>
-                  <Text style={{color: '#9CA3AF', fontSize: 12}}>{t.timeLabel || "Vaqt"}</Text>
-                  <Text style={{color: '#FBBF24', fontSize: 16, fontFamily: 'Inter_700Bold'}}>{res.time}s</Text>
-                </View>
-             </View>
+                <Text style={{ color: res.isCorrect ? '#10B981' : '#6B7280', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                  {res.isCorrect ? `+${calculateQuestionXP()} XP` : '0 XP'}
+                </Text>
+              </View>
+            </View>
           ))}
         </ScrollView>
       </View>
