@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": " ",
+    "name": "IQROMAX",
     "slug": "iqromax_mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -24,7 +24,8 @@
       "navigationBar": {
         "visible": "sticky-immersive",
         "backgroundColor": "#05050C"
-      }
+      },
+      "package": "com.iqromax.iqromax_mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
