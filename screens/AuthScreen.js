@@ -232,7 +232,7 @@ export default function AuthScreen({ navigation, route }) {
           body: JSON.stringify({
             phone: role === 'teacher' ? undefined : phone.trim(),
             username: role === 'teacher' ? usernameInput.trim() : undefined,
-            password,
+            password: password.trim(),
             language
           })
         });

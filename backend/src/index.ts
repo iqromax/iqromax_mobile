@@ -559,7 +559,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     if (!user) return res.status(400).json({ error: t.userNotFound });
 
-    const validPassword = await bcrypt.compare(password, user.password);
+    const validPassword = await bcrypt.compare(String(password || '').trim(), user.password);
     if (!validPassword) return res.status(400).json({ error: t.wrongPass });
 
     if (user.status !== 'Faol') return res.status(403).json({ error: t.inactive });
