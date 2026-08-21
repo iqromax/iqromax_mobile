@@ -3733,6 +3733,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       };
                       await AsyncStorage.setItem('user_data', JSON.stringify(fullUser));
                       setUser(fullUser);
+                      if (route.params?.user) {
+                        route.params.user.isGuest = false;
+                        route.params.user.phone = authPhone.trim();
+                        route.params.user.email = authEmail.trim();
+                      }
                       setIsOtpModalOpen(false);
                       setIsAuthModalOpen(false);
                       Alert.alert(
