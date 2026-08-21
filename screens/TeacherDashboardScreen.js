@@ -17,13 +17,13 @@ const SOCKET_SERVER_URL = API_URL.replace(/\/api\/?$/, '');
 const getAvatarByName = (avatarName) => {
   const avatarMap = {
     'avatar_maks.png': require('../assets/avatar_maks.png'),
-    'avatar_sam.png': require('../assets/avatar_sam.png'),
-    'avatar_leo.png': require('../assets/avatar_leo.png'),
-    'avatar_ray.png': require('../assets/avatar_ray.png'),
-    'avatar_mia.png': require('../assets/avatar_mia.png'),
-    'avatar_zoe.png': require('../assets/avatar_zoe.png'),
-    'avatar_eva.png': require('../assets/avatar_eva.png'),
-    'avatar_lily.png': require('../assets/avatar_lily.png'),
+    'avatar_alex.jpg': require('../assets/avatar_alex.jpg'),
+    'avatar_david.jpg': require('../assets/avatar_david.jpg'),
+    'avatar_emma.jpg': require('../assets/avatar_emma.jpg'),
+    'avatar_kevin.png': require('../assets/avatar_kevin.png'),
+    'avatar_lily.jpg': require('../assets/avatar_lily.jpg'),
+    'avatar_maya.jpg': require('../assets/avatar_maya.jpg'),
+    'avatar_sophia.png': require('../assets/avatar_sophia.png'),
   };
   return avatarMap[avatarName] || require('../assets/avatar_maks.png');
 };
