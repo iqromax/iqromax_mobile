@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated, Alert, ActivityIndicator, Modal } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -146,23 +146,54 @@ export default function AuthScreen({ navigation, route }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [usernameInput, setUsernameInput] = useState('');
+  const [requestModal, setRequestModal] = useState({ visible: false, title: '', message: '' });
+
   const handleAuthAction = async () => {
     if (activeTab === 'register') {
-      if (!name.trim()) {
-        Alert.alert(t.errorTitle, t.errFillFields);
+      if (role === 'teacher') {
+        if (!name.trim() || !phone.trim() || !email.trim() || !password || !confirmPassword) {
+          Alert.alert(t.errorTitle, t.errFillFields);
+          return;
+        }
+        if (password !== confirmPassword) {
+          Alert.alert(t.errorTitle, t.errPassMatch);
+          return;
+        }
+
+        setIsLoading(true);
+        try {
+          const res = await fetch(`${API_URL}/teacher/request`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: name.trim(),
+              phone: phone.trim(),
+              email: email.trim(),
+              password
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            setRequestModal({
+              visible: true,
+              title: "So'rov Adminga Yuborildi!",
+              message: "Sizning so'rovingiz adminga yuborildi. Hisobingiz tasdiqlansa tez orada emailingizga kirish uchun username va password jo'natiladi, u orqali hisobingizga kira olasiz."
+            });
+          } else {
+            Alert.alert(t.errorTitle, data.error || t.errServer);
+          }
+        } catch (e) {
+          Alert.alert(t.errorTitle, t.errNetwork);
+        } finally {
+          setIsLoading(false);
+        }
         return;
       }
 
-      if (role === 'teacher') {
-        const teacherUser = { name: name.trim(), role: 'teacher', language };
-        try {
-          await AsyncStorage.setItem('user_data', JSON.stringify(teacherUser));
-        } catch (e) {}
-
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'TeacherDashboard', params: { user: teacherUser, language } }]
-        });
+      if (!name.trim()) {
+        Alert.alert(t.errorTitle, t.errFillFields);
         return;
       }
 
@@ -176,8 +207,9 @@ export default function AuthScreen({ navigation, route }) {
       return;
     } else {
       // Login logic
-      if (!phone.trim() || !password) {
-        Alert.alert(t.errorTitle, t.errPhonePass);
+      const loginIdentifier = role === 'teacher' ? usernameInput.trim() : phone.trim();
+      if (!loginIdentifier || !password) {
+        Alert.alert(t.errorTitle, role === 'teacher' ? 'Iltimos, username va parolni kiriting!' : t.errPhonePass);
         return;
       }
       setIsLoading(true);
@@ -185,13 +217,17 @@ export default function AuthScreen({ navigation, route }) {
         const response = await fetch(`${API_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: phone.trim(), password, language })
+          body: JSON.stringify({
+            phone: role === 'teacher' ? undefined : phone.trim(),
+            username: role === 'teacher' ? usernameInput.trim() : undefined,
+            password,
+            language
+          })
         });
         
         const data = await response.json();
         
         if (response.ok) {
-          // Detect character index if possible
           let charIndex = 0;
           let gender = 'boys';
           const boysChars = ["Max", "Sam", "Leo", "Ray"];
@@ -207,7 +243,6 @@ export default function AuthScreen({ navigation, route }) {
              }
           }
 
-          // Save session
           try {
             await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
           } catch (e) {
@@ -220,7 +255,6 @@ export default function AuthScreen({ navigation, route }) {
               routes: [{ name: 'TeacherDashboard', params: { user: data.user, language } }]
             });
           } else {
-            // Reset navigation and go to StudentDashboard with full user data
             navigation.reset({
               index: 0,
               routes: [{ 
@@ -303,7 +337,7 @@ export default function AuthScreen({ navigation, route }) {
 
           {/* Form */}
           {activeTab === 'register' ? (
-            <View style={{ marginBottom: 60 }}>
+            <View style={{ marginBottom: 20 }}>
               <CustomAnimatedInput
                 icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
                 placeholder={t.fullName}
@@ -311,17 +345,77 @@ export default function AuthScreen({ navigation, route }) {
                 value={name}
                 onChangeText={setName}
               />
+
+              {role === 'teacher' && (
+                <>
+                  <CustomAnimatedInput
+                    icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
+                    placeholder={t.phone}
+                    placeholderTextColor="#555566"
+                    keyboardType="phone-pad"
+                    value={phone}
+                    onChangeText={setPhone}
+                  />
+
+                  <CustomAnimatedInput
+                    icon={<Feather name="mail" size={18} color="#888899" style={styles.inputIcon} />}
+                    placeholder={t.email}
+                    placeholderTextColor="#555566"
+                    keyboardType="email-address"
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+
+                  <CustomAnimatedInput
+                    icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
+                    placeholder={t.password}
+                    placeholderTextColor="#555566"
+                    secureTextEntry={!showPassword}
+                    value={password}
+                    onChangeText={setPassword}
+                    rightIcon={
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                        <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+                      </TouchableOpacity>
+                    }
+                  />
+
+                  <CustomAnimatedInput
+                    icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
+                    placeholder={t.confirmPassword}
+                    placeholderTextColor="#555566"
+                    secureTextEntry={!showConfirmPassword}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    rightIcon={
+                      <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
+                        <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+                      </TouchableOpacity>
+                    }
+                  />
+                </>
+              )}
             </View>
           ) : (
             <>
-              <CustomAnimatedInput
-                icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
-                placeholder={t.phone}
-                placeholderTextColor="#555566"
-                keyboardType="phone-pad"
-                value={phone}
-                onChangeText={setPhone}
-              />
+              {role === 'teacher' ? (
+                <CustomAnimatedInput
+                  icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
+                  placeholder="Username"
+                  placeholderTextColor="#555566"
+                  value={usernameInput}
+                  onChangeText={setUsernameInput}
+                />
+              ) : (
+                <CustomAnimatedInput
+                  icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
+                  placeholder={t.phone}
+                  placeholderTextColor="#555566"
+                  keyboardType="phone-pad"
+                  value={phone}
+                  onChangeText={setPhone}
+                />
+              )}
 
               <CustomAnimatedInput
                 icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
@@ -351,12 +445,12 @@ export default function AuthScreen({ navigation, route }) {
           <TouchableOpacity 
             style={[
               styles.loginButton, 
-              activeTab === 'register' && { marginTop: 40 },
-              ((activeTab === 'register' ? !name.trim() : (!phone.trim() || !password)) || isLoading) && { opacity: 0.5 }
+              activeTab === 'register' && { marginTop: 20 },
+              (isLoading) && { opacity: 0.5 }
             ]} 
             activeOpacity={0.8}
             onPress={handleAuthAction}
-            disabled={(activeTab === 'register' ? !name.trim() : (!phone.trim() || !password)) || isLoading}
+            disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#FFF" />
@@ -383,6 +477,36 @@ export default function AuthScreen({ navigation, route }) {
           
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* TEACHER REQUEST SUBMITTED MODAL */}
+      <Modal visible={requestModal.visible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalIconBox}>
+              <MaterialCommunityIcons name="send-check-outline" size={36} color="#A855F7" />
+            </View>
+
+            <Text style={styles.modalTitleText}>
+              {requestModal.title}
+            </Text>
+
+            <Text style={styles.modalDescText}>
+              {requestModal.message}
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.modalCloseBtn}
+              onPress={() => {
+                setRequestModal({ visible: false, title: '', message: '' });
+                setActiveTab('login');
+              }}
+            >
+              <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>Tushundim</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -524,5 +648,58 @@ const styles = StyleSheet.create({
     color: '#555566',
     fontSize: 12,
     marginLeft: 6,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 5, 12, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#0D0D1A',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#A855F7',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  modalIconBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(168, 85, 247, 0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#A855F7',
+  },
+  modalTitleText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  modalDescText: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  modalCloseBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 14,
+    backgroundColor: '#A855F7',
+    alignItems: 'center',
   },
 });

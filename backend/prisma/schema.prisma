@@ -71,3 +71,14 @@ model UserMission {
 
   @@unique([userId, missionId])
 }
+
+model TeacherRequest {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  email     String
+  password  String
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

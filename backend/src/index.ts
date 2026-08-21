@@ -338,12 +338,164 @@ const LOGIN_TRANSLATIONS: Record<string, any> = {
 };
 
 // User login
+// Teacher application request
+app.post('/api/teacher/request', async (req, res) => {
+  try {
+    const { name, phone, email, password } = req.body;
+    if (!name || !phone || !email || !password) {
+      return res.status(400).json({ error: 'Iltimos, barcha maydonlarni to\'ldiring' });
+    }
+
+    // Check existing email
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Ushbu email bilan ro\'yxatdan o\'tilgan' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // @ts-ignore
+    const teacherReq = await prisma.teacherRequest.create({
+      data: {
+        name,
+        phone,
+        email,
+        password: hashedPassword,
+        status: 'PENDING'
+      }
+    });
+
+    res.status(201).json({ message: 'So\'rovingiz yuborildi', request: teacherReq });
+  } catch (error) {
+    console.error('Teacher request error:', error);
+    res.status(500).json({ error: 'Server xatosi yuz berdi' });
+  }
+});
+
+// Admin: Get all teacher requests and teachers
+app.get('/api/teacher/requests', async (req, res) => {
+  try {
+    // @ts-ignore
+    const requests = await prisma.teacherRequest.findMany({
+      orderBy: { createdAt: 'desc' }
+    });
+    const teachers = await prisma.user.findMany({
+      where: { role: { equals: 'teacher', mode: 'insensitive' } },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json({ requests, teachers });
+  } catch (error) {
+    console.error('Fetch teacher requests error:', error);
+    res.status(500).json({ error: 'Server xatosi' });
+  }
+});
+
+// Admin: Approve teacher request
+app.post('/api/teacher/approve', async (req, res) => {
+  try {
+    const { id } = req.body;
+    // @ts-ignore
+    const reqItem = await prisma.teacherRequest.findUnique({ where: { id } });
+    if (!reqItem) return res.status(404).json({ error: 'So\'rov topilmadi' });
+
+    // Generate random 8-char password
+    const generatedPass = Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(generatedPass, 10);
+    const customId = await generateCustomId();
+
+    // Create teacher user
+    const teacherUser = await prisma.user.create({
+      data: {
+        customId,
+        role: 'teacher',
+        name: reqItem.name,
+        phone: reqItem.phone,
+        email: reqItem.email,
+        password: hashedPassword,
+        status: 'Faol'
+      }
+    });
+
+    // Update request status
+    // @ts-ignore
+    await prisma.teacherRequest.update({
+      where: { id },
+      data: { status: 'APPROVED' }
+    });
+
+    // Send localized email to teacher with login credentials
+    const mailOptions = {
+      from: `"IQROMAX Admin" <${process.env.SMTP_USER}>`,
+      to: reqItem.email,
+      subject: 'IQROMAX - O\'qituvchilik so\'rovingiz tasdiqlandi!',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #070712; color: #ffffff; padding: 40px; border-radius: 16px; border: 1px solid #1A1A2F;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ffffff; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 2px;">
+              IQRO<span style="color: #A855F7;">MAX</span>
+            </h1>
+          </div>
+          
+          <h2 style="color: #ffffff; font-size: 22px; margin-bottom: 16px;">Tabriklaymiz, ${reqItem.name}!</h2>
+          <p style="color: #C7D2FE; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+            Sizning IQROMAX platformasida o'qituvchilik qilish bo'yicha yuborgan so'rovingiz admin tomonidan muvaffaqiyatli tasdiqlandi!
+          </p>
+          
+          <div style="background-color: #121223; padding: 24px; border-radius: 14px; border: 1px solid #A855F7; margin-bottom: 30px;">
+            <p style="color: #9CA3AF; font-size: 14px; margin-bottom: 10px;">Tizimga kirish ma'lumotlaringiz:</p>
+            <p style="color: #FFFFFF; font-size: 16px; margin: 6px 0;"><strong>Username (Ismingiz):</strong> <span style="color: #A855F7;">${reqItem.name}</span></p>
+            <p style="color: #FFFFFF; font-size: 16px; margin: 6px 0;"><strong>Parol (Password):</strong> <span style="color: #10B981; font-weight: bold;">${generatedPass}</span></p>
+          </div>
+          
+          <p style="color: #818CF8; font-size: 14px; text-align: center;">
+            Ushbu ma'lumotlar orqali mobil ilovaning O'qituvchi bo'limida tizimga kirishingiz mumkin.
+          </p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ message: 'O\'qituvchi muvaffaqiyatli tasdiqlandi va emailga parol yuborildi', user: teacherUser });
+  } catch (error) {
+    console.error('Approve teacher error:', error);
+    res.status(500).json({ error: 'Server xatosi' });
+  }
+});
+
+// Admin: Reject teacher request
+app.post('/api/teacher/reject', async (req, res) => {
+  try {
+    const { id } = req.body;
+    // @ts-ignore
+    await prisma.teacherRequest.update({
+      where: { id },
+      data: { status: 'REJECTED' }
+    });
+    res.json({ message: 'So\'rov rad etildi' });
+  } catch (error) {
+    console.error('Reject teacher error:', error);
+    res.status(500).json({ error: 'Server xatosi' });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { phone, password, language = 'en' } = req.body;
+    const { phone, username, password, language = 'en' } = req.body;
     const t = LOGIN_TRANSLATIONS[language] || LOGIN_TRANSLATIONS['en'];
 
-    const user = await prisma.user.findFirst({ where: { phone } });
+    const identifier = phone || username;
+    if (!identifier) return res.status(400).json({ error: t.userNotFound });
+
+    // Search by phone, email, or name (case-insensitive username)
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { phone: identifier },
+          { email: identifier },
+          { name: { equals: identifier, mode: 'insensitive' } }
+        ]
+      }
+    });
+
     if (!user) return res.status(400).json({ error: t.userNotFound });
 
     const validPassword = await bcrypt.compare(password, user.password);

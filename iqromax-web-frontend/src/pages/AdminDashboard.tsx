@@ -65,11 +65,12 @@ import { toast } from 'sonner';
 import { FAQManager } from '@/components/FAQManager';
 import { FeedbackManager } from '@/components/FeedbackManager';
 import { CourseApplicationsManager } from '@/components/CourseApplicationsManager';
+import { TeachersManager } from '@/components/TeachersManager';
 
-const AdminDashboard = () => {
+const AdminDashboard = ({ initialTab }: { initialTab?: string }) => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(initialTab || 'dashboard');
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   
@@ -251,6 +252,7 @@ const AdminDashboard = () => {
       ]
     },
     { id: 'abacus', label: 'Abakus', icon: Shield },
+    { id: 'teachers', label: 'O\'qituvchilar', icon: Users },
     { id: 'feedback', label: 'Izoh yoki taklif', icon: MessageSquare },
     { id: 'applications', label: 'Kursga arizalar', icon: BookOpen },
   ];
@@ -1800,6 +1802,14 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+      );
+    }
+
+    if (activeTab === 'teachers') {
+      return (
+        <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
+          <TeachersManager searchQuery={globalSearchQuery} />
         </div>
       );
     }
