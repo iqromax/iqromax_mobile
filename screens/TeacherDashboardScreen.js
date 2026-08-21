@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather, MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import io from 'socket.io-client';
 import { API_URL } from '../src/config/api';
-import { calculateUserRank } from '../src/utils/rankUtils';
+import { LinearGradient } from 'expo-linear-gradient';
 import { DASHBOARD_TRANSLATIONS } from './StudentDashboardScreen';
 
 const SOCKET_SERVER_URL = API_URL.replace(/\/api\/?$/, '');
