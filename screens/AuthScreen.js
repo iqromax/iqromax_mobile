@@ -133,9 +133,9 @@ const CustomAnimatedInput = ({ icon, rightIcon, ...props }) => {
 };
 
 export default function AuthScreen({ navigation, route }) {
-  const { role = 'student', language = 'en' } = route.params || {};
+  const { role = 'student', language = 'en', initialTab = 'login' } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['en'];
-  const [activeTab, setActiveTab] = useState('login'); // 'register' or 'login'
+  const [activeTab, setActiveTab] = useState(initialTab); // 'register' or 'login'
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -148,48 +148,19 @@ export default function AuthScreen({ navigation, route }) {
 
   const handleAuthAction = async () => {
     if (activeTab === 'register') {
-      if (!name.trim() || !phone.trim() || !email.trim() || !password || !confirmPassword) {
+      if (!name.trim()) {
         Alert.alert(t.errorTitle, t.errFillFields);
         return;
       }
-      if (password !== confirmPassword) {
-        Alert.alert(t.errorTitle, t.errPassMatch);
-        return;
-      }
 
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${API_URL}/auth/send-otp`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email: email.trim(), name: name.trim(), language }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          // Move to OTP screen
-          navigation.navigate('OtpScreen', {
-            ...route.params,
-            role,
-            name: name.trim(),
-            phone: phone.trim(),
-            email: email.trim(),
-            password: password,
-            referralCode: referralCode.trim(),
-          });
-        } else {
-          Alert.alert(t.errorTitle, data.error || t.errServer);
-        }
-      } catch (error) {
-        Alert.alert(t.errorTitle, t.errNetwork);
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-
+      // Step 3 -> Name entered -> Go to Step 4 (Country Selection)
+      navigation.navigate('StepFour', {
+        ...route.params,
+        role,
+        name: name.trim(),
+        language
+      });
+      return;
     } else {
       // Login logic
       if (!phone.trim() || !password) {
@@ -308,7 +279,7 @@ export default function AuthScreen({ navigation, route }) {
           </View>
 
           {/* Form */}
-          {activeTab === 'register' && (
+          {activeTab === 'register' ? (
             <CustomAnimatedInput
               icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
               placeholder={t.fullName}
@@ -316,57 +287,39 @@ export default function AuthScreen({ navigation, route }) {
               value={name}
               onChangeText={setName}
             />
-          )}
+          ) : (
+            <>
+              <CustomAnimatedInput
+                icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
+                placeholder={t.phone}
+                placeholderTextColor="#555566"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={setPhone}
+              />
 
-          <CustomAnimatedInput
-            icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
-            placeholder={t.phone}
-            placeholderTextColor="#555566"
-            keyboardType="phone-pad"
-            value={phone}
-            onChangeText={setPhone}
-          />
+              <CustomAnimatedInput
+                icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
+                placeholder={t.password}
+                placeholderTextColor="#555566"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                rightIcon={
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                    <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+                  </TouchableOpacity>
+                }
+              />
 
-          {activeTab === 'register' && (
-            <CustomAnimatedInput
-              icon={<Feather name="mail" size={18} color="#888899" style={styles.inputIcon} />}
-              placeholder={t.email}
-              placeholderTextColor="#555566"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-            />
-          )}
-
-          <CustomAnimatedInput
-            icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
-            placeholder={t.password}
-            placeholderTextColor="#555566"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-            rightIcon={
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
+              <TouchableOpacity 
+                style={styles.forgotPasswordContainer} 
+                onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
               </TouchableOpacity>
-            }
-          />
-
-          {activeTab === 'register' && (
-            <CustomAnimatedInput
-              icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
-              placeholder={t.confirmPassword}
-              placeholderTextColor="#555566"
-              secureTextEntry={!showConfirmPassword}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              rightIcon={
-                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-                  <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color="#888899" />
-                </TouchableOpacity>
-              }
-            />
+            </>
           )}
 
           {/* Temporarily hidden 
@@ -397,11 +350,11 @@ export default function AuthScreen({ navigation, route }) {
             style={[
               styles.loginButton, 
               activeTab === 'register' && { marginTop: 8 },
-              ((activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password)) || isLoading) && { opacity: 0.5 }
+              ((activeTab === 'register' ? !name.trim() : (!phone.trim() || !password)) || isLoading) && { opacity: 0.5 }
             ]} 
             activeOpacity={0.8}
             onPress={handleAuthAction}
-            disabled={activeTab === 'register' ? (!name || !phone || !email || !password || !confirmPassword) : (!phone || !password) || isLoading}
+            disabled={(activeTab === 'register' ? !name.trim() : (!phone.trim() || !password)) || isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#FFF" />

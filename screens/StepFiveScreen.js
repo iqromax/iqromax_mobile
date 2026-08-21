@@ -298,58 +298,42 @@ export default function StepFiveScreen({ navigation, route }) {
   };
 
   const handleFinish = async () => {
-    const { role, name, phone, email, password, country, referralCode } = route.params || {};
+    const { role = 'student', name = 'Mehmon', country = 'UZ' } = route.params || {};
     
     // Determine character name
     const charList = gender === 'boys' ? t.boysChars : t.girlsChars;
     const charIndex = gender === 'boys' ? selectedChar : selectedChar - 4;
     const characterName = charList[charIndex];
 
-    // If missing register data, just go to dashboard (might be simple login path for now)
-    if (!name || !email) {
-      navigation.navigate('StudentDashboard', { language, selectedChar, gender });
-      return;
-    }
+    const tempGuestUser = {
+      name: name || 'Mehmon',
+      character: characterName,
+      country,
+      role,
+      isGuest: true,
+      xp: 0,
+      customId: Math.floor(100000 + Math.random() * 900000).toString()
+    };
 
-    setIsRegistering(true);
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          role,
-          name,
-          phone,
-          email,
-          password,
-          country,
-          language,
-          character: characterName,
-          referralCode
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Success
-        setUserData(data.user);
-        
-        try {
-          await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
-        } catch (e) {
-          console.error('AsyncStorage error', e);
-        }
-
-        setShowSuccessModal(true);
-      } else {
-        Alert.alert('Xatolik', data.error || 'Ro\'yxatdan o\'tishda xatolik yuz berdi');
-      }
-    } catch (error) {
-      Alert.alert('Xatolik', 'Tarmoq xatosi. Iltimos tekshirib qayta urinib ko\'ring.');
-    } finally {
-      setIsRegistering(false);
+      await AsyncStorage.setItem('user_data', JSON.stringify(tempGuestUser));
+    } catch (e) {
+      console.error('AsyncStorage error', e);
     }
+
+    // Reset navigation directly to StudentDashboard
+    navigation.reset({
+      index: 0,
+      routes: [{ 
+        name: 'StudentDashboard', 
+        params: { 
+          user: tempGuestUser,
+          language,
+          selectedChar,
+          gender
+        } 
+      }]
+    });
   };
 
   return (

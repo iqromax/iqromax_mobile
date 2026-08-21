@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image, ImageBackground } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -352,6 +352,34 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [leaderboardData, setLeaderboardData] = useState([]);
   
   const [userXp, setUserXp] = useState(user?.xp || 0);
+  // Guest user check: Only true if isGuest is explicitly true or missing phone & email & id
+  const isGuestUser = user?.isGuest === true || (!user?.phone && !user?.email && !user?.id);
+  
+  // Auth Required Modal & Registration State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authPhone, setAuthPhone] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('');
+  const [authShowPassword, setAuthShowPassword] = useState(false);
+  const [authShowConfirmPassword, setAuthShowConfirmPassword] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // OTP Modal State
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [otpCode, setOtpCode] = useState(['', '', '', '']);
+  const [otpTimer, setOtpTimer] = useState(60);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const otpInputRefs = useRef([]);
+
+  const checkGuestAuth = (actionCallback) => {
+    if (isGuestUser) {
+      setIsAuthModalOpen(true);
+      return false;
+    }
+    if (actionCallback) actionCallback();
+    return true;
+  };
   
   // Dynamic real game stats state for right panel (Mantiq, Tezlik, Aniqlik)
   // For new users (XP == 0 or no saved stats), default values start at 0%, 0.0s, 0%
@@ -470,6 +498,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isSkinlarOpen, setIsSkinlarOpen] = useState(false);
 
   const togglePersonajAccordion = () => {
+    if (!checkGuestAuth()) return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setIsPersonajOpen(prev => {
       if (!prev) setIsSkinlarOpen(false);
@@ -478,6 +507,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const toggleSkinlarAccordion = () => {
+    if (!checkGuestAuth()) return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setIsSkinlarOpen(prev => {
       if (!prev) setIsPersonajOpen(false);
@@ -1361,6 +1391,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const handleStartBattle = async () => {
+    if (!checkGuestAuth()) return;
     if (currentEnergy < 2) {
       setRequiredEnergyAlert(2);
       setIsEnergyAlertVisible(true);
@@ -1380,6 +1411,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const handleStartExercise = async () => {
+    if (!checkGuestAuth()) return;
     const isSpeed = activeExerciseType === 'speed';
     const reqEnergy = isSpeed ? 2 : 1;
     if (currentEnergy < reqEnergy) {
@@ -1429,7 +1461,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           {/* Right Icons */}
           <View style={styles.rightIcons}>
-            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7} onPress={() => { loadNotifications(); setIsNotifModalOpen(true); }}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7} onPress={() => checkGuestAuth(() => { loadNotifications(); setIsNotifModalOpen(true); })}>
               <Feather name="bell" size={22} color="#FFFFFF" />
               {notificationsList.length > 0 && <View style={styles.notificationDot} />}
             </TouchableOpacity>
@@ -1442,7 +1474,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <TouchableOpacity 
             style={[styles.statCard, { marginRight: 10 }]} 
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('EnergyCenter')}
+            onPress={() => checkGuestAuth(() => navigation.navigate('EnergyCenter'))}
           >
             <View style={styles.statContent}>
               <Image source={require('../assets/lightning_energy.png')} style={styles.statImage} />
@@ -3301,7 +3333,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           <TouchableOpacity 
             style={[styles.navItem, activeTab === 'profile' && styles.navItemActive]} 
-            onPress={() => setActiveTab('profile')}
+            onPress={() => checkGuestAuth(() => setActiveTab('profile'))}
             activeOpacity={0.8}
           >
             <MaterialCommunityIcons 
@@ -3432,6 +3464,281 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
           </View>
         </View>
+      </Modal>
+
+      {/* AUTHORIZATION REQUIRED MODAL */}
+      <Modal visible={isAuthModalOpen} transparent animationType="slide">
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={[styles.modalContent, { backgroundColor: '#0D0D1A', borderWidth: 1, borderColor: '#A855F7', padding: 20 }]}>
+            <View style={{ alignItems: 'center', marginBottom: 15 }}>
+              <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(168, 85, 247, 0.1)', justifyContent: 'center', alignItems: 'center', marginBottom: 10, borderWidth: 1, borderColor: '#A855F7' }}>
+                <MaterialCommunityIcons name="lock-alert-outline" size={32} color="#A855F7" />
+              </View>
+              <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 6 }}>
+                Avtorizatsiyadan o'ting
+              </Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center', lineHeight: 18 }}>
+                Ilovadagi barcha imkoniyatlar va funksiyalardan to'liq foydalanish uchun ma'lumotlaringizni to'ldiring.
+              </Text>
+            </View>
+
+            {/* Registration Form Fields */}
+            <View style={{ gap: 10, width: '100%', marginBottom: 15 }}>
+              <View style={styles.authInputWrapper}>
+                <Feather name="phone" size={16} color="#888899" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.authInputField}
+                  placeholder="Telefon raqamingiz"
+                  placeholderTextColor="#555566"
+                  keyboardType="phone-pad"
+                  value={authPhone}
+                  onChangeText={setAuthPhone}
+                />
+              </View>
+
+              <View style={styles.authInputWrapper}>
+                <Feather name="mail" size={16} color="#888899" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.authInputField}
+                  placeholder="Elektron pochtangiz"
+                  placeholderTextColor="#555566"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={authEmail}
+                  onChangeText={setAuthEmail}
+                />
+              </View>
+
+              <View style={styles.authInputWrapper}>
+                <Feather name="lock" size={16} color="#888899" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.authInputField}
+                  placeholder="Parolingiz"
+                  placeholderTextColor="#555566"
+                  secureTextEntry={!authShowPassword}
+                  value={authPassword}
+                  onChangeText={setAuthPassword}
+                />
+                <TouchableOpacity onPress={() => setAuthShowPassword(!authShowPassword)}>
+                  <Feather name={authShowPassword ? "eye" : "eye-off"} size={16} color="#888899" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.authInputWrapper}>
+                <Feather name="lock" size={16} color="#888899" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.authInputField}
+                  placeholder="Parolni tasdiqlang"
+                  placeholderTextColor="#555566"
+                  secureTextEntry={!authShowConfirmPassword}
+                  value={authConfirmPassword}
+                  onChangeText={setAuthConfirmPassword}
+                />
+                <TouchableOpacity onPress={() => setAuthShowConfirmPassword(!authShowConfirmPassword)}>
+                  <Feather name={authShowConfirmPassword ? "eye" : "eye-off"} size={16} color="#888899" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
+              <TouchableOpacity 
+                style={[styles.modalBtn, { backgroundColor: '#1A1A2E', flex: 0.4 }]}
+                onPress={() => setIsAuthModalOpen(false)}
+              >
+                <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold' }}>Yopish</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.modalBtn, { backgroundColor: '#A855F7', flex: 0.6 }]}
+                disabled={authLoading}
+                onPress={async () => {
+                  if (!authPhone.trim() || !authEmail.trim() || !authPassword || !authConfirmPassword) {
+                    Alert.alert('Xatolik', 'Iltimos, barcha maydonlarni to\'ldiring!');
+                    return;
+                  }
+                  if (authPassword !== authConfirmPassword) {
+                    Alert.alert('Xatolik', 'Parollar mos kelmadi!');
+                    return;
+                  }
+
+                  setAuthLoading(true);
+                  try {
+                    const response = await fetch(`${API_URL}/auth/send-otp`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: authEmail.trim(), name: user?.name || 'O\'quvchi', language })
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                      setIsAuthModalOpen(false);
+                      setIsOtpModalOpen(true);
+                    } else {
+                      const errMsg = data.error || 'Server xatosi yuz berdi';
+                      if (errMsg.toLowerCase().includes('already') || errMsg.toLowerCase().includes('mavjud') || errMsg.toLowerCase().includes('ro\'yxatdan') || errMsg.toLowerCase().includes('registered')) {
+                        Alert.alert(
+                          'Ogohlantirish',
+                          'Bu email yoki telefon raqamidan oldin ro\'yxatdan o\'tilgan. Iltimos, boshqa ma\'lumot kiriting yoki tizimga kiring.',
+                          [
+                            {
+                              text: 'Boshqatdan urinib ko\'rish',
+                              onPress: () => {
+                                // Form resets/refreshes
+                                setAuthEmail('');
+                                setAuthPhone('');
+                                setAuthPassword('');
+                                setAuthConfirmPassword('');
+                              }
+                            },
+                            {
+                              text: 'Kirish',
+                              onPress: () => {
+                                setIsAuthModalOpen(false);
+                                navigation.navigate('AuthScreen', { language, initialTab: 'login' });
+                              }
+                            }
+                          ]
+                        );
+                      } else {
+                        Alert.alert('Xatolik', errMsg);
+                      }
+                    }
+                  } catch (e) {
+                    Alert.alert('Xatolik', 'Tarmoqqa ulanib bo\'lmadi');
+                  } finally {
+                    setAuthLoading(false);
+                  }
+                }}
+              >
+                {authLoading ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>Saqlash (Save)</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* EMAIL OTP VERIFICATION MODAL */}
+      <Modal visible={isOtpModalOpen} transparent animationType="fade">
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={[styles.modalContent, { backgroundColor: '#0D0D1A', borderWidth: 1, borderColor: '#10B981', padding: 20, alignItems: 'center' }]}>
+            <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(16, 185, 129, 0.1)', justifyContent: 'center', alignItems: 'center', marginBottom: 15, borderWidth: 1, borderColor: '#10B981' }}>
+              <MaterialCommunityIcons name="email-check-outline" size={32} color="#10B981" />
+            </View>
+
+            <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 6 }}>
+              Emailni tasdiqlang
+            </Text>
+            <Text style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center', marginBottom: 20, lineHeight: 18 }}>
+              Biz 4 xonali tasdiqlash kodini <Text style={{ color: '#10B981', fontWeight: 'bold' }}>{authEmail}</Text> manziliga yubordik.
+            </Text>
+
+            {/* OTP Inputs */}
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+              {otpCode.map((digit, idx) => (
+                <TextInput
+                  key={idx}
+                  ref={(ref) => (otpInputRefs.current[idx] = ref)}
+                  style={{
+                    width: 50,
+                    height: 60,
+                    borderRadius: 12,
+                    borderWidth: 2,
+                    borderColor: digit ? '#10B981' : '#1A1A2E',
+                    backgroundColor: '#05050C',
+                    color: '#FFF',
+                    fontSize: 24,
+                    fontFamily: 'Inter_700Bold',
+                    textAlign: 'center'
+                  }}
+                  keyboardType="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChangeText={(text) => {
+                    const newOtp = [...otpCode];
+                    newOtp[idx] = text;
+                    setOtpCode(newOtp);
+                    if (text && idx < 3) {
+                      otpInputRefs.current[idx + 1]?.focus();
+                    }
+                  }}
+                />
+              ))}
+            </View>
+
+            {otpLoading ? (
+              <ActivityIndicator color="#10B981" style={{ marginBottom: 15 }} />
+            ) : (
+              <TouchableOpacity 
+                style={[styles.modalBtn, { backgroundColor: '#10B981', width: '100%', paddingVertical: 14 }]}
+                onPress={async () => {
+                  const code = otpCode.join('');
+                  if (code.length < 4) {
+                    Alert.alert('Xatolik', 'Iltimos, 4 xonali kodni kiriting!');
+                    return;
+                  }
+
+                  setOtpLoading(true);
+                  try {
+                    const verifyRes = await fetch(`${API_URL}/auth/verify-otp`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: authEmail.trim(), otp: code })
+                    });
+
+                    if (!verifyRes.ok) {
+                      const errData = await verifyRes.json();
+                      Alert.alert('Xatolik', errData.error || 'Kod noto\'g\'ri!');
+                      setOtpLoading(false);
+                      return;
+                    }
+
+                    // Register user on server
+                    const regRes = await fetch(`${API_URL}/auth/register`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        role: user?.role || 'student',
+                        name: user?.name || 'O\'quvchi',
+                        phone: authPhone.trim(),
+                        email: authEmail.trim(),
+                        password: authPassword,
+                        country: user?.country || 'UZ',
+                        language,
+                        character: user?.character || 'maks'
+                      })
+                    });
+
+                    const regData = await regRes.json();
+                    if (regRes.ok) {
+                      const fullUser = { ...regData.user, isGuest: false };
+                      await AsyncStorage.setItem('user_data', JSON.stringify(fullUser));
+                      setUser(fullUser);
+                      setIsOtpModalOpen(false);
+                      Alert.alert('Muvaffaqiyatli!', 'Akkauntingiz muvaffaqiyatli avtorizatsiyadan o\'tdi!');
+                    } else {
+                      Alert.alert('Xatolik', regData.error || 'Ro\'yxatdan o\'tishda xatolik');
+                    }
+                  } catch (e) {
+                    Alert.alert('Xatolik', 'Tarmoq xatosi yuz berdi');
+                  } finally {
+                    setOtpLoading(false);
+                  }
+                }}
+              >
+                <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 16 }}>Tasdiqlash</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
     </SafeAreaView>
@@ -6468,6 +6775,22 @@ const styles = StyleSheet.create({
   modalBtnPrimaryText: {
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
+  },
+  authInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#05050C',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#1A1A2E',
+    height: 48,
+    paddingHorizontal: 12,
+  },
+  authInputField: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: 'Inter_500Medium',
   },
 });
 
