@@ -108,6 +108,8 @@ export default function Teachers() {
     } finally {
       setActionLoadingId(null);
     }
+  };
+
   const confirmDeleteTeacher = async () => {
     if (!teacherToDelete) return;
     const id = teacherToDelete.id;
