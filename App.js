@@ -330,13 +330,21 @@ export default function App() {
              }
           }
 
-          setInitialRoute('StudentDashboard');
-          setInitialParams({
-            user: userData,
-            language: userData.language || 'uz',
-            selectedChar: charIndex,
-            gender: gender
-          });
+          if (userData && (userData.role?.toLowerCase() === 'teacher' || userData.role === "O'qituvchi")) {
+            setInitialRoute('TeacherDashboardScreen');
+            setInitialParams({
+              user: userData,
+              language: userData.language || 'uz'
+            });
+          } else {
+            setInitialRoute('StudentDashboard');
+            setInitialParams({
+              user: userData,
+              language: userData.language || 'uz',
+              selectedChar: charIndex,
+              gender: gender
+            });
+          }
         }
       } catch (error) {
         console.error('Failed to check auth status', error);

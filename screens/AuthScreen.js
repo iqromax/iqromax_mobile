@@ -264,7 +264,7 @@ export default function AuthScreen({ navigation, route }) {
           if (role === 'teacher' || data.user?.role?.toLowerCase() === 'teacher') {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'TeacherDashboard', params: { user: data.user, language } }]
+              routes: [{ name: 'TeacherDashboardScreen', params: { user: data.user, language } }]
             });
           } else {
             navigation.reset({
