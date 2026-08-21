@@ -356,8 +356,28 @@ export default function StudentDashboardScreen({ navigation, route }) {
   // Guest user check: True ONLY if user is a guest user (explicitly isGuest: true or no user object exists)
   const isGuestUser = Boolean(!user || user.isGuest === true);
   
-  // Auth Required Modal & Registration State
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  // Custom Premium Alert Modal State
+  const [customAlert, setCustomAlert] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'success', // 'success' or 'warning'
+    buttons: []
+  });
+
+  const showCustomAlert = (title, message, type = 'success', buttons = []) => {
+    setCustomAlert({
+      visible: true,
+      title,
+      message,
+      type,
+      buttons
+    });
+  };
+
+  const closeCustomAlert = () => {
+    setCustomAlert(prev => ({ ...prev, visible: false }));
+  };
   const [authPhone, setAuthPhone] = useState('');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
@@ -1537,7 +1557,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.logic}</Text>
                   <Text style={styles.rightStatNumber}>{realStats.logic}%</Text>
-                  <Text style={[styles.rightStatSubLabel, { color: '#3B82F6' }]} numberOfLines={1}>{t.logicDesc}</Text>
+                  <Text style={[styles.rightStatSubLabel, { color: '#3B82F6' }]} numberOfLines={1}>
+                    {realStats.logic > 0 ? t.logicDesc : '0%'}
+                  </Text>
                 </View>
               </View>
 
@@ -1547,7 +1569,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.speed}</Text>
                   <Text style={styles.rightStatNumber}>{realStats.speedTime}s</Text>
-                  <Text style={[styles.rightStatSubLabel, { color: '#22C55E' }]} numberOfLines={1}>{t.speedDesc}</Text>
+                  <Text style={[styles.rightStatSubLabel, { color: '#22C55E' }]} numberOfLines={1}>
+                    {parseFloat(realStats.speedTime) > 0 ? t.speedDesc : '0.0s'}
+                  </Text>
                 </View>
               </View>
 
@@ -1557,7 +1581,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.rightStatTextCol}>
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.accuracy}</Text>
                   <Text style={styles.rightStatNumber}>{realStats.accuracy}%</Text>
-                  <Text style={[styles.rightStatSubLabel, { color: '#F59E0B' }]} numberOfLines={1}>{t.accuracyDesc}</Text>
+                  <Text style={[styles.rightStatSubLabel, { color: '#F59E0B' }]} numberOfLines={1}>
+                    {realStats.accuracy > 0 ? t.accuracyDesc : '0%'}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -3584,9 +3610,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                     errMsg.toLowerCase().includes('oldin');
 
                       if (isDup) {
-                        Alert.alert(
+                        showCustomAlert(
                           t.authDupTitle || 'Ogohlantirish',
                           t.authDupMsg || 'Bu email yoki telefon raqamidan oldin ro\'yxatdan o\'tilgan. Iltimos, boshqa ma\'lumot kiriting yoki tizimga kiring.',
+                          'warning',
                           [
                             {
                               text: t.authTryAgainBtn || 'Boshqatdan urinib ko\'rish',
@@ -3607,11 +3634,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           ]
                         );
                       } else {
-                        Alert.alert('Xatolik', errMsg);
+                        showCustomAlert('Xatolik', errMsg, 'warning');
                       }
                     }
                   } catch (e) {
-                    Alert.alert('Xatolik', 'Tarmoqqa ulanib bo\'lmadi');
+                    showCustomAlert('Xatolik', 'Tarmoqqa ulanib bo\'lmadi', 'warning');
                   } finally {
                     setAuthLoading(false);
                   }
@@ -3687,7 +3714,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 onPress={async () => {
                   const code = otpCode.join('');
                   if (code.length < 4) {
-                    Alert.alert('Xatolik', 'Iltimos, 4 xonali kodni kiriting!');
+                    showCustomAlert('Xatolik', 'Iltimos, 4 xonali kodni kiriting!', 'warning');
                     return;
                   }
 
@@ -3701,7 +3728,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                     if (!verifyRes.ok) {
                       const errData = await verifyRes.json();
-                      Alert.alert('Xatolik', errData.error || 'Kod noto\'g\'ri!');
+                      showCustomAlert('Xatolik', errData.error || 'Kod noto\'g\'ri!', 'warning');
                       setOtpLoading(false);
                       return;
                     }
@@ -3740,9 +3767,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       }
                       setIsOtpModalOpen(false);
                       setIsAuthModalOpen(false);
-                      Alert.alert(
+                      showCustomAlert(
                         t.authSuccessTitle || 'Muvaffaqiyatli!', 
                         t.authSuccessMsg || 'Akkauntingiz muvaffaqiyatli avtorizatsiyadan o\'tdi! Barcha imkoniyatlar ochildi.',
+                        'success',
                         [
                           {
                             text: 'OK',
@@ -3767,6 +3795,98 @@ export default function StudentDashboardScreen({ navigation, route }) {
             )}
           </View>
         </KeyboardAvoidingView>
+      {/* CUSTOM PREMIUM ALERT MODAL */}
+      <Modal visible={customAlert.visible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[
+            styles.modalContent, 
+            { 
+              backgroundColor: '#0D0D1A', 
+              borderWidth: 1.5, 
+              borderColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B', 
+              padding: 24, 
+              alignItems: 'center',
+              borderRadius: 24,
+              shadowColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.35,
+              shadowRadius: 16,
+              elevation: 12
+            }
+          ]}>
+            <View style={{
+              width: 64,
+              height: 64,
+              borderRadius: 32,
+              backgroundColor: customAlert.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+              justify: 'center',
+              alignItems: 'center',
+              marginBottom: 16,
+              borderWidth: 1.5,
+              borderColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B'
+            }}>
+              <MaterialCommunityIcons 
+                name={customAlert.type === 'success' ? "check-decagram" : "alert-rhombus-outline"} 
+                size={34} 
+                color={customAlert.type === 'success' ? "#10B981" : "#F59E0B"} 
+              />
+            </View>
+
+            <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8 }}>
+              {customAlert.title}
+            </Text>
+
+            <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+              {customAlert.message}
+            </Text>
+
+            <View style={{ width: '100%', gap: 10 }}>
+              {customAlert.buttons && customAlert.buttons.length > 0 ? (
+                customAlert.buttons.map((btn, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    activeOpacity={0.8}
+                    style={{
+                      width: '100%',
+                      paddingVertical: 14,
+                      borderRadius: 14,
+                      backgroundColor: idx === 0 && customAlert.buttons.length > 1 ? '#1A1A2E' : (customAlert.type === 'success' ? '#10B981' : '#A855F7'),
+                      borderWidth: idx === 0 && customAlert.buttons.length > 1 ? 1 : 0,
+                      borderColor: '#2A2A40',
+                      alignItems: 'center'
+                    }}
+                    onPress={() => {
+                      closeCustomAlert();
+                      if (btn.onPress) btn.onPress();
+                    }}
+                  >
+                    <Text style={{
+                      color: idx === 0 && customAlert.buttons.length > 1 ? '#9CA3AF' : '#FFF',
+                      fontFamily: 'Inter_700Bold',
+                      fontSize: 15
+                    }}>
+                      {btn.text}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={{
+                    width: '100%',
+                    paddingVertical: 14,
+                    borderRadius: 14,
+                    backgroundColor: customAlert.type === 'success' ? '#10B981' : '#A855F7',
+                    alignItems: 'center'
+                  }}
+                  onPress={closeCustomAlert}
+                >
+                  <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>OK</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
       </Modal>
 
     </SafeAreaView>
