@@ -378,6 +378,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const closeCustomAlert = () => {
     setCustomAlert(prev => ({ ...prev, visible: false }));
   };
+
+  // Auth Required Modal & Registration State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authPhone, setAuthPhone] = useState('');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
