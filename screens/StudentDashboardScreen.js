@@ -410,7 +410,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   useFocusEffect(
     useCallback(() => {
       import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
-        AsyncStorage.getItem('user_game_stats').then(val => {
+        const userIdKey = user?.customId || user?.id || 'guest';
+        AsyncStorage.getItem(`user_game_stats_${userIdKey}`).then(val => {
           if (val) {
             const parsed = JSON.parse(val);
             setRealStats({
@@ -423,7 +424,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           }
         }).catch(e => console.log(e));
 
-        AsyncStorage.getItem('user_activity_history').then(histVal => {
+        AsyncStorage.getItem(`user_activity_history_${userIdKey}`).then(histVal => {
           if (histVal) {
             setActivityHistory(JSON.parse(histVal).slice(0, 3));
           } else {
@@ -431,7 +432,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           }
         }).catch(e => console.log(e));
       });
-    }, [])
+    }, [user?.customId, user?.id])
   );
 
   useEffect(() => {
