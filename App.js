@@ -331,7 +331,7 @@ export default function App() {
           }
 
           if (userData && (userData.role?.toLowerCase() === 'teacher' || userData.role === "O'qituvchi")) {
-            setInitialRoute('TeacherDashboardScreen');
+            setInitialRoute('TeacherDashboard');
             setInitialParams({
               user: userData,
               language: userData.language || 'uz'
@@ -385,7 +385,7 @@ export default function App() {
           <Stack.Screen name="StepFour" component={StepFourScreen} />
           <Stack.Screen name="StepFive" component={StepFiveScreen} />
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} initialParams={initialRoute === 'StudentDashboard' ? initialParams : undefined} />
-          <Stack.Screen name="TeacherDashboard" component={TeacherDashboardScreen} />
+          <Stack.Screen name="TeacherDashboard" component={TeacherDashboardScreen} initialParams={initialRoute === 'TeacherDashboard' ? initialParams : undefined} />
           <Stack.Screen name="EnergyCenter" component={EnergyCenterScreen} />
         <Stack.Screen name="ReferralScreen" component={ReferralScreen} />
           <Stack.Screen name="OddiyHisobGame" component={OddiyHisobGameScreen} />
