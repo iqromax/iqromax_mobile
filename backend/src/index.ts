@@ -234,14 +234,31 @@ app.post('/api/auth/forgot-password-otp', async (req, res) => {
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
     const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ error: 'Email and new password are required' });
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
     
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    // Case insensitive search
+    const user = await prisma.user.findFirst({
+      where: {
+        email: { equals: cleanEmail, mode: 'insensitive' }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User with this email not found' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword.trim(), 10);
     
     await prisma.user.update({
-      where: { email },
+      where: { id: user.id },
       data: { password: hashedPassword }
     });
 
+    console.log(`Password reset successfully for user email: ${cleanEmail}`);
     res.json({ message: 'Password updated successfully' });
   } catch (error) {
     console.error('Reset password error:', error);
