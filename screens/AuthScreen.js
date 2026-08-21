@@ -153,6 +153,19 @@ export default function AuthScreen({ navigation, route }) {
         return;
       }
 
+      if (role === 'teacher') {
+        const teacherUser = { name: name.trim(), role: 'teacher', language };
+        try {
+          await AsyncStorage.setItem('user_data', JSON.stringify(teacherUser));
+        } catch (e) {}
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'TeacherDashboard', params: { user: teacherUser, language } }]
+        });
+        return;
+      }
+
       // Step 3 -> Name entered -> Go to Step 4 (Country Selection)
       navigation.navigate('StepFour', {
         ...route.params,
@@ -201,19 +214,26 @@ export default function AuthScreen({ navigation, route }) {
             console.error('AsyncStorage error', e);
           }
 
-          // Reset navigation and go to StudentDashboard with full user data
-          navigation.reset({
-            index: 0,
-            routes: [{ 
-              name: 'StudentDashboard', 
-              params: { 
-                user: data.user,
-                language: data.user.language || 'uz',
-                selectedChar: charIndex,
-                gender: gender
-              } 
-            }]
-          });
+          if (role === 'teacher' || data.user?.role?.toLowerCase() === 'teacher') {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'TeacherDashboard', params: { user: data.user, language } }]
+            });
+          } else {
+            // Reset navigation and go to StudentDashboard with full user data
+            navigation.reset({
+              index: 0,
+              routes: [{ 
+                name: 'StudentDashboard', 
+                params: { 
+                  user: data.user,
+                  language: data.user.language || 'uz',
+                  selectedChar: charIndex,
+                  gender: gender
+                } 
+              }]
+            });
+          }
         } else {
           Alert.alert(t.errorTitle, data.error || t.errLogin);
         }
@@ -245,9 +265,11 @@ export default function AuthScreen({ navigation, route }) {
           <View style={styles.heroContainer}>
             <Image 
               source={
-                activeTab === 'login' 
-                  ? require('../assets/auth_hero_with_text.jpg') 
-                  : (role === 'parent' ? require('../assets/auth_hero_parent.jpg') : (role === 'teacher' ? require('../assets/auth_hero_teacher.jpg') : require('../assets/register_hero_with_text.jpg')))
+                role === 'teacher'
+                  ? require('../assets/auth_hero_teacher.png')
+                  : (activeTab === 'login' 
+                      ? require('../assets/auth_hero_with_text.jpg') 
+                      : (role === 'parent' ? require('../assets/auth_hero_parent.jpg') : require('../assets/register_hero_with_text.jpg')))
               } 
               style={styles.heroImage} 
               contentFit="contain" 

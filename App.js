@@ -36,6 +36,8 @@ import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_7
 const Stack = createNativeStackNavigator();
 export const navigationRef = createNavigationContainerRef();
 
+import TeacherDashboardScreen from './screens/TeacherDashboardScreen';
+
 export default function App() {
   
   const [assetsLoaded, setAssetsLoaded] = useState(false);
@@ -375,6 +377,7 @@ export default function App() {
           <Stack.Screen name="StepFour" component={StepFourScreen} />
           <Stack.Screen name="StepFive" component={StepFiveScreen} />
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} initialParams={initialRoute === 'StudentDashboard' ? initialParams : undefined} />
+          <Stack.Screen name="TeacherDashboard" component={TeacherDashboardScreen} />
           <Stack.Screen name="EnergyCenter" component={EnergyCenterScreen} />
         <Stack.Screen name="ReferralScreen" component={ReferralScreen} />
           <Stack.Screen name="OddiyHisobGame" component={OddiyHisobGameScreen} />
