@@ -772,11 +772,29 @@ app.delete('/api/admin/users/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const userToDelete = await prisma.user.findUnique({ where: { id } });
-    await prisma.user.delete({
-      where: { id }
-    });
-    // Emit real-time event to connected clients
-    io.emit('user_deleted', { id: userToDelete?.id || id, customId: userToDelete?.customId });
+    
+    if (userToDelete) {
+      // If deleting a teacher or user, also cleanup matching teacher requests by email or phone
+      if (userToDelete.email || userToDelete.phone) {
+        // @ts-ignore
+        await prisma.teacherRequest.deleteMany({
+          where: {
+            OR: [
+              ...(userToDelete.email ? [{ email: userToDelete.email }] : []),
+              ...(userToDelete.phone ? [{ phone: userToDelete.phone }] : [])
+            ]
+          }
+        });
+      }
+
+      await prisma.user.delete({
+        where: { id }
+      });
+      
+      // Emit real-time event to connected clients
+      io.emit('user_deleted', { id: userToDelete.id, customId: userToDelete.customId });
+    }
+
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('Delete user error:', error);
