@@ -352,8 +352,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [leaderboardData, setLeaderboardData] = useState([]);
   
   const [userXp, setUserXp] = useState(user?.xp || 0);
-  // Guest user check: Only true if isGuest is explicitly true or missing phone & email & id
-  const isGuestUser = user?.isGuest === true || (!user?.phone && !user?.email && !user?.id);
+  // Guest user check: True ONLY if user is a guest user (explicitly isGuest: true or no user object exists)
+  const isGuestUser = Boolean(!user || user.isGuest === true);
   
   // Auth Required Modal & Registration State
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
