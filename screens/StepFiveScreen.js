@@ -505,16 +505,14 @@ export default function StepFiveScreen({ navigation, route }) {
       <View style={styles.bottomContainer}>
         <TouchableOpacity 
           style={[styles.button, isRegistering && { opacity: 0.7 }]} 
-          activeOpacity={0.8}
+          activeOpacity={0.7}
           disabled={isRegistering}
           onPress={() => {
-            requestAnimationFrame(() => {
-              handleFinish();
-            });
+            handleFinish();
           }}
         >
           {isRegistering ? (
-             <ActivityIndicator color="#000" />
+             <ActivityIndicator color="#000" size="small" />
           ) : (
             <>
               <Text style={styles.buttonText}>{t.next}</Text>

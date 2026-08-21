@@ -354,7 +354,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [userXp, setUserXp] = useState(user?.xp || 0);
   
   // Dynamic real game stats state for right panel (Mantiq, Tezlik, Aniqlik)
-  const [realStats, setRealStats] = useState({ logic: 92, speedTime: '1.8', accuracy: 95 });
+  // For new users (XP == 0 or no saved stats), default values start at 0%, 0.0s, 0%
+  const [realStats, setRealStats] = useState({ logic: 0, speedTime: '0.0', accuracy: 0 });
 
   useFocusEffect(
     useCallback(() => {
@@ -363,10 +364,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
           if (val) {
             const parsed = JSON.parse(val);
             setRealStats({
-              logic: parsed.logic !== undefined ? parsed.logic : 92,
-              speedTime: parsed.speedTime !== undefined ? parsed.speedTime : '1.8',
-              accuracy: parsed.accuracy !== undefined ? parsed.accuracy : 95
+              logic: parsed.logic !== undefined ? parsed.logic : 0,
+              speedTime: parsed.speedTime !== undefined ? parsed.speedTime : '0.0',
+              accuracy: parsed.accuracy !== undefined ? parsed.accuracy : 0
             });
+          } else {
+            setRealStats({ logic: 0, speedTime: '0.0', accuracy: 0 });
           }
         }).catch(e => console.log(e));
       });
@@ -1442,9 +1445,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
             
 
 
-            {/* Canvas Container */}
-            <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
-              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
+            {/* Canvas & Character Fallback Container */}
+            <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], justifyContent: 'center', alignItems: 'center' }} pointerEvents="box-none">
+              {/* Instant 2D Fallback character avatar */}
+              <View style={{ position: 'absolute', width: 260, height: 380, top: 40, zIndex: 0, justifyContent: 'center', alignItems: 'center' }} pointerEvents="none">
+                <Image source={baseAvatarsList[activeAvatarIndex]?.img || require('../assets/avatar_maks.png')} style={{ width: '100%', height: '100%', borderRadius: 20 }} contentFit="contain" />
+              </View>
+
+              <Canvas frameloop="demand" style={{ flex: 1, width: '100%', backgroundColor: 'transparent', zIndex: 2 }} pointerEvents="auto" gl={{ alpha: true }}>
                 <ambientLight intensity={2.5} color="#ffffff" />
                 <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#444444" />
                 <Environment preset="city" />

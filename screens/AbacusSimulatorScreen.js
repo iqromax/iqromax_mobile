@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Platform, StatusBar, SafeAreaView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Audio } from 'expo-av';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const TRANSLATIONS = {
@@ -19,18 +20,40 @@ const TRANSLATIONS = {
 };
 
 const BEAD_WIDTH = 62;
-const BEAD_HEIGHT = 30;
+const BEAD_HEIGHT = 45; // 1.5x taller beads (30 * 1.5 = 45)
 const ROD_WIDTH = 8;
-const TOP_SLIDE_DISTANCE = 30;
+const TOP_SLIDE_DISTANCE = 62; // Lifted higher for a perfect resting position
 const BOTTOM_SLIDE_DISTANCE = 118;
+
+// Shared sound effect ref
+let globalTickSound = null;
+const playBeadSound = async () => {
+  try {
+    if (globalTickSound) {
+      await globalTickSound.setPositionAsync(0);
+      await globalTickSound.playAsync();
+    } else {
+      const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
+      globalTickSound = sound;
+      await sound.playAsync();
+    }
+  } catch (e) {
+    try {
+      const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
+      await sound.playAsync();
+    } catch (err) {}
+  }
+};
 
 const TopBead = ({ onValueChange, resetFlag }) => {
   const panY = useRef(new Animated.Value(0)).current; // 0 = UP (rest), TOP_SLIDE_DISTANCE = DOWN (active)
   const isDown = useRef(false);
+  const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
     Animated.spring(panY, { toValue: 0, useNativeDriver: true }).start();
     isDown.current = false;
+    setIsActive(false);
     onValueChange(0);
   }, [resetFlag]);
 
@@ -44,10 +67,14 @@ const TopBead = ({ onValueChange, resetFlag }) => {
 
         if (swipedDown || (tapped && !isDown.current)) {
           isDown.current = true;
+          setIsActive(true);
+          playBeadSound();
           Animated.spring(panY, { toValue: TOP_SLIDE_DISTANCE, useNativeDriver: true }).start();
           onValueChange(5);
         } else if (swipedUp || (tapped && isDown.current)) {
           isDown.current = false;
+          setIsActive(false);
+          playBeadSound();
           Animated.spring(panY, { toValue: 0, useNativeDriver: true }).start();
           onValueChange(0);
         }
@@ -55,16 +82,20 @@ const TopBead = ({ onValueChange, resetFlag }) => {
     })
   ).current;
 
+  // Active color: Darker rich bronze gold. Default color: Warm Gold
+  const beadColors = isActive 
+    ? ['#D97706', '#B45309', '#78350F', '#451A03'] 
+    : ['#FFF176', '#F59E0B', '#B45309', '#78350F'];
+  const beadBorderColor = isActive ? '#B45309' : '#FEF08A';
+
   return (
     <Animated.View style={[styles.beadWrapper, { transform: [{ translateY: panY }] }]} {...panResponder.panHandlers}>
-      <LinearGradient colors={['#FFF176', '#F59E0B', '#B45309', '#78350F']} locations={[0, 0.35, 0.75, 1]} style={styles.bead} />
+      <LinearGradient colors={beadColors} locations={[0, 0.35, 0.75, 1]} style={[styles.bead, { borderColor: beadBorderColor }]} />
     </Animated.View>
   );
 };
 
 const BottomBeads = ({ onValueChange, resetFlag }) => {
-  // Array of 4 animated values for the 4 bottom beads.
-  // 0 = DOWN (rest), -BOTTOM_SLIDE_DISTANCE = UP (active)
   const beadAnims = useRef([
     new Animated.Value(0),
     new Animated.Value(0),
@@ -73,9 +104,12 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
   ]).current;
   
   const beadStates = useRef([false, false, false, false]); // true = UP, false = DOWN
+  const [activeStates, setActiveStates] = useState([false, false, false, false]);
 
   const updateBeads = (newStates) => {
     beadStates.current = newStates;
+    setActiveStates([...newStates]);
+    playBeadSound();
     const val = newStates.filter(s => s).length;
     onValueChange(val);
     newStates.forEach((state, i) => {
@@ -84,7 +118,12 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
   };
 
   useEffect(() => {
-    updateBeads([false, false, false, false]);
+    beadStates.current = [false, false, false, false];
+    setActiveStates([false, false, false, false]);
+    onValueChange(0);
+    [0, 1, 2, 3].forEach(i => {
+      Animated.spring(beadAnims[i], { toValue: 0, useNativeDriver: true }).start();
+    });
   }, [resetFlag]);
 
   const responders = useRef([0, 1, 2, 3].map(index => 
@@ -111,15 +150,23 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
 
   return (
     <View style={styles.bottomBeadsContainer}>
-      {[0, 1, 2, 3].map((i) => (
-        <Animated.View 
-          key={i} 
-          style={[styles.beadWrapper, { transform: [{ translateY: beadAnims[i] }] }]} 
-          {...responders[i].panHandlers}
-        >
-          <LinearGradient colors={['#FFF176', '#F59E0B', '#B45309', '#78350F']} locations={[0, 0.35, 0.75, 1]} style={styles.bead} />
-        </Animated.View>
-      ))}
+      {[0, 1, 2, 3].map((i) => {
+        const isActive = activeStates[i];
+        const beadColors = isActive 
+          ? ['#D97706', '#B45309', '#78350F', '#451A03'] 
+          : ['#FFF176', '#F59E0B', '#B45309', '#78350F'];
+        const beadBorderColor = isActive ? '#B45309' : '#FEF08A';
+
+        return (
+          <Animated.View 
+            key={i} 
+            style={[styles.beadWrapper, { transform: [{ translateY: beadAnims[i] }] }]} 
+            {...responders[i].panHandlers}
+          >
+            <LinearGradient colors={beadColors} locations={[0, 0.35, 0.75, 1]} style={[styles.bead, { borderColor: beadBorderColor }]} />
+          </Animated.View>
+        );
+      })}
     </View>
   );
 };
@@ -134,20 +181,21 @@ const AbacusColumn = ({ label, onValueChange, resetFlag }) => {
 
   return (
     <View style={styles.column}>
+      {/* Continuous Vertical Rod */}
+      <LinearGradient colors={['#3E2723', '#5D4037', '#3E2723']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.rod} />
+
       {/* Top Section */}
       <View style={styles.topSection}>
-        <LinearGradient colors={['#3E2723', '#5D4037', '#3E2723']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.rod} />
         <View style={styles.topBeadArea}>
           <TopBead onValueChange={setTopVal} resetFlag={resetFlag} />
         </View>
       </View>
 
-      {/* Middle Bar Piece (visual only, actual bar is behind or over) */}
+      {/* Middle Bar Piece */}
       <View style={styles.middleBarPiece} />
 
       {/* Bottom Section */}
       <View style={styles.bottomSection}>
-        <LinearGradient colors={['#3E2723', '#5D4037', '#3E2723']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.rod} />
         <View style={styles.bottomBeadArea}>
            <BottomBeads onValueChange={setBottomVal} resetFlag={resetFlag} />
         </View>
@@ -164,6 +212,27 @@ export default function AbacusSimulatorScreen() {
 
   const [resetFlag, setResetFlag] = useState(0);
   const [values, setValues] = useState({ 1000: 0, 100: 0, 10: 0, 1: 0 });
+
+  useEffect(() => {
+    let s1;
+    async function loadSound() {
+      try {
+        await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, allowsRecordingIOS: false, staysActiveInBackground: false });
+        const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
+        globalTickSound = sound;
+        s1 = sound;
+      } catch (e) {
+        console.log('Error loading abacus tick sound:', e);
+      }
+    }
+    loadSound();
+    return () => {
+      if (s1) {
+        s1.unloadAsync();
+        globalTickSound = null;
+      }
+    };
+  }, []);
 
   const totalValue = values[1000] * 1000 + values[100] * 100 + values[10] * 10 + values[1];
 
@@ -204,8 +273,8 @@ export default function AbacusSimulatorScreen() {
             <View style={styles.innerShadow}>
               <View style={styles.abacusInner}>
                 
-                {/* Horizontal Bar (Behind beads) */}
-                <LinearGradient colors={['#3E2723', '#5D4037', '#3E2723']} style={styles.horizontalBar} />
+                {/* Horizontal Bar (Premium Metallic Beam) */}
+                <LinearGradient colors={['#FFFFFF', '#E2E8F0', '#94A3B8', '#F8FAFC']} start={{x:0, y:0}} end={{x:0, y:1}} style={styles.horizontalBar} />
 
                 {/* Columns */}
                 <View style={styles.columnsRow}>
@@ -301,7 +370,7 @@ const styles = StyleSheet.create({
   },
   abacusContainer: {
     width: 350,
-    height: 380,
+    height: 450,
     marginTop: 10,
   },
   outerFrame: {
@@ -341,14 +410,19 @@ const styles = StyleSheet.create({
   },
   horizontalBar: {
     position: 'absolute',
-    top: 90, // position between top and bottom beads
+    top: 105, // position between top and bottom beads
     left: 0,
     right: 0,
-    height: 16,
-    zIndex: 1,
+    height: 12,
+    zIndex: 5,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#2D1B15',
+    borderColor: '#FDE047', // Glowing Gold Accent Line
+    shadowColor: '#FFFFFF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 6,
   },
   columnsRow: {
     flexDirection: 'row',
@@ -379,7 +453,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
   },
   topSection: {
-    height: 60,
+    height: 75,
     width: '100%',
     alignItems: 'center',
     position: 'relative',
@@ -391,7 +465,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    zIndex: 3,
+    zIndex: 10,
   },
   middleBarPiece: {
     height: 16,
@@ -411,7 +485,7 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     justifyContent: 'flex-end', // bottom beads rest at bottom
-    zIndex: 3,
+    zIndex: 10,
   },
   bottomBeadsContainer: {
     height: BEAD_HEIGHT * 4 + BOTTOM_SLIDE_DISTANCE,
@@ -434,7 +508,7 @@ const styles = StyleSheet.create({
   },
   bead: {
     flex: 1,
-    borderRadius: 15,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#FEF08A',
     shadowColor: '#000',

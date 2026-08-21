@@ -174,6 +174,44 @@ export default function BattleResultScreen({ navigation, route }) {
             }
           }
         }
+
+        // Save real game stats for Battle mode (Mantiq, Tezlik, Aniqlik)
+        const total = correct + incorrect;
+        if (total > 0) {
+          const accuracyPercent = Math.round((correct / total) * 100);
+          const currentSpeed = parseFloat(avgTime) || 1.8;
+          const logicScore = Math.min(100, Math.round(accuracyPercent * (isWin ? 1.2 : 0.9)));
+
+          AsyncStorage.getItem('user_game_stats').then(existing => {
+            if (!existing) {
+              const initialStats = {
+                logic: logicScore,
+                speedTime: currentSpeed.toFixed(1),
+                accuracy: accuracyPercent,
+                gamesCount: 1
+              };
+              AsyncStorage.setItem('user_game_stats', JSON.stringify(initialStats)).catch(e => console.log(e));
+            } else {
+              const stats = JSON.parse(existing);
+              const prevGames = stats.gamesCount || 1;
+              const newGames = prevGames + 1;
+
+              const newLogic = Math.round(((stats.logic || 0) * prevGames + logicScore) / newGames);
+              const newAccuracy = Math.round(((stats.accuracy || 0) * prevGames + accuracyPercent) / newGames);
+
+              const prevSpeed = parseFloat(stats.speedTime || '0.0');
+              const newSpeed = prevSpeed > 0 ? (((prevSpeed * prevGames) + currentSpeed) / newGames).toFixed(1) : currentSpeed.toFixed(1);
+
+              const updatedStats = {
+                logic: Math.min(100, newLogic),
+                speedTime: newSpeed,
+                accuracy: Math.min(100, newAccuracy),
+                gamesCount: newGames
+              };
+              AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
+            }
+          }).catch(e => console.log(e));
+        }
       } catch (e) {}
     }
     fetchUserAndSaveXP();

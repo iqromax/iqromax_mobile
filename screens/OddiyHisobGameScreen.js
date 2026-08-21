@@ -357,19 +357,45 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       const totalQuestions = speedResults.length;
       const correctCount = speedResults.filter(r => r.isCorrect).length;
       const accuracyPercent = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+      
       const validTimes = speedResults.map(r => parseFloat(r.time)).filter(t => !isNaN(t) && t > 0);
       const avgTimeVal = validTimes.length > 0 ? (validTimes.reduce((a, b) => a + b, 0) / validTimes.length).toFixed(1) : '1.8';
-      const logicScore = accuracyPercent;
+
+      // Logic formula: Base accuracy + Difficulty multiplier (digits & examplesCount)
+      const difficultyMultiplier = Math.min(1.5, 1 + (digits * 0.1) + (examplesCount * 0.05));
+      const logicScore = Math.min(100, Math.round(accuracyPercent * difficultyMultiplier));
 
       import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
         AsyncStorage.getItem('user_game_stats').then(existing => {
-          let stats = existing ? JSON.parse(existing) : { logic: logicScore, speedTime: avgTimeVal, accuracy: accuracyPercent };
-          stats = {
-            logic: Math.round((stats.logic + logicScore) / 2),
-            speedTime: avgTimeVal,
-            accuracy: Math.round((stats.accuracy + accuracyPercent) / 2)
-          };
-          AsyncStorage.setItem('user_game_stats', JSON.stringify(stats)).catch(e => console.log(e));
+          if (!existing) {
+            const initialStats = {
+              logic: logicScore,
+              speedTime: avgTimeVal,
+              accuracy: accuracyPercent,
+              gamesCount: 1
+            };
+            AsyncStorage.setItem('user_game_stats', JSON.stringify(initialStats)).catch(e => console.log(e));
+          } else {
+            const stats = JSON.parse(existing);
+            const prevGames = stats.gamesCount || 1;
+            const newGames = prevGames + 1;
+            
+            // Weighted average calculations across all played exercises
+            const newLogic = Math.round(((stats.logic || 0) * prevGames + logicScore) / newGames);
+            const newAccuracy = Math.round(((stats.accuracy || 0) * prevGames + accuracyPercent) / newGames);
+            
+            const prevSpeed = parseFloat(stats.speedTime || '0.0');
+            const currentSpeed = parseFloat(avgTimeVal);
+            const newSpeed = prevSpeed > 0 ? (((prevSpeed * prevGames) + currentSpeed) / newGames).toFixed(1) : currentSpeed.toFixed(1);
+
+            const updatedStats = {
+              logic: Math.min(100, newLogic),
+              speedTime: newSpeed,
+              accuracy: Math.min(100, newAccuracy),
+              gamesCount: newGames
+            };
+            AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
+          }
         }).catch(e => console.log(e));
       });
     }
