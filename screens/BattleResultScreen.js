@@ -210,6 +210,23 @@ export default function BattleResultScreen({ navigation, route }) {
               };
               AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
             }
+
+            // Save to user activity history (last 3 entries)
+            AsyncStorage.getItem('user_activity_history').then(histVal => {
+              let history = histVal ? JSON.parse(histVal) : [];
+              const now = new Date();
+              const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+              
+              const newEntry = {
+                id: Date.now(),
+                title: "1v1 Boshma-bosh o'yin",
+                time: `${t.actToday || 'Bugun'}, ${timeStr}`,
+                xpGained: isWin ? 25 : 0
+              };
+
+              history = [newEntry, ...history].slice(0, 3);
+              AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
+            }).catch(e => console.log(e));
           }).catch(e => console.log(e));
         }
       } catch (e) {}

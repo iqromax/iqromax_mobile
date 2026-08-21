@@ -396,6 +396,33 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
             };
             AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
           }
+
+          // Save/Update user activity history with earned XP (last 3 entries)
+          AsyncStorage.getItem('user_activity_history').then(histVal => {
+            let history = histVal ? JSON.parse(histVal) : [];
+            const isMultiply = ['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation);
+            const modeTitle = isSpeedMode 
+              ? "Ko'paytirish va bo'lish" 
+              : isMultiply ? "Ko'paytirish va bo'lish" : "Tasavvur (Oddiy hisob)";
+            
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            if (history.length > 0 && history[0].title === modeTitle) {
+              history[0].xpGained = totalGainedXP;
+              history[0].time = `${t.actToday || 'Bugun'}, ${timeStr}`;
+            } else {
+              const newEntry = {
+                id: Date.now(),
+                title: modeTitle,
+                time: `${t.actToday || 'Bugun'}, ${timeStr}`,
+                xpGained: totalGainedXP
+              };
+              history = [newEntry, ...history].slice(0, 3);
+            }
+
+            AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
+          }).catch(e => console.log(e));
         }).catch(e => console.log(e));
       });
     }

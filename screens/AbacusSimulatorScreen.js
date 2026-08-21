@@ -226,6 +226,26 @@ export default function AbacusSimulatorScreen() {
       }
     }
     loadSound();
+
+    // Save Abacus simulator entry to user_activity_history
+    import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
+      AsyncStorage.getItem('user_activity_history').then(histVal => {
+        let history = histVal ? JSON.parse(histVal) : [];
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        
+        const newEntry = {
+          id: Date.now(),
+          title: "Abakus simulyatori",
+          time: `Bugun, ${timeStr}`,
+          xpGained: 10
+        };
+
+        history = [newEntry, ...history].slice(0, 3);
+        AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
+      }).catch(e => console.log(e));
+    });
+
     return () => {
       if (s1) {
         s1.unloadAsync();

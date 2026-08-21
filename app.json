@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "IQROMAX",
+    "name": "Mental Arifmetika",
     "slug": "iqromax_mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,10 +16,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#05050C",
+        "foregroundImage": "./assets/icon.png"
       },
       "navigationBar": {
         "visible": "sticky-immersive",

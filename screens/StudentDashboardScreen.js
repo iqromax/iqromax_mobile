@@ -356,6 +356,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   // Dynamic real game stats state for right panel (Mantiq, Tezlik, Aniqlik)
   // For new users (XP == 0 or no saved stats), default values start at 0%, 0.0s, 0%
   const [realStats, setRealStats] = useState({ logic: 0, speedTime: '0.0', accuracy: 0 });
+  const [activityHistory, setActivityHistory] = useState([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -370,6 +371,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
             });
           } else {
             setRealStats({ logic: 0, speedTime: '0.0', accuracy: 0 });
+          }
+        }).catch(e => console.log(e));
+
+        AsyncStorage.getItem('user_activity_history').then(histVal => {
+          if (histVal) {
+            setActivityHistory(JSON.parse(histVal).slice(0, 3));
+          } else {
+            setActivityHistory([]);
           }
         }).catch(e => console.log(e));
       });
@@ -1331,6 +1340,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
 
+  const saveActivityLog = async (title, xpGained = 0) => {
+    try {
+      const histVal = await AsyncStorage.getItem('user_activity_history');
+      let history = histVal ? JSON.parse(histVal) : [];
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      
+      const newEntry = {
+        id: Date.now(),
+        title,
+        time: `${t.actToday || 'Bugun'}, ${timeStr}`,
+        xpGained
+      };
+
+      history = [newEntry, ...history.filter(h => h.title !== title || (Date.now() - h.id > 30000))].slice(0, 3);
+      await AsyncStorage.setItem('user_activity_history', JSON.stringify(history));
+      setActivityHistory(history);
+    } catch (e) {}
+  };
+
   const handleStartBattle = async () => {
     if (currentEnergy < 2) {
       setRequiredEnergyAlert(2);
@@ -1339,6 +1368,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }
     const success = await consumeEnergy(2);
     if (success) {
+      saveActivityLog("1v1 Boshma-bosh o'yin", 0);
       if (activeBattleMode === 'dost') {
         navigation.navigate('FriendInvite', { language });
       } else if (activeBattleMode === 'oddiy') {
@@ -1360,8 +1390,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
     const success = await consumeEnergy(reqEnergy);
     if (success) {
       if (activeExerciseType === 'abacus') {
+        saveActivityLog("Abakus simulyatori", 10);
         navigation.navigate('AbacusSimulator', { language });
       } else {
+        const isMultiply = ['multiply', 'kopaytirish', 'divide', 'bolish'].includes(isSpeed ? speedSecOperation : selectedOperation);
+        const modeTitle = isSpeed 
+          ? "Ko'paytirish va bo'lish" 
+          : isMultiply ? "Ko'paytirish va bo'lish" : "Tasavvur (Oddiy hisob)";
+        saveActivityLog(modeTitle, 0);
+
         navigation.navigate('OddiyHisobGame', {
           examplesCount: isSpeed ? speedSecExamples : selectedExamples,
           operation: isSpeed ? speedSecOperation : selectedOperation,
@@ -1445,14 +1482,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
             
 
 
-            {/* Canvas & Character Fallback Container */}
-            <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], justifyContent: 'center', alignItems: 'center' }} pointerEvents="box-none">
-              {/* Instant 2D Fallback character avatar */}
-              <View style={{ position: 'absolute', width: 260, height: 380, top: 40, zIndex: 0, justifyContent: 'center', alignItems: 'center' }} pointerEvents="none">
-                <Image source={baseAvatarsList[activeAvatarIndex]?.img || require('../assets/avatar_maks.png')} style={{ width: '100%', height: '100%', borderRadius: 20 }} contentFit="contain" />
-              </View>
-
-              <Canvas frameloop="demand" style={{ flex: 1, width: '100%', backgroundColor: 'transparent', zIndex: 2 }} pointerEvents="auto" gl={{ alpha: true }}>
+            {/* Canvas Container */}
+            <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
+              <Canvas frameloop="demand" style={{ flex: 1, width: '100%', backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
                 <ambientLight intensity={2.5} color="#ffffff" />
                 <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#444444" />
                 <Environment preset="city" />
@@ -3085,7 +3117,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </ImageBackground>
             </View>
 
-            {/* Stats Grid */}
+            {/* Stats Grid - Connected to Real User Data */}
             <View style={styles.proSectionHeader}>
               <Text style={styles.proSectionTitle}>{t.stats}</Text>
             </View>
@@ -3093,110 +3125,65 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <View style={styles.proStatsGrid}>
               <View style={styles.proStatBox}>
                 <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FBBF24" />
-                <Text style={styles.proStatBoxValue}>0.8s</Text>
+                <Text style={styles.proStatBoxValue}>{realStats.speedTime}s</Text>
                 <Text style={styles.proStatBoxLabel}>{t.statSpeed}</Text>
               </View>
               <View style={styles.proStatBox}>
                 <MaterialCommunityIcons name="bullseye-arrow" size={24} color="#10B981" />
-                <Text style={styles.proStatBoxValue}>95%</Text>
+                <Text style={styles.proStatBoxValue}>{realStats.accuracy}%</Text>
                 <Text style={styles.proStatBoxLabel}>{t.statAccuracy}</Text>
               </View>
               <View style={styles.proStatBox}>
-                <MaterialCommunityIcons name="fire" size={24} color="#EF4444" />
-                <Text style={styles.proStatBoxValue}>14 {t.streakDesc}</Text>
-                <Text style={styles.proStatBoxLabel}>{t.statStreak}</Text>
+                <MaterialCommunityIcons name="brain" size={24} color="#3B82F6" />
+                <Text style={styles.proStatBoxValue}>{realStats.logic}%</Text>
+                <Text style={styles.proStatBoxLabel}>{t.logic}</Text>
               </View>
               <View style={styles.proStatBox}>
                 <MaterialCommunityIcons name="trophy-award" size={24} color="#8B5CF6" />
-                <Text style={styles.proStatBoxValue}>1248</Text>
-                <Text style={styles.proStatBoxLabel}>{t.statRating}</Text>
+                <Text style={styles.proStatBoxValue}>{userXp}</Text>
+                <Text style={styles.proStatBoxLabel}>{t.statXP || 'XP'}</Text>
               </View>
             </View>
 
-            {/* Achievements Showcase */}
-            <View style={styles.proSectionHeader}>
-              <Text style={styles.proSectionTitle}>{t.achievementsTitle}</Text>
-              <TouchableOpacity><Text style={styles.proSectionLink}>{t.seeAll}</Text></TouchableOpacity>
-            </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.proBadgeScroll}>
-              <View style={styles.proBadgeActive}>
-                <Image source={require('../assets/yutuq_1.png')} style={styles.proBadgeImg} />
-                <Text style={styles.proBadgeText}>{(BADGE_TRANSLATIONS[language] || BADGE_TRANSLATIONS['uz']).firstWin}</Text>
-              </View>
-              <View style={styles.proBadgeActive}>
-                <Image source={require('../assets/yutuq_3.png')} style={styles.proBadgeImg} />
-                <Text style={styles.proBadgeText}>{(BADGE_TRANSLATIONS[language] || BADGE_TRANSLATIONS['uz']).days14}</Text>
-              </View>
-              <View style={styles.proBadgeActive}>
-                <Image source={require('../assets/yutuq_4.png')} style={styles.proBadgeImg} />
-                <Text style={styles.proBadgeText}>{(BADGE_TRANSLATIONS[language] || BADGE_TRANSLATIONS['uz']).top10}</Text>
-              </View>
-              <View style={styles.proBadgeInactive}>
-                <Image source={require('../assets/yutuq_5.png')} style={styles.proBadgeImg} />
-                <Text style={styles.proBadgeTextInactive}>{(BADGE_TRANSLATIONS[language] || BADGE_TRANSLATIONS['uz']).platinum}</Text>
-              </View>
-              <View style={styles.proBadgeInactive}>
-                <Image source={require('../assets/yutuq_6.png')} style={styles.proBadgeImg} />
-                <Text style={styles.proBadgeTextInactive}>{(BADGE_TRANSLATIONS[language] || BADGE_TRANSLATIONS['uz']).master}</Text>
-              </View>
-            </ScrollView>
-
-            {/* Timeline Activity */}
+            {/* Timeline Activity - Real Dynamic Data (Last 3 entries) */}
             <View style={styles.proSectionHeader}>
               <Text style={styles.proSectionTitle}>{t.activityTitle}</Text>
             </View>
             
             <View style={styles.proTimelineContainer}>
-              {/* Activity Item 1 */}
-              <View style={styles.proTimelineItem}>
-                <View style={styles.proTimelineDotLine}>
-                  <View style={[styles.proTimelineDot, {backgroundColor: '#10B981', shadowColor: '#10B981'}]} />
-                  <View style={styles.proTimelineLine} />
+              {activityHistory.length > 0 ? (
+                activityHistory.map((item, index) => {
+                  const colors = ['#10B981', '#3B82F6', '#A855F7'];
+                  const themeColor = colors[index % colors.length];
+                  const isLast = index === activityHistory.length - 1;
+
+                  return (
+                    <View key={item.id || index} style={styles.proTimelineItem}>
+                      <View style={styles.proTimelineDotLine}>
+                        <View style={[styles.proTimelineDot, { backgroundColor: themeColor, shadowColor: themeColor }]} />
+                        {!isLast && <View style={styles.proTimelineLine} />}
+                      </View>
+                      <View style={styles.proTimelineContent}>
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.proTimelineTitle}>{item.title}</Text>
+                          <Text style={styles.proTimelineSub}>{item.time}</Text>
+                        </View>
+                        <View style={[styles.proTimelineTag, { backgroundColor: `${themeColor}20` }]}>
+                          <Text style={[styles.proTimelineTagText, { color: themeColor }]}>
+                            {item.xpGained > 0 ? `+${item.xpGained} XP` : 'Bajarildi'}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  );
+                })
+              ) : (
+                <View style={{ paddingVertical: 15, alignItems: 'center' }}>
+                  <Text style={{ color: '#6B7280', fontSize: 12, fontFamily: 'Inter_500Medium' }}>
+                    Hali o'yinlar tarixi mavjud emas
+                  </Text>
                 </View>
-                <View style={styles.proTimelineContent}>
-                  <View style={{flex: 1}}>
-                    <Text style={styles.proTimelineTitle}>{t.actBattle}</Text>
-                    <Text style={styles.proTimelineSub}>{t.actToday}, 14:30</Text>
-                  </View>
-                  <View style={[styles.proTimelineTag, {backgroundColor: 'rgba(16, 185, 129, 0.1)'}]}>
-                    <Text style={[styles.proTimelineTagText, {color: '#10B981'}]}>{t.actWin}</Text>
-                  </View>
-                </View>
-              </View>
-              
-              {/* Activity Item 2 */}
-              <View style={styles.proTimelineItem}>
-                <View style={styles.proTimelineDotLine}>
-                  <View style={[styles.proTimelineDot, {backgroundColor: '#3B82F6', shadowColor: '#3B82F6'}]} />
-                  <View style={styles.proTimelineLine} />
-                </View>
-                <View style={styles.proTimelineContent}>
-                  <View style={{flex: 1}}>
-                    <Text style={styles.proTimelineTitle}>{t.actFast}</Text>
-                    <Text style={styles.proTimelineSub}>{t.actToday}, 11:15</Text>
-                  </View>
-                  <View style={[styles.proTimelineTag, {backgroundColor: 'rgba(59, 130, 246, 0.1)'}]}>
-                    <Text style={[styles.proTimelineTagText, {color: '#3B82F6'}]}>+45 XP</Text>
-                  </View>
-                </View>
-              </View>
-              
-              {/* Activity Item 3 */}
-              <View style={styles.proTimelineItem}>
-                <View style={styles.proTimelineDotLine}>
-                  <View style={[styles.proTimelineDot, {backgroundColor: '#A855F7', shadowColor: '#A855F7'}]} />
-                  {/* No line for last item */}
-                </View>
-                <View style={styles.proTimelineContent}>
-                  <View style={{flex: 1}}>
-                    <Text style={styles.proTimelineTitle}>{t.actSimple}</Text>
-                    <Text style={styles.proTimelineSub}>{t.actYesterday}, 18:20</Text>
-                  </View>
-                  <View style={[styles.proTimelineTag, {backgroundColor: 'rgba(168, 85, 247, 0.1)'}]}>
-                    <Text style={[styles.proTimelineTagText, {color: '#A855F7'}]}>98%</Text>
-                  </View>
-                </View>
-              </View>
+              )}
             </View>
 
             {/* Language Settings */}
