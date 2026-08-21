@@ -410,13 +410,15 @@ export default function AuthScreen({ navigation, route }) {
                 }
               />
 
-              <TouchableOpacity 
-                style={styles.forgotPasswordContainer} 
-                onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
-              </TouchableOpacity>
+              {role !== 'teacher' && (
+                <TouchableOpacity 
+                  style={styles.forgotPasswordContainer} 
+                  onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
+                </TouchableOpacity>
+              )}
             </>
           )}
 
