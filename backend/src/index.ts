@@ -519,15 +519,22 @@ app.post('/api/auth/login', async (req, res) => {
     const { phone, username, password, language = 'en' } = req.body;
     const t = LOGIN_TRANSLATIONS[language] || LOGIN_TRANSLATIONS['en'];
 
-    const identifier = phone || username;
+    const identifier = (phone || username || '').trim();
     if (!identifier) return res.status(400).json({ error: t.userNotFound });
 
-    // Search by phone, email, or name (case-insensitive username)
+    // Normalize phone numbers (e.g. +998901234567 vs 998901234567)
+    const cleanPhone = identifier.replace(/[^\d+]/g, '');
+    const phoneWithoutPlus = cleanPhone.replace(/^\+/, '');
+    const phoneWithPlus = '+' + phoneWithoutPlus;
+
+    // Search by phone (with or without +), email, or name (case-insensitive username)
     const user = await prisma.user.findFirst({
       where: {
         OR: [
           { phone: identifier },
-          { email: identifier },
+          { phone: phoneWithPlus },
+          { phone: phoneWithoutPlus },
+          { email: { equals: identifier, mode: 'insensitive' } },
           { name: { equals: identifier, mode: 'insensitive' } }
         ]
       }
