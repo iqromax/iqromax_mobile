@@ -1579,7 +1579,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.logic}</Text>
                   <Text style={styles.rightStatNumber}>{realStats.logic}%</Text>
                   <Text style={[styles.rightStatSubLabel, { color: '#3B82F6' }]} numberOfLines={1}>
-                    {realStats.logic > 0 ? t.logicDesc : '0%'}
+                    {realStats.logic > 0 ? `+${realStats.logic}%` : '0%'}
                   </Text>
                 </View>
               </View>
@@ -1591,7 +1591,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.speed}</Text>
                   <Text style={styles.rightStatNumber}>{realStats.speedTime}s</Text>
                   <Text style={[styles.rightStatSubLabel, { color: '#22C55E' }]} numberOfLines={1}>
-                    {parseFloat(realStats.speedTime) > 0 ? t.speedDesc : '0.0s'}
+                    {parseFloat(realStats.speedTime) > 0 ? `${realStats.speedTime}s` : '0.0s'}
                   </Text>
                 </View>
               </View>
@@ -1603,7 +1603,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Text style={styles.rightStatTopLabel} numberOfLines={1}>{t.accuracy}</Text>
                   <Text style={styles.rightStatNumber}>{realStats.accuracy}%</Text>
                   <Text style={[styles.rightStatSubLabel, { color: '#F59E0B' }]} numberOfLines={1}>
-                    {realStats.accuracy > 0 ? t.accuracyDesc : '0%'}
+                    {realStats.accuracy > 0 ? `+${realStats.accuracy}%` : '0%'}
                   </Text>
                 </View>
               </View>
