@@ -3796,6 +3796,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
             )}
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
       {/* CUSTOM PREMIUM ALERT MODAL */}
       <Modal visible={customAlert.visible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
