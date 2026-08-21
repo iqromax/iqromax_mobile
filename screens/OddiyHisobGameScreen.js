@@ -366,64 +366,70 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       const logicScore = Math.min(100, Math.round(accuracyPercent * difficultyMultiplier));
 
       import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
-        AsyncStorage.getItem('user_game_stats').then(existing => {
-          if (!existing) {
-            const initialStats = {
-              logic: logicScore,
-              speedTime: avgTimeVal,
-              accuracy: accuracyPercent,
-              gamesCount: 1
-            };
-            AsyncStorage.setItem('user_game_stats', JSON.stringify(initialStats)).catch(e => console.log(e));
-          } else {
-            const stats = JSON.parse(existing);
-            const prevGames = stats.gamesCount || 1;
-            const newGames = prevGames + 1;
-            
-            // Weighted average calculations across all played exercises
-            const newLogic = Math.round(((stats.logic || 0) * prevGames + logicScore) / newGames);
-            const newAccuracy = Math.round(((stats.accuracy || 0) * prevGames + accuracyPercent) / newGames);
-            
-            const prevSpeed = parseFloat(stats.speedTime || '0.0');
-            const currentSpeed = parseFloat(avgTimeVal);
-            const newSpeed = prevSpeed > 0 ? (((prevSpeed * prevGames) + currentSpeed) / newGames).toFixed(1) : currentSpeed.toFixed(1);
+        AsyncStorage.getItem('user_data').then(dataStr => {
+          const userData = dataStr ? JSON.parse(dataStr) : null;
+          const userIdKey = userData?.customId || userData?.id || 'guest';
 
-            const updatedStats = {
-              logic: Math.min(100, newLogic),
-              speedTime: newSpeed,
-              accuracy: Math.min(100, newAccuracy),
-              gamesCount: newGames
-            };
-            AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
-          }
-
-          // Save/Update user activity history with earned XP (last 3 entries)
-          AsyncStorage.getItem('user_activity_history').then(histVal => {
-            let history = histVal ? JSON.parse(histVal) : [];
-            const isMultiply = ['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation);
-            const modeTitle = isSpeedMode 
-              ? "Ko'paytirish va bo'lish" 
-              : isMultiply ? "Ko'paytirish va bo'lish" : "Tasavvur (Oddiy hisob)";
-            
-            const now = new Date();
-            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            
-            if (history.length > 0 && history[0].title === modeTitle) {
-              history[0].xpGained = totalGainedXP;
-              history[0].time = `${t.actToday || 'Bugun'}, ${timeStr}`;
-            } else {
-              const newEntry = {
-                id: Date.now(),
-                title: modeTitle,
-                time: `${t.actToday || 'Bugun'}, ${timeStr}`,
-                xpGained: totalGainedXP
+          AsyncStorage.getItem('user_game_stats').then(existing => {
+            let updatedStats;
+            if (!existing) {
+              updatedStats = {
+                logic: logicScore,
+                speedTime: avgTimeVal,
+                accuracy: accuracyPercent,
+                gamesCount: 1
               };
-              history = [newEntry, ...history].slice(0, 3);
-            }
+            } else {
+              const stats = JSON.parse(existing);
+              const prevGames = stats.gamesCount || 1;
+              const newGames = prevGames + 1;
+              
+              const newLogic = Math.round(((stats.logic || 0) * prevGames + logicScore) / newGames);
+              const newAccuracy = Math.round(((stats.accuracy || 0) * prevGames + accuracyPercent) / newGames);
+              
+              const prevSpeed = parseFloat(stats.speedTime || '0.0');
+              const currentSpeed = parseFloat(avgTimeVal);
+              const newSpeed = prevSpeed > 0 ? (((prevSpeed * prevGames) + currentSpeed) / newGames).toFixed(1) : currentSpeed.toFixed(1);
 
-            AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
+              updatedStats = {
+                logic: Math.min(100, newLogic),
+                speedTime: newSpeed,
+                accuracy: Math.min(100, newAccuracy),
+                gamesCount: newGames
+              };
+            }
+            AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
+            AsyncStorage.setItem(`user_game_stats_${userIdKey}`, JSON.stringify(updatedStats)).catch(e => console.log(e));
+
+            // Save/Update user activity history with earned XP (last 3 entries)
+            AsyncStorage.getItem('user_activity_history').then(histVal => {
+              let history = histVal ? JSON.parse(histVal) : [];
+              const isMultiply = ['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation);
+              const modeTitle = isSpeedMode 
+                ? "Ko'paytirish va bo'lish" 
+                : isMultiply ? "Ko'paytirish va bo'lish" : "Tasavvur (Oddiy hisob)";
+              
+              const now = new Date();
+              const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+              
+              if (history.length > 0 && history[0].title === modeTitle) {
+                history[0].xpGained = totalGainedXP;
+                history[0].time = `${t.actToday || 'Bugun'}, ${timeStr}`;
+              } else {
+                const newEntry = {
+                  id: Date.now(),
+                  title: modeTitle,
+                  time: `${t.actToday || 'Bugun'}, ${timeStr}`,
+                  xpGained: totalGainedXP
+                };
+                history = [newEntry, ...history].slice(0, 3);
+              }
+
+              AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
+              AsyncStorage.setItem(`user_activity_history_${userIdKey}`, JSON.stringify(history)).catch(e => console.log(e));
+            }).catch(e => console.log(e));
           }).catch(e => console.log(e));
-        }).catch(e => console.log(e));
+        });
       });
     }
   }, [phase, speedResults]);

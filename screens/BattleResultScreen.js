@@ -183,14 +183,14 @@ export default function BattleResultScreen({ navigation, route }) {
           const logicScore = Math.min(100, Math.round(accuracyPercent * (isWin ? 1.2 : 0.9)));
 
           AsyncStorage.getItem('user_game_stats').then(existing => {
+            let updatedStats;
             if (!existing) {
-              const initialStats = {
+              updatedStats = {
                 logic: logicScore,
                 speedTime: currentSpeed.toFixed(1),
                 accuracy: accuracyPercent,
                 gamesCount: 1
               };
-              AsyncStorage.setItem('user_game_stats', JSON.stringify(initialStats)).catch(e => console.log(e));
             } else {
               const stats = JSON.parse(existing);
               const prevGames = stats.gamesCount || 1;
@@ -202,14 +202,16 @@ export default function BattleResultScreen({ navigation, route }) {
               const prevSpeed = parseFloat(stats.speedTime || '0.0');
               const newSpeed = prevSpeed > 0 ? (((prevSpeed * prevGames) + currentSpeed) / newGames).toFixed(1) : currentSpeed.toFixed(1);
 
-              const updatedStats = {
+              updatedStats = {
                 logic: Math.min(100, newLogic),
                 speedTime: newSpeed,
                 accuracy: Math.min(100, newAccuracy),
                 gamesCount: newGames
               };
-              AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
             }
+            const userIdKey = uData?.customId || uData?.id || 'guest';
+            AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
+            AsyncStorage.setItem(`user_game_stats_${userIdKey}`, JSON.stringify(updatedStats)).catch(e => console.log(e));
 
             // Save to user activity history (last 3 entries)
             AsyncStorage.getItem('user_activity_history').then(histVal => {
@@ -226,6 +228,7 @@ export default function BattleResultScreen({ navigation, route }) {
 
               history = [newEntry, ...history].slice(0, 3);
               AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
+              AsyncStorage.setItem(`user_activity_history_${userIdKey}`, JSON.stringify(history)).catch(e => console.log(e));
             }).catch(e => console.log(e));
           }).catch(e => console.log(e));
         }

@@ -229,21 +229,27 @@ export default function AbacusSimulatorScreen() {
 
     // Save Abacus simulator entry to user_activity_history
     import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
-      AsyncStorage.getItem('user_activity_history').then(histVal => {
-        let history = histVal ? JSON.parse(histVal) : [];
-        const now = new Date();
-        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        
-        const newEntry = {
-          id: Date.now(),
-          title: "Abakus simulyatori",
-          time: `Bugun, ${timeStr}`,
-          xpGained: 10
-        };
+      AsyncStorage.getItem('user_data').then(dataStr => {
+        const userData = dataStr ? JSON.parse(dataStr) : null;
+        const userIdKey = userData?.customId || userData?.id || 'guest';
 
-        history = [newEntry, ...history].slice(0, 3);
-        AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
-      }).catch(e => console.log(e));
+        AsyncStorage.getItem('user_activity_history').then(histVal => {
+          let history = histVal ? JSON.parse(histVal) : [];
+          const now = new Date();
+          const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+          
+          const newEntry = {
+            id: Date.now(),
+            title: "Abakus simulyatori",
+            time: `Bugun, ${timeStr}`,
+            xpGained: 10
+          };
+
+          history = [newEntry, ...history].slice(0, 3);
+          AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
+          AsyncStorage.setItem(`user_activity_history_${userIdKey}`, JSON.stringify(history)).catch(e => console.log(e));
+        }).catch(e => console.log(e));
+      });
     });
 
     return () => {

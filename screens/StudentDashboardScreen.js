@@ -423,7 +423,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
               accuracy: parsed.accuracy !== undefined ? parsed.accuracy : 0
             });
           } else {
-            setRealStats({ logic: 0, speedTime: '0.0', accuracy: 0 });
+            AsyncStorage.getItem('user_game_stats').then(globalVal => {
+              if (globalVal) {
+                const parsed = JSON.parse(globalVal);
+                setRealStats({
+                  logic: parsed.logic !== undefined ? parsed.logic : 0,
+                  speedTime: parsed.speedTime !== undefined ? parsed.speedTime : '0.0',
+                  accuracy: parsed.accuracy !== undefined ? parsed.accuracy : 0
+                });
+              } else {
+                setRealStats({ logic: 0, speedTime: '0.0', accuracy: 0 });
+              }
+            }).catch(e => console.log(e));
           }
         }).catch(e => console.log(e));
 
@@ -431,7 +442,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
           if (histVal) {
             setActivityHistory(JSON.parse(histVal).slice(0, 3));
           } else {
-            setActivityHistory([]);
+            AsyncStorage.getItem('user_activity_history').then(globalHist => {
+              if (globalHist) {
+                setActivityHistory(JSON.parse(globalHist).slice(0, 3));
+              } else {
+                setActivityHistory([]);
+              }
+            }).catch(e => console.log(e));
           }
         }).catch(e => console.log(e));
       });
