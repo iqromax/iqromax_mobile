@@ -159,12 +159,17 @@ export default function AuthScreen({ navigation, route }) {
 
   const [usernameInput, setUsernameInput] = useState('');
   const [requestModal, setRequestModal] = useState({ visible: false, title: '', message: '' });
+  const [customAlert, setCustomAlert] = useState({ visible: false, title: '', message: '', type: 'error' });
+
+  const showAlert = (title, message, type = 'error') => {
+    setCustomAlert({ visible: true, title, message, type });
+  };
 
   const handleAuthAction = async () => {
     if (activeTab === 'register') {
       if (role === 'teacher') {
         if (!name.trim() || !phone.trim() || !email.trim()) {
-          Alert.alert(t.errorTitle, t.errFillFields);
+          showAlert(t.errorTitle, t.errFillFields);
           return;
         }
 
@@ -189,10 +194,10 @@ export default function AuthScreen({ navigation, route }) {
               message: t.reqSentMsg || "Sizning so'rovingiz adminga yuborildi. Hisobingiz tasdiqlansa tez orada emailingizga kirish uchun username va password jo'natiladi."
             });
           } else {
-            Alert.alert(t.errorTitle, data.error || t.errServer);
+            showAlert(t.errorTitle, data.error || t.errServer);
           }
         } catch (e) {
-          Alert.alert(t.errorTitle, t.errNetwork);
+          showAlert(t.errorTitle, t.errNetwork);
         } finally {
           setIsLoading(false);
         }
@@ -200,7 +205,7 @@ export default function AuthScreen({ navigation, route }) {
       }
 
       if (!name.trim()) {
-        Alert.alert(t.errorTitle, t.errFillFields);
+        showAlert(t.errorTitle, t.errFillFields);
         return;
       }
 
@@ -216,7 +221,7 @@ export default function AuthScreen({ navigation, route }) {
       // Login logic
       const loginIdentifier = role === 'teacher' ? usernameInput.trim() : phone.trim();
       if (!loginIdentifier || !password) {
-        Alert.alert(t.errorTitle, role === 'teacher' ? 'Iltimos, username va parolni kiriting!' : t.errPhonePass);
+        showAlert(t.errorTitle, role === 'teacher' ? 'Iltimos, username va parolni kiriting!' : t.errPhonePass);
         return;
       }
       setIsLoading(true);
@@ -276,10 +281,10 @@ export default function AuthScreen({ navigation, route }) {
             });
           }
         } else {
-          Alert.alert(t.errorTitle, data.error || t.errLogin);
+          showAlert(t.errorTitle, data.error || t.errLogin);
         }
       } catch (error) {
-        Alert.alert(t.errorTitle, t.errNetwork);
+        showAlert(t.errorTitle, t.errNetwork);
         console.error('Login error:', error);
       } finally {
         setIsLoading(false);
@@ -482,6 +487,33 @@ export default function AuthScreen({ navigation, route }) {
                 setRequestModal({ visible: false, title: '', message: '' });
                 setActiveTab('login');
               }}
+            >
+              <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>Tushundim</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* CUSTOM ERROR GLASSMORPHISM MODAL */}
+      <Modal visible={customAlert.visible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { borderColor: '#EF4444', shadowColor: '#EF4444' }]}>
+            <View style={[styles.modalIconBox, { backgroundColor: 'rgba(239, 68, 68, 0.12)', borderColor: '#EF4444' }]}>
+              <MaterialCommunityIcons name="alert-circle-outline" size={38} color="#EF4444" />
+            </View>
+
+            <Text style={styles.modalTitleText}>
+              {customAlert.title || t.errorTitle}
+            </Text>
+
+            <Text style={styles.modalDescText}>
+              {customAlert.message}
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[styles.modalCloseBtn, { backgroundColor: '#EF4444' }]}
+              onPress={() => setCustomAlert({ visible: false, title: '', message: '', type: 'error' })}
             >
               <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>Tushundim</Text>
             </TouchableOpacity>
