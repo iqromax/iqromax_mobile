@@ -280,13 +280,15 @@ export default function AuthScreen({ navigation, route }) {
 
           {/* Form */}
           {activeTab === 'register' ? (
-            <CustomAnimatedInput
-              icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
-              placeholder={t.fullName}
-              placeholderTextColor="#555566"
-              value={name}
-              onChangeText={setName}
-            />
+            <View style={{ marginBottom: 40 }}>
+              <CustomAnimatedInput
+                icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
+                placeholder={t.fullName}
+                placeholderTextColor="#555566"
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
           ) : (
             <>
               <CustomAnimatedInput
@@ -322,34 +324,11 @@ export default function AuthScreen({ navigation, route }) {
             </>
           )}
 
-          {/* Temporarily hidden 
-          {activeTab === 'register' && (
-            <CustomAnimatedInput
-              icon={<Feather name="gift" size={18} color="#888899" style={styles.inputIcon} />}
-              placeholder="Taklif kodi (Ixtiyoriy)"
-              placeholderTextColor="#555566"
-              autoCapitalize="characters"
-              value={referralCode}
-              onChangeText={setReferralCode}
-            />
-          )}
-          */}
-
-          {activeTab === 'login' && (
-            <TouchableOpacity 
-              style={styles.forgotPasswordContainer} 
-              onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
-            </TouchableOpacity>
-          )}
-
           {/* Main Button */}
           <TouchableOpacity 
             style={[
               styles.loginButton, 
-              activeTab === 'register' && { marginTop: 8 },
+              activeTab === 'register' && { marginTop: 20 },
               ((activeTab === 'register' ? !name.trim() : (!phone.trim() || !password)) || isLoading) && { opacity: 0.5 }
             ]} 
             activeOpacity={0.8}
