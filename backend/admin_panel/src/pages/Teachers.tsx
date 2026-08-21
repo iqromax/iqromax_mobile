@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
-import { Search, Loader2, CheckCircle2, XCircle, Clock, Mail, Phone, UserCheck, FileText, AlertCircle, Send } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, XCircle, Clock, Mail, Phone, UserCheck, FileText, AlertCircle, Send, Trash2 } from 'lucide-react';
 
 interface TeacherRequestItem {
   id: string;
@@ -29,9 +29,10 @@ export default function Teachers() {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  // Custom Confirm & Reject Modals
+  // Custom Confirm, Reject & Delete Modals
   const [approveModalItem, setApproveModalItem] = useState<TeacherRequestItem | null>(null);
   const [rejectModalItem, setRejectModalItem] = useState<TeacherRequestItem | null>(null);
+  const [teacherToDelete, setTeacherToDelete] = useState<TeacherUserItem | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
 
   const fetchTeacherData = async (showLoading = true) => {
@@ -100,6 +101,26 @@ export default function Teachers() {
       } else {
         const err = await res.json();
         alert(err.error || "Rad etishda xatolik");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Server bilan ulanishda xatolik");
+    } finally {
+      setActionLoadingId(null);
+    }
+  const confirmDeleteTeacher = async () => {
+    if (!teacherToDelete) return;
+    const id = teacherToDelete.id;
+    setActionLoadingId(id);
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setTeacherToDelete(null);
+        fetchTeacherData(false);
+      } else {
+        alert("O'chirishda xatolik yuz berdi");
       }
     } catch (e) {
       console.error(e);
@@ -305,18 +326,19 @@ export default function Teachers() {
                     <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase">Aloqa</th>
                     <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase">Qo'shilgan sana</th>
                     <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase">Holati</th>
+                    <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase text-right">Amallar</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1A1A2F]">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center">
+                      <td colSpan={7} className="py-12 text-center">
                         <Loader2 className="w-8 h-8 text-purple-500 animate-spin mx-auto" />
                       </td>
                     </tr>
                   ) : filteredTeachers.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-indigo-200/50 text-sm">
+                      <td colSpan={7} className="py-12 text-center text-indigo-200/50 text-sm">
                         O'qituvchilar mavjud emas
                       </td>
                     </tr>
@@ -335,6 +357,15 @@ export default function Teachers() {
                           <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
                             Faol
                           </span>
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => setTeacherToDelete(t)}
+                            className="w-8 h-8 rounded-lg flex items-center justify-center bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white transition-all border border-rose-500/20 hover:border-rose-500 hover:shadow-[0_0_10px_rgba(244,63,94,0.5)] ml-auto"
+                            title="O'qituvchini o'chirish"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -448,6 +479,58 @@ export default function Teachers() {
                     <>
                       <Send className="w-4 h-4" />
                       Rad etish & Yuborish
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE TEACHER CONFIRMATION MODAL */}
+      {teacherToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#05050C]/80 backdrop-blur-md" onClick={() => !actionLoadingId && setTeacherToDelete(null)}></div>
+          <div className="relative w-full max-w-md bg-[#0D0D1F] border border-rose-500/30 rounded-3xl p-6 shadow-[0_0_50px_rgba(244,63,94,0.2)] overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-red-500 via-rose-600 to-pink-600"></div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mb-4 shadow-[inset_0_0_15px_rgba(244,63,94,0.2)]">
+                <AlertCircle className="w-8 h-8 text-rose-400" />
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-2">O'qituvchini O'chirish</h3>
+              <p className="text-sm text-indigo-200/70 mb-6 leading-relaxed">
+                Haqiqatan ham <strong className="text-white">{teacherToDelete.name}</strong> ismli o'qituvchini tizimdan o'chirib tashlamoqchimisiz?
+                <br />
+                <span className="text-rose-400 text-xs mt-2 block font-medium">⚠️ O'qituvchi ilovada bo'lsa real-vaqt rejimida ogohlantirilib, tizimdan chiqarib yuboriladi.</span>
+              </p>
+
+              <div className="flex gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => setTeacherToDelete(null)}
+                  disabled={!!actionLoadingId}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[#121228] border border-[#1A1A35] text-indigo-200/80 text-sm font-medium hover:bg-[#1A1A3F] hover:text-white transition-all disabled:opacity-50"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDeleteTeacher}
+                  disabled={!!actionLoadingId}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-bold shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)] hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {actionLoadingId === teacherToDelete.id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      O'chirilmoqda...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Ha, O'chirish
                     </>
                   )}
                 </button>

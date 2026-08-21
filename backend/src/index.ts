@@ -818,6 +818,20 @@ app.delete('/api/admin/users/sync-delete/:identifier', async (req, res) => {
   }
 });
 
+// Check user existence/status API
+app.get('/api/user/status/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(444).json({ exists: false, deleted: true });
+    }
+    res.json({ exists: true, status: user.status });
+  } catch (e) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Serve admin panel static files in production
 app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 
