@@ -297,6 +297,7 @@ const getAvatarByName = (name) => {
 
 export default function StudentDashboardScreen({ navigation, route }) {
   const { energy: currentEnergy, consumeEnergy, formattedTime } = useEnergy();
+  const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
   const [requiredEnergyAlert, setRequiredEnergyAlert] = useState(1);
   const { language = 'uz', selectedChar = 0 } = route.params || {};
@@ -492,7 +493,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
     };
   }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'abacus');
-  const [user, setUser] = useState(route.params?.user);
 
   const [isPersonajOpen, setIsPersonajOpen] = useState(false);
   const [isSkinlarOpen, setIsSkinlarOpen] = useState(false);
