@@ -200,6 +200,10 @@ export default function App() {
         const userDataStr = await AsyncStorage.getItem('user_data');
         if (userDataStr) {
           const currentUser = JSON.parse(userDataStr);
+          // Skip check for temporary guest users who have not registered on the server yet
+          if (currentUser && currentUser.isGuest === true) {
+            return;
+          }
           if (currentUser && currentUser.customId) {
             let cleanId = String(currentUser.customId).trim();
             if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
@@ -286,8 +290,8 @@ export default function App() {
         if (userDataStr) {
           const userData = JSON.parse(userDataStr);
           
-          // Verify user still exists in database before allowing access
-          if (userData && userData.customId) {
+          // Verify user still exists in database before allowing access (only for non-guest registered users)
+          if (userData && userData.isGuest !== true && userData.customId) {
             try {
               let cleanId = String(userData.customId).trim();
               if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
