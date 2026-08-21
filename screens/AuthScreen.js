@@ -280,7 +280,7 @@ export default function AuthScreen({ navigation, route }) {
 
           {/* Form */}
           {activeTab === 'register' ? (
-            <View style={{ marginBottom: 40 }}>
+            <View style={{ marginBottom: 120 }}>
               <CustomAnimatedInput
                 icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
                 placeholder={t.fullName}
@@ -328,7 +328,7 @@ export default function AuthScreen({ navigation, route }) {
           <TouchableOpacity 
             style={[
               styles.loginButton, 
-              activeTab === 'register' && { marginTop: 20 },
+              activeTab === 'register' && { marginTop: 40 },
               ((activeTab === 'register' ? !name.trim() : (!phone.trim() || !password)) || isLoading) && { opacity: 0.5 }
             ]} 
             activeOpacity={0.8}
