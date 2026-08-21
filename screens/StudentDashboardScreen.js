@@ -575,7 +575,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   if (me) {
                     setUserXp(me.xp);
                     setUser(prev => {
-                      const updated = { ...prev, xp: me.xp };
+                      const updated = { ...prev, ...me, xp: me.xp, isGuest: false };
                       AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
                       return updated;
                     });
@@ -3720,6 +3720,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     const regData = await regRes.json();
                     if (regRes.ok) {
                       const fullUser = { 
+                        ...user,
                         ...regData.user, 
                         isGuest: false,
                         phone: authPhone.trim(),
