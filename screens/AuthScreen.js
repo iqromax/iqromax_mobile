@@ -12,7 +12,8 @@ const TRANSLATIONS = {
     forgotPassword: 'Forgot password?', dataProtected: 'Your data is reliably protected',
     orContinue: 'or continue with', errFillFields: 'Please fill all fields!', errPassMatch: 'Passwords do not match!',
     errPhonePass: 'Please enter phone number and password!', errServer: 'Server error occurred',
-    errNetwork: 'Failed to connect. Check internet.', errLogin: 'Login failed', errorTitle: 'Error'
+    errNetwork: 'Failed to connect. Check internet.', errLogin: 'Login failed', errorTitle: 'Error',
+    reqSentTitle: 'Request Sent to Admin!', reqSentMsg: 'Your application has been sent to admin. Once approved, login details (username and password) will be sent to your email.'
   },
   ru: { 
     createAccount: 'Создать аккаунт', login: 'Войти', fullName: 'Ваше имя', phone: 'Ваш номер телефона',
@@ -20,7 +21,8 @@ const TRANSLATIONS = {
     forgotPassword: 'Забыли пароль?', dataProtected: 'Ваши данные надежно защищены',
     orContinue: 'или продолжите через', errFillFields: 'Пожалуйста, заполните все поля!', errPassMatch: 'Пароли не совпадают!',
     errPhonePass: 'Введите номер телефона и пароль!', errServer: 'Произошла ошибка сервера',
-    errNetwork: 'Ошибка сети. Проверьте интернет.', errLogin: 'Ошибка входа', errorTitle: 'Ошибка'
+    errNetwork: 'Ошибка сети. Проверьте интернет.', errLogin: 'Ошибка входа', errorTitle: 'Ошибка',
+    reqSentTitle: 'Заявка отправлена админу!', reqSentMsg: 'Ваша заявка отправлена администратору. После одобрения логин и пароль будут отправлены на ваш email.'
   },
   uz: { 
     createAccount: 'Akkaunt yaratish', login: 'Kirish', fullName: 'Ismingiz', phone: 'Telefon raqamingiz',
@@ -28,7 +30,8 @@ const TRANSLATIONS = {
     forgotPassword: 'Parolni unutdingizmi?', dataProtected: 'Ma\'lumotlaringiz ishonchli himoyalangan',
     orContinue: 'yoki quyidagilar orqali davom eting', errFillFields: 'Iltimos, barcha maydonlarni to\'ldiring!', errPassMatch: 'Parollar mos kelmadi!',
     errPhonePass: 'Iltimos, telefon raqami va parolni kiriting!', errServer: 'Server xatosi yuz berdi',
-    errNetwork: 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.', errLogin: 'Tizimga kirishda xatolik yuz berdi', errorTitle: 'Xatolik'
+    errNetwork: 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.', errLogin: 'Tizimga kirishda xatolik yuz berdi', errorTitle: 'Xatolik',
+    reqSentTitle: 'So\'rov Adminga Yuborildi!', reqSentMsg: 'Sizning so\'rovingiz adminga yuborildi. Hisobingiz tasdiqlansa tez orada emailingizga kirish uchun username va password jo\'natiladi.'
   },
   ar: { 
     createAccount: 'إنشاء حساب', login: 'تسجيل الدخول', fullName: 'اسمك', phone: 'رقم هاتفك',
@@ -36,7 +39,8 @@ const TRANSLATIONS = {
     forgotPassword: 'هل نسيت كلمة المرور؟', dataProtected: 'بياناتك محمية بشكل موثوق',
     orContinue: 'أو الاستمرار عبر', errFillFields: 'يرجى تعبئة جميع الحقول!', errPassMatch: 'كلمات المرور غير متطابقة!',
     errPhonePass: 'يرجى إدخال رقم الهاتف وكلمة المرور!', errServer: 'حدث خطأ في الخادم',
-    errNetwork: 'فشل الاتصال. تحقق من الإنترنت.', errLogin: 'فشل تسجيل الدخول', errorTitle: 'خطأ'
+    errNetwork: 'فشل الاتصال. تحقق من الإنترنت.', errLogin: 'فشل تسجيل الدخول', errorTitle: 'خطأ',
+    reqSentTitle: 'تم إرسال الطلب إلى المسؤول!', reqSentMsg: 'تم إرسال طلبك إلى المسؤول. عند الموافقة، سيتم إرسال اسم المستخدم وكلمة المرور إلى بريدك الإلكتروني.'
   },
   tr: { 
     createAccount: 'Hesap oluştur', login: 'Giriş', fullName: 'Adınız', phone: 'Telefon numaranız',
@@ -44,7 +48,8 @@ const TRANSLATIONS = {
     forgotPassword: 'Şifrenizi mi unuttunuz?', dataProtected: 'Verileriniz güvenle korunmaktadır',
     orContinue: 'veya şununla devam et', errFillFields: 'Lütfen tüm alanları doldurun!', errPassMatch: 'Şifreler eşleşmiyor!',
     errPhonePass: 'Lütfen telefon numarasını ve şifreyi girin!', errServer: 'Sunucu hatası oluştu',
-    errNetwork: 'Bağlantı başarısız. İnterneti kontrol edin.', errLogin: 'Giriş başarısız', errorTitle: 'Hata'
+    errNetwork: 'Bağlantı başarısız. İnterneti kontrol edin.', errLogin: 'Giriş başarısız', errorTitle: 'Hata',
+    reqSentTitle: 'İstek Yöneticiye Gönderildi!', reqSentMsg: 'Başvurunuz yöneticiye gönderildi. Onaylandıktan sonra kullanıcı adı ve şifreniz e-postanıza gönderilecektir.'
   },
   zh: { 
     createAccount: '创建帐户', login: '登录', fullName: '你的名字', phone: '你的电话号码',
@@ -52,7 +57,8 @@ const TRANSLATIONS = {
     forgotPassword: '忘记密码？', dataProtected: '您的数据受到可靠保护',
     orContinue: '或继续使用', errFillFields: '请填写所有字段！', errPassMatch: '密码不匹配！',
     errPhonePass: '请输入电话号码和密码！', errServer: '发生服务器错误',
-    errNetwork: '连接失败。检查网络。', errLogin: '登录失败', errorTitle: '错误'
+    errNetwork: '连接失败。检查网络。', errLogin: '登录失败', errorTitle: '错误',
+    reqSentTitle: '请求已发送给管理员！', reqSentMsg: '您的申请已发送给管理员。一旦批准，用户名和密码将发送到您的电子邮件。'
   },
   ky: { 
     createAccount: 'Аккаунт түзүү', login: 'Кирүү', fullName: 'Атыңыз', phone: 'Телефон номериңиз',
@@ -60,7 +66,8 @@ const TRANSLATIONS = {
     forgotPassword: 'Сырсөздү унуттуңузбу?', dataProtected: 'Сиздин маалыматтар ишенимдүү корголгон',
     orContinue: 'же муну менен улантуу', errFillFields: 'Бардык талааларды толтуруңуз!', errPassMatch: 'Сырсөздөр дал келбейт!',
     errPhonePass: 'Телефон номерин жана сырсөздү киргизиңиз!', errServer: 'Сервер катасы пайда болду',
-    errNetwork: 'Тармакка туташуу мүмкүн эмес. Интернетти текшериңиз.', errLogin: 'Кирүү катасы', errorTitle: 'Ката'
+    errNetwork: 'Тармакка туташуу мүмкүн эмес. Интернетти текшериңиз.', errLogin: 'Кирүү катасы', errorTitle: 'Ката',
+    reqSentTitle: 'Сүйлөшүү админге жөнөтүлдү!', reqSentMsg: 'Сиздин өтүнүчүңүз админге жөнөтүлдү. Тастыкталгандан кийин колдонуучу аты жана сырсөз электрондук почтаңызга жөнөтүлөт.'
   },
   kk: { 
     createAccount: 'Аккаунт жасау', login: 'Кіру', fullName: 'Атыңыз', phone: 'Телефон нөміріңіз',
@@ -68,7 +75,8 @@ const TRANSLATIONS = {
     forgotPassword: 'Құпия сөзді ұмыттыңыз ба?', dataProtected: 'Сіздің деректеріңіз сенімді қорғалған',
     orContinue: 'немесе арқылы жалғастыру', errFillFields: 'Барлық өрістерді толтырыңыз!', errPassMatch: 'Құпия сөздер сәйкес келмейді!',
     errPhonePass: 'Телефон нөмірі мен құпия сөзді енгізіңіз!', errServer: 'Сервер қатесі орын алды',
-    errNetwork: 'Желіге қосылу мүмкін емес. Интернетті тексеріңіз.', errLogin: 'Кіру қатесі', errorTitle: 'Қате'
+    errNetwork: 'Желіге қосылу мүмкін емес. Интернетті тексеріңіз.', errLogin: 'Кіру қатесі', errorTitle: 'Қате',
+    reqSentTitle: 'Өтініш админге жіберілді!', reqSentMsg: 'Сіздің өтінішіңіз админге жіберілді. Расталғаннан кейін кіру деректері электрондық поштаңызға жіберіледі.'
   },
   tg: { 
     createAccount: 'Эҷоди ҳисоб', login: 'Вуруд', fullName: 'Номи шумо', phone: 'Рақами телефони шумо',
@@ -76,7 +84,8 @@ const TRANSLATIONS = {
     forgotPassword: 'Рамзро фаромӯш кардед?', dataProtected: 'Маълумоти шумо эътимоднок ҳифз карда мешавад',
     orContinue: 'ё идома додан бо', errFillFields: 'Лутфан ҳамаи майдонҳоро пур кунед!', errPassMatch: 'Рамзҳо мувофиқат намекунанд!',
     errPhonePass: 'Лутфан рақами телефон ва рамзро ворид кунед!', errServer: 'Хатои сервер рух дод',
-    errNetwork: 'Пайвастшавӣ ба шабака ноком шуд. Интернетро тафтиш кунед.', errLogin: 'Хатои вуруд', errorTitle: 'Хатогӣ'
+    errNetwork: 'Пайвастшавӣ ба шабака ноком шуд. Интернетро тафтиш кунед.', errLogin: 'Хатои вуруд', errorTitle: 'Хатогӣ',
+    reqSentTitle: 'Дархост ба администратор фиристода шуд!', reqSentMsg: 'Дархости шумо ба администратор фиристода шуд. Пас аз тасдиқ, логин ва парол ба почтаи электронии шумо фиристода мешавад.'
   },
   ja: { 
     createAccount: 'アカウントを作成', login: 'ログイン', fullName: 'あなたの名前', phone: '電話番号',
@@ -84,7 +93,8 @@ const TRANSLATIONS = {
     forgotPassword: 'パスワードを忘れた場合', dataProtected: 'データは確実に保護されています',
     orContinue: 'または次で続ける', errFillFields: 'すべてのフィールドに入力してください！', errPassMatch: 'パスワードが一致しません！',
     errPhonePass: '電話番号とパスワードを入力してください！', errServer: 'サーバーエラーが発生しました',
-    errNetwork: '接続に失敗しました。インターネットを確認してください。', errLogin: 'ログイン失敗', errorTitle: 'エラー'
+    errNetwork: '接続に失敗しました。インターネットを確認してください。', errLogin: 'ログイン失敗', errorTitle: 'エラー',
+    reqSentTitle: 'リクエストが管理者に送信されました！', reqSentMsg: 'あなたの申請が管理者に送信されました。承認後、ログイン情報がメールに送信されます。'
   },
   ko: { 
     createAccount: '계정 만들기', login: '로그인', fullName: '이름', phone: '전화번호',
@@ -92,7 +102,8 @@ const TRANSLATIONS = {
     forgotPassword: '비밀번호를 잊으셨나요?', dataProtected: '데이터는 안전하게 보호됩니다',
     orContinue: '또는 다음으로 계속', errFillFields: '모든 필드를 입력해주세요!', errPassMatch: '비밀번호가 일치하지 않습니다!',
     errPhonePass: '전화번호와 비밀번호를 입력해주세요!', errServer: '서버 오류가 발생했습니다',
-    errNetwork: '네트워크 연결 실패. 인터넷을 확인하세요.', errLogin: '로그인 실패', errorTitle: '오류'
+    errNetwork: '네트워크 연결 실패. 인터넷을 확인하세요.', errLogin: '로그인 실패', errorTitle: '오류',
+    reqSentTitle: '관리자에게 요청이 전송되었습니다!', reqSentMsg: '신청서가 관리자에게 전송되었습니다. 승인되면 로그인 자격 증명이 이메일로 전송됩니다.'
   }
 };
 
@@ -152,12 +163,8 @@ export default function AuthScreen({ navigation, route }) {
   const handleAuthAction = async () => {
     if (activeTab === 'register') {
       if (role === 'teacher') {
-        if (!name.trim() || !phone.trim() || !email.trim() || !password || !confirmPassword) {
+        if (!name.trim() || !phone.trim() || !email.trim()) {
           Alert.alert(t.errorTitle, t.errFillFields);
-          return;
-        }
-        if (password !== confirmPassword) {
-          Alert.alert(t.errorTitle, t.errPassMatch);
           return;
         }
 
@@ -170,7 +177,7 @@ export default function AuthScreen({ navigation, route }) {
               name: name.trim(),
               phone: phone.trim(),
               email: email.trim(),
-              password
+              password: 'teacher_pending_pass'
             })
           });
 
@@ -178,8 +185,8 @@ export default function AuthScreen({ navigation, route }) {
           if (res.ok) {
             setRequestModal({
               visible: true,
-              title: "So'rov Adminga Yuborildi!",
-              message: "Sizning so'rovingiz adminga yuborildi. Hisobingiz tasdiqlansa tez orada emailingizga kirish uchun username va password jo'natiladi, u orqali hisobingizga kira olasiz."
+              title: t.reqSentTitle || "So'rov Adminga Yuborildi!",
+              message: t.reqSentMsg || "Sizning so'rovingiz adminga yuborildi. Hisobingiz tasdiqlansa tez orada emailingizga kirish uchun username va password jo'natiladi."
             });
           } else {
             Alert.alert(t.errorTitle, data.error || t.errServer);
@@ -364,34 +371,6 @@ export default function AuthScreen({ navigation, route }) {
                     keyboardType="email-address"
                     value={email}
                     onChangeText={setEmail}
-                  />
-
-                  <CustomAnimatedInput
-                    icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
-                    placeholder={t.password}
-                    placeholderTextColor="#555566"
-                    secureTextEntry={!showPassword}
-                    value={password}
-                    onChangeText={setPassword}
-                    rightIcon={
-                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                        <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
-                      </TouchableOpacity>
-                    }
-                  />
-
-                  <CustomAnimatedInput
-                    icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
-                    placeholder={t.confirmPassword}
-                    placeholderTextColor="#555566"
-                    secureTextEntry={!showConfirmPassword}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    rightIcon={
-                      <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeIcon}>
-                        <Feather name={showConfirmPassword ? "eye" : "eye-off"} size={18} color="#888899" />
-                      </TouchableOpacity>
-                    }
                   />
                 </>
               )}

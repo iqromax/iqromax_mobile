@@ -464,13 +464,50 @@ app.post('/api/teacher/approve', async (req, res) => {
 // Admin: Reject teacher request
 app.post('/api/teacher/reject', async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id, reason } = req.body;
+    // @ts-ignore
+    const reqItem = await prisma.teacherRequest.findUnique({ where: { id } });
+    if (!reqItem) return res.status(404).json({ error: 'So\'rov topilmadi' });
+
     // @ts-ignore
     await prisma.teacherRequest.update({
       where: { id },
       data: { status: 'REJECTED' }
     });
-    res.json({ message: 'So\'rov rad etildi' });
+
+    const rejectionReasonText = reason && reason.trim() ? reason.trim() : 'Taqdim etilgan ma\'lumotlar talablarimizga mos kelmadi.';
+
+    const mailOptions = {
+      from: `"IQROMAX Admin" <${process.env.SMTP_USER}>`,
+      to: reqItem.email,
+      subject: 'IQROMAX - O\'qituvchilik so\'rovingiz bo\'yicha habar',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #070712; color: #ffffff; padding: 40px; border-radius: 16px; border: 1px solid #1A1A2F;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ffffff; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 2px;">
+              IQRO<span style="color: #EF4444;">MAX</span>
+            </h1>
+          </div>
+          
+          <h2 style="color: #ffffff; font-size: 22px; margin-bottom: 16px;">Xayrli kun, ${reqItem.name}!</h2>
+          <p style="color: #C7D2FE; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+            Afsuski, IQROMAX platformasida o'qituvchilik qilish bo'yicha yuborgan so'rovingiz admin tomonidan rad etildi.
+          </p>
+          
+          <div style="background-color: #121223; padding: 24px; border-radius: 14px; border: 1px solid #EF4444; margin-bottom: 30px;">
+            <p style="color: #9CA3AF; font-size: 14px; margin-bottom: 8px;"><strong>Rad etilish sababi:</strong></p>
+            <p style="color: #F87171; font-size: 15px; line-height: 1.5; margin: 0;">${rejectionReasonText}</p>
+          </div>
+          
+          <p style="color: #818CF8; font-size: 14px; text-align: center;">
+            Qo'shimcha savollaringiz bo'lsa, qo'llab-quvvatlash xizmati bilan bog mezoningiz mumkin.
+          </p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ message: 'So\'rov rad etildi va emailga habar yuborildi' });
   } catch (error) {
     console.error('Reject teacher error:', error);
     res.status(500).json({ error: 'Server xatosi' });

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
-import { Search, Loader2, CheckCircle2, XCircle, Clock, Mail, Phone, UserCheck, FileText } from 'lucide-react';
+import { Search, Loader2, CheckCircle2, XCircle, Clock, Mail, Phone, UserCheck, FileText, AlertCircle, Send } from 'lucide-react';
 
 interface TeacherRequestItem {
   id: string;
@@ -29,6 +29,11 @@ export default function Teachers() {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
+  // Custom Confirm & Reject Modals
+  const [approveModalItem, setApproveModalItem] = useState<TeacherRequestItem | null>(null);
+  const [rejectModalItem, setRejectModalItem] = useState<TeacherRequestItem | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+
   const fetchTeacherData = async (showLoading = true) => {
     if (showLoading) setIsLoading(true);
     try {
@@ -53,8 +58,9 @@ export default function Teachers() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleApprove = async (id: string) => {
-    if (!confirm("Ushbu o'qituvchi so'rovini tasdiqlamoqchimisiz? Emailga avtomatik login va parol yuboriladi.")) return;
+  const confirmApprove = async () => {
+    if (!approveModalItem) return;
+    const id = approveModalItem.id;
     setActionLoadingId(id);
     try {
       const res = await fetch('/api/teacher/approve', {
@@ -63,7 +69,7 @@ export default function Teachers() {
         body: JSON.stringify({ id })
       });
       if (res.ok) {
-        alert("O'qituvchi tasdiqlandi va login ma'lumotlari emailga yuborildi!");
+        setApproveModalItem(null);
         fetchTeacherData(false);
       } else {
         const err = await res.json();
@@ -77,17 +83,19 @@ export default function Teachers() {
     }
   };
 
-  const handleReject = async (id: string) => {
-    if (!confirm("Ushbu so'rovni rad etmoqchimisiz?")) return;
+  const confirmReject = async () => {
+    if (!rejectModalItem) return;
+    const id = rejectModalItem.id;
     setActionLoadingId(id);
     try {
       const res = await fetch('/api/teacher/reject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
+        body: JSON.stringify({ id, reason: rejectionReason })
       });
       if (res.ok) {
-        alert("So'rov rad etildi");
+        setRejectModalItem(null);
+        setRejectionReason('');
         fetchTeacherData(false);
       } else {
         const err = await res.json();
@@ -252,19 +260,22 @@ export default function Teachers() {
                           {req.status === 'PENDING' ? (
                             <div className="flex items-center justify-end gap-2">
                               <button
-                                onClick={() => handleApprove(req.id)}
+                                onClick={() => setApproveModalItem(req)}
                                 disabled={actionLoadingId === req.id}
-                                className="px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white border border-green-500/30 text-xs font-medium flex items-center gap-1 transition-all"
+                                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-medium text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-1.5 transition-all"
                               >
-                                {actionLoadingId === req.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                                <CheckCircle2 className="w-4 h-4" />
                                 Tasdiqlash
                               </button>
                               <button
-                                onClick={() => handleReject(req.id)}
+                                onClick={() => {
+                                  setRejectModalItem(req);
+                                  setRejectionReason('');
+                                }}
                                 disabled={actionLoadingId === req.id}
-                                className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/30 text-xs font-medium flex items-center gap-1 transition-all"
+                                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-medium text-xs shadow-[0_0_15px_rgba(244,63,94,0.3)] hover:shadow-[0_0_20px_rgba(244,63,94,0.5)] flex items-center gap-1.5 transition-all"
                               >
-                                <XCircle className="w-3.5 h-3.5" />
+                                <XCircle className="w-4 h-4" />
                                 Rad etish
                               </button>
                             </div>
@@ -334,6 +345,117 @@ export default function Teachers() {
           </div>
         )}
       </div>
+
+      {/* APPROVE CONFIRMATION MODAL */}
+      {approveModalItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#05050C]/80 backdrop-blur-md" onClick={() => !actionLoadingId && setApproveModalItem(null)}></div>
+          <div className="relative w-full max-w-md bg-[#0D0D1F] border border-emerald-500/30 rounded-3xl p-6 shadow-[0_0_50px_rgba(16,185,129,0.2)] overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 via-green-500 to-teal-400"></div>
+            
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4 shadow-[inset_0_0_15px_rgba(16,185,129,0.2)]">
+                <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-2">O'qituvchini Tasdiqlash</h3>
+              <p className="text-sm text-indigo-200/70 mb-6 leading-relaxed">
+                Haqiqatan ham <strong className="text-white">{approveModalItem.name}</strong> foydalanuvchisini o'qituvchilikka tasdiqlamoqchimisiz?
+                <br />
+                <span className="text-emerald-400 text-xs mt-2 block font-medium">✨ Emailga avtomatik ravishda login (username) va parol yuboriladi.</span>
+              </p>
+
+              <div className="flex gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => setApproveModalItem(null)}
+                  disabled={!!actionLoadingId}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[#121228] border border-[#1A1A35] text-indigo-200/80 text-sm font-medium hover:bg-[#1A1A3F] hover:text-white transition-all disabled:opacity-50"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmApprove}
+                  disabled={!!actionLoadingId}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {actionLoadingId === approveModalItem.id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Tasdiqlanmoqda...
+                    </>
+                  ) : (
+                    "Ha, Tasdiqlash"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* REJECT MODAL WITH REASON INPUT */}
+      {rejectModalItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#05050C]/80 backdrop-blur-md" onClick={() => !actionLoadingId && setRejectModalItem(null)}></div>
+          <div className="relative w-full max-w-md bg-[#0D0D1F] border border-rose-500/30 rounded-3xl p-6 shadow-[0_0_50px_rgba(244,63,94,0.2)] overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-red-500 to-pink-500"></div>
+
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center mb-4 shadow-[inset_0_0_15px_rgba(244,63,94,0.2)]">
+                <AlertCircle className="w-8 h-8 text-rose-400" />
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-2">So'rovni Rad Etish</h3>
+              <p className="text-sm text-indigo-200/70 mb-4 leading-relaxed">
+                <strong className="text-white">{rejectModalItem.name}</strong> so'rovini rad etish sababini kiriting. Ushbu sabab uning emailiga yuboriladi.
+              </p>
+
+              {/* Reason Textarea */}
+              <div className="w-full text-left mb-6">
+                <label className="block text-xs font-semibold text-indigo-200/60 uppercase tracking-wider mb-2">Rad etish sababi</label>
+                <textarea
+                  rows={3}
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Masalan: Hujjatlar yetarli emas yoki talablarga mos kelmaydi..."
+                  className="w-full bg-[#050512] border border-[#1A1A35] rounded-xl p-3 text-sm text-white placeholder:text-indigo-200/30 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all resize-none"
+                />
+              </div>
+
+              <div className="flex gap-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => setRejectModalItem(null)}
+                  disabled={!!actionLoadingId}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[#121228] border border-[#1A1A35] text-indigo-200/80 text-sm font-medium hover:bg-[#1A1A3F] hover:text-white transition-all disabled:opacity-50"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmReject}
+                  disabled={!!actionLoadingId}
+                  className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 text-white text-sm font-bold shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)] hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {actionLoadingId === rejectModalItem.id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Yuborilmoqda...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Rad etish & Yuborish
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
