@@ -239,19 +239,17 @@ export default function AuthScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {/* Hero Image with Text */}
-          <View style={styles.heroContainer}>
-            <Image 
-              source={
-                activeTab === 'login' 
-                  ? require('../assets/auth_hero_with_text.jpg') 
-                  : (role === 'parent' ? require('../assets/auth_hero_parent.jpg') : (role === 'teacher' ? require('../assets/auth_hero_teacher.jpg') : require('../assets/register_hero_with_text.jpg')))
-              } 
-              style={styles.heroImage} 
-              contentFit="contain" 
-            />
-          </View>
+          {activeTab === 'login' && (
+            <View style={styles.heroContainer}>
+              <Image 
+                source={require('../assets/auth_hero_with_text.jpg')} 
+                style={styles.heroImage} 
+                contentFit="contain" 
+              />
+            </View>
+          )}
 
           {/* Custom Tabs */}
           <View style={styles.tabContainer}>
@@ -280,7 +278,7 @@ export default function AuthScreen({ navigation, route }) {
 
           {/* Form */}
           {activeTab === 'register' ? (
-            <View style={{ marginBottom: 120 }}>
+            <View style={{ marginBottom: 60 }}>
               <CustomAnimatedInput
                 icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
                 placeholder={t.fullName}
