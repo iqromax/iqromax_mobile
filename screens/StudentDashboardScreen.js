@@ -3566,6 +3566,42 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                   setAuthLoading(true);
                   try {
+                    // Check if email or phone is already registered in backend users list
+                    const checkRes = await fetch(`${API_URL}/users/search/?q=${encodeURIComponent(authEmail.trim())}`);
+                    if (checkRes.ok) {
+                      const checkUsers = await checkRes.json();
+                      const exists = Array.isArray(checkUsers) && checkUsers.some(u => 
+                        (u.email && u.email.toLowerCase() === authEmail.trim().toLowerCase()) ||
+                        (u.phone && u.phone.trim() === authPhone.trim())
+                      );
+                      if (exists) {
+                        setAuthLoading(false);
+                        Alert.alert(
+                          t.authDupTitle || 'Ogohlantirish',
+                          t.authDupMsg || 'Bu email yoki telefon raqamidan oldin ro\'yxatdan o\'tilgan. Iltimos, boshqa ma\'lumot kiriting yoki tizimga kiring.',
+                          [
+                            {
+                              text: t.authTryAgainBtn || 'Boshqatdan urinib ko\'rish',
+                              onPress: () => {
+                                setAuthEmail('');
+                                setAuthPhone('');
+                                setAuthPassword('');
+                                setAuthConfirmPassword('');
+                              }
+                            },
+                            {
+                              text: t.authLoginBtn || 'Kirish',
+                              onPress: () => {
+                                setIsAuthModalOpen(false);
+                                navigation.navigate('AuthScreen', { language, initialTab: 'login' });
+                              }
+                            }
+                          ]
+                        );
+                        return;
+                      }
+                    }
+
                     const response = await fetch(`${API_URL}/auth/send-otp`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -3585,7 +3621,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                             {
                               text: t.authTryAgainBtn || 'Boshqatdan urinib ko\'rish',
                               onPress: () => {
-                                // Form resets/refreshes
                                 setAuthEmail('');
                                 setAuthPhone('');
                                 setAuthPassword('');
