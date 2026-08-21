@@ -104,31 +104,6 @@ const TRANSLATIONS = {
     errPhonePass: '전화번호와 비밀번호를 입력해주세요!', errServer: '서버 오류가 발생했습니다',
     errNetwork: '네트워크 연결 실패. 인터넷을 확인하세요.', errLogin: '로그인 실패', errorTitle: '오류',
     reqSentTitle: '관리자에게 요청이 전송되었습니다!', reqSentMsg: '신청서가 관리자에게 전송되었습니다. 승인되면 로그인 자격 증명이 이메일로 전송됩니다.'
-  }', phone: 'Рақами телефони шумо',
-    email: 'Почтаи электронии шумо', password: 'Рамзи шумо', confirmPassword: 'Тасдиқи рамз',
-    forgotPassword: 'Рамзро фаромӯш кардед?', dataProtected: 'Маълумоти шумо эътимоднок ҳифз карда мешавад',
-    orContinue: 'ё идома додан бо', errFillFields: 'Лутфан ҳамаи майдонҳоро пур кунед!', errPassMatch: 'Рамзҳо мувофиқат намекунанд!',
-    errPhonePass: 'Лутфан рақами телефон ва рамзро ворид кунед!', errServer: 'Хатои сервер рух дод',
-    errNetwork: 'Пайвастшавӣ ба шабака ноком шуд. Интернетро тафтиш кунед.', errLogin: 'Хатои вуруд', errorTitle: 'Хатогӣ',
-    reqSentTitle: 'Дархост ба администратор фиристода шуд!', reqSentMsg: 'Дархости шумо ба администратор фиристода шуд. Пас аз тасдиқ, логин ва парол ба почтаи электронии шумо фиристода мешавад.'
-  },
-  ja: { 
-    createAccount: 'アカウントを作成', login: 'ログイン', fullName: 'あなたの名前', phone: '電話番号',
-    email: 'メールアドレス', password: 'パスワード', confirmPassword: 'パスワードの確認',
-    forgotPassword: 'パスワードを忘れた場合', dataProtected: 'データは確実に保護されています',
-    orContinue: 'または次で続ける', errFillFields: 'すべてのフィールドに入力してください！', errPassMatch: 'パスワードが一致しません！',
-    errPhonePass: '電話番号とパスワードを入力してください！', errServer: 'サーバーエラーが発生しました',
-    errNetwork: '接続に失敗しました。インターネットを確認してください。', errLogin: 'ログイン失敗', errorTitle: 'エラー',
-    reqSentTitle: 'リクエストが管理者に送信されました！', reqSentMsg: 'あなたの申請が管理者に送信されました。承認後、ログイン情報がメールに送信されます。'
-  },
-  ko: { 
-    createAccount: '계정 만들기', login: '로그인', fullName: '이름', phone: '전화번호',
-    email: '이메일 주소', password: '비밀번호', confirmPassword: '비밀번호 확인',
-    forgotPassword: '비밀번호를 잊으셨나요?', dataProtected: '데이터는 안전하게 보호됩니다',
-    orContinue: '또는 다음으로 계속', errFillFields: '모든 필드를 입력해주세요!', errPassMatch: '비밀번호가 일치하지 않습니다!',
-    errPhonePass: '전화번호와 비밀번호를 입력해주세요!', errServer: '서버 오류가 발생했습니다',
-    errNetwork: '네트워크 연결 실패. 인터넷을 확인하세요.', errLogin: '로그인 실패', errorTitle: '오류',
-    reqSentTitle: '관리자에게 요청이 전송되었습니다!', reqSentMsg: '신청서가 관리자에게 전송되었습니다. 승인되면 로그인 자격 증명이 이메일로 전송됩니다.'
   }
 };
 
