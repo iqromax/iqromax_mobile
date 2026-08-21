@@ -231,6 +231,7 @@ export default function AuthScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor="#05050C" />
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         style={{ flex: 1 }}
       >
         <View style={styles.header}>
@@ -241,15 +242,17 @@ export default function AuthScreen({ navigation, route }) {
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {/* Hero Image with Text */}
-          {activeTab === 'login' && (
-            <View style={styles.heroContainer}>
-              <Image 
-                source={require('../assets/auth_hero_with_text.jpg')} 
-                style={styles.heroImage} 
-                contentFit="contain" 
-              />
-            </View>
-          )}
+          <View style={styles.heroContainer}>
+            <Image 
+              source={
+                activeTab === 'login' 
+                  ? require('../assets/auth_hero_with_text.jpg') 
+                  : (role === 'parent' ? require('../assets/auth_hero_parent.jpg') : (role === 'teacher' ? require('../assets/auth_hero_teacher.jpg') : require('../assets/register_hero_with_text.jpg')))
+              } 
+              style={styles.heroImage} 
+              contentFit="contain" 
+            />
+          </View>
 
           {/* Custom Tabs */}
           <View style={styles.tabContainer}>
