@@ -55,7 +55,7 @@ export default function ForgotPasswordScreen({ route, navigation }) {
         navigation.navigate('OtpScreen', { 
           email: email.trim(),
           isResetPassword: true,
-          language
+          language: language || 'uz'
         });
       } else {
         Alert.alert(t.errorTitle, data.error || 'Server error');

@@ -226,7 +226,7 @@ export default function ResetPasswordScreen({ route, navigation }) {
       
       if (response.ok) {
         Alert.alert('', t.success, [
-          { text: 'OK', onPress: () => navigation.navigate('AuthScreen') }
+          { text: 'OK', onPress: () => navigation.navigate('AuthScreen', { language, role: route.params?.role || 'student' }) }
         ]);
       } else {
         Alert.alert(t.errorTitle, data.error || 'Server error');

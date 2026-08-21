@@ -46,7 +46,7 @@ const LOCALIZED_LANGUAGES = {
 };
 
 export default function StepTwoScreen({ navigation, route }) {
-  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [selectedLanguage, setSelectedLanguage] = useState(route.params?.language || 'uz');
   const t = TRANSLATIONS[selectedLanguage] || TRANSLATIONS['en'];
   const localizedNames = LOCALIZED_LANGUAGES[selectedLanguage] || LOCALIZED_LANGUAGES['en'];
 

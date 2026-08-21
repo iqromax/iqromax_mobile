@@ -106,8 +106,8 @@ const TRANSLATIONS = {
 };
 
 export default function StepThreeScreen({ navigation, route }) {
-  const { language = 'en' } = route?.params || {};
-  const t = TRANSLATIONS[language] || TRANSLATIONS['en'];
+  const { language = 'uz' } = route?.params || {};
+  const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
   const [selectedRole, setSelectedRole] = useState(null);
 
   const handleNext = () => {

@@ -144,8 +144,8 @@ const CustomAnimatedInput = ({ icon, rightIcon, ...props }) => {
 };
 
 export default function AuthScreen({ navigation, route }) {
-  const { role = 'student', language = 'en', initialTab = 'login' } = route.params || {};
-  const t = TRANSLATIONS[language] || TRANSLATIONS['en'];
+  const { role = 'student', language = 'uz', initialTab = 'login' } = route.params || {};
+  const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
   const [activeTab, setActiveTab] = useState(initialTab); // 'register' or 'login'
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
