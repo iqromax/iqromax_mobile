@@ -230,8 +230,8 @@ export default function AuthScreen({ navigation, route }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            phone: role === 'teacher' ? undefined : phone.trim(),
-            username: role === 'teacher' ? usernameInput.trim() : undefined,
+            phone: phone.trim() || undefined,
+            username: usernameInput.trim() || undefined,
             password: password.trim(),
             language
           })
