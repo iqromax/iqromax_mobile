@@ -3719,11 +3719,28 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                     const regData = await regRes.json();
                     if (regRes.ok) {
-                      const fullUser = { ...regData.user, isGuest: false };
+                      const fullUser = { 
+                        ...regData.user, 
+                        isGuest: false,
+                        phone: authPhone.trim(),
+                        email: authEmail.trim()
+                      };
                       await AsyncStorage.setItem('user_data', JSON.stringify(fullUser));
                       setUser(fullUser);
                       setIsOtpModalOpen(false);
-                      Alert.alert('Muvaffaqiyatli!', 'Akkauntingiz muvaffaqiyatli avtorizatsiyadan o\'tdi!');
+                      setIsAuthModalOpen(false);
+                      Alert.alert(
+                        'Muvaffaqiyatli!', 
+                        'Akkauntingiz muvaffaqiyatli avtorizatsiyadan o\'tdi! Barcha imkoniyatlar ochildi.',
+                        [
+                          {
+                            text: 'OK',
+                            onPress: () => {
+                              setActiveTab('profile');
+                            }
+                          }
+                        ]
+                      );
                     } else {
                       Alert.alert('Xatolik', regData.error || 'Ro\'yxatdan o\'tishda xatolik');
                     }
