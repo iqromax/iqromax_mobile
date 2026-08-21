@@ -3566,46 +3566,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                   setAuthLoading(true);
                   try {
-                    // Check if email or phone is already registered in ranking/user list
-                    try {
-                      const checkRes = await fetch(`${API_URL}/ranking?t=${Date.now()}`);
-                      if (checkRes.ok) {
-                        const checkUsers = await checkRes.json();
-                        const exists = Array.isArray(checkUsers) && checkUsers.some(u => 
-                          (u.email && u.email.toLowerCase() === authEmail.trim().toLowerCase()) ||
-                          (u.phone && String(u.phone).trim() === authPhone.trim())
-                        );
-                        if (exists) {
-                          setAuthLoading(false);
-                          Alert.alert(
-                            t.authDupTitle || 'Ogohlantirish',
-                            t.authDupMsg || 'Bu email yoki telefon raqamidan oldin ro\'yxatdan o\'tilgan. Iltimos, boshqa ma\'lumot kiriting yoki tizimga kiring.',
-                            [
-                              {
-                                text: t.authTryAgainBtn || 'Boshqatdan urinib ko\'rish',
-                                onPress: () => {
-                                  setAuthEmail('');
-                                  setAuthPhone('');
-                                  setAuthPassword('');
-                                  setAuthConfirmPassword('');
-                                }
-                              },
-                              {
-                                text: t.authLoginBtn || 'Kirish',
-                                onPress: () => {
-                                  setIsAuthModalOpen(false);
-                                  navigation.navigate('AuthScreen', { language, initialTab: 'login' });
-                                }
-                              }
-                            ]
-                          );
-                          return;
-                        }
-                      }
-                    } catch (checkErr) {
-                      console.log('Pre-check error:', checkErr);
-                    }
-
                     const response = await fetch(`${API_URL}/auth/send-otp`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -3616,8 +3576,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       setIsAuthModalOpen(false);
                       setIsOtpModalOpen(true);
                     } else {
-                      const errMsg = data.error || 'Server xatosi yuz berdi';
-                      if (errMsg.toLowerCase().includes('already') || errMsg.toLowerCase().includes('mavjud') || errMsg.toLowerCase().includes('ro\'yxatdan') || errMsg.toLowerCase().includes('registered')) {
+                      const errMsg = String(data.error || 'Server xatosi yuz berdi');
+                      const isDup = errMsg.toLowerCase().includes('already') || 
+                                    errMsg.toLowerCase().includes('mavjud') || 
+                                    errMsg.toLowerCase().includes('ro\'yxatdan') || 
+                                    errMsg.toLowerCase().includes('registered') ||
+                                    errMsg.toLowerCase().includes('oldin');
+
+                      if (isDup) {
                         Alert.alert(
                           t.authDupTitle || 'Ogohlantirish',
                           t.authDupMsg || 'Bu email yoki telefon raqamidan oldin ro\'yxatdan o\'tilgan. Iltimos, boshqa ma\'lumot kiriting yoki tizimga kiring.',

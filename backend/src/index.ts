@@ -86,6 +86,12 @@ app.post('/api/auth/send-otp', async (req, res) => {
     const { email, name, language = 'en' } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required' });
 
+    // Check if user is already registered with this email
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Bu email dan oldin ro\'yxatdan o\'tilgan' });
+    }
+
     const code = generateOTP();
     // Expiry: 1 minute from now
     const expiresAt = new Date(Date.now() + 60 * 1000);
