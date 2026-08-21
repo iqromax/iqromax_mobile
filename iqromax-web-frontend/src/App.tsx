@@ -128,7 +128,6 @@ const App = () => (
                       <Route path="/blog/:id" element={<BlogPostPage />} />
                       <Route path="/admin" element={<AdminDashboard />} />
                       <Route path="/admin/login" element={<AdminLogin />} />
-                      <Route path="/teachers" element={<AdminDashboard initialTab="teachers" />} />
                       <Route path="/faq" element={<FAQ />} />
                       <Route path="/courses" element={<KidsCourses />} />
                       <Route path="/profile" element={<Profile />} />
