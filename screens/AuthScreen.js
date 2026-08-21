@@ -8,7 +8,7 @@ import { API_URL } from '../src/config/api';
 const TRANSLATIONS = {
   en: { 
     createAccount: 'Create account', login: 'Login', fullName: 'Your name', phone: 'Your phone number',
-    email: 'Your email', password: 'Your password', confirmPassword: 'Confirm password',
+    username: 'Username', email: 'Your email', password: 'Your password', confirmPassword: 'Confirm password',
     forgotPassword: 'Forgot password?', dataProtected: 'Your data is reliably protected',
     orContinue: 'or continue with', errFillFields: 'Please fill all fields!', errPassMatch: 'Passwords do not match!',
     errPhonePass: 'Please enter phone number and password!', errServer: 'Server error occurred',
@@ -17,7 +17,7 @@ const TRANSLATIONS = {
   },
   ru: { 
     createAccount: 'Создать аккаунт', login: 'Войти', fullName: 'Ваше имя', phone: 'Ваш номер телефона',
-    email: 'Ваш email', password: 'Ваш пароль', confirmPassword: 'Подтвердите пароль',
+    username: 'Имя пользователя (Username)', email: 'Ваш email', password: 'Ваш пароль', confirmPassword: 'Подтвердите пароль',
     forgotPassword: 'Забыли пароль?', dataProtected: 'Ваши данные надежно защищены',
     orContinue: 'или продолжите через', errFillFields: 'Пожалуйста, заполните все поля!', errPassMatch: 'Пароли не совпадают!',
     errPhonePass: 'Введите номер телефона и пароль!', errServer: 'Произошла ошибка сервера',
@@ -26,7 +26,7 @@ const TRANSLATIONS = {
   },
   uz: { 
     createAccount: 'Akkaunt yaratish', login: 'Kirish', fullName: 'Ismingiz', phone: 'Telefon raqamingiz',
-    email: 'Elektron pochtangiz', password: 'Parolingiz', confirmPassword: 'Parolni tasdiqlang',
+    username: 'Foydalanuvchi nomi (Username)', email: 'Elektron pochtangiz', password: 'Parolingiz', confirmPassword: 'Parolni tasdiqlang',
     forgotPassword: 'Parolni unutdingizmi?', dataProtected: 'Ma\'lumotlaringiz ishonchli himoyalangan',
     orContinue: 'yoki quyidagilar orqali davom eting', errFillFields: 'Iltimos, barcha maydonlarni to\'ldiring!', errPassMatch: 'Parollar mos kelmadi!',
     errPhonePass: 'Iltimos, telefon raqami va parolni kiriting!', errServer: 'Server xatosi yuz berdi',
@@ -35,7 +35,7 @@ const TRANSLATIONS = {
   },
   ar: { 
     createAccount: 'إنشاء حساب', login: 'تسجيل الدخول', fullName: 'اسمك', phone: 'رقم هاتفك',
-    email: 'بريدك الإلكتروني', password: 'كلمة المرور', confirmPassword: 'تأكيد كلمة المرور',
+    username: 'اسم المستخدم', email: 'بريدك الإلكتروني', password: 'كلمة المرور', confirmPassword: 'تأكيد كلمة المرور',
     forgotPassword: 'هل نسيت كلمة المرور؟', dataProtected: 'بياناتك محمية بشكل موثوق',
     orContinue: 'أو الاستمرار عبر', errFillFields: 'يرجى تعبئة جميع الحقول!', errPassMatch: 'كلمات المرور غير متطابقة!',
     errPhonePass: 'يرجى إدخال رقم الهاتف وكلمة المرور!', errServer: 'حدث خطأ في الخادم',
@@ -44,7 +44,7 @@ const TRANSLATIONS = {
   },
   tr: { 
     createAccount: 'Hesap oluştur', login: 'Giriş', fullName: 'Adınız', phone: 'Telefon numaranız',
-    email: 'E-posta adresiniz', password: 'Şifreniz', confirmPassword: 'Şifreyi onayla',
+    username: 'Kullanıcı adı', email: 'E-posta adresiniz', password: 'Şifreniz', confirmPassword: 'Şifreyi onayla',
     forgotPassword: 'Şifrenizi mi unuttunuz?', dataProtected: 'Verileriniz güvenle korunmaktadır',
     orContinue: 'veya şununla devam et', errFillFields: 'Lütfen tüm alanları doldurun!', errPassMatch: 'Şifreler eşleşmiyor!',
     errPhonePass: 'Lütfen telefon numarasını ve şifreyi girin!', errServer: 'Sunucu hatası oluştu',
@@ -53,7 +53,7 @@ const TRANSLATIONS = {
   },
   zh: { 
     createAccount: '创建帐户', login: '登录', fullName: '你的名字', phone: '你的电话号码',
-    email: '你的电子邮箱', password: '你的密码', confirmPassword: '确认密码',
+    username: '用户名', email: '你的电子邮箱', password: '你的密码', confirmPassword: '确认密码',
     forgotPassword: '忘记密码？', dataProtected: '您的数据受到可靠保护',
     orContinue: '或继续使用', errFillFields: '请填写所有字段！', errPassMatch: '密码不匹配！',
     errPhonePass: '请输入电话号码和密码！', errServer: '发生服务器错误',
@@ -62,7 +62,7 @@ const TRANSLATIONS = {
   },
   ky: { 
     createAccount: 'Аккаунт түзүү', login: 'Кирүү', fullName: 'Атыңыз', phone: 'Телефон номериңиз',
-    email: 'Электрондук почтаңыз', password: 'Сырсөзүңүз', confirmPassword: 'Сырсөздү ырастоо',
+    username: 'Колдонуучунун аты (Username)', email: 'Электрондук почтаңыз', password: 'Сырсөзүңүз', confirmPassword: 'Сырсөздү ырастоо',
     forgotPassword: 'Сырсөздү унуттуңузбу?', dataProtected: 'Сиздин маалыматтар ишенимдүү корголгон',
     orContinue: 'же муну менен улантуу', errFillFields: 'Бардык талааларды толтуруңуз!', errPassMatch: 'Сырсөздөр дал келбейт!',
     errPhonePass: 'Телефон номерин жана сырсөздү киргизиңиз!', errServer: 'Сервер катасы пайда болду',
@@ -71,7 +71,7 @@ const TRANSLATIONS = {
   },
   kk: { 
     createAccount: 'Аккаунт жасау', login: 'Кіру', fullName: 'Атыңыз', phone: 'Телефон нөміріңіз',
-    email: 'Электрондық поштаңыз', password: 'Құпия сөзіңіз', confirmPassword: 'Құпия сөзді растау',
+    username: 'Пайдаланушы аты (Username)', email: 'Электрондық поштаңыз', password: 'Құпия сөзіңіз', confirmPassword: 'Құпия сөзді растау',
     forgotPassword: 'Құпия сөзді ұмыттыңыз ба?', dataProtected: 'Сіздің деректеріңіз сенімді қорғалған',
     orContinue: 'немесе арқылы жалғастыру', errFillFields: 'Барлық өрістерді толтырыңыз!', errPassMatch: 'Құпия сөздер сәйкес келмейді!',
     errPhonePass: 'Телефон нөмірі мен құпия сөзді енгізіңіз!', errServer: 'Сервер қатесі орын алды',
@@ -80,6 +80,31 @@ const TRANSLATIONS = {
   },
   tg: { 
     createAccount: 'Эҷоди ҳисоб', login: 'Вуруд', fullName: 'Номи шумо', phone: 'Рақами телефони шумо',
+    username: 'Номи корбарӣ (Username)', email: 'Почтаи электронии шумо', password: 'Рамзи шумо', confirmPassword: 'Тасдиқи рамз',
+    forgotPassword: 'Рамзро фаромӯш кардед?', dataProtected: 'Маълумоти шумо эътимоднок ҳифз карда мешавад',
+    orContinue: 'ё идома додан бо', errFillFields: 'Лутфан ҳамаи майдонҳоро пур кунед!', errPassMatch: 'Рамзҳо мувофиқат намекунанд!',
+    errPhonePass: 'Лутфан рақами телефон ва рамзро ворид кунед!', errServer: 'Хатои сервер рух дод',
+    errNetwork: 'Пайвастшавӣ ба шабака ноком шуд. Интернетро тафтиш кунед.', errLogin: 'Хатои вуруд', errorTitle: 'Хатогӣ',
+    reqSentTitle: 'Дархост ба администратор фиристода шуд!', reqSentMsg: 'Дархости шумо ба администратор фиристода шуд. Пас аз тасдиқ, логин ва парол ба почтаи электронии шумо фиристода мешавад.'
+  },
+  ja: { 
+    createAccount: 'アカウントを作成', login: 'ログイン', fullName: 'あなたの名前', phone: '電話番号',
+    username: 'ユーザー名 (Username)', email: 'メールアドレス', password: 'パスワード', confirmPassword: 'パスワードの確認',
+    forgotPassword: 'パスワードを忘れた場合', dataProtected: 'データは確実に保護されています',
+    orContinue: 'または次で続ける', errFillFields: 'すべてのフィールドに入力してください！', errPassMatch: 'パスワードが一致しません！',
+    errPhonePass: '電話番号とパスワードを入力してください！', errServer: 'サーバーエラーが発生しました',
+    errNetwork: '接続に失敗しました。インターネットを確認してください。', errLogin: 'ログイン失敗', errorTitle: 'エラー',
+    reqSentTitle: 'リクエストが管理者に送信されました！', reqSentMsg: 'あなたの申請が管理者に送信されました。承認後、ログイン情報がメールに送信されます。'
+  },
+  ko: { 
+    createAccount: '계정 만들기', login: '로그인', fullName: '이름', phone: '전화번호',
+    username: '사용자 이름 (Username)', email: '이메일 주소', password: '비밀번호', confirmPassword: '비밀번호 확인',
+    forgotPassword: '비밀번호를 잊으셨나요?', dataProtected: '데이터는 안전하게 보호됩니다',
+    orContinue: '또는 다음으로 계속', errFillFields: '모든 필드를 입력해주세요!', errPassMatch: '비밀번호가 일치하지 않습니다!',
+    errPhonePass: '전화번호와 비밀번호를 입력해주세요!', errServer: '서버 오류가 발생했습니다',
+    errNetwork: '네트워크 연결 실패. 인터넷을 확인하세요.', errLogin: '로그인 실패', errorTitle: '오류',
+    reqSentTitle: '관리자에게 요청이 전송되었습니다!', reqSentMsg: '신청서가 관리자에게 전송되었습니다. 승인되면 로그인 자격 증명이 이메일로 전송됩니다.'
+  }', phone: 'Рақами телефони шумо',
     email: 'Почтаи электронии шумо', password: 'Рамзи шумо', confirmPassword: 'Тасдиқи рамз',
     forgotPassword: 'Рамзро фаромӯш кардед?', dataProtected: 'Маълумоти шумо эътимоднок ҳифз карда мешавад',
     orContinue: 'ё идома додан бо', errFillFields: 'Лутфан ҳамаи майдонҳоро пур кунед!', errPassMatch: 'Рамзҳо мувофиқат намекунанд!',
@@ -380,7 +405,7 @@ export default function AuthScreen({ navigation, route }) {
               {role === 'teacher' ? (
                 <CustomAnimatedInput
                   icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
-                  placeholder="Username"
+                  placeholder={t.username || "Username"}
                   placeholderTextColor="#555566"
                   value={usernameInput}
                   onChangeText={setUsernameInput}
