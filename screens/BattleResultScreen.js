@@ -249,25 +249,29 @@ export default function BattleResultScreen({ navigation, route }) {
           console.log('Error saving game stats:', err);
         }
 
-            // Save to user activity history (last 3 entries)
-            AsyncStorage.getItem('user_activity_history').then(histVal => {
-              let history = histVal ? JSON.parse(histVal) : [];
-              const now = new Date();
-              const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-              
-              const newEntry = {
-                id: Date.now(),
-                title: "1v1 Boshma-bosh o'yin",
-                time: `${t.actToday || 'Bugun'}, ${timeStr}`,
-                xpGained: isWin ? 25 : 0
-              };
+        // 3. Save to user activity history (last 3 entries)
+        try {
+          const histVal = await AsyncStorage.getItem('user_activity_history');
+          let history = histVal ? JSON.parse(histVal) : [];
+          const now = new Date();
+          const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+          
+          const newEntry = {
+            id: Date.now(),
+            title: "1v1 Boshma-bosh o'yin",
+            time: `${t.actToday || 'Bugun'}, ${timeStr}`,
+            xpGained: isWin ? 25 : 0
+          };
 
-              history = [newEntry, ...history].slice(0, 3);
-              AsyncStorage.setItem('user_activity_history', JSON.stringify(history)).catch(e => console.log(e));
-              AsyncStorage.setItem(`user_activity_history_${userIdKey}`, JSON.stringify(history)).catch(e => console.log(e));
-            }).catch(e => console.log(e));
-          }).catch(e => console.log(e));
-      } catch (e) {}
+          history = [newEntry, ...history].slice(0, 3);
+          await AsyncStorage.setItem('user_activity_history', JSON.stringify(history));
+          await AsyncStorage.setItem(`user_activity_history_${userIdKey}`, JSON.stringify(history));
+        } catch (err) {
+          console.log('Error saving activity history:', err);
+        }
+      } catch (e) {
+        console.log('Error in fetchUserAndSaveXP:', e);
+      }
     }
     fetchUserAndSaveXP();
 
