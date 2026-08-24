@@ -3902,6 +3902,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </TouchableOpacity>
               )}
             </View>
+          </View>
+        </View>
+      </Modal>
       {/* REFERRAL & CASHBACK MODAL */}
       <Modal visible={isReferralModalOpen} transparent animationType="slide">
         <View style={styles.modalOverlay}>
