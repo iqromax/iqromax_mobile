@@ -477,7 +477,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           }
         }).catch(e => console.log(e));
       });
-    }, [user?.customId, user?.id])
+    }, [user?.customId, user?.id, route.params])
   );
 
   useEffect(() => {

@@ -458,7 +458,7 @@ export default function BattleResultScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-          <TouchableOpacity style={styles.homeBtn} onPress={() => navigation.navigate('StudentDashboard', { initialTab: 'exercise', initialExerciseType: 'battle', language })}>
+          <TouchableOpacity style={styles.homeBtn} onPress={() => navigation.navigate('StudentDashboard', { initialTab: 'exercise', initialExerciseType: 'battle', language, updatedTimestamp: Date.now() })}>
             <MaterialCommunityIcons name="home" size={20} color="#fff" />
             <Text style={styles.homeBtnText}>{t.home}</Text>
           </TouchableOpacity>
