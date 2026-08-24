@@ -151,9 +151,10 @@ export default function BattleResultScreen({ navigation, route }) {
   useEffect(() => {
     async function fetchUserAndSaveXP() {
       try {
+        let uData = null;
         const data = await AsyncStorage.getItem('user_data');
         if (data) {
-          const uData = JSON.parse(data);
+          uData = JSON.parse(data);
           setUserData(uData);
 
           if (isWin) {
@@ -180,64 +181,73 @@ export default function BattleResultScreen({ navigation, route }) {
         const accuracyPercent = total > 0 ? Math.round((correct / total) * 100) : 100;
         const currentSpeed = parseFloat(avgTime) || 1.8;
         const logicScore = Math.min(100, Math.round(accuracyPercent * (isWin ? 1.2 : 0.9)));
-
         const userIdKey = uData?.customId || uData?.id || 'guest';
 
-        AsyncStorage.getItem('user_game_stats').then(existing => {
-            let updatedStats;
-            if (!existing) {
-              updatedStats = {
-                logic: logicScore,
-                speedTime: currentSpeed.toFixed(1),
-                accuracy: accuracyPercent,
-                gamesCount: 1
-              };
-            } else {
-              const stats = JSON.parse(existing);
-              const prevGames = stats.gamesCount || 1;
-              const newGames = prevGames + 1;
+        // 1. Save Battle Best Results (Victories, Streak, Fastest Time)
+        try {
+          const battleVal = await AsyncStorage.getItem(`user_battle_stats_${userIdKey}`);
+          const globalBattleVal = await AsyncStorage.getItem('user_battle_stats');
+          const rawVal = battleVal || globalBattleVal;
 
-              const newLogic = Math.round(((stats.logic || 0) * prevGames + logicScore) / newGames);
-              const newAccuracy = Math.round(((stats.accuracy || 0) * prevGames + accuracyPercent) / newGames);
+          let battleStats = rawVal ? JSON.parse(rawVal) : { victories: 0, currentStreak: 0, bestStreak: 0, fastestTime: '0.0' };
+          
+          const newVictories = isWin ? (battleStats.victories || 0) + 1 : (battleStats.victories || 0);
+          const newCurrentStreak = isWin ? (battleStats.currentStreak || 0) + 1 : 0;
+          const newBestStreak = Math.max(battleStats.bestStreak || 0, newCurrentStreak);
+          
+          let newFastest = battleStats.fastestTime && battleStats.fastestTime !== '0.0' ? parseFloat(battleStats.fastestTime) : 0;
+          if (currentSpeed > 0) {
+            newFastest = newFastest > 0 ? Math.min(newFastest, currentSpeed) : currentSpeed;
+          }
+          const fastestStr = newFastest > 0 ? newFastest.toFixed(1) : '0.0';
 
-              const prevSpeed = parseFloat(stats.speedTime || '0.0');
-              const newSpeed = prevSpeed > 0 ? (((prevSpeed * prevGames) + currentSpeed) / newGames).toFixed(1) : currentSpeed.toFixed(1);
+          const updatedBattleStats = {
+            victories: newVictories,
+            currentStreak: newCurrentStreak,
+            bestStreak: newBestStreak,
+            fastestTime: fastestStr
+          };
 
-              updatedStats = {
-                logic: Math.min(100, newLogic),
-                speedTime: newSpeed,
-                accuracy: Math.min(100, newAccuracy),
-                gamesCount: newGames
-              };
-            }
-            const userIdKey = uData?.customId || uData?.id || 'guest';
-            AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
-            AsyncStorage.setItem(`user_game_stats_${userIdKey}`, JSON.stringify(updatedStats)).catch(e => console.log(e));
+          await AsyncStorage.setItem('user_battle_stats', JSON.stringify(updatedBattleStats));
+          await AsyncStorage.setItem(`user_battle_stats_${userIdKey}`, JSON.stringify(updatedBattleStats));
+        } catch (err) {
+          console.log('Error saving battle best results:', err);
+        }
 
-            // Save Battle Best Results (Victories, Streak, Fastest Time)
-            AsyncStorage.getItem(`user_battle_stats_${userIdKey}`).then(battleVal => {
-              let battleStats = battleVal ? JSON.parse(battleVal) : { victories: 0, currentStreak: 0, bestStreak: 0, fastestTime: '0.0' };
-              
-              const newVictories = isWin ? battleStats.victories + 1 : battleStats.victories;
-              const newCurrentStreak = isWin ? (battleStats.currentStreak || 0) + 1 : 0;
-              const newBestStreak = Math.max(battleStats.bestStreak || 0, newCurrentStreak);
-              
-              let newFastest = battleStats.fastestTime && battleStats.fastestTime !== '0.0' ? parseFloat(battleStats.fastestTime) : 0;
-              if (currentSpeed > 0) {
-                newFastest = newFastest > 0 ? Math.min(newFastest, currentSpeed) : currentSpeed;
-              }
-              const fastestStr = newFastest > 0 ? newFastest.toFixed(1) : '0.0';
+        // 2. Save General Game Stats (Logic, Speed, Accuracy)
+        try {
+          const existing = await AsyncStorage.getItem('user_game_stats');
+          let updatedStats;
+          if (!existing) {
+            updatedStats = {
+              logic: logicScore,
+              speedTime: currentSpeed.toFixed(1),
+              accuracy: accuracyPercent,
+              gamesCount: 1
+            };
+          } else {
+            const stats = JSON.parse(existing);
+            const prevGames = stats.gamesCount || 1;
+            const newGames = prevGames + 1;
 
-              const updatedBattleStats = {
-                victories: newVictories,
-                currentStreak: newCurrentStreak,
-                bestStreak: newBestStreak,
-                fastestTime: fastestStr
-              };
+            const newLogic = Math.round(((stats.logic || 0) * prevGames + logicScore) / newGames);
+            const newAccuracy = Math.round(((stats.accuracy || 0) * prevGames + accuracyPercent) / newGames);
 
-              AsyncStorage.setItem(`user_battle_stats_${userIdKey}`, JSON.stringify(updatedBattleStats)).catch(e => console.log(e));
-              AsyncStorage.setItem('user_battle_stats', JSON.stringify(updatedBattleStats)).catch(e => console.log(e));
-            }).catch(e => console.log(e));
+            const prevSpeed = parseFloat(stats.speedTime || '0.0');
+            const newSpeed = prevSpeed > 0 ? (((prevSpeed * prevGames) + currentSpeed) / newGames).toFixed(1) : currentSpeed.toFixed(1);
+
+            updatedStats = {
+              logic: Math.min(100, newLogic),
+              speedTime: newSpeed,
+              accuracy: Math.min(100, newAccuracy),
+              gamesCount: newGames
+            };
+          }
+          await AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats));
+          await AsyncStorage.setItem(`user_game_stats_${userIdKey}`, JSON.stringify(updatedStats));
+        } catch (err) {
+          console.log('Error saving game stats:', err);
+        }
 
             // Save to user activity history (last 3 entries)
             AsyncStorage.getItem('user_activity_history').then(histVal => {
