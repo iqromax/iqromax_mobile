@@ -1777,7 +1777,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
         </View>
 
-        <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 220 : 280, paddingBottom: 170, paddingHorizontal: 20 }}>
+        <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 260 : 280, paddingBottom: 170, paddingHorizontal: 20 }}>
         
         {activeExerciseType === 'abacus' && (
           <View style={{ marginTop: 10 }}>
@@ -5211,7 +5211,7 @@ const styles = StyleSheet.create({
   // BATTLE SECTION STYLES
   battleCardContainer: {
     width: '100%',
-    aspectRatio: 1.85, // Fixed aspect ratio to prevent squashing (taller)
+    aspectRatio: Platform.OS === 'android' ? 2.02 : 1.85,
     borderRadius: 16,
     overflow: 'hidden',
   },
@@ -5225,56 +5225,56 @@ const styles = StyleSheet.create({
   },
   battleLeftPlayer: {
     position: 'absolute',
-    top: '25%', // Reverted back
+    top: Platform.OS === 'android' ? '15%' : '25%',
     left: '24%',
     alignItems: 'flex-start',
   },
   battleRightPlayer: {
     position: 'absolute',
-    top: '25%', // Reverted back
+    top: Platform.OS === 'android' ? '15%' : '25%',
     left: '60%',
     alignItems: 'flex-start',
   },
   battlePlayerLabelYou: {
     color: '#38BDF8', // Light Blue
-    fontSize: 14,
+    fontSize: Platform.OS === 'android' ? 13 : 14,
     fontFamily: 'Inter_700Bold',
     textTransform: 'uppercase',
-    marginBottom: 2,
+    marginBottom: Platform.OS === 'android' ? 0 : 2,
   },
   battlePlayerLabelOpp: {
     color: '#EF4444', // Red
-    fontSize: 14,
+    fontSize: Platform.OS === 'android' ? 13 : 14,
     fontFamily: 'Inter_700Bold',
-    marginBottom: 2,
+    marginBottom: Platform.OS === 'android' ? 0 : 2,
   },
   battlePlayerNameYou: {
     color: '#FFF',
-    fontSize: 10,
+    fontSize: Platform.OS === 'android' ? 9 : 10,
     fontFamily: 'Inter_600SemiBold',
-    marginBottom: 4,
+    marginBottom: Platform.OS === 'android' ? 2 : 4,
     maxWidth: 90,
   },
   battlePlayerNameOpp: {
     color: '#FFF',
-    fontSize: 10,
+    fontSize: Platform.OS === 'android' ? 9 : 10,
     fontFamily: 'Inter_600SemiBold',
-    marginBottom: 4,
+    marginBottom: Platform.OS === 'android' ? 2 : 4,
     maxWidth: 90,
   },
   battleLevelBadgeYou: {
     backgroundColor: '#1E1B4B',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: Platform.OS === 'android' ? 6 : 8,
+    paddingVertical: Platform.OS === 'android' ? 2 : 4,
     borderRadius: 6,
-    marginBottom: 6,
+    marginBottom: Platform.OS === 'android' ? 3 : 6,
   },
   battleLevelBadgeOpp: {
     backgroundColor: '#1E1B4B',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: Platform.OS === 'android' ? 6 : 8,
+    paddingVertical: Platform.OS === 'android' ? 2 : 4,
     borderRadius: 6,
-    marginBottom: 6,
+    marginBottom: Platform.OS === 'android' ? 3 : 6,
   },
   battleLevelTextYou: {
     color: '#D8B4FE',
