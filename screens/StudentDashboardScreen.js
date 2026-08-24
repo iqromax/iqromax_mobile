@@ -405,11 +405,22 @@ export default function StudentDashboardScreen({ navigation, route }) {
     return true;
   };
   
-  // Dynamic real game stats state for right panel (Mantiq, Tezlik, Aniqlik)
-  // For new users (XP == 0 or no saved stats), default values start at 0%, 0.0s, 0%
   const [realStats, setRealStats] = useState({ logic: 0, speedTime: '0.0', accuracy: 0 });
   const [battleBestStats, setBattleBestStats] = useState({ victories: 0, bestStreak: 0, fastestTime: '0.0' });
   const [activityHistory, setActivityHistory] = useState([]);
+
+  // Referral, Cashback & Mystery Box Modals
+  const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
+  const [isMysteryBoxModalOpen, setIsMysteryBoxModalOpen] = useState(false);
+  const [myPromoCode, setMyPromoCode] = useState(user?.customId ? `IQ-${user.customId}` : 'IQROMAX2026');
+  const [promoChangeCount, setPromoChangeCount] = useState(0);
+  const [newPromoInput, setNewPromoInput] = useState('');
+  const [isEditingPromo, setIsEditingPromo] = useState(false);
+  const [mysteryKeysCount, setMysteryKeysCount] = useState(1); // 1 free box for new user
+  const [potentialCashback, setPotentialCashback] = useState(0);
+  const [realCashback, setRealCashback] = useState(0);
+  const [isOpeningBox, setIsOpeningBox] = useState(false);
+  const [boxReward, setBoxReward] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -3140,6 +3151,63 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </ImageBackground>
             </View>
 
+            {/* REFERRAL CASHBACK & MYSTERY BOX ACTION CARDS */}
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
+              {/* Mystery Box Card */}
+              <TouchableOpacity 
+                style={{
+                  flex: 1,
+                  backgroundColor: '#1E1B4B',
+                  borderRadius: 18,
+                  padding: 14,
+                  borderWidth: 1.5,
+                  borderColor: '#A855F7',
+                  shadowColor: '#A855F7',
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 6,
+                  alignItems: 'center'
+                }}
+                activeOpacity={0.8}
+                onPress={() => setIsMysteryBoxModalOpen(true)}
+              >
+                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(168, 85, 247, 0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#A855F7' }}>
+                  <MaterialCommunityIcons name="treasure-chest" size={26} color="#F59E0B" />
+                </View>
+                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>SIRLI SANDIQ</Text>
+                <View style={{ backgroundColor: '#A855F7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, marginTop: 6 }}>
+                  <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{mysteryKeysCount} ta sandiq</Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* Promo Code & Cashback Card */}
+              <TouchableOpacity 
+                style={{
+                  flex: 1,
+                  backgroundColor: '#0F172A',
+                  borderRadius: 18,
+                  padding: 14,
+                  borderWidth: 1.5,
+                  borderColor: '#38BDF8',
+                  shadowColor: '#38BDF8',
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 6,
+                  alignItems: 'center'
+                }}
+                activeOpacity={0.8}
+                onPress={() => setIsReferralModalOpen(true)}
+              >
+                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(56, 189, 248, 0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#38BDF8' }}>
+                  <MaterialCommunityIcons name="ticket-percent" size={26} color="#38BDF8" />
+                </View>
+                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>PROMOKOD & KESHBEK</Text>
+                <View style={{ backgroundColor: 'rgba(56, 189, 248, 0.2)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, marginTop: 6 }}>
+                  <Text style={{ color: '#38BDF8', fontSize: 10, fontFamily: 'Inter_700Bold' }}>25% Keshbek</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
             {/* Stats Grid - Connected to Real User Data */}
             <View style={styles.proSectionHeader}>
               <Text style={styles.proSectionTitle}>{t.stats}</Text>
@@ -3834,6 +3902,201 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </TouchableOpacity>
               )}
             </View>
+      {/* REFERRAL & CASHBACK MODAL */}
+      <Modal visible={isReferralModalOpen} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: '#0B0F19', borderWidth: 1.5, borderColor: '#38BDF8', padding: 22, borderRadius: 24, maxHeight: '85%' }]}>
+            
+            {/* Header */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <MaterialCommunityIcons name="ticket-percent" size={24} color="#38BDF8" />
+                <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>PROMOKOD & KESHBEK</Text>
+              </View>
+              <TouchableOpacity onPress={() => setIsReferralModalOpen(false)}>
+                <MaterialCommunityIcons name="close-circle" size={26} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
+              {/* Promo Code Box */}
+              <View style={{ backgroundColor: '#1E293B', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(56, 189, 248, 0.3)' }}>
+                <Text style={{ color: '#94A3B8', fontSize: 11, fontFamily: 'Inter_600SemiBold', textTransform: 'uppercase', marginBottom: 6 }}>Sizning Shaxsiy Promokodingiz</Text>
+                
+                {isEditingPromo ? (
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TextInput 
+                      style={{ flex: 1, backgroundColor: '#0F172A', color: '#38BDF8', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8, fontFamily: 'Inter_700Bold', borderWidth: 1, borderColor: '#38BDF8' }}
+                      value={newPromoInput}
+                      onChangeText={setNewPromoInput}
+                      placeholder="Yangi promokod"
+                      placeholderTextColor="#64748B"
+                      autoCapitalize="characters"
+                    />
+                    <TouchableOpacity 
+                      style={{ backgroundColor: '#38BDF8', paddingHorizontal: 16, borderRadius: 10, justifyContent: 'center' }}
+                      onPress={() => {
+                        if (!newPromoInput.trim()) return;
+                        if (promoChangeCount > 0) {
+                          showCustomAlert('Pullik xizmat', 'Promokodni qayta o\'zgartirish 500 coin yoki $0.99 turadi', 'warning');
+                        }
+                        setMyPromoCode(newPromoInput.trim().toUpperCase());
+                        setPromoChangeCount(prev => prev + 1);
+                        setIsEditingPromo(false);
+                        showCustomAlert('Muvaffaqiyatli', 'Promokod yangilandi!', 'success');
+                      }}
+                    >
+                      <Text style={{ color: '#0F172A', fontFamily: 'Inter_700Bold' }}>Saqlash</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ color: '#38BDF8', fontSize: 20, fontFamily: 'Inter_800ExtraBold', letterSpacing: 1 }}>{myPromoCode}</Text>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      <TouchableOpacity 
+                        style={{ backgroundColor: 'rgba(56, 189, 248, 0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }}
+                        onPress={() => {
+                          import('react-native').then(({ Clipboard }) => {
+                            Clipboard.setString(myPromoCode);
+                            showCustomAlert('Nusxalandi!', 'Promokod nusxalandi', 'success');
+                          });
+                        }}
+                      >
+                        <Text style={{ color: '#38BDF8', fontSize: 12, fontFamily: 'Inter_700Bold' }}>Nusxalash</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }}
+                        onPress={() => {
+                          setNewPromoInput(myPromoCode);
+                          setIsEditingPromo(true);
+                        }}
+                      >
+                        <MaterialCommunityIcons name="pencil" size={16} color="#94A3B8" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+                
+                <Text style={{ color: '#64748B', fontSize: 10, marginTop: 8, fontFamily: 'Inter_400Regular' }}>
+                  * Birinchi tahrirlash bepul, keyingi o'zgartirishlar pullik bo'ladi.
+                </Text>
+              </View>
+
+              {/* Cashback Stats Grid */}
+              <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold', marginTop: 4 }}>KESHBEK HAMYONI (25%)</Text>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                {/* 1. Potential Cashback */}
+                <View style={{ flex: 1, backgroundColor: '#131C2E', padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#1E293B' }}>
+                  <MaterialCommunityIcons name="clock-outline" size={20} color="#F59E0B" />
+                  <Text style={{ color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 6 }}>Ehtimoliy Keshbek</Text>
+                  <Text style={{ color: '#F59E0B', fontSize: 16, fontFamily: 'Inter_800ExtraBold', marginTop: 2 }}>{potentialCashback} XP</Text>
+                  <Text style={{ color: '#64748B', fontSize: 8, marginTop: 4, lineHeight: 11 }}>Taklif etilgan do'stlaringiz balansidan 25% qismi.</Text>
+                </View>
+
+                {/* 2. Real Cashback */}
+                <View style={{ flex: 1, backgroundColor: '#131C2E', padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#10B981' }}>
+                  <MaterialCommunityIcons name="cash-multiple" size={20} color="#10B981" />
+                  <Text style={{ color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 6 }}>Haqiqiy Keshbek</Text>
+                  <Text style={{ color: '#10B981', fontSize: 16, fontFamily: 'Inter_800ExtraBold', marginTop: 2 }}>{realCashback} XP</Text>
+                  <Text style={{ color: '#64748B', fontSize: 8, marginTop: 4, lineHeight: 11 }}>Yechib olish yoki harid qilish uchun tayyor.</Text>
+                </View>
+              </View>
+
+              {/* Share Referral Link Button */}
+              <TouchableOpacity 
+                style={{ backgroundColor: '#38BDF8', paddingVertical: 14, borderRadius: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 6 }}
+                activeOpacity={0.8}
+                onPress={() => {
+                  import('react-native').then(({ Share }) => {
+                    Share.share({
+                      message: `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling! Mening promokodim: ${myPromoCode}`
+                    });
+                  });
+                }}
+              >
+                <MaterialCommunityIcons name="share-variant" size={20} color="#0F172A" />
+                <Text style={{ color: '#0F172A', fontFamily: 'Inter_700Bold', fontSize: 15 }}>DO'STLARNI TAKLIF QILISH</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* MYSTERY BOX MODAL */}
+      <Modal visible={isMysteryBoxModalOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: '#0D091B', borderWidth: 1.5, borderColor: '#A855F7', padding: 24, borderRadius: 26, alignItems: 'center' }]}>
+            
+            <TouchableOpacity 
+              style={{ position: 'absolute', top: 16, right: 16 }}
+              onPress={() => {
+                setIsMysteryBoxModalOpen(false);
+                setBoxReward(null);
+              }}
+            >
+              <MaterialCommunityIcons name="close-circle" size={26} color="#9CA3AF" />
+            </TouchableOpacity>
+
+            <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_800ExtraBold', textAlign: 'center', marginBottom: 4 }}>
+              SIRLI SANDIQ 🎁
+            </Text>
+            <Text style={{ color: '#C084FC', fontSize: 12, textAlign: 'center', fontFamily: 'Inter_600SemiBold', marginBottom: 20 }}>
+              {mysteryKeysCount > 0 ? `Sizda ${mysteryKeysCount} ta sandiq bor!` : "Imkoniyatlar tugadi. Do'stlaringizni taklif qiling!"}
+            </Text>
+
+            {/* Glowing Box Image / Animation */}
+            <View style={{ width: 140, height: 140, justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
+              <Image 
+                source={require('../assets/level_chest.png')} 
+                style={{ width: 130, height: 130 }} 
+                contentFit="contain" 
+              />
+            </View>
+
+            {boxReward ? (
+              <View style={{ backgroundColor: 'rgba(168, 85, 247, 0.15)', borderWidth: 1, borderColor: '#A855F7', borderRadius: 16, padding: 16, alignItems: 'center', width: '100%', marginBottom: 20 }}>
+                <Text style={{ color: '#F59E0B', fontSize: 12, fontFamily: 'Inter_700Bold', textTransform: 'uppercase', marginBottom: 4 }}>TABRIKLAYMIZ! 🎉</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_800ExtraBold', textAlign: 'center' }}>{boxReward}</Text>
+              </View>
+            ) : null}
+
+            {/* Action Button */}
+            <TouchableOpacity 
+              style={{
+                width: '100%',
+                paddingVertical: 14,
+                borderRadius: 14,
+                backgroundColor: mysteryKeysCount > 0 ? '#A855F7' : '#374151',
+                alignItems: 'center',
+                shadowColor: '#A855F7',
+                shadowOpacity: 0.5,
+                shadowRadius: 10
+              }}
+              disabled={mysteryKeysCount <= 0 || isOpeningBox}
+              activeOpacity={0.8}
+              onPress={() => {
+                setIsOpeningBox(true);
+                setTimeout(() => {
+                  const rewards = [
+                    '3 kunlik BEPUL Premium Status! 👑',
+                    '+250 Oltin Coinlar! 🪙',
+                    '20% Maxsus Chegirma Kuponi! 🏷️',
+                    '+500 Oltin Coinlar! 🪙',
+                    '1 kunlik BEPUL Premium! ⚡',
+                    'Nodir Personaj Skini! 🎭'
+                  ];
+                  const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+                  setBoxReward(randomReward);
+                  setMysteryKeysCount(prev => Math.max(0, prev - 1));
+                  setIsOpeningBox(false);
+                }, 800);
+              }}
+            >
+              <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 16 }}>
+                {isOpeningBox ? "OCHILMOQDA..." : mysteryKeysCount > 0 ? "SANDIQNI OCHISH ✨" : "KALITLAR TUGADI"}
+              </Text>
+            </TouchableOpacity>
+
           </View>
         </View>
       </Modal>
