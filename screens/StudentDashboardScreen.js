@@ -424,18 +424,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               accuracy: parsed.accuracy !== undefined ? parsed.accuracy : 0
             });
           } else {
-            AsyncStorage.getItem('user_game_stats').then(globalVal => {
-              if (globalVal) {
-                const parsed = JSON.parse(globalVal);
-                setRealStats({
-                  logic: parsed.logic !== undefined ? parsed.logic : 0,
-                  speedTime: parsed.speedTime !== undefined ? parsed.speedTime : '0.0',
-                  accuracy: parsed.accuracy !== undefined ? parsed.accuracy : 0
-                });
-              } else {
-                setRealStats({ logic: 0, speedTime: '0.0', accuracy: 0 });
-              }
-            }).catch(e => console.log(e));
+            setRealStats({ logic: 0, speedTime: '0.0', accuracy: 0 });
           }
         }).catch(e => console.log(e));
 
@@ -448,18 +437,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               fastestTime: parsed.fastestTime || '0.0'
             });
           } else {
-            AsyncStorage.getItem('user_battle_stats').then(gBVal => {
-              if (gBVal) {
-                const parsed = JSON.parse(gBVal);
-                setBattleBestStats({
-                  victories: parsed.victories || 0,
-                  bestStreak: parsed.bestStreak || 0,
-                  fastestTime: parsed.fastestTime || '0.0'
-                });
-              } else {
-                setBattleBestStats({ victories: 0, bestStreak: 0, fastestTime: '0.0' });
-              }
-            }).catch(e => console.log(e));
+            setBattleBestStats({ victories: 0, bestStreak: 0, fastestTime: '0.0' });
           }
         }).catch(e => console.log(e));
 
