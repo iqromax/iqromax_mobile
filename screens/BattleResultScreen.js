@@ -176,13 +176,14 @@ export default function BattleResultScreen({ navigation, route }) {
         }
 
         // Save real game stats for Battle mode (Mantiq, Tezlik, Aniqlik)
-        const total = correct + incorrect;
-        if (total > 0) {
-          const accuracyPercent = Math.round((correct / total) * 100);
-          const currentSpeed = parseFloat(avgTime) || 1.8;
-          const logicScore = Math.min(100, Math.round(accuracyPercent * (isWin ? 1.2 : 0.9)));
+        const total = (correct || 0) + (incorrect || 0);
+        const accuracyPercent = total > 0 ? Math.round((correct / total) * 100) : 100;
+        const currentSpeed = parseFloat(avgTime) || 1.8;
+        const logicScore = Math.min(100, Math.round(accuracyPercent * (isWin ? 1.2 : 0.9)));
 
-          AsyncStorage.getItem('user_game_stats').then(existing => {
+        const userIdKey = uData?.customId || uData?.id || 'guest';
+
+        AsyncStorage.getItem('user_game_stats').then(existing => {
             let updatedStats;
             if (!existing) {
               updatedStats = {
@@ -256,7 +257,6 @@ export default function BattleResultScreen({ navigation, route }) {
               AsyncStorage.setItem(`user_activity_history_${userIdKey}`, JSON.stringify(history)).catch(e => console.log(e));
             }).catch(e => console.log(e));
           }).catch(e => console.log(e));
-        }
       } catch (e) {}
     }
     fetchUserAndSaveXP();
