@@ -60,6 +60,9 @@ const TopBead = ({ onValueChange, resetFlag }) => {
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderRelease: (_, gesture) => {
         const swipedDown = gesture.dy > 10;
         const swipedUp = gesture.dy < -10;
@@ -129,6 +132,9 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
   const responders = useRef([0, 1, 2, 3].map(index => 
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
       onPanResponderRelease: (_, gesture) => {
         const swipedUp = gesture.dy < -10;
         const swipedDown = gesture.dy > 10;
