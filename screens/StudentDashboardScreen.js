@@ -4467,47 +4467,10 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
   },
   navBarContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: '#050512',
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    zIndex: 100,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderLeftWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-  },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 16,
-    minWidth: '18%',
-  },
-  navItemActive: {
-    backgroundColor: 'rgba(168, 85, 247, 0.15)',
-  },
-  navText: {
-    color: '#9CA3AF',
-    fontSize: 8,
-    fontFamily: 'Inter_600SemiBold',
-    marginTop: 4,
-    textTransform: 'uppercase',
-  },
-  navTextActive: {
-    color: '#A855F7',
-  },
-
-  // BATTLE SECTION STYLES
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    padd  // BATTLE SECTION STYLES
   battleCardContainer: {
     width: '100%',
     aspectRatio: 2.10, // Adjusted ratio so background and content scale identically on Android
@@ -4638,9 +4601,7 @@ const styles = StyleSheet.create({
     fontSize: 7.5,
     fontFamily: 'Inter_500Medium',
     marginTop: -2,
-  },
-  exTitle: {
-    color: '#FFF',
+  },   color: '#FFF',
     fontSize: 20,
     fontFamily: 'Inter_700Bold',
   },
