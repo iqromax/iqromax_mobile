@@ -3017,7 +3017,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 style={styles.floatingMyProfileBtn}
                 onPress={() => {
                   if (!user?.customId) {
-                    Alert.alert('Ogohlantirish', 'Foydalanuvchi ma\'lumotlari topilmadi!');
+                    showCustomAlert('Ogohlantirish', 'Foydalanuvchi ma\'lumotlari topilmadi!', 'warning');
                     return;
                   }
                   const userIndex = filteredLeaderboard.findIndex(item => item.customId === user.customId);
@@ -3042,7 +3042,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       setHighlightedUserId(null);
                     }, 3000);
                   } else {
-                    Alert.alert('Ogohlantirish', 'Siz reyting jadvalidan topilmadingiz yoki qidiruv natijasiga mos kelmadingiz!');
+                    showCustomAlert('Ogohlantirish', 'Siz reyting jadvalidan topilmadingiz yoki qidiruv natijasiga mos kelmadingiz!', 'warning');
                   }
                 }}
                 activeOpacity={0.8}
