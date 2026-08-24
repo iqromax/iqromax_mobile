@@ -408,6 +408,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   // Dynamic real game stats state for right panel (Mantiq, Tezlik, Aniqlik)
   // For new users (XP == 0 or no saved stats), default values start at 0%, 0.0s, 0%
   const [realStats, setRealStats] = useState({ logic: 0, speedTime: '0.0', accuracy: 0 });
+  const [battleBestStats, setBattleBestStats] = useState({ victories: 0, bestStreak: 0, fastestTime: '0.0' });
   const [activityHistory, setActivityHistory] = useState([]);
 
   useFocusEffect(
@@ -433,6 +434,30 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 });
               } else {
                 setRealStats({ logic: 0, speedTime: '0.0', accuracy: 0 });
+              }
+            }).catch(e => console.log(e));
+          }
+        }).catch(e => console.log(e));
+
+        AsyncStorage.getItem(`user_battle_stats_${userIdKey}`).then(bVal => {
+          if (bVal) {
+            const parsed = JSON.parse(bVal);
+            setBattleBestStats({
+              victories: parsed.victories || 0,
+              bestStreak: parsed.bestStreak || 0,
+              fastestTime: parsed.fastestTime || '0.0'
+            });
+          } else {
+            AsyncStorage.getItem('user_battle_stats').then(gBVal => {
+              if (gBVal) {
+                const parsed = JSON.parse(gBVal);
+                setBattleBestStats({
+                  victories: parsed.victories || 0,
+                  bestStreak: parsed.bestStreak || 0,
+                  fastestTime: parsed.fastestTime || '0.0'
+                });
+              } else {
+                setBattleBestStats({ victories: 0, bestStreak: 0, fastestTime: '0.0' });
               }
             }).catch(e => console.log(e));
           }
@@ -2413,7 +2438,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.bestResultItem}>
                   <Image source={require('../assets/best_victories.png')} style={styles.bestResultIcon} contentFit="contain" />
                   <Text style={styles.bestResultLabel}>{t.bestVictories || "G'alabalar"}</Text>
-                  <Text style={styles.bestResultValue}>12</Text>
+                  <Text style={styles.bestResultValue}>{battleBestStats.victories}</Text>
                 </View>
 
                 {/* Vertical Divider */}
@@ -2423,7 +2448,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.bestResultItem}>
                   <Image source={require('../assets/best_streak.png')} style={styles.bestResultIcon} contentFit="contain" />
                   <Text style={styles.bestResultLabel}>{t.bestStreak || "G'alaba seriyasi"}</Text>
-                  <Text style={styles.bestResultValue}>5</Text>
+                  <Text style={styles.bestResultValue}>{battleBestStats.bestStreak}</Text>
                 </View>
 
                 {/* Vertical Divider */}
@@ -2433,7 +2458,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={styles.bestResultItem}>
                   <Image source={require('../assets/best_time.png')} style={styles.bestResultIcon} contentFit="contain" />
                   <Text style={styles.bestResultLabel}>{t.bestTime || "Eng tez vaqt"}</Text>
-                  <Text style={styles.bestResultValue}>18.4s</Text>
+                  <Text style={styles.bestResultValue}>{battleBestStats.fastestTime}s</Text>
                 </View>
               </View>
             </View>

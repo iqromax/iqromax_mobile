@@ -213,6 +213,31 @@ export default function BattleResultScreen({ navigation, route }) {
             AsyncStorage.setItem('user_game_stats', JSON.stringify(updatedStats)).catch(e => console.log(e));
             AsyncStorage.setItem(`user_game_stats_${userIdKey}`, JSON.stringify(updatedStats)).catch(e => console.log(e));
 
+            // Save Battle Best Results (Victories, Streak, Fastest Time)
+            AsyncStorage.getItem(`user_battle_stats_${userIdKey}`).then(battleVal => {
+              let battleStats = battleVal ? JSON.parse(battleVal) : { victories: 0, currentStreak: 0, bestStreak: 0, fastestTime: '0.0' };
+              
+              const newVictories = isWin ? battleStats.victories + 1 : battleStats.victories;
+              const newCurrentStreak = isWin ? (battleStats.currentStreak || 0) + 1 : 0;
+              const newBestStreak = Math.max(battleStats.bestStreak || 0, newCurrentStreak);
+              
+              let newFastest = battleStats.fastestTime && battleStats.fastestTime !== '0.0' ? parseFloat(battleStats.fastestTime) : 0;
+              if (currentSpeed > 0) {
+                newFastest = newFastest > 0 ? Math.min(newFastest, currentSpeed) : currentSpeed;
+              }
+              const fastestStr = newFastest > 0 ? newFastest.toFixed(1) : '0.0';
+
+              const updatedBattleStats = {
+                victories: newVictories,
+                currentStreak: newCurrentStreak,
+                bestStreak: newBestStreak,
+                fastestTime: fastestStr
+              };
+
+              AsyncStorage.setItem(`user_battle_stats_${userIdKey}`, JSON.stringify(updatedBattleStats)).catch(e => console.log(e));
+              AsyncStorage.setItem('user_battle_stats', JSON.stringify(updatedBattleStats)).catch(e => console.log(e));
+            }).catch(e => console.log(e));
+
             // Save to user activity history (last 3 entries)
             AsyncStorage.getItem('user_activity_history').then(histVal => {
               let history = histVal ? JSON.parse(histVal) : [];
