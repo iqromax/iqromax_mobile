@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator, Share } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image, ImageBackground } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -3958,11 +3959,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <View style={{ flexDirection: 'row', gap: 8 }}>
                       <TouchableOpacity 
                         style={{ backgroundColor: 'rgba(56, 189, 248, 0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }}
-                        onPress={() => {
-                          import('react-native').then(({ Clipboard }) => {
-                            Clipboard.setString(myPromoCode);
-                            showCustomAlert('Nusxalandi!', 'Promokod nusxalandi', 'success');
-                          });
+                        onPress={async () => {
+                          await Clipboard.setStringAsync(myPromoCode);
+                          showCustomAlert('Nusxalandi!', 'Promokod nusxalandi', 'success');
                         }}
                       >
                         <Text style={{ color: '#38BDF8', fontSize: 12, fontFamily: 'Inter_700Bold' }}>Nusxalash</Text>
@@ -4010,10 +4009,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 style={{ backgroundColor: '#38BDF8', paddingVertical: 14, borderRadius: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 6 }}
                 activeOpacity={0.8}
                 onPress={() => {
-                  import('react-native').then(({ Share }) => {
-                    Share.share({
-                      message: `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling! Mening promokodim: ${myPromoCode}`
-                    });
+                  Share.share({
+                    message: `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling! Mening promokodim: ${myPromoCode}`
                   });
                 }}
               >
