@@ -27,6 +27,7 @@ import BattleMatchmakingScreen from './screens/BattleMatchmakingScreen';
 import BattleGameScreen from './screens/BattleGameScreen';
 import FriendInviteScreen from './screens/FriendInviteScreen';
 import BattleResultScreen from './screens/BattleResultScreen';
+import MysteryBoxScreen from './screens/MysteryBoxScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 
 
@@ -395,6 +396,7 @@ export default function App() {
 <Stack.Screen name="BattleMatchmaking" component={BattleMatchmakingScreen} />
           <Stack.Screen name="BattleGame" component={BattleGameScreen} />
           <Stack.Screen name="BattleResult" component={BattleResultScreen} />
+          <Stack.Screen name="MysteryBox" component={MysteryBoxScreen} />
         </Stack.Navigator>
 
         {/* Global Admin Action (Delete/Block) Alert Modal */}

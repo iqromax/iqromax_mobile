@@ -3170,7 +3170,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   alignItems: 'center'
                 }}
                 activeOpacity={0.8}
-                onPress={() => setIsMysteryBoxModalOpen(true)}
+                onPress={() => navigation.navigate('MysteryBox', { user })}
               >
                 <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(168, 85, 247, 0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#A855F7' }}>
                   <MaterialCommunityIcons name="treasure-chest" size={26} color="#F59E0B" />
