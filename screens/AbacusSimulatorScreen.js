@@ -20,10 +20,10 @@ const TRANSLATIONS = {
 };
 
 const BEAD_WIDTH = 62;
-const BEAD_HEIGHT = 45; // 1.5x taller beads (30 * 1.5 = 45)
+const BEAD_HEIGHT = 36;
 const ROD_WIDTH = 8;
-const TOP_SLIDE_DISTANCE = 62; // Lifted higher for a perfect resting position
-const BOTTOM_SLIDE_DISTANCE = 118;
+const TOP_SLIDE_DISTANCE = 34;
+const BOTTOM_SLIDE_DISTANCE = 42;
 
 // Shared sound effect ref
 let globalTickSound = null;
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   },
   abacusContainer: {
     width: 350,
-    height: 450,
+    height: 310,
     marginTop: 10,
   },
   outerFrame: {
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   },
   horizontalBar: {
     position: 'absolute',
-    top: 105, // position between top and bottom beads
+    top: 72, // position between top and bottom beads
     left: 0,
     right: 0,
     height: 12,
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
   },
   topSection: {
-    height: 75,
+    height: 70,
     width: '100%',
     alignItems: 'center',
     position: 'relative',
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   bottomBeadArea: {
     position: 'absolute',
     top: 0,
-    bottom: 10, // padding from bottom of frame
+    bottom: 4, // padding from bottom of frame
     left: 0,
     right: 0,
     alignItems: 'center',

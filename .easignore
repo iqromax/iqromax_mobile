@@ -1,0 +1,13 @@
+# EAS build ignore list
+node_modules/
+.expo/
+dist/
+web-build/
+backend/
+.git/
+*.apk
+*.aab
+*.tar.gz
+*.zip
+android/
+ios/
