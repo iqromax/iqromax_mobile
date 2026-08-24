@@ -111,9 +111,9 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     try {
       if (type === 'tick' && tickSound.current) {
         if (op === '-') {
-          await tickSound.current.setRateAsync(0.85, true);
+          await tickSound.current.setRateAsync(0.6, true);
         } else {
-          await tickSound.current.setRateAsync(1.25, true);
+          await tickSound.current.setRateAsync(1.6, true);
         }
         await tickSound.current.replayAsync();
       } else if (type === 'correct' && correctSound.current) {
