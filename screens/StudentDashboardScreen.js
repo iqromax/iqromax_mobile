@@ -3781,25 +3781,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               elevation: 12
             }
           ]}>
-            <View style={{
-              width: 64,
-              height: 64,
-              borderRadius: 32,
-              backgroundColor: customAlert.type === 'success' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
-              justify: 'center',
-              alignItems: 'center',
-              marginBottom: 16,
-              borderWidth: 1.5,
-              borderColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B'
-            }}>
-              <MaterialCommunityIcons 
-                name={customAlert.type === 'success' ? "check-decagram" : "alert-rhombus-outline"} 
-                size={34} 
-                color={customAlert.type === 'success' ? "#10B981" : "#F59E0B"} 
-              />
-            </View>
-
-            <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8 }}>
+            <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8, marginTop: 4 }}>
               {customAlert.title}
             </Text>
 
