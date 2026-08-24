@@ -2404,65 +2404,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
 
-            {/* DAILY MISSION AND BONUS ROW */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, width: '100%' }}>
-              
-              {/* Box 1: Mission */}
-              <View style={[styles.dailyBoxCard, { marginRight: 8 }]}>
-                <Text style={styles.dailyBoxTitle}>{t.bmDailyMission || 'KUNLIK BATTLE MISSIYASI'}</Text>
-                
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, flex: 1 }}>
-                  <Image source={require('../assets/target_icon.png')} style={{ width: 32, height: 32, marginRight: 10 }} contentFit="contain" />
-                  <Text style={{ color: '#FFF', fontSize: 11, fontFamily: 'Inter_600SemiBold', flex: 1, lineHeight: 16 }}>
-                    {t.bmDailyMissionDesc || "3 ta battle'da ishtirok eting"}
-                  </Text>
-                </View>
-
-                {/* Progress Bar */}
-                <View style={{ marginTop: 15, marginBottom: 5 }}>
-                  <View style={{ height: 6, backgroundColor: '#1A1B2D', borderRadius: 3, width: '100%' }}>
-                    <View style={{ height: 6, backgroundColor: '#A855F7', borderRadius: 3, width: '33%' }} />
-                  </View>
-                  <Text style={{ color: '#9CA3AF', fontSize: 10, textAlign: 'center', marginTop: 6, fontFamily: 'Inter_500Medium' }}>1 / 3</Text>
-                </View>
-              </View>
-
-              {/* Box 2: Bonus */}
-              <View style={styles.dailyBoxCard}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={styles.dailyBoxTitle}>{t.bmDailyBonus || 'KUNLIK BONUS'}</Text>
-                  <Text style={{ color: '#A855F7', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{formatBonusTime(bonusTimeLeft)}</Text>
-                </View>
-                
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, justifyContent: 'space-between', flex: 1 }}>
-                  {/* Coin */}
-                  <View style={{ alignItems: 'center' }}>
-                    <Image source={require('../assets/coin_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} contentFit="cover" />
-                    <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x100</Text>
-                    <MaterialCommunityIcons name="check" size={14} color="#10B981" style={{ marginTop: 2 }} />
-                  </View>
-                  
-                  <MaterialCommunityIcons name="arrow-right" size={12} color="#6B7280" style={{ marginBottom: 20 }} />
-                  
-                  {/* XP */}
-                  <View style={{ alignItems: 'center' }}>
-                    <Image source={require('../assets/xp_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 14 }} contentFit="cover" />
-                    <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x50</Text>
-                    <MaterialCommunityIcons name="check" size={14} color="#10B981" style={{ marginTop: 2 }} />
-                  </View>
-
-                  <MaterialCommunityIcons name="arrow-right" size={12} color="#6B7280" style={{ marginBottom: 20 }} />
-
-                  {/* Chest */}
-                  <View style={{ alignItems: 'center' }}>
-                    <Image source={require('../assets/chest_icon.jpg')} style={{ width: 28, height: 28, borderRadius: 6 }} contentFit="cover" />
-                    <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>x1</Text>
-                    <Text style={{ color: '#9CA3AF', fontSize: 8, fontFamily: 'Inter_400Regular', marginTop: 2 }}>7 kun</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-
             {/* BEST RESULTS SECTION */}
             <View style={styles.bestResultsCard}>
               <Text style={styles.bestResultsTitle}>{t.bestResults || 'ENG YAXSHI NATIJALAR'}</Text>
