@@ -246,9 +246,9 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       let newSeq = [];
       const isDirectInputMode = ['multiply', 'kopaytirish', 'divide', 'bolish', 'aralash'].includes(operation) || isSpeedMode;
       if (['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation)) {
-         newSeq = [{ num: parts[0], op: '' }, { num: parts[2], op: parts[1] }];
+         newSeq = [{ num: parts[0], op: '+' }, { num: parts[2], op: parts[1] }];
       } else {
-         newSeq.push({ num: parts[0], op: '' });
+         newSeq.push({ num: parts[0], op: '+' });
          for (let i = 1; i < parts.length; i += 2) {
            newSeq.push({ num: parts[i+1], op: parts[i] });
          }
@@ -635,7 +635,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     return (
       <View style={styles.flashingCard}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <View style={[styles.flashingCardOperator, !currentTerm.op && { opacity: 0 }, { marginRight: 20, marginBottom: 15 }]}>
+          <View style={[styles.flashingCardOperator, { marginRight: 20, marginBottom: 15 }]}>
             <Text style={[styles.flashingCardOperatorText, { color: opColor, textShadowColor: opColor }]}>{currentTerm.op || '+'}</Text>
           </View>
           <Text style={[styles.flashingCardNumber, { marginBottom: 0 }]}>{currentTerm.num}</Text>

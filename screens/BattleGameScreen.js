@@ -187,9 +187,9 @@ export default function BattleGameScreen({ navigation, route }) {
       let parts = q.display.split(' ');
       let newSeq = [];
       if (['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation)) {
-         newSeq = [{ num: parts[0], op: '' }, { num: parts[2], op: parts[1] }];
+         newSeq = [{ num: parts[0], op: '+' }, { num: parts[2], op: parts[1] }];
       } else {
-         newSeq.push({ num: parts[0], op: '' });
+         newSeq.push({ num: parts[0], op: '+' });
          for (let i = 1; i < parts.length; i += 2) {
            newSeq.push({ num: parts[i+1], op: parts[i] });
          }
@@ -383,8 +383,10 @@ export default function BattleGameScreen({ navigation, route }) {
           </View>
         ) : phase === 'flashing' ? (
           <View style={styles.gameArea}>
-            <Text style={styles.mainNumber}>{sequence[seqIndex]?.num || '?'}</Text>
-            {sequence[seqIndex]?.op ? <Text style={styles.operator}>{sequence[seqIndex].op}</Text> : null}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={[styles.operator, { marginRight: 15, marginTop: 0 }]}>{sequence[seqIndex]?.op || '+'}</Text>
+              <Text style={styles.mainNumber}>{sequence[seqIndex]?.num || '?'}</Text>
+            </View>
           </View>
         ) : (
           <View style={styles.gameArea}>
