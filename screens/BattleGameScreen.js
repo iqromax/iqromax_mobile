@@ -158,9 +158,14 @@ export default function BattleGameScreen({ navigation, route }) {
     };
   }, []);
 
-  const playSound = async (type) => {
+  const playSound = async (type, op = '+') => {
     try {
       if (type === 'tick' && tickSound.current) {
+        if (op === '-') {
+          await tickSound.current.setRateAsync(0.85, true);
+        } else {
+          await tickSound.current.setRateAsync(1.25, true);
+        }
         await tickSound.current.replayAsync();
       }
     } catch (e) {}
@@ -200,7 +205,7 @@ export default function BattleGameScreen({ navigation, route }) {
         setPhase('countdown');
         setStartCountdown(3);
       } else {
-        playSound('tick');
+        playSound('tick', newSeq[0]?.op || '+');
         setPhase('flashing');
         setQuestionStartTime(Date.now());
       }
@@ -216,7 +221,7 @@ export default function BattleGameScreen({ navigation, route }) {
         }, 1000);
         return () => clearTimeout(timer);
       } else {
-        playSound('tick');
+        playSound('tick', sequence[0]?.op || '+');
         setPhase('flashing');
         setQuestionStartTime(Date.now());
       }
@@ -230,7 +235,8 @@ export default function BattleGameScreen({ navigation, route }) {
         const delay = speed * 1000;
         timeout = setTimeout(() => {
           if (seqIndex + 1 < sequence.length) {
-            playSound('tick');
+            const nextOp = sequence[seqIndex + 1]?.op || '+';
+            playSound('tick', nextOp);
             setSeqIndex(seqIndex + 1);
           } else {
             setQuestionStartTime(Date.now());

@@ -107,9 +107,14 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     };
   }, []);
 
-  const playSound = async (type) => {
+  const playSound = async (type, op = '+') => {
     try {
       if (type === 'tick' && tickSound.current) {
+        if (op === '-') {
+          await tickSound.current.setRateAsync(0.85, true);
+        } else {
+          await tickSound.current.setRateAsync(1.25, true);
+        }
         await tickSound.current.replayAsync();
       } else if (type === 'correct' && correctSound.current) {
         await correctSound.current.replayAsync();
@@ -189,7 +194,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         return () => clearTimeout(timer);
       } else {
         setStartTime(Date.now()); // reset timer at start of flashing
-        playSound('tick');
+        playSound('tick', sequence[0]?.op || '+');
         setPhase('flashing');
       }
     } else if (phase === 'feedback') {
@@ -264,7 +269,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           setPhase('countdown');
           setCountdown(3);
         } else {
-          playSound('tick');
+          playSound('tick', newSeq[0]?.op || '+');
           setPhase('flashing');
         }
       }
@@ -281,7 +286,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         const delay = speed * 1000;
         timeout = setTimeout(() => {
           if (seqIndex + 1 < sequence.length) {
-            playSound('tick');
+            const nextOp = sequence[seqIndex + 1]?.op || '+';
+            playSound('tick', nextOp);
             setSeqIndex(seqIndex + 1);
           } else {
             setQuestionStartTime(Date.now());
