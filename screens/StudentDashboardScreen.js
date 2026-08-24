@@ -4470,123 +4470,138 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#05050C',
-    borderTopWidth: 1,
-    borderTopColor: '#1F1F30',
-    paddingBottom: 25, 
-    zIndex: 100, // Stay above everything
-    elevation: 20, // Add elevation for Android zIndex to work
+    padd  // BATTLE SECTION STYLES
+  battleCardContainer: {
+    width: '100%',
+    aspectRatio: 2.10, // Adjusted ratio so background and content scale identically on Android
+    borderRadius: 16,
+    overflow: 'hidden',
   },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
+  battleCardBg: {
+    width: '100%',
+    height: '100%',
   },
-  statCardBlock: {
-    backgroundColor: '#070716', // Very dark blue/black
-    borderWidth: 1.5,
-    borderRadius: 8, // Slightly smaller radius
-    width: '24%', // Fits 4 in a row
-    paddingVertical: 6, // Smaller height
-    paddingHorizontal: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
+  battleCardOverlay: {
+    flex: 1,
+    position: 'relative',
   },
-  statCardInner: {
-    flexDirection: 'row', // Icon on left, text on right
-    alignItems: 'center',
-    justifyContent: 'center',
+  battleLeftPlayer: {
+    position: 'absolute',
+    top: '14%',
+    left: '24%',
+    alignItems: 'flex-start',
   },
-  statIconLeft: {
-    marginRight: 4, // Space between icon and text
+  battleRightPlayer: {
+    position: 'absolute',
+    top: '14%',
+    left: '60%',
+    alignItems: 'flex-start',
+  },
+  battlePlayerLabelYou: {
+    color: '#38BDF8', // Light Blue
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
+    textTransform: 'uppercase',
     marginBottom: 0,
   },
-  statTextRight: {
-    alignItems: 'flex-start', // Align text to left
-    flexShrink: 1, // Ensure text shrinks to fit
-  },
-  statTopLabel: {
-    color: '#FFF',
-    fontSize: 6, // Reduced size to fit horizontally
-    fontFamily: 'Inter_500Medium',
-    marginBottom: 2,
-    textTransform: 'uppercase',
-  },
-  statMainNumber: {
-    color: '#FFF',
-    fontSize: 14, // Reduced size
+  battlePlayerLabelOpp: {
+    color: '#EF4444', // Red
+    fontSize: 13,
     fontFamily: 'Inter_700Bold',
     marginBottom: 0,
   },
-  statBottomLabel: {
-    fontSize: 6, // Reduced size
-    fontFamily: 'Inter_500Medium',
+  battlePlayerNameYou: {
+    color: '#FFF',
+    fontSize: 9,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 2,
+    maxWidth: 90,
   },
-  navBarContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 80,
-    backgroundColor: '#050512', // Very dark blue/black matching the image
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    zIndex: 100,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderLeftWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+  battlePlayerNameOpp: {
+    color: '#FFF',
+    fontSize: 9,
+    fontFamily: 'Inter_600SemiBold',
+    marginBottom: 2,
+    maxWidth: 90,
   },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 16,
-    minWidth: '18%',
+  battleLevelBadgeYou: {
+    backgroundColor: '#1E1B4B',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 3,
   },
-  navItemActive: {
-    backgroundColor: 'rgba(168, 85, 247, 0.15)', // Light purple translucent bg
+  battleLevelBadgeOpp: {
+    backgroundColor: '#1E1B4B',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 3,
   },
-  navText: {
-    color: '#9CA3AF', // Gray color
+  battleLevelTextYou: {
+    color: '#D8B4FE',
     fontSize: 8,
     fontFamily: 'Inter_600SemiBold',
-    marginTop: 4,
-    textTransform: 'uppercase',
   },
-  navTextActive: {
-    color: '#A855F7', // Bright purple
+  battleLevelTextOpp: {
+    color: '#D8B4FE',
+    fontSize: 8,
+    fontFamily: 'Inter_600SemiBold',
   },
-  exHeaderRow: {
+  battleTrophyRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    marginTop: 10,
+    marginBottom: 0,
   },
-  exBackButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#3B0764',
-    backgroundColor: '#0A0A14',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  exTitleContainer: {
-    alignItems: 'center',
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  exTitle: {
+  battleTrophyTextYou: {
     color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+  },
+  battleTrophyTextOpp: {
+    color: '#FFF',
+    fontSize: 10,
+    fontFamily: 'Inter_700Bold',
+  },
+  leaderboardContainer: {
+    marginTop: 12,
+    width: '100%',
+    backgroundColor: '#080B13',
+    borderRadius: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.15)',
+  },
+  floatingMyProfileBtn: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#05050C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(192, 132, 252, 0.4)',
+    shadowColor: '#C084FC',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  floatingMyProfileInner: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1.5,
+    borderColor: '#C084FC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  battleReytingText: {
+    color: '#9CA3AF',
+    fontSize: 7.5,
+    fontFamily: 'Inter_500Medium',
+    marginTop: -2,
+  },   color: '#FFF',
     fontSize: 20,
     fontFamily: 'Inter_700Bold',
   },
@@ -5211,7 +5226,7 @@ const styles = StyleSheet.create({
   // BATTLE SECTION STYLES
   battleCardContainer: {
     width: '100%',
-    aspectRatio: 1.85, // Fixed aspect ratio to prevent squashing (taller)
+    aspectRatio: 2.10, // Perfect ratio to scale text and background image identically on Android
     borderRadius: 16,
     overflow: 'hidden',
   },
@@ -5225,56 +5240,56 @@ const styles = StyleSheet.create({
   },
   battleLeftPlayer: {
     position: 'absolute',
-    top: '25%', // Reverted back
+    top: '12%',
     left: '24%',
     alignItems: 'flex-start',
   },
   battleRightPlayer: {
     position: 'absolute',
-    top: '25%', // Reverted back
+    top: '12%',
     left: '60%',
     alignItems: 'flex-start',
   },
   battlePlayerLabelYou: {
     color: '#38BDF8', // Light Blue
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter_700Bold',
     textTransform: 'uppercase',
-    marginBottom: 2,
+    marginBottom: 0,
   },
   battlePlayerLabelOpp: {
     color: '#EF4444', // Red
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Inter_700Bold',
-    marginBottom: 2,
+    marginBottom: 0,
   },
   battlePlayerNameYou: {
     color: '#FFF',
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Inter_600SemiBold',
-    marginBottom: 4,
+    marginBottom: 2,
     maxWidth: 90,
   },
   battlePlayerNameOpp: {
     color: '#FFF',
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Inter_600SemiBold',
-    marginBottom: 4,
+    marginBottom: 2,
     maxWidth: 90,
   },
   battleLevelBadgeYou: {
     backgroundColor: '#1E1B4B',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 3,
   },
   battleLevelBadgeOpp: {
     backgroundColor: '#1E1B4B',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginBottom: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 3,
   },
   battleLevelTextYou: {
     color: '#D8B4FE',
@@ -5289,16 +5304,16 @@ const styles = StyleSheet.create({
   battleTrophyRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 2,
+    marginBottom: 0,
   },
   battleTrophyTextYou: {
     color: '#FFF',
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Inter_700Bold',
   },
   battleTrophyTextOpp: {
     color: '#FFF',
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: 'Inter_700Bold',
   },
   leaderboardContainer: {
@@ -5336,8 +5351,9 @@ const styles = StyleSheet.create({
   },
   battleReytingText: {
     color: '#9CA3AF',
-    fontSize: 8,
+    fontSize: 7.5,
     fontFamily: 'Inter_500Medium',
+    marginTop: -2,
   },
 
   // BATTLE MODES STYLES
