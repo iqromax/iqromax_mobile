@@ -2342,10 +2342,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {/* BATTLE ONLY CONFIGURATION */}
         {activeExerciseType === 'battle' && (
           <View style={{ marginTop: 15, marginBottom: 15 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, zIndex: 10 }}>
-              <MaterialCommunityIcons name="sword-cross" size={24} color="#FFF" style={{ marginRight: 8 }} />
-              <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}>{t.battleTabTitle || 'BATTLE'}</Text>
-            </View>
 
             <View style={styles.battleCardContainer}>
               <ImageBackground source={require('../assets/battle_vs_bg.png')} style={styles.battleCardBg} imageStyle={{ borderRadius: 16 }} contentFit="fill">
