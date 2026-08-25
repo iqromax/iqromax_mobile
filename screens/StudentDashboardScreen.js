@@ -2341,8 +2341,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* BATTLE ONLY CONFIGURATION */}
         {activeExerciseType === 'battle' && (
-          <View style={{ marginTop: 25, marginBottom: 15 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: -22, zIndex: 10 }}>
+          <View style={{ marginTop: 15, marginBottom: 15 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, zIndex: 10 }}>
               <MaterialCommunityIcons name="sword-cross" size={24} color="#FFF" style={{ marginRight: 8 }} />
               <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}>{t.battleTabTitle || 'BATTLE'}</Text>
             </View>
@@ -2354,12 +2354,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {/* Left Player (You) */}
                   <View style={styles.battleLeftPlayer}>
                     <Text style={styles.battlePlayerLabelYou}>{t.battleYou || 'SIZ'}</Text>
-                    <Text style={styles.battlePlayerNameYou}>{t.title ? t.title.replace(' ', '\n') : ''}</Text>
+                    <Text style={styles.battlePlayerNameYou} numberOfLines={2} adjustsFontSizeToFit>{t.title ? t.title.replace(' ', '\n') : ''}</Text>
                     <View style={styles.battleLevelBadgeYou}>
                       <Text style={styles.battleLevelTextYou}>{t.battleLevel || 'Level'} 24</Text>
                     </View>
                     <View style={styles.battleTrophyRow}>
-                      <MaterialCommunityIcons name="trophy" size={14} color="#F59E0B" style={{ marginRight: 4 }} />
+                      <MaterialCommunityIcons name="trophy" size={12} color="#F59E0B" style={{ marginRight: 4 }} />
                       <Text style={styles.battleTrophyTextYou}>1 250</Text>
                     </View>
                     <Text style={styles.battleReytingText}>{t.battleRating || 'Reyting'}</Text>
@@ -2368,12 +2368,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {/* Right Player (Opponent) */}
                   <View style={styles.battleRightPlayer}>
                     <Text style={styles.battlePlayerLabelOpp}>{t.battleOpponent || 'Raqib'}</Text>
-                    <Text style={styles.battlePlayerNameOpp}>IQ{'\n'}Warrior</Text>
+                    <Text style={styles.battlePlayerNameOpp} numberOfLines={2} adjustsFontSizeToFit>IQ{'\n'}Warrior</Text>
                     <View style={styles.battleLevelBadgeOpp}>
                       <Text style={styles.battleLevelTextOpp}>{t.battleLevel || 'Level'} 22</Text>
                     </View>
                     <View style={styles.battleTrophyRow}>
-                      <MaterialCommunityIcons name="trophy" size={14} color="#F59E0B" style={{ marginRight: 4 }} />
+                      <MaterialCommunityIcons name="trophy" size={12} color="#F59E0B" style={{ marginRight: 4 }} />
                       <Text style={styles.battleTrophyTextOpp}>1 180</Text>
                     </View>
                     <Text style={styles.battleReytingText}>{t.battleRating || 'Reyting'}</Text>
@@ -5404,7 +5404,7 @@ const styles = StyleSheet.create({
   // BATTLE SECTION STYLES
   battleCardContainer: {
     width: '100%',
-    aspectRatio: Platform.OS === 'android' ? 2.02 : 1.85,
+    aspectRatio: 1.85,
     borderRadius: 16,
     overflow: 'hidden',
   },
@@ -5418,13 +5418,13 @@ const styles = StyleSheet.create({
   },
   battleLeftPlayer: {
     position: 'absolute',
-    top: Platform.OS === 'android' ? '15%' : '25%',
+    top: '25%',
     left: '24%',
     alignItems: 'flex-start',
   },
   battleRightPlayer: {
     position: 'absolute',
-    top: Platform.OS === 'android' ? '15%' : '25%',
+    top: '25%',
     left: '60%',
     alignItems: 'flex-start',
   },
