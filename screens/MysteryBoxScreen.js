@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Share } from 'react-native';
 import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Clipboard from 'expo-clipboard';
@@ -14,7 +14,9 @@ export default function MysteryBoxScreen({ navigation, route }) {
   const [rewardsTab, setRewardsTab] = useState('Barchasi'); // 'Barchasi' | 'Faol' | 'Tarix'
 
   // Invitation & Referral state
-  const myPromoCode = user?.customId ? `iqromax.uz/invite/${user.customId.replace(/^#+/, '')}` : 'iqromax.uz/invite/Ergashboy';
+  const rawPromo = user?.customId ? user.customId.replace(/^#+/, '') : 'MICHAEL';
+  const referralLink = `https://iqromax.uz/invite/${rawPromo}`;
+  const shareMessage = `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling!\n\nMening promokodim: ${rawPromo}\n\nIlovani yuklab olish uchun havola:\n${referralLink}`;
   const [isCopied, setIsCopied] = useState(false);
 
   // Rewards List State
@@ -26,9 +28,15 @@ export default function MysteryBoxScreen({ navigation, route }) {
   ]);
 
   const copyLink = async () => {
-    await Clipboard.setStringAsync(myPromoCode);
+    await Clipboard.setStringAsync(referralLink);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const shareReferral = async () => {
+    try {
+      await Share.share({ message: shareMessage });
+    } catch (e) {}
   };
 
   const openBoxHandler = () => {
@@ -247,7 +255,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
             <View style={styles.inviteLinkCard}>
               <Text style={{ color: '#64748B', fontSize: 11, textAlign: 'center', fontFamily: 'Inter_500Medium', marginBottom: 6 }}>Sizning taklif havolangiz</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                <Text style={{ color: '#A855F7', fontSize: 14, fontFamily: 'Inter_700Bold' }}>{myPromoCode}</Text>
+                <Text style={{ color: '#A855F7', fontSize: 14, fontFamily: 'Inter_700Bold' }}>{referralLink}</Text>
                 <TouchableOpacity onPress={copyLink}>
                   <MaterialCommunityIcons name={isCopied ? "check" : "content-copy"} size={18} color="#A855F7" />
                 </TouchableOpacity>
@@ -256,14 +264,14 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
             {/* Social Share Grid */}
             <View style={styles.shareGridRow}>
-              <TouchableOpacity style={styles.shareGridItem} onPress={copyLink}>
+              <TouchableOpacity style={styles.shareGridItem} onPress={shareReferral}>
                 <View style={[styles.shareIconCircle, { backgroundColor: '#229ED9' }]}>
                   <MaterialCommunityIcons name="send" size={20} color="#FFF" />
                 </View>
                 <Text style={styles.shareGridLabel}>Telegram</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.shareGridItem} onPress={copyLink}>
+              <TouchableOpacity style={styles.shareGridItem} onPress={shareReferral}>
                 <View style={[styles.shareIconCircle, { backgroundColor: '#25D366' }]}>
                   <MaterialCommunityIcons name="whatsapp" size={20} color="#FFF" />
                 </View>
@@ -277,7 +285,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
                 <Text style={styles.shareGridLabel}>Kopiyalash</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.shareGridItem} onPress={copyLink}>
+              <TouchableOpacity style={styles.shareGridItem} onPress={shareReferral}>
                 <View style={[styles.shareIconCircle, { backgroundColor: '#475569' }]}>
                   <MaterialCommunityIcons name="dots-horizontal" size={20} color="#FFF" />
                 </View>

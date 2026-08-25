@@ -4013,8 +4013,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 style={{ backgroundColor: '#38BDF8', paddingVertical: 14, borderRadius: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8, marginTop: 6 }}
                 activeOpacity={0.8}
                 onPress={() => {
+                  const promo = user?.customId ? user.customId.replace(/^#+/, '') : 'IQROMAX';
+                  const link = `https://iqromax.uz/invite/${promo}`;
                   Share.share({
-                    message: `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling! Mening promokodim: ${myPromoCode}`
+                    message: `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling!\n\nMening promokodim: ${promo}\n\nIlovani yuklab olish uchun havola:\n${link}`
                   });
                 }}
               >
