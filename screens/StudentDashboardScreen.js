@@ -237,26 +237,30 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
 
-  // Android EXGL chrome texture fix: Convert materials to MeshBasicMaterial with original map texture
+  // Android EXGL chrome/silhouette texture fix: Convert materials to MeshStandardMaterial with map texture and proper roughness
   React.useMemo(() => {
     scene.traverse((child) => {
       if (child.isMesh && child.material) {
          const mats = Array.isArray(child.material) ? child.material : [child.material];
          const newMats = mats.map(mat => {
             if (mat.map) {
-              const basicMat = new THREE.MeshBasicMaterial({
+              const stdMat = new THREE.MeshStandardMaterial({
                 map: mat.map,
                 side: THREE.DoubleSide,
                 transparent: mat.transparent || false,
                 alphaTest: mat.alphaTest || 0,
+                roughness: 0.5,
+                metalness: 0.0,
               });
-              return basicMat;
+              return stdMat;
             }
-            mat.metalness = 0;
-            mat.roughness = 1;
-            mat.side = THREE.DoubleSide;
-            mat.needsUpdate = true;
-            return mat;
+            const stdMat = new THREE.MeshStandardMaterial({
+              color: mat.color || 0xdddddd,
+              side: THREE.DoubleSide,
+              roughness: 0.6,
+              metalness: 0.0,
+            });
+            return stdMat;
          });
          child.material = Array.isArray(child.material) ? newMats : newMats[0];
       }
