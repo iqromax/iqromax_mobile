@@ -266,12 +266,36 @@ app.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
-// Helper: Generate Custom ID (6-digit random unique ID)
+// Helper: Generate Custom ID (6-character random alphanumeric ID from specified set)
+// Character set: A B C D E F G H J K L M N P Q R T U V W X Y Z 2 3 4 5 6 7 8 9
 const generateCustomId = async () => {
+  const chars = 'ABCDEFGHJKLMNPQRTVWXYZ23456789';
+  const letters = 'ABCDEFGHJKLMNPQRTVWXYZ';
+  const digits = '23456789';
+
   while (true) {
-    // Generate a random 6-digit number between 100000 and 999999
-    const randomNum = Math.floor(100000 + Math.random() * 900000);
-    const customId = `#${randomNum}`;
+    let result = '';
+    // Ensure mixture of letters and numbers (e.g. 4 letters, 2 digits or mixed)
+    // Create 6 character array
+    const idArr: string[] = [];
+    
+    // Pick 4 letters
+    for (let i = 0; i < 4; i++) {
+      idArr.push(letters.charAt(Math.floor(Math.random() * letters.length)));
+    }
+    // Pick 2 digits
+    for (let i = 0; i < 2; i++) {
+      idArr.push(digits.charAt(Math.floor(Math.random() * digits.length)));
+    }
+    
+    // Shuffle the 6 characters randomly
+    for (let i = idArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [idArr[i], idArr[j]] = [idArr[j], idArr[i]];
+    }
+    
+    result = idArr.join('');
+    const customId = `#${result}`;
     const exists = await prisma.user.findUnique({ where: { customId } });
     if (!exists) {
       return customId;
