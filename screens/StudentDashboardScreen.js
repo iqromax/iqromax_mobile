@@ -266,7 +266,7 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
         enablePan={false} 
         minPolarAngle={Math.PI / 2} 
         maxPolarAngle={Math.PI / 2} 
-        rotateSpeed={25}
+        rotateSpeed={4.0}
         target={[0, 0, 0]}
       />
     </>
