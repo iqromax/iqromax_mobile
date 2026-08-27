@@ -367,6 +367,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       
       const validTimes = speedResults.map(r => parseFloat(r.time)).filter(t => !isNaN(t) && t > 0);
       const avgTimeVal = validTimes.length > 0 ? (validTimes.reduce((a, b) => a + b, 0) / validTimes.length).toFixed(1) : '1.8';
+      const totalGainedXP = correctCount * calculateQuestionXP();
 
       // Logic formula: Base accuracy + Difficulty multiplier (digits & examplesCount)
       const difficultyMultiplier = Math.min(1.5, 1 + (digits * 0.1) + (examplesCount * 0.05));
