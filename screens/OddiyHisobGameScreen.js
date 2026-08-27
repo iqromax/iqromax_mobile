@@ -29,7 +29,7 @@ const { width, height } = Dimensions.get('window');
 export default function OddiyHisobGameScreen({ navigation, route }) {
   const { energy: currentEnergy, consumeEnergy, formattedTime } = useEnergy();
   // Config from params
-  const { examplesCount = 3, operation = 'oddiy', speed = 1, digits = 1, language = 'uz', isSpeedMode = false } = route.params || {};
+  const { examplesCount = 3, operation = 'oddiy', speed = 1, digits = 1, language = 'uz', isSpeedMode = false, isTeacher = false } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
 
   // Game phases: 'countdown' | 'flashing' | 'input' | 'feedback'
@@ -529,7 +529,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           <Animated.Text style={{color: '#D1D5DB', fontFamily: 'Inter_500Medium', fontSize: 16, marginBottom: 15, transform: [{translateX: shakeAnim}]}}>{t.tryAgainFeedback}</Animated.Text>
         )}
         
-        {isLastAnswerCorrect && (
+        {isLastAnswerCorrect && !isTeacher && (
           <Animated.View style={[styles.feedbackRewards, { transform: [{translateY: translateYAnim}] }]}>
             <View style={styles.rewardBadge}>
                <Image source={require('../assets/xp_icon.jpg')} style={{width: 24, height: 24, borderRadius: 12}} contentFit="cover" />
@@ -834,22 +834,24 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
               </Text>
             </View>
 
-            {/* Right side: XP Badge */}
-            <View style={{
-              backgroundColor: 'rgba(0, 0, 0, 0.35)',
-              paddingHorizontal: 16,
-              paddingVertical: 12,
-              borderRadius: 16,
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.15)',
-              alignItems: 'center',
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image source={require('../assets/xp_icon.jpg')} style={{ width: 22, height: 22, borderRadius: 11, marginRight: 6 }} contentFit="cover" />
-                <Text style={{ color: '#FBBF24', fontFamily: 'Inter_900Black', fontSize: 20 }}>+{totalGainedXP}</Text>
+            {/* Right side: XP Badge (Only for Students) */}
+            {!isTeacher && (
+              <View style={{
+                backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.15)',
+                alignItems: 'center',
+              }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image source={require('../assets/xp_icon.jpg')} style={{ width: 22, height: 22, borderRadius: 11, marginRight: 6 }} contentFit="cover" />
+                  <Text style={{ color: '#FBBF24', fontFamily: 'Inter_900Black', fontSize: 20 }}>+{totalGainedXP}</Text>
+                </View>
+                <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 9, marginTop: 2, textTransform: 'uppercase' }}>{t.earnedXPLabel || "TO'PLANGAN XP"}</Text>
               </View>
-              <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 9, marginTop: 2, textTransform: 'uppercase' }}>{t.earnedXPLabel || "TO'PLANGAN XP"}</Text>
-            </View>
+            )}
           </View>
         </LinearGradient>
 
@@ -900,9 +902,11 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="clock-outline" size={13} color="#FBBF24" style={{ marginRight: 3 }} />
                   <Text style={{ color: '#FBBF24', fontSize: 14, fontFamily: 'Inter_700Bold' }}>{res.time}s</Text>
                 </View>
-                <Text style={{ color: res.isCorrect ? '#10B981' : '#6B7280', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
-                  {res.isCorrect ? `+${calculateQuestionXP()} XP` : '0 XP'}
-                </Text>
+                {!isTeacher && (
+                  <Text style={{ color: res.isCorrect ? '#10B981' : '#6B7280', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                    {res.isCorrect ? `+${calculateQuestionXP()} XP` : '0 XP'}
+                  </Text>
+                )}
               </View>
             </View>
           ))}
