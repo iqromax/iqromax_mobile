@@ -1562,7 +1562,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
 
             {/* Canvas Container */}
-            <View style={{ position: 'absolute', top: -30, bottom: -60, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
+            <View style={{ position: 'absolute', top: -30, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
               <Canvas frameloop="demand" style={{ flex: 1, width: '100%', backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
                 <ambientLight intensity={2.5} color="#ffffff" />
                 <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#444444" />
@@ -1654,9 +1654,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
             activeOpacity={0.7} 
             style={styles.startButton}
             onPress={() => setActiveTab('exercise')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="fill" />
-            <View style={styles.startButtonTouchable}>
+            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="fill" pointerEvents="none" />
+            <View style={styles.startButtonTouchable} pointerEvents="none">
               <Text style={styles.startButtonText}>{t.startExercise}</Text>
             </View>
           </TouchableOpacity>
@@ -4563,7 +4564,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     height: 70,
     marginTop: 15,
-    zIndex: 10,
+    position: 'relative',
+    zIndex: 99,
+    elevation: 10,
   },
   startButtonBg: {
     width: '100%',
