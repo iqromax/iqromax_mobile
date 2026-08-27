@@ -272,64 +272,205 @@ export default function TeacherDashboardScreen({ navigation, route }) {
             </View>
 
             <ScrollView style={{ flex: 1, paddingHorizontal: 20 }} showsVerticalScrollIndicator={false}>
-              {/* DIGITS SELECTOR */}
-              <View style={styles.configBox}>
-                <Text style={styles.configTitle}>SON XONASI</Text>
-                <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
-                  {[1, 2, 3, 4].map(d => (
-                    <TouchableOpacity 
-                      key={d}
-                      style={[styles.digitBtn, selectedDigits === d && styles.digitBtnActive]}
-                      onPress={() => setSelectedDigits(d)}
-                    >
-                      <Text style={[styles.digitBtnText, selectedDigits === d && styles.digitBtnTextActive]}>{d}-xonali</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
+              {/* 1. ABAKUS TAB CONTENT */}
+              {activeExerciseType === 'abacus' && (
+                <View style={{ marginTop: 10 }}>
+                  <View style={{ backgroundColor: '#0D0D1F', padding: 20, borderWidth: 1.5, borderColor: 'rgba(168, 85, 247, 0.3)', borderRadius: 18, marginBottom: 20 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                      <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>ABAKUS (SOROBAN) HAQIDA</Text>
+                      <MaterialCommunityIcons name="information-outline" size={20} color="#9CA3AF" />
+                    </View>
+                    
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View style={{ flex: 1, height: 110 }}>
+                        <Image source={require('../assets/abacus_info.png')} style={{ width: '100%', height: '100%' }} contentFit="contain" />
+                      </View>
+                      <View style={{ flex: 1, paddingLeft: 12 }}>
+                        <Text style={{ fontSize: 12, lineHeight: 18, color: '#D1D5DB' }}>
+                          Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
 
-              {/* EXAMPLE COUNT */}
-              <View style={styles.configBox}>
-                <Text style={styles.configTitle}>HADLAR SONI ({exampleCount} ta)</Text>
-                <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
-                  {[5, 10, 15, 20, 25].map(c => (
-                    <TouchableOpacity 
-                      key={c}
-                      style={[styles.digitBtn, exampleCount === c && styles.digitBtnActive]}
-                      onPress={() => setExampleCount(c)}
-                    >
-                      <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  <TouchableOpacity 
+                    style={{ flexDirection: 'row', backgroundColor: '#6D28D9', paddingVertical: 16, borderRadius: 16, justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 10 }} 
+                    activeOpacity={0.8} 
+                    onPress={() => navigation.navigate('AbacusSimulator', { language })}
+                  >
+                    <MaterialCommunityIcons name="lightning-bolt" size={22} color="#FFF" />
+                    <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>ABAKUSNI OCHISH</Text>
+                  </TouchableOpacity>
                 </View>
-              </View>
+              )}
 
-              {/* SPEED SELECTOR */}
-              <View style={styles.configBox}>
-                <Text style={styles.configTitle}>TEZLIK ({selectedSpeed} soniya)</Text>
-                <View style={{ flexDirection: 'row', gap: 10, marginTop: 8 }}>
-                  {[0.5, 1, 1.5, 2].map(s => (
-                    <TouchableOpacity 
-                      key={s}
-                      style={[styles.digitBtn, selectedSpeed === s && styles.digitBtnActive]}
-                      onPress={() => setSelectedSpeed(s)}
-                    >
-                      <Text style={[styles.digitBtnText, selectedSpeed === s && styles.digitBtnTextActive]}>{s}s</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
+              {/* 2. ODDIY HISOB & TEZKOR HISOB CONFIGURATION CARDS */}
+              {(activeExerciseType === 'calc' || activeExerciseType === 'speed') && (
+                <>
+                  {/* HADLAR SONI SECTION */}
+                  <View style={styles.configBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#A855F7" />
+                      </View>
+                      <View>
+                        <Text style={styles.configTitle}>HADLAR SONI</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>5 dan 25 hadgacha tanlang</Text>
+                      </View>
+                    </View>
 
-              <View style={{ height: 100 }} />
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {[5, 10, 15, 20, 25].map(c => (
+                        <TouchableOpacity 
+                          key={c}
+                          style={[styles.digitBtn, exampleCount === c && styles.digitBtnActive]}
+                          onPress={() => setExampleCount(c)}
+                        >
+                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} had</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* AMALLAR SECTION */}
+                  <View style={styles.configBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="calculator-variant" size={20} color="#A855F7" />
+                      </View>
+                      <View>
+                        <Text style={styles.configTitle}>AMALLAR</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Amallar turini tanlang</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {/* Oddiy */}
+                      <TouchableOpacity 
+                        style={[styles.opCard, selectedOpType === 'oddiy' && styles.opCardActive]}
+                        onPress={() => setSelectedOpType('oddiy')}
+                        activeOpacity={0.8}
+                      >
+                        {selectedOpType === 'oddiy' && (
+                          <View style={styles.opCheckBadge}>
+                            <MaterialCommunityIcons name="check" size={10} color="#FFF" />
+                          </View>
+                        )}
+                        <MaterialCommunityIcons name="plus" size={26} color={selectedOpType === 'oddiy' ? '#A855F7' : '#9CA3AF'} />
+                        <Text style={[styles.opCardText, selectedOpType === 'oddiy' && styles.opCardTextActive]}>Oddiy</Text>
+                      </TouchableOpacity>
+
+                      {/* Formula 5 */}
+                      <TouchableOpacity 
+                        style={[styles.opCard, selectedOpType === 'f5' && styles.opCardActive]}
+                        onPress={() => setSelectedOpType('f5')}
+                        activeOpacity={0.8}
+                      >
+                        {selectedOpType === 'f5' && (
+                          <View style={styles.opCheckBadge}>
+                            <MaterialCommunityIcons name="check" size={10} color="#FFF" />
+                          </View>
+                        )}
+                        <Text style={[styles.opFormulaIcon, selectedOpType === 'f5' && { color: '#A855F7' }]}>f(x)</Text>
+                        <Text style={[styles.opCardText, selectedOpType === 'f5' && styles.opCardTextActive]}>Formula 5</Text>
+                      </TouchableOpacity>
+
+                      {/* Formula 10 */}
+                      <TouchableOpacity 
+                        style={[styles.opCard, selectedOpType === 'f10' && styles.opCardActive]}
+                        onPress={() => setSelectedOpType('f10')}
+                        activeOpacity={0.8}
+                      >
+                        {selectedOpType === 'f10' && (
+                          <View style={styles.opCheckBadge}>
+                            <MaterialCommunityIcons name="check" size={10} color="#FFF" />
+                          </View>
+                        )}
+                        <Text style={[styles.opFormulaIcon, selectedOpType === 'f10' && { color: '#A855F7' }]}>f(x)</Text>
+                        <Text style={[styles.opCardText, selectedOpType === 'f10' && styles.opCardTextActive]}>Formula 10</Text>
+                      </TouchableOpacity>
+
+                      {/* Aralash */}
+                      <TouchableOpacity 
+                        style={[styles.opCard, selectedOpType === 'aralash' && styles.opCardActive]}
+                        onPress={() => setSelectedOpType('aralash')}
+                        activeOpacity={0.8}
+                      >
+                        {selectedOpType === 'aralash' && (
+                          <View style={styles.opCheckBadge}>
+                            <MaterialCommunityIcons name="check" size={10} color="#FFF" />
+                          </View>
+                        )}
+                        <MaterialCommunityIcons name="shuffle-variant" size={24} color={selectedOpType === 'aralash' ? '#A855F7' : '#9CA3AF'} />
+                        <Text style={[styles.opCardText, selectedOpType === 'aralash' && styles.opCardTextActive]}>Aralash</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* TEZLIK SECTION */}
+                  <View style={styles.configBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="lightning-bolt" size={20} color="#A855F7" />
+                      </View>
+                      <View>
+                        <Text style={styles.configTitle}>TEZLIK</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Mashq bajarish tezligini tanlang</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {[0.5, 1, 1.5, 2].map(s => (
+                        <TouchableOpacity 
+                          key={s}
+                          style={[styles.digitBtn, selectedSpeed === s && styles.digitBtnActive]}
+                          onPress={() => setSelectedSpeed(s)}
+                        >
+                          <Text style={[styles.digitBtnText, selectedSpeed === s && styles.digitBtnTextActive]}>{s} soniya</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* SON XONASI SECTION */}
+                  <View style={styles.configBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="numeric" size={20} color="#A855F7" />
+                      </View>
+                      <View>
+                        <Text style={styles.configTitle}>SON XONASI</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Qatnashadigan sonlar xonasini tanlang</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {[1, 2, 3, 4].map(d => (
+                        <TouchableOpacity 
+                          key={d}
+                          style={[styles.digitBtn, selectedDigits === d && styles.digitBtnActive]}
+                          onPress={() => setSelectedDigits(d)}
+                        >
+                          <Text style={[styles.digitBtnText, selectedDigits === d && styles.digitBtnTextActive]}>{d} xonali</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={{ height: 110 }} />
+                </>
+              )}
             </ScrollView>
 
-            {/* START BUTTON */}
-            <View style={styles.bottomBtnContainer}>
-              <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.8} onPress={handleStartExercise}>
-                <MaterialCommunityIcons name="play-circle-outline" size={24} color="#FFF" />
-                <Text style={styles.primaryBtnText}>MASHQNI BOSHLASH</Text>
-              </TouchableOpacity>
-            </View>
+            {/* START BUTTON (FOR CALC & SPEED) */}
+            {(activeExerciseType === 'calc' || activeExerciseType === 'speed') && (
+              <View style={styles.bottomBtnContainer}>
+                <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.8} onPress={handleStartExercise}>
+                  <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FFF" />
+                  <Text style={styles.primaryBtnText}>MASHQNI BOSHLASH</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         )}
 
@@ -596,8 +737,19 @@ const styles = StyleSheet.create({
   },
   rankNum: { color: '#A855F7', fontSize: 14, fontFamily: 'Inter_700Bold', width: 32 },
   rankAvatar: { width: 40, height: 40, borderRadius: 20 },
-  rankName: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_600SemiBold' },
-  rankXp: { color: '#9CA3AF', fontSize: 12 },
+  opCard: {
+    flex: 1, backgroundColor: '#121228', borderRadius: 12, paddingVertical: 14,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1A1A35',
+    position: 'relative'
+  },
+  opCardActive: { borderColor: '#A855F7', backgroundColor: 'rgba(168, 85, 247, 0.2)' },
+  opCheckBadge: {
+    position: 'absolute', top: 6, right: 6, backgroundColor: '#A855F7',
+    borderRadius: 8, width: 16, height: 16, justifyContent: 'center', alignItems: 'center'
+  },
+  opFormulaIcon: { color: '#9CA3AF', fontSize: 16, fontFamily: 'Inter_700Bold' },
+  opCardText: { color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 4 },
+  opCardTextActive: { color: '#FFFFFF' },
 
   // PROFILE STYLES
   profileCard: {
