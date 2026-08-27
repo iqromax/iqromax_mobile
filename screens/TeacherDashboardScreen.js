@@ -123,7 +123,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
   };
 
   const handleStartExercise = () => {
-    navigation.navigate('ExerciseScreen', {
+    navigation.navigate('OddiyHisobGame', {
       exerciseType: activeExerciseType,
       digits: selectedDigits,
       count: exampleCount,
