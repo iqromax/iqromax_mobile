@@ -1802,7 +1802,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
         </View>
 
-        <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 285, paddingBottom: 170, paddingHorizontal: 20 }}>
+        <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: Platform.OS === 'android' ? 315 : 285, paddingBottom: 170, paddingHorizontal: 20 }}>
         
         {activeExerciseType === 'abacus' && (
           <View style={{ marginTop: 10 }}>
