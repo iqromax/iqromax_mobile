@@ -136,7 +136,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       generated.push(MentalMathGenerator.generate(operation, digits, terms));
     }
     setQuestions(generated);
-  }, []);
+    setCurrentQIndex(0);
+  }, [examplesCount, operation, speed, digits, isSpeedMode, route.params]);
 
   const calculateQuestionXP = () => {
     let xpAmount = 0;
@@ -249,7 +250,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       const q = questions[currentQIndex];
       let parts = q.display.split(' ');
       let newSeq = [];
-      const isDirectInputMode = ['multiply', 'kopaytirish', 'divide', 'bolish', 'aralash'].includes(operation) || isSpeedMode;
+      const isDirectInputMode = ['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation) || isSpeedMode;
       if (['multiply', 'kopaytirish', 'divide', 'bolish'].includes(operation)) {
          newSeq = [{ num: parts[0], op: '+' }, { num: parts[2], op: parts[1] }];
       } else {
