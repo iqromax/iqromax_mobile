@@ -297,8 +297,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                 </View>
               )}
 
-              {/* 2. ODDIY HISOB & TEZKOR HISOB CONFIGURATION CARDS */}
-              {(activeExerciseType === 'calc' || activeExerciseType === 'speed') && (
+              {/* 2. TASAVVUR (ODDIY HISOB) CONFIGURATION CARDS */}
+              {activeExerciseType === 'calc' && (
                 <>
                   {/* HADLAR SONI SECTION */}
                   <View style={styles.configBox}>
@@ -422,6 +422,108 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           <Text style={[styles.digitBtnText, selectedSpeed === s && styles.digitBtnTextActive]}>{s} soniya</Text>
                         </TouchableOpacity>
                       ))}
+                    </View>
+                  </View>
+
+                  {/* SON XONASI SECTION */}
+                  <View style={styles.configBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="numeric" size={20} color="#A855F7" />
+                      </View>
+                      <View>
+                        <Text style={styles.configTitle}>SON XONASI</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Qatnashadigan sonlar xonasini tanlang</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {[1, 2, 3, 4].map(d => (
+                        <TouchableOpacity 
+                          key={d}
+                          style={[styles.digitBtn, selectedDigits === d && styles.digitBtnActive]}
+                          onPress={() => setSelectedDigits(d)}
+                        >
+                          <Text style={[styles.digitBtnText, selectedDigits === d && styles.digitBtnTextActive]}>{d} xonali</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={{ height: 110 }} />
+                </>
+              )}
+
+              {/* 3. KO'PAYTIRISH VA BO'LISH CONFIGURATION CARDS */}
+              {activeExerciseType === 'speed' && (
+                <>
+                  {/* MISOLLAR SONI SECTION */}
+                  <View style={styles.configBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#A855F7" />
+                      </View>
+                      <View>
+                        <Text style={styles.configTitle}>MISOLLAR SONI</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Jami beriladigan misollar sonini tanlang</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                      {[5, 10, 15, 20, 25].map(c => (
+                        <TouchableOpacity 
+                          key={c}
+                          style={[styles.digitBtn, exampleCount === c && styles.digitBtnActive]}
+                          onPress={() => setExampleCount(c)}
+                        >
+                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} ta</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  </View>
+
+                  {/* AMALLAR (KO'PAYTIRISH / BO'LISH) SECTION */}
+                  <View style={styles.configBox}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                      <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                        <MaterialCommunityIcons name="calculator-variant" size={20} color="#A855F7" />
+                      </View>
+                      <View>
+                        <Text style={styles.configTitle}>AMALLAR</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Amallar turini tanlang</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ flexDirection: 'row', gap: 12 }}>
+                      {/* Ko'paytirish */}
+                      <TouchableOpacity 
+                        style={[styles.opCard, { paddingVertical: 18 }, selectedOpType === 'kopaytirish' && styles.opCardActive]}
+                        onPress={() => setSelectedOpType('kopaytirish')}
+                        activeOpacity={0.8}
+                      >
+                        {selectedOpType === 'kopaytirish' && (
+                          <View style={styles.opCheckBadge}>
+                            <MaterialCommunityIcons name="check" size={10} color="#FFF" />
+                          </View>
+                        )}
+                        <MaterialCommunityIcons name="close" size={30} color={selectedOpType === 'kopaytirish' ? '#A855F7' : '#9CA3AF'} />
+                        <Text style={[styles.opCardText, { fontSize: 13, marginTop: 6 }, selectedOpType === 'kopaytirish' && styles.opCardTextActive]}>Ko'paytirish</Text>
+                      </TouchableOpacity>
+
+                      {/* Bo'lish */}
+                      <TouchableOpacity 
+                        style={[styles.opCard, { paddingVertical: 18 }, selectedOpType === 'bolish' && styles.opCardActive]}
+                        onPress={() => setSelectedOpType('bolish')}
+                        activeOpacity={0.8}
+                      >
+                        {selectedOpType === 'bolish' && (
+                          <View style={styles.opCheckBadge}>
+                            <MaterialCommunityIcons name="check" size={10} color="#FFF" />
+                          </View>
+                        )}
+                        <MaterialCommunityIcons name="division" size={30} color={selectedOpType === 'bolish' ? '#A855F7' : '#9CA3AF'} />
+                        <Text style={[styles.opCardText, { fontSize: 13, marginTop: 6 }, selectedOpType === 'bolish' && styles.opCardTextActive]}>Bo'lish</Text>
+                      </TouchableOpacity>
                     </View>
                   </View>
 
