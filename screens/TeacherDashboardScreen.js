@@ -251,22 +251,22 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   <Text style={[styles.exTabCardText, activeExerciseType === 'abacus' && styles.exTabCardTextActive]}>Abakus</Text>
                 </TouchableOpacity>
 
-                {/* 2. ODDIY HISOB */}
+                {/* 2. TASAVVUR (ODDIY HISOB) */}
                 <TouchableOpacity 
                   style={[styles.exTabCard, activeExerciseType === 'calc' && styles.exTabCardActive]}
                   onPress={() => setActiveExerciseType('calc')}
                 >
                   <MaterialCommunityIcons name="calculator" size={26} color={activeExerciseType === 'calc' ? '#22C55E' : '#9CA3AF'} />
-                  <Text style={[styles.exTabCardText, activeExerciseType === 'calc' && styles.exTabCardTextActive]}>Oddiy Hisob</Text>
+                  <Text style={[styles.exTabCardText, activeExerciseType === 'calc' && styles.exTabCardTextActive]}>Tasavvur</Text>
                 </TouchableOpacity>
 
-                {/* 3. TEZICOR HISOBLASH */}
+                {/* 3. KO'PAYTIRISH VA BO'LISH */}
                 <TouchableOpacity 
                   style={[styles.exTabCard, activeExerciseType === 'speed' && styles.exTabCardActive]}
                   onPress={() => setActiveExerciseType('speed')}
                 >
                   <MaterialCommunityIcons name="lightning-bolt" size={26} color={activeExerciseType === 'speed' ? '#3B82F6' : '#9CA3AF'} />
-                  <Text style={[styles.exTabCardText, activeExerciseType === 'speed' && styles.exTabCardTextActive]}>Tezkor Hisob</Text>
+                  <Text style={[styles.exTabCardText, activeExerciseType === 'speed' && styles.exTabCardTextActive, { textAlign: 'center' }]}>Ko'paytirish va bo'lish</Text>
                 </TouchableOpacity>
               </View>
             </View>
