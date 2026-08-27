@@ -15,18 +15,18 @@ import { DASHBOARD_TRANSLATIONS } from './StudentDashboardScreen';
 
 const SOCKET_SERVER_URL = API_URL.replace(/\/api\/?$/, '');
 
-const getAvatarByName = (avatarName) => {
-  const avatarMap = {
-    'avatar_maks.png': require('../assets/avatar_maks.png'),
-    'avatar_alex.jpg': require('../assets/avatar_alex.jpg'),
-    'avatar_david.jpg': require('../assets/avatar_david.jpg'),
-    'avatar_emma.jpg': require('../assets/avatar_emma.jpg'),
-    'avatar_kevin.png': require('../assets/avatar_kevin.png'),
-    'avatar_lily.jpg': require('../assets/avatar_lily.jpg'),
-    'avatar_maya.jpg': require('../assets/avatar_maya.jpg'),
-    'avatar_sophia.png': require('../assets/avatar_sophia.png'),
-  };
-  return avatarMap[avatarName] || require('../assets/avatar_maks.png');
+const getAvatarByName = (name) => {
+  if (!name) return require('../assets/avatar_maks.png');
+  const lower = String(name).toLowerCase();
+  if (lower.includes('alex')) return require('../assets/avatar_alex.jpg');
+  if (lower.includes('maks')) return require('../assets/avatar_maks.png');
+  if (lower.includes('david')) return require('../assets/avatar_david.jpg');
+  if (lower.includes('kevin')) return require('../assets/avatar_kevin.png');
+  if (lower.includes('lily')) return require('../assets/avatar_lily.jpg');
+  if (lower.includes('maya')) return require('../assets/avatar_maya.jpg');
+  if (lower.includes('sophia')) return require('../assets/avatar_sophia.png');
+  if (lower.includes('emma')) return require('../assets/avatar_emma.jpg');
+  return require('../assets/avatar_maks.png');
 };
 
 export default function TeacherDashboardScreen({ navigation, route }) {
@@ -99,7 +99,9 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                 rank: index + 1,
                 name: u.name || '---',
                 xp: u.xp || 0,
-                avatar: u.avatar && u.avatar.startsWith('http') ? { uri: u.avatar } : getAvatarByName(u.avatar)
+                avatar: (u.avatar && u.avatar.startsWith('http')) 
+                  ? { uri: u.avatar } 
+                  : getAvatarByName(u.character || u.avatar || u.characterName || u.name)
               }));
               setLeaderboardData(rankedData);
             }
@@ -145,14 +147,19 @@ export default function TeacherDashboardScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor="#05050C" />
 
       {/* TOP HEADER */}
-      <View style={styles.topHeader}>
+      <LinearGradient
+        colors={['#130924', '#090914']}
+        style={styles.topHeader}
+      >
         <View style={styles.headerLeft}>
           <View style={styles.avatarBox}>
-            <Feather name="user-check" size={24} color="#A855F7" />
+            <LinearGradient colors={['#A855F7', '#6D28D9']} style={styles.avatarGradient}>
+              <Feather name="user-check" size={22} color="#FFFFFF" />
+            </LinearGradient>
           </View>
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={styles.welcomeText}>O'qituvchi</Text>
+              <Text style={styles.welcomeText}>O'QITUVCHI</Text>
               <View style={styles.infiniteBadge}>
                 <MaterialCommunityIcons name="infinity" size={14} color="#10B981" />
                 <Text style={styles.infiniteText}>Cheksiz</Text>
@@ -162,10 +169,12 @@ export default function TeacherDashboardScreen({ navigation, route }) {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleReturnToHome}>
-          <Feather name="log-out" size={20} color="#EF4444" />
+        <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.8} onPress={handleReturnToHome}>
+          <LinearGradient colors={['rgba(239, 68, 68, 0.2)', 'rgba(239, 68, 68, 0.05)']} style={styles.logoutGradient}>
+            <Feather name="log-out" size={18} color="#F87171" />
+          </LinearGradient>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {/* TAB CONTENTS */}
       <View style={{ flex: 1 }}>
@@ -756,24 +765,26 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#05050C' },
   topHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#1A1A2E'
+    paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: 'rgba(168, 85, 247, 0.2)'
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatarBox: {
-    width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(168, 85, 247, 0.15)',
-    justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#A855F7'
+    width: 44, height: 44, borderRadius: 22, overflow: 'hidden',
+    borderWidth: 1.5, borderColor: '#A855F7',
+    shadowColor: '#A855F7', shadowOpacity: 0.5, shadowRadius: 8, elevation: 6
   },
-  welcomeText: { color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_500Medium' },
-  userName: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' },
+  avatarGradient: { width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' },
+  welcomeText: { color: '#A855F7', fontSize: 10, fontFamily: 'Inter_700Bold', letterSpacing: 0.8 },
+  userName: { color: '#FFFFFF', fontSize: 17, fontFamily: 'Inter_700Bold', marginTop: 2 },
   infiniteBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)'
+    paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.4)'
   },
   infiniteText: { color: '#10B981', fontSize: 10, fontFamily: 'Inter_700Bold' },
   logoutBtn: {
-    padding: 8, borderRadius: 10, backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)'
+    borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.4)'
   },
+  logoutGradient: { padding: 9, justifyContent: 'center', alignItems: 'center' },
   scrollContent: { flex: 1, paddingHorizontal: 20, paddingTop: 14 },
   heroCard: { borderRadius: 20, overflow: 'hidden', marginBottom: 20 },
   heroGradient: { padding: 20 },
