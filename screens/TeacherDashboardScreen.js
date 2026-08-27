@@ -51,6 +51,26 @@ export default function TeacherDashboardScreen({ navigation, route }) {
   // Ranking data
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchFocusAnim = useRef(new Animated.Value(0)).current;
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+    Animated.timing(searchFocusAnim, {
+      toValue: 1,
+      duration: 250,
+      useNativeDriver: false
+    }).start();
+  };
+
+  const handleSearchBlur = () => {
+    setIsSearchFocused(false);
+    Animated.timing(searchFocusAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: false
+    }).start();
+  };
 
   // Socket & Real-time deletion check
   useEffect(() => {
@@ -619,19 +639,48 @@ export default function TeacherDashboardScreen({ navigation, route }) {
 
         {/* 4. REYTING SAHIFA (RANKING) */}
         {activeTab === 'ranking' && (
-          <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 10 }}>
-            <Text style={styles.sectionTitle}>{t.rankingTitle || "REYTING"}</Text>
-            
-            <View style={styles.searchBar}>
-              <Feather name="search" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+          <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 14 }}>
+            <Animated.View style={[
+              styles.searchBar,
+              {
+                borderColor: searchFocusAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['#1A1A35', '#A855F7']
+                }),
+                backgroundColor: searchFocusAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ['#0D0D1F', '#130C2E']
+                }),
+                shadowColor: '#A855F7',
+                shadowOpacity: searchFocusAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0.6]
+                }),
+                shadowRadius: 10,
+                elevation: isSearchFocused ? 6 : 0
+              }
+            ]}>
+              <Feather 
+                name="search" 
+                size={18} 
+                color={isSearchFocused ? '#A855F7' : '#9CA3AF'} 
+                style={{ marginRight: 10 }} 
+              />
               <TextInput
-                style={{ flex: 1, color: '#FFF', fontSize: 14 }}
+                style={{ flex: 1, color: '#FFF', fontSize: 14, fontFamily: 'Inter_500Medium' }}
                 placeholder={t.searchPlaceholder || "Foydalanuvchi qidirish..."}
                 placeholderTextColor="#6B7280"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
+                onFocus={handleSearchFocus}
+                onBlur={handleSearchBlur}
               />
-            </View>
+              {!!searchQuery && (
+                <TouchableOpacity onPress={() => setSearchQuery('')} style={{ padding: 4 }}>
+                  <Feather name="x-circle" size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              )}
+            </Animated.View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
               {filteredLeaderboard.length === 0 ? (
@@ -838,7 +887,7 @@ const styles = StyleSheet.create({
   // RANKING STYLES
   searchBar: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#0D0D1F',
-    borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: '#1A1A35', marginBottom: 14
+    borderRadius: 16, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1.5, borderColor: '#1A1A35', marginBottom: 16
   },
   rankRow: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#0D0D1F',
