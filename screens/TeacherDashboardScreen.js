@@ -457,15 +457,15 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               {/* 3. KO'PAYTIRISH VA BO'LISH CONFIGURATION CARDS */}
               {activeExerciseType === 'speed' && (
                 <>
-                  {/* MISOLLAR SONI SECTION */}
+                  {/* HADLAR SONI SECTION */}
                   <View style={styles.configBox}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                       <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>MISOLLAR SONI</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Jami beriladigan misollar sonini tanlang</Text>
+                        <Text style={styles.configTitle}>HADLAR SONI</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>5 dan 25 hadgacha tanlang</Text>
                       </View>
                     </View>
 
@@ -476,7 +476,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           style={[styles.digitBtn, exampleCount === c && styles.digitBtnActive]}
                           onPress={() => setExampleCount(c)}
                         >
-                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} ta</Text>
+                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} had</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
