@@ -294,7 +294,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   </View>
 
                   <View style={{ height: 110 }} />
-                </>
+                </View>
               )}
             </ScrollView>
 
