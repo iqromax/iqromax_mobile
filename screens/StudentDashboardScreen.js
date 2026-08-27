@@ -237,19 +237,37 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   const modelPath = models[characterIndex] || models[0];
   const { scene } = useGLTF(modelPath);
 
-  // Fix Android EXGL black silhouette: Keep original materials, disable metallic reflection, and ensure update
+  // Fix Android EXGL chrome/silver reflection artifact: Convert mesh materials on Android to MeshBasicMaterial with original textures
   React.useMemo(() => {
     scene.traverse((child) => {
       if (child.isMesh && child.material) {
-         const mats = Array.isArray(child.material) ? child.material : [child.material];
-         mats.forEach(mat => {
-           mat.metalness = 0.0;
-           mat.roughness = 1.0;
-           if ('emissive' in mat && mat.emissive) {
-             mat.emissive.setHex(0x000000);
-           }
-           mat.needsUpdate = true;
-         });
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        if (Platform.OS === 'android') {
+          const newMats = mats.map(mat => {
+            if (mat.map) {
+              return new THREE.MeshBasicMaterial({
+                map: mat.map,
+                side: THREE.DoubleSide,
+                transparent: mat.transparent || false,
+                alphaTest: mat.alphaTest || 0,
+              });
+            }
+            return new THREE.MeshBasicMaterial({
+              color: mat.color ? mat.color : 0xdddddd,
+              side: THREE.DoubleSide,
+            });
+          });
+          child.material = Array.isArray(child.material) ? newMats : newMats[0];
+        } else {
+          mats.forEach(mat => {
+            mat.metalness = 0.0;
+            mat.roughness = 1.0;
+            if ('emissive' in mat && mat.emissive) {
+              mat.emissive.setHex(0x000000);
+            }
+            mat.needsUpdate = true;
+          });
+        }
       }
     });
   }, [scene]);
