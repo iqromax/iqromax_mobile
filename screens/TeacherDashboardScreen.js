@@ -158,13 +158,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
             </LinearGradient>
           </View>
           <View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={styles.welcomeText}>O'QITUVCHI</Text>
-              <View style={styles.infiniteBadge}>
-                <MaterialCommunityIcons name="infinity" size={14} color="#10B981" />
-                <Text style={styles.infiniteText}>Cheksiz</Text>
-              </View>
-            </View>
+            <Text style={styles.welcomeText}>O'QITUVCHI</Text>
             <Text style={styles.userName}>{user?.name || "O'qituvchi"}</Text>
           </View>
         </View>
@@ -852,6 +846,8 @@ const styles = StyleSheet.create({
   },
   rankNum: { color: '#A855F7', fontSize: 14, fontFamily: 'Inter_700Bold', width: 32 },
   rankAvatar: { width: 40, height: 40, borderRadius: 20 },
+  rankName: { color: '#FFFFFF', fontSize: 15, fontFamily: 'Inter_700Bold' },
+  rankXp: { color: '#9CA3AF', fontSize: 12, marginTop: 2 },
   opCard: {
     flex: 1, backgroundColor: '#121228', borderRadius: 12, paddingVertical: 14,
     alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#1A1A35',
