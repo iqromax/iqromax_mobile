@@ -986,6 +986,53 @@ app.delete('/api/admin/mystery-box/:id', async (req, res) => {
   }
 });
 
+// --- ADMIN PREMIUM USERS MANAGEMENT API ---
+app.get('/api/admin/premium-users', async (req, res) => {
+  try {
+    // Fetch users with active or past premium, or registered as Premium
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          { premiumExpiresAt: { not: null } },
+          { role: { contains: 'Premium' } }
+        ]
+      },
+      orderBy: { updatedAt: 'desc' }
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error('Fetch premium users error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Revoke/Delete Premium Subscription for a user
+app.post('/api/admin/revoke-premium', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID talab qilinadi' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        premiumExpiresAt: null,
+        role: 'Student'
+      }
+    });
+
+    // Broadcast socket event to instant sync with mobile app
+    io.emit('premium_revoked', { userId: updatedUser.id, customId: updatedUser.customId });
+
+    res.json({ message: 'Premium obuna muvaffaqiyatli bekor qilindi', user: updatedUser });
+  } catch (error) {
+    console.error('Revoke premium error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Serve admin panel static files in production
 app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 

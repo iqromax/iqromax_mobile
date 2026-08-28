@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
-import { Package, Plus, Trash2, Edit, Sparkles, AlertCircle, CheckCircle2, Zap, Crown } from 'lucide-react';
+import { Package, Plus, Trash2, Edit, Sparkles, AlertCircle, CheckCircle2, Zap, Crown, Users, UserX, Calendar } from 'lucide-react';
 
 interface MysteryBoxItem {
   id: string;
@@ -13,12 +13,32 @@ interface MysteryBoxItem {
   createdAt: string;
 }
 
+interface PremiumUser {
+  id: string;
+  customId: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  premiumExpiresAt?: string | null;
+  createdAt: string;
+}
+
 const MysteryBoxAdmin = () => {
+  // Navigation Tab State: 'rewards' | 'premium_users'
+  const [activeTab, setActiveTab] = useState<'rewards' | 'premium_users'>('rewards');
+
+  // Mystery Box Items State
   const [items, setItems] = useState<MysteryBoxItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MysteryBoxItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  // Premium Users State
+  const [premiumUsers, setPremiumUsers] = useState<PremiumUser[]>([]);
+  const [isRevoking, setIsRevoking] = useState<string | null>(null);
 
   // Form State
   const [name, setName] = useState('');
@@ -39,8 +59,21 @@ const MysteryBoxAdmin = () => {
     }
   };
 
+  const fetchPremiumUsers = async () => {
+    try {
+      const res = await fetch('/api/admin/premium-users');
+      if (res.ok) {
+        const data = await res.json();
+        setPremiumUsers(data);
+      }
+    } catch (e) {
+      console.error('Fetch premium users error:', e);
+    }
+  };
+
   useEffect(() => {
     fetchMysteryBoxItems();
+    fetchPremiumUsers();
   }, []);
 
   const handleOpenCreateModal = () => {
@@ -118,6 +151,30 @@ const MysteryBoxAdmin = () => {
     }
   };
 
+  const handleRevokePremium = async (userId: string, userName: string) => {
+    if (!window.confirm(`Haqiqatan ham "${userName}" foydalanuvchisining Premium xizmatini o'chirib tashlamoqchimisiz? O'chirilgach, u mashq bajarganda chaqmoq sarflana boshlaydi!`)) return;
+
+    setIsRevoking(userId);
+    try {
+      const res = await fetch('/api/admin/revoke-premium', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+
+      if (res.ok) {
+        setPremiumUsers(prev => prev.filter(u => u.id !== userId));
+        setAlertMsg({ text: `"${userName}" premium obunasi muvaffaqiyatli o'chirildi!`, type: 'success' });
+      } else {
+        setAlertMsg({ text: 'O\'chirishda xatolik yuz berdi', type: 'error' });
+      }
+    } catch (e) {
+      setAlertMsg({ text: 'Tarmoq xatosi yuz berdi', type: 'error' });
+    } finally {
+      setIsRevoking(null);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -129,17 +186,46 @@ const MysteryBoxAdmin = () => {
               <Package className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-wide">Sirli Sandiq Boshqaruvi</h1>
-              <p className="text-sm text-gray-400 mt-1">Sirli sandiq sovg'alarini yaratish, tahrirlash hamda jadval ko'rinishida boshqarish</p>
+              <h1 className="text-2xl font-bold text-white tracking-wide">Sirli Sandiq & Premium Boshqaruvi</h1>
+              <p className="text-sm text-gray-400 mt-1">Sovg'alarni yaratish hamda Premium obunachilar ro'yxatini boshqarish</p>
             </div>
           </div>
 
+          {activeTab === 'rewards' && (
+            <button
+              onClick={handleOpenCreateModal}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold px-5 py-3 rounded-xl shadow-lg shadow-purple-600/25 transition-all cursor-pointer"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Yangi Sirli Sandiq Yaratish</span>
+            </button>
+          )}
+        </div>
+
+        {/* Navigation Tabs Header */}
+        <div className="flex items-center gap-3 bg-[#080816] p-1.5 rounded-xl border border-[#1A1A35] w-fit">
           <button
-            onClick={handleOpenCreateModal}
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold px-5 py-3 rounded-xl shadow-lg shadow-purple-600/25 transition-all cursor-pointer"
+            onClick={() => setActiveTab('rewards')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all cursor-pointer ${
+              activeTab === 'rewards'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
           >
-            <Plus className="w-5 h-5" />
-            <span>Yangi Sirli Sandiq Yaratish</span>
+            <Package className="w-4 h-4" />
+            <span>Sovg'alar Ro'yxati ({items.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('premium_users')}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all cursor-pointer ${
+              activeTab === 'premium_users'
+                ? 'bg-gradient-to-r from-amber-600 to-purple-600 text-white shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Crown className="w-4 h-4 text-amber-400" />
+            <span>Premium Obunachilar ({premiumUsers.length})</span>
           </button>
         </div>
 
@@ -156,105 +242,214 @@ const MysteryBoxAdmin = () => {
           </div>
         )}
 
-        {/* TABLE VIEW OF MYSTERY BOX ITEMS */}
-        <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden shadow-xl">
-          <div className="px-6 py-4 border-b border-[#1A1A2F] flex items-center justify-between">
-            <h2 className="font-bold text-white text-base">Sirli Sovg'alar Ro'yxati ({items.length})</h2>
-          </div>
+        {/* TAB 1: SOVG'ALAR RO'YXATI TABLE */}
+        {activeTab === 'rewards' && (
+          <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden shadow-xl">
+            <div className="px-6 py-4 border-b border-[#1A1A2F] flex items-center justify-between">
+              <h2 className="font-bold text-white text-base">Sirli Sovg'alar Ro'yxati ({items.length})</h2>
+            </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-[#080814] border-b border-[#151528] text-gray-400 text-xs uppercase tracking-wider">
-                  <th className="py-4 px-6 font-semibold">Turi & Belgisi</th>
-                  <th className="py-4 px-6 font-semibold">Sovg'a Nomi</th>
-                  <th className="py-4 px-6 font-semibold">Tavsifi</th>
-                  <th className="py-4 px-6 font-semibold">Qiymati</th>
-                  <th className="py-4 px-6 font-semibold">Yaratilgan Sana</th>
-                  <th className="py-4 px-6 font-semibold text-right">Amallar</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#151528] text-sm text-gray-300">
-                {items.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#121225]/50 transition-colors group">
-                    {/* Type & Badge */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${
-                          item.type === 'energy' 
-                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' 
-                            : 'bg-purple-500/10 border-purple-500/30 text-purple-400'
-                        }`}>
-                          {item.type === 'energy' ? <Zap className="w-5 h-5" /> : <Crown className="w-5 h-5" />}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#080814] border-b border-[#151528] text-gray-400 text-xs uppercase tracking-wider">
+                    <th className="py-4 px-6 font-semibold">Turi & Belgisi</th>
+                    <th className="py-4 px-6 font-semibold">Sovg'a Nomi</th>
+                    <th className="py-4 px-6 font-semibold">Tavsifi</th>
+                    <th className="py-4 px-6 font-semibold">Qiymati</th>
+                    <th className="py-4 px-6 font-semibold">Yaratilgan Sana</th>
+                    <th className="py-4 px-6 font-semibold text-right">Amallar</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#151528] text-sm text-gray-300">
+                  {items.map((item) => (
+                    <tr key={item.id} className="hover:bg-[#121225]/50 transition-colors group">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${
+                            item.type === 'energy' 
+                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' 
+                              : 'bg-purple-500/10 border-purple-500/30 text-purple-400'
+                          }`}>
+                            {item.type === 'energy' ? <Zap className="w-5 h-5" /> : <Crown className="w-5 h-5" />}
+                          </div>
+                          <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
+                            item.type === 'energy' 
+                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' 
+                              : 'bg-purple-500/10 border-purple-500/30 text-purple-300'
+                          }`}>
+                            {item.badge || (item.type === 'energy' ? `⚡ ${item.value || 1} Energiya` : `👑 ${item.value || 1} kun Premium`)}
+                          </span>
                         </div>
-                        <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${
-                          item.type === 'energy' 
-                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' 
-                            : 'bg-purple-500/10 border-purple-500/30 text-purple-300'
-                        }`}>
-                          {item.badge || (item.type === 'energy' ? `⚡ ${item.value || 1} Energiya` : `👑 ${item.value || 1} kun Premium`)}
+                      </td>
+
+                      <td className="py-4 px-6 font-bold text-white group-hover:text-purple-300 transition-colors">
+                        {item.name}
+                      </td>
+
+                      <td className="py-4 px-6 text-gray-400 max-w-xs truncate">
+                        {item.description}
+                      </td>
+
+                      <td className="py-4 px-6">
+                        <span className="font-bold text-white bg-[#15152A] px-3 py-1 rounded-lg border border-[#252545]">
+                          {item.type === 'energy' ? `${item.value || 1} ta Energiya ⚡` : `${item.value || 1} kun Premium 👑`}
                         </span>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Name */}
-                    <td className="py-4 px-6 font-bold text-white group-hover:text-purple-300 transition-colors">
-                      {item.name}
-                    </td>
+                      <td className="py-4 px-6 text-gray-500 text-xs">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </td>
 
-                    {/* Description */}
-                    <td className="py-4 px-6 text-gray-400 max-w-xs truncate">
-                      {item.description}
-                    </td>
+                      <td className="py-4 px-6 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleOpenEditModal(item)}
+                            className="flex items-center gap-1 text-xs bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/30 transition-all cursor-pointer"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                            <span>Tahrirlash</span>
+                          </button>
 
-                    {/* Value */}
-                    <td className="py-4 px-6">
-                      <span className="font-bold text-white bg-[#15152A] px-3 py-1 rounded-lg border border-[#252545]">
-                        {item.type === 'energy' ? `${item.value || 1} ta Energiya ⚡` : `${item.value || 1} kun Premium 👑`}
-                      </span>
-                    </td>
+                          <button
+                            onClick={() => handleDeleteItem(item.id)}
+                            disabled={isDeleting === item.id}
+                            className="flex items-center gap-1 text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 px-3 py-1.5 rounded-lg border border-red-500/30 transition-all cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>{isDeleting === item.id ? 'O\'chirilmoqda...' : 'O\'chirish'}</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
 
-                    {/* Date */}
-                    <td className="py-4 px-6 text-gray-500 text-xs">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </td>
-
-                    {/* Actions: Edit & Delete */}
-                    <td className="py-4 px-6 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleOpenEditModal(item)}
-                          className="flex items-center gap-1 text-xs bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 px-3 py-1.5 rounded-lg border border-indigo-500/30 transition-all cursor-pointer"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                          <span>Tahrirlash</span>
-                        </button>
-
-                        <button
-                          onClick={() => handleDeleteItem(item.id)}
-                          disabled={isDeleting === item.id}
-                          className="flex items-center gap-1 text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 px-3 py-1.5 rounded-lg border border-red-500/30 transition-all cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          <span>{isDeleting === item.id ? 'O\'chirilmoqda...' : 'O\'chirish'}</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-
-                {items.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-16 text-center text-gray-500">
-                      <Package className="w-12 h-12 mx-auto mb-3 text-gray-600" />
-                      <p className="font-medium text-base text-gray-400">Hozircha hech qanday sirli sovg'a yaratilmagan</p>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  {items.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-16 text-center text-gray-500">
+                        <Package className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+                        <p className="font-medium text-base text-gray-400">Hozircha hech qanday sirli sovg'a yaratilmagan</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* TAB 2: PREMIUM OBUNACHILAR TABLE */}
+        {activeTab === 'premium_users' && (
+          <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden shadow-xl">
+            <div className="px-6 py-4 border-b border-[#1A1A2F] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Crown className="w-5 h-5 text-amber-400" />
+                <h2 className="font-bold text-white text-base">Premium Statusiga Ega O'quvchilar Ro'yxati ({premiumUsers.length})</h2>
+              </div>
+              <span className="text-xs text-amber-400/80 bg-amber-500/10 px-3 py-1 rounded-lg border border-amber-500/20 font-semibold">
+                ⚡ Premium faollik vaqtida chaqmoqlar sarflanmaydi
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#080814] border-b border-[#151528] text-gray-400 text-xs uppercase tracking-wider">
+                    <th className="py-4 px-6 font-semibold">Foydalanuvchi</th>
+                    <th className="py-4 px-6 font-semibold">ID / Promokod</th>
+                    <th className="py-4 px-6 font-semibold">Aloqa</th>
+                    <th className="py-4 px-6 font-semibold">Premium Amaldagi Muddati</th>
+                    <th className="py-4 px-6 font-semibold">Holati</th>
+                    <th className="py-4 px-6 font-semibold text-right">Amallar</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#151528] text-sm text-gray-300">
+                  {premiumUsers.map((user) => {
+                    const isStillActive = user.premiumExpiresAt ? new Date(user.premiumExpiresAt).getTime() > Date.now() : true;
+                    return (
+                      <tr key={user.id} className="hover:bg-[#121225]/50 transition-colors group">
+                        {/* User Name & Role */}
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-purple-500/20 border border-amber-500/30 flex items-center justify-center font-bold text-amber-400">
+                              👑
+                            </div>
+                            <div>
+                              <p className="font-bold text-white group-hover:text-amber-300 transition-colors">{user.name}</p>
+                              <p className="text-xs text-gray-500">{user.role}</p>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Custom ID */}
+                        <td className="py-4 px-6 font-mono text-purple-300 font-bold">
+                          {user.customId}
+                        </td>
+
+                        {/* Contact */}
+                        <td className="py-4 px-6 text-gray-400 text-xs">
+                          <p className="text-gray-300 font-medium">{user.email}</p>
+                          <p className="text-gray-500 mt-0.5">{user.phone}</p>
+                        </td>
+
+                        {/* Premium Expiration Date */}
+                        <td className="py-4 px-6">
+                          {user.premiumExpiresAt ? (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-purple-400" />
+                              <div>
+                                <p className="font-bold text-white text-xs">
+                                  {new Date(user.premiumExpiresAt).toLocaleDateString()} {new Date(user.premiumExpiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                                <p className={`text-[10px] ${isStillActive ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {isStillActive ? '⚡ Hozir faol' : '⌛ Muddati tugagan'}
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-amber-400 font-bold">Doimiy Premium</span>
+                          )}
+                        </td>
+
+                        {/* Status Badge */}
+                        <td className="py-4 px-6">
+                          <span className={`px-3 py-1 text-xs font-bold rounded-lg border ${
+                            isStillActive 
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                              : 'bg-red-500/10 border-red-500/30 text-red-400'
+                          }`}>
+                            {isStillActive ? '⚡ Faol' : 'Tugagan'}
+                          </span>
+                        </td>
+
+                        {/* Revoke Action Button */}
+                        <td className="py-4 px-6 text-right">
+                          <button
+                            onClick={() => handleRevokePremium(user.id, user.name)}
+                            disabled={isRevoking === user.id}
+                            className="flex items-center gap-1.5 text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20 px-3.5 py-2 rounded-xl border border-red-500/30 transition-all cursor-pointer ml-auto font-semibold"
+                          >
+                            <UserX className="w-4 h-4" />
+                            <span>{isRevoking === user.id ? 'Bekor qilinmoqda...' : 'Premium xizmatini o\'chirish'}</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+
+                  {premiumUsers.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-16 text-center text-gray-500">
+                        <Users className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+                        <p className="font-medium text-base text-gray-400">Hozircha hech qanday Premium obunachi mavjud emas</p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Create / Edit Mystery Box Modal */}
         {isModalOpen && (
@@ -306,7 +501,6 @@ const MysteryBoxAdmin = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Sovg'a Turi Select: Premium or Energy */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Sovg'a Turi (Type)</label>
                     <select
@@ -325,7 +519,6 @@ const MysteryBoxAdmin = () => {
                     </select>
                   </div>
 
-                  {/* Dynamic Value Input depending on Type */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
                       {type === 'energy' ? 'Chaqmoq Soni (1 - 10)' : 'Premium Kunlari (Kun)'}
