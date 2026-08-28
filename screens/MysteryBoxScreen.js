@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Share } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Share, Alert } from 'react-native';
 import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Clipboard from 'expo-clipboard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MysteryBoxScreen({ navigation, route }) {
   const { user, initialTab = 'main' } = route.params || {};
@@ -12,6 +13,12 @@ export default function MysteryBoxScreen({ navigation, route }) {
   const [keysCount, setKeysCount] = useState(3);
   const [claimedReward, setClaimedReward] = useState(null);
   const [rewardsTab, setRewardsTab] = useState('Barchasi'); // 'Barchasi' | 'Faol' | 'Tarix'
+
+  // Invitation & Referral state
+  const rawPromo = user?.customId ? user.customId.replace(/^#+/, '') : 'MICHAEL';
+  const referralLink = `https://iqromax.uz/invite/${rawPromo}`;
+  const shareMessage = `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling!\n\nMening promokodim: ${rawPromo}\n\nIlovani yuklab olish uchun havola:\n${referralLink}`;
+  const [isCopied, setIsCopied] = useState(false);
 
   // Real dynamic states for bonus keys & streak
   const [welcomeBonusClaimed, setWelcomeBonusClaimed] = useState(true); // User received 1 bonus key on registration
@@ -53,9 +60,6 @@ export default function MysteryBoxScreen({ navigation, route }) {
       Alert.alert("Tabriklaymiz! 🎉", "7 kunlik faollik uchun +1 ta oltin kalit berildi!");
     }
   };
-  const referralLink = `https://iqromax.uz/invite/${rawPromo}`;
-  const shareMessage = `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling!\n\nMening promokodim: ${rawPromo}\n\nIlovani yuklab olish uchun havola:\n${referralLink}`;
-  const [isCopied, setIsCopied] = useState(false);
 
   // Rewards List State
   const [rewardsList, setRewardsList] = useState([
