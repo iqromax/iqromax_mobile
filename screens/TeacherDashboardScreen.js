@@ -961,7 +961,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
       </View>
 
       {/* LANGUAGE SELECTOR MODAL */}
-      <Modal visible={isLangModalOpen} transparent animationType="slide">
+      <Modal visible={isLangModalOpen} transparent animationType="fade">
         <View style={styles.langModalOverlay}>
           <View style={styles.langModalContainer}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -1160,10 +1160,10 @@ const styles = StyleSheet.create({
   },
   langTitleText: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold' },
   langSubtitleText: { color: '#9CA3AF', fontSize: 12, marginTop: 2, fontFamily: 'Inter_500Medium' },
-  langModalOverlay: { flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.85)', justifyContent: 'flex-end' },
+  langModalOverlay: { flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.88)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   langModalContainer: {
-    backgroundColor: '#0D0D1A', borderTopLeftRadius: 28, borderTopRightRadius: 28,
-    padding: 24, borderWidth: 1, borderColor: '#A855F7'
+    width: '100%', backgroundColor: '#0D0D1A', borderRadius: 24,
+    padding: 22, borderWidth: 1.5, borderColor: '#A855F7'
   },
   langModalTitle: { color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_700Bold' },
   langItem: {
