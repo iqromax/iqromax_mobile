@@ -63,6 +63,9 @@ export default function MysteryBoxScreen({ navigation, route }) {
     }
   };
 
+  // Rewards List State with real storage
+  const [rewardsList, setRewardsList] = useState([]);
+
   // Per-user isolated storage key
   const userIdKey = user?.customId || user?.id || 'guest';
   const REWARDS_STORAGE_KEY = `user_won_rewards_history_${userIdKey}`;
