@@ -4,6 +4,7 @@ import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import io from 'socket.io-client';
 import { API_URL } from '../src/config/api';
 
 export default function MysteryBoxScreen({ navigation, route }) {
@@ -128,6 +129,29 @@ export default function MysteryBoxScreen({ navigation, route }) {
       } catch (e) {}
     }
     fetchAdminItems();
+
+    // Socket listener: when admin revokes premium, clear active premium item from user's Sovg'alarim list
+    const socket = io(API_URL, { transports: ['websocket'] });
+    socket.on('premium_revoked', async (data) => {
+      if (!user || data.userId === user.id || data.customId === user.customId) {
+        try {
+          await AsyncStorage.removeItem('user_premium_expires_at');
+          const storedRewards = await AsyncStorage.getItem('user_won_rewards_history');
+          if (storedRewards) {
+            const parsed = JSON.parse(storedRewards);
+            // Remove active premium reward item from history array or set status to Tarix
+            const updated = parsed.filter(item => item.type !== 'premium');
+            setRewardsList(updated);
+            await AsyncStorage.setItem('user_won_rewards_history', JSON.stringify(updated));
+          }
+        } catch (e) {}
+      }
+    });
+
+    return () => {
+      socket.off('premium_revoked');
+      socket.disconnect();
+    };
   }, []);
 
   const openBoxHandler = () => {
