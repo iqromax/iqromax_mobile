@@ -82,3 +82,14 @@ model TeacherRequest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model MysteryBoxItem {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  badge       String?  // Optional badge tag e.g. "⚡ 3 kun", "🪙 +500 Coin"
+  type        String   @default("premium") // "premium", "coin", "discount", "skin"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

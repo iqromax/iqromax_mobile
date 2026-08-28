@@ -4,6 +4,7 @@ import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../src/config/api';
 
 export default function MysteryBoxScreen({ navigation, route }) {
   const { user, initialTab = 'main' } = route.params || {};
@@ -81,16 +82,46 @@ export default function MysteryBoxScreen({ navigation, route }) {
     } catch (e) {}
   };
 
+  // Fetch Admin Created Mystery Box Items
+  const [adminBoxItems, setAdminBoxItems] = useState([]);
+
+  React.useEffect(() => {
+    async function fetchAdminItems() {
+      try {
+        const res = await fetch(`${API_URL}/mystery-box`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setAdminBoxItems(data);
+          }
+        }
+      } catch (e) {}
+    }
+    fetchAdminItems();
+  }, []);
+
   const openBoxHandler = () => {
     if (keysCount <= 0) return;
     setActiveScreen('opening');
     setTimeout(() => {
-      const rewardOptions = [
-        { title: '3 KUNLIK BEPUL PREMIUM', sub: 'Ajoyib! Siz 3 kunlik Premium status yutdingiz!', badge: '⚡ 3 kun', type: 'premium' },
-        { title: '500 OLTIN COINLAR', sub: 'Ajoyib! Siz 500 Coin yutdingiz!', badge: '🪙 +500 Coin', type: 'coin' },
-        { title: '20% CHEGIRMA KUPONI', sub: 'Ajoyib! Siz 20% Chegirma kuponini yutdingiz!', badge: '🏷️ 20% Off', type: 'discount' },
-      ];
-      const selected = rewardOptions[Math.floor(Math.random() * rewardOptions.length)];
+      let selected = null;
+      if (adminBoxItems.length > 0) {
+        const randomItem = adminBoxItems[Math.floor(Math.random() * adminBoxItems.length)];
+        selected = {
+          title: randomItem.name,
+          sub: randomItem.description,
+          badge: randomItem.badge || (randomItem.type === 'coin' ? '🪙 Coin' : '⚡ Premium'),
+          type: randomItem.type || 'premium'
+        };
+      } else {
+        const rewardOptions = [
+          { title: '3 KUNLIK BEPUL PREMIUM', sub: 'Ajoyib! Siz 3 kunlik Premium status yutdingiz!', badge: '⚡ 3 kun', type: 'premium' },
+          { title: '500 OLTIN COINLAR', sub: 'Ajoyib! Siz 500 Coin yutdingiz!', badge: '🪙 +500 Coin', type: 'coin' },
+          { title: '20% CHEGIRMA KUPONI', sub: 'Ajoyib! Siz 20% Chegirma kuponini yutdingiz!', badge: '🏷️ 20% Off', type: 'discount' },
+        ];
+        selected = rewardOptions[Math.floor(Math.random() * rewardOptions.length)];
+      }
+
       setClaimedReward(selected);
       setKeysCount(prev => Math.max(0, prev - 1));
       setActiveScreen('reward');

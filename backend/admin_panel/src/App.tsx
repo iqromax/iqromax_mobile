@@ -7,6 +7,7 @@ import Teachers from './pages/Teachers';
 import Parents from './pages/Parents';
 import EnergyCenter from './pages/EnergyCenter';
 import Notifications from './pages/Notifications';
+import MysteryBoxAdmin from './pages/MysteryBoxAdmin';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/mystery-box" element={<MysteryBoxAdmin />} />
         <Route path="/users" element={<Users />} />
         <Route path="/students" element={<Students />} />
         <Route path="/teachers" element={<Teachers />} />

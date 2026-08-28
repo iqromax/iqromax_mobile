@@ -903,6 +903,62 @@ app.get('/api/user/status/:id', async (req, res) => {
   }
 });
 
+// --- MYSTERY BOX ADMIN & APP API ---
+app.get('/api/mystery-box', async (req, res) => {
+  try {
+    // @ts-ignore
+    const items = await prisma.mysteryBoxItem.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json(items);
+  } catch (error) {
+    console.error('Fetch mystery box items error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/admin/mystery-box', async (req, res) => {
+  try {
+    const { name, description, badge, type } = req.body;
+    if (!name || !description) {
+      return res.status(400).json({ error: 'Nomi va tavsifi kiritilishi shart!' });
+    }
+
+    // Automatically derive badge and type if not provided
+    const derivedBadge = badge || (name.toLowerCase().includes('premium') ? '⚡ Premium' : name.toLowerCase().includes('coin') ? '🪙 Coin' : '🏷️ Kupon');
+    const derivedType = type || (name.toLowerCase().includes('coin') ? 'coin' : name.toLowerCase().includes('kupon') ? 'discount' : 'premium');
+
+    // @ts-ignore
+    const newItem = await prisma.mysteryBoxItem.create({
+      data: {
+        name: name.trim(),
+        description: description.trim(),
+        badge: derivedBadge,
+        type: derivedType,
+        isActive: true
+      }
+    });
+
+    res.status(201).json({ message: 'Sirli sovg\'a muvaffaqiyatli yaratildi', item: newItem });
+  } catch (error) {
+    console.error('Create mystery box item error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.delete('/api/admin/mystery-box/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    // @ts-ignore
+    await prisma.mysteryBoxItem.delete({ where: { id } });
+    res.json({ message: 'Sirli sovg\'a o\'chirildi' });
+  } catch (error) {
+    console.error('Delete mystery box item error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Serve admin panel static files in production
 app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle } from 'lucide-react';
+import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle, Package } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
@@ -52,6 +52,18 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             >
               <Home className={`w-5 h-5 ${location.pathname === '/dashboard' ? 'text-purple-200' : ''}`} />
               {isSidebarOpen && <span>Dashboard</span>}
+            </Link>
+
+            <Link 
+              to="/mystery-box" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/mystery-box' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <Package className={`w-5 h-5 ${location.pathname === '/mystery-box' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>Sirli Sandiq</span>}
             </Link>
             
             <Link 
