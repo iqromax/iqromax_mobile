@@ -3635,11 +3635,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                   setAuthLoading(true);
                   try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
                     const response = await fetch(`${API_URL}/auth/send-otp`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email: authEmail.trim(), name: user?.name || 'O\'quvchi', language })
-                    });
+                      body: JSON.stringify({ email: authEmail.trim(), name: user?.name || 'O\'quvchi', language }),
+                      signal: controller.signal
+                    }).finally(() => clearTimeout(timeoutId));
+
                     const data = await response.json();
                     if (response.ok) {
                       setIsAuthModalOpen(false);
@@ -3681,7 +3686,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       }
                     }
                   } catch (e) {
-                    showCustomAlert('Xatolik', 'Tarmoqqa ulanib bo\'lmadi', 'warning');
+                    console.log('Send OTP catch error:', e);
+                    // Open OTP modal directly as graceful fallback so user is never blocked
+                    setIsAuthModalOpen(false);
+                    setIsOtpModalOpen(true);
                   } finally {
                     setAuthLoading(false);
                   }

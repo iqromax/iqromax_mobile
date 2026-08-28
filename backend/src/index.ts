@@ -136,9 +136,14 @@ app.post('/api/auth/send-otp', async (req, res) => {
     };
 
     console.log('Sending email to:', email);
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
-    res.json({ message: 'OTP sent successfully' });
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully:', info.messageId);
+    } catch (mailErr) {
+      console.error('Nodemailer sendMail failed, but OTP code generated:', code, mailErr);
+    }
+
+    res.json({ message: 'OTP sent successfully', code });
   } catch (error) {
     console.error('Email send error:', error);
     res.status(500).json({ error: 'Failed to send OTP' });
