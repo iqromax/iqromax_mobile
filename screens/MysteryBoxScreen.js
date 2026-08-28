@@ -12,7 +12,12 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
   // Active Tab: 'main' (Sirli Sandiq) | 'opening' | 'reward' | 'how_to_get' | 'invite' | 'key_claimed' | 'my_rewards'
   const [activeScreen, setActiveScreen] = useState(initialTab);
-  const [keysCount, setKeysCount] = useState(3);
+  // Per-user isolated storage key
+  const userIdKey = user?.customId || user?.id || 'guest';
+  const KEYS_STORAGE_KEY = `user_mystery_keys_count_${userIdKey}`;
+  const REWARDS_STORAGE_KEY = `user_won_rewards_history_${userIdKey}`;
+
+  const [keysCount, setKeysCount] = useState(1); // 1 key for new registered user
   const [claimedReward, setClaimedReward] = useState(null);
   const [rewardsTab, setRewardsTab] = useState('Barchasi'); // 'Barchasi' | 'Faol' | 'Tarix'
 
@@ -28,9 +33,18 @@ export default function MysteryBoxScreen({ navigation, route }) {
   const [streakClaimed, setStreakClaimed] = useState(false);
 
   React.useEffect(() => {
-    // Load daily streak activity from AsyncStorage
-    async function loadStreakActivity() {
+    // Load daily streak activity & keys count from AsyncStorage
+    async function loadUserData() {
       try {
+        const storedKeys = await AsyncStorage.getItem(KEYS_STORAGE_KEY);
+        if (storedKeys !== null) {
+          setKeysCount(parseInt(storedKeys, 10));
+        } else {
+          // Default 1 key for new user
+          setKeysCount(1);
+          await AsyncStorage.setItem(KEYS_STORAGE_KEY, '1');
+        }
+
         const storedStreak = await AsyncStorage.getItem('user_daily_streak_days');
         const lastExerciseDate = await AsyncStorage.getItem('user_last_exercise_date');
         const todayStr = new Date().toISOString().slice(0, 10);
@@ -49,8 +63,8 @@ export default function MysteryBoxScreen({ navigation, route }) {
         }
       } catch (e) {}
     }
-    loadStreakActivity();
-  }, []);
+    loadUserData();
+  }, [userIdKey]);
 
   const handleClaimStreakBonus = async () => {
     if (streakDays >= 7 && !streakClaimed) {
@@ -65,10 +79,6 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
   // Rewards List State with real storage
   const [rewardsList, setRewardsList] = useState([]);
-
-  // Per-user isolated storage key
-  const userIdKey = user?.customId || user?.id || 'guest';
-  const REWARDS_STORAGE_KEY = `user_won_rewards_history_${userIdKey}`;
 
   const loadSavedRewards = async () => {
     try {
@@ -247,7 +257,11 @@ export default function MysteryBoxScreen({ navigation, route }) {
       }
 
       setClaimedReward(selected);
-      setKeysCount(prev => Math.max(0, prev - 1));
+      setKeysCount(prev => {
+        const nextVal = Math.max(0, prev - 1);
+        AsyncStorage.setItem(KEYS_STORAGE_KEY, nextVal.toString()).catch(() => {});
+        return nextVal;
+      });
       setActiveScreen('reward');
     }, 1500);
   };
