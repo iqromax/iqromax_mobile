@@ -319,8 +319,56 @@ export default function TeacherDashboardScreen({ navigation, route }) {
   const [generatedPdfUri, setGeneratedPdfUri] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-  // Statistics Dashboard Filter State
-  const [statsTimeFilter, setStatsTimeFilter] = useState('7days'); // 'today' | '7days' | '30days' | '3months'
+  // Teacher Direct Message Modal State
+  const [sendMessageModal, setSendMessageModal] = useState({ visible: false, student: null });
+  const [teacherMsgText, setTeacherMsgText] = useState('');
+  const [isSendingMsg, setIsSendingMsg] = useState(false);
+  const [msgFeedback, setMsgFeedback] = useState({ visible: false, title: '', message: '', type: 'success' });
+
+  const handleOpenSendMessage = (student) => {
+    setSendMessageModal({ visible: true, student });
+    setTeacherMsgText('');
+  };
+
+  const handleSendTeacherMessage = async () => {
+    if (!teacherMsgText.trim()) {
+      setMsgFeedback({ visible: true, title: 'Xatolik', message: 'Iltimos, xabar matnini kiriting!', type: 'error' });
+      return;
+    }
+
+    setIsSendingMsg(true);
+    try {
+      const res = await fetch(`${API_URL}/teacher/send-message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teacherName: user?.name || "O'qituvchi",
+          studentId: sendMessageModal.student?.customId || sendMessageModal.student?.id,
+          studentName: sendMessageModal.student?.name,
+          studentEmail: sendMessageModal.student?.email,
+          message: teacherMsgText.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setSendMessageModal({ visible: false, student: null });
+        setTeacherMsgText('');
+        setMsgFeedback({
+          visible: true,
+          title: 'Muvaffaqiyatli! 🎉',
+          message: `${sendMessageModal.student?.name || "O'quvchi"}ga xabaringiz ilovadagi bildirishnomalariga va emailingizga yuborildi.`,
+          type: 'success'
+        });
+      } else {
+        setMsgFeedback({ visible: true, title: 'Xatolik', message: data.error || 'Xabar yuborishda xatolik yuz berdi', type: 'error' });
+      }
+    } catch (e) {
+      setMsgFeedback({ visible: true, title: 'Xatolik', message: 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.', type: 'error' });
+    } finally {
+      setIsSendingMsg(false);
+    }
+  };
 
   const handleGeneratePdf = async () => {
     setIsGeneratingPdf(true);
@@ -1181,9 +1229,13 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         </Text>
                       </View>
                     </View>
-                    <TouchableOpacity style={styles.alertUserBtn} activeOpacity={0.8} onPress={() => setActiveTab('ranking')}>
-                      <Text style={styles.alertUserBtnText}>Ko'rish</Text>
-                      <Feather name="chevron-right" size={14} color="#A855F7" />
+                    <TouchableOpacity 
+                      style={styles.alertUserMsgBtn} 
+                      activeOpacity={0.8} 
+                      onPress={() => handleOpenSendMessage(st)}
+                    >
+                      <MaterialCommunityIcons name="message-text-outline" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                      <Text style={styles.alertUserMsgBtnText}>Xabar yozish</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -1547,6 +1599,102 @@ export default function TeacherDashboardScreen({ navigation, route }) {
         </View>
       </Modal>
 
+      {/* TEACHER DIRECT MESSAGE TO STUDENT MODAL */}
+      <Modal visible={sendMessageModal.visible} transparent animationType="fade">
+        <View style={styles.langModalOverlay}>
+          <View style={styles.sendMessageModalContainer}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={styles.msgModalIconBox}>
+                  <MaterialCommunityIcons name="message-text" size={22} color="#A855F7" />
+                </View>
+                <View>
+                  <Text style={styles.msgModalTitle}>O'quvchiga xabar yuborish</Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>
+                    {sendMessageModal.student?.name || "O'quvchi"}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setSendMessageModal({ visible: false, student: null })}>
+                <Feather name="x" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={{ color: '#E2E8F0', fontSize: 13, fontFamily: 'Inter_500Medium', marginBottom: 10 }}>
+              Xabaringiz o'quvchining ilovadagi Bildirishnomalar bo'limiga hamda shaxsiy emailiga bir vaqtda boradi:
+            </Text>
+
+            <TextInput
+              style={styles.msgTextInput}
+              placeholder="O'quvchiga xabaringizni yozing..."
+              placeholderTextColor="#6B7280"
+              multiline
+              numberOfLines={4}
+              value={teacherMsgText}
+              onChangeText={setTeacherMsgText}
+              textAlignVertical="top"
+            />
+
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
+              <TouchableOpacity 
+                style={styles.msgCancelBtn} 
+                activeOpacity={0.8}
+                onPress={() => setSendMessageModal({ visible: false, student: null })}
+              >
+                <Text style={styles.msgCancelBtnText}>Bekor qilish</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.msgSendSubmitBtn, isSendingMsg && { opacity: 0.6 }]} 
+                activeOpacity={0.85}
+                onPress={handleSendTeacherMessage}
+                disabled={isSendingMsg}
+              >
+                {isSendingMsg ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <>
+                    <Feather name="send" size={16} color="#FFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.msgSendSubmitBtnText}>Yuborish</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* MESSAGE FEEDBACK MODAL */}
+      <Modal visible={msgFeedback.visible} transparent animationType="fade">
+        <View style={styles.langModalOverlay}>
+          <View style={styles.feedbackModalContainer}>
+            <View style={[
+              styles.feedbackIconBox, 
+              msgFeedback.type === 'error' ? { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderColor: '#EF4444' } : {}
+            ]}>
+              <MaterialCommunityIcons 
+                name={msgFeedback.type === 'error' ? 'alert-circle-outline' : 'check-circle-outline'} 
+                size={36} 
+                color={msgFeedback.type === 'error' ? '#EF4444' : '#10B981'} 
+              />
+            </View>
+
+            <Text style={styles.feedbackTitle}>{msgFeedback.title}</Text>
+            <Text style={styles.feedbackDesc}>{msgFeedback.message}</Text>
+
+            <TouchableOpacity 
+              style={[
+                styles.feedbackCloseBtn,
+                msgFeedback.type === 'error' ? { backgroundColor: '#EF4444' } : {}
+              ]}
+              onPress={() => setMsgFeedback({ visible: false, title: '', message: '', type: 'success' })}
+            >
+              <Text style={styles.feedbackCloseBtnText}>Tushundim</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/* REAL-TIME ACCOUNT DELETED ALERT MODAL */}
       <Modal visible={isDeletedModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -1837,6 +1985,44 @@ const styles = StyleSheet.create({
   alertUserReason: { color: '#EF4444', fontSize: 11, marginTop: 2, fontFamily: 'Inter_500Medium' },
   alertUserBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: 'rgba(168, 85, 247, 0.15)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
   alertUserBtnText: { color: '#A855F7', fontSize: 12, fontFamily: 'Inter_700Bold' },
+
+  alertUserMsgBtn: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#A855F7',
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10
+  },
+  alertUserMsgBtnText: { color: '#FFFFFF', fontSize: 12, fontFamily: 'Inter_700Bold' },
+
+  sendMessageModalContainer: {
+    width: '100%', backgroundColor: '#0D0D1A', borderRadius: 24,
+    padding: 22, borderWidth: 1.5, borderColor: '#A855F7', shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16, elevation: 15
+  },
+  msgModalIconBox: {
+    width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#A855F7'
+  },
+  msgModalTitle: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' },
+  msgTextInput: {
+    backgroundColor: '#121228', borderRadius: 14, borderWidth: 1, borderColor: '#1A1A35',
+    color: '#FFFFFF', padding: 14, fontSize: 14, fontFamily: 'Inter_400Regular', height: 110
+  },
+  msgCancelBtn: { flex: 1, paddingVertical: 14, borderRadius: 14, backgroundColor: '#1A1A35', alignItems: 'center' },
+  msgCancelBtnText: { color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 14 },
+  msgSendSubmitBtn: { flex: 1, paddingVertical: 14, borderRadius: 14, backgroundColor: '#A855F7', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+  msgSendSubmitBtnText: { color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 14 },
+
+  feedbackModalContainer: {
+    width: '100%', backgroundColor: '#0D0D1A', borderRadius: 24,
+    padding: 24, alignItems: 'center', borderWidth: 1.5, borderColor: '#10B981'
+  },
+  feedbackIconBox: {
+    width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    justifyContent: 'center', alignItems: 'center', marginBottom: 14, borderWidth: 1, borderColor: '#10B981'
+  },
+  feedbackTitle: { color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_700Bold', marginBottom: 8, textAlign: 'center' },
+  feedbackDesc: { color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', textAlign: 'center', marginBottom: 20, lineHeight: 20 },
+  feedbackCloseBtn: { width: '100%', paddingVertical: 14, borderRadius: 14, backgroundColor: '#10B981', alignItems: 'center' },
+  feedbackCloseBtnText: { color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 15 },
 
   trendGraphBox: { flexDirection: 'row', height: 140, marginTop: 14, alignItems: 'stretch' },
   trendYAxis: { justifyContent: 'space-between', paddingRight: 10, borderRightWidth: 1, borderRightColor: '#1A1A35' },

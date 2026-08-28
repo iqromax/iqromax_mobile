@@ -906,6 +906,103 @@ app.get('/api/user/status/:id', async (req, res) => {
 // Serve admin panel static files in production
 app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 
+// --- TEACHER DIRECT MESSAGE & NOTIFICATION API ---
+app.post('/api/teacher/send-message', async (req, res) => {
+  try {
+    const { teacherName, studentId, studentName, studentEmail, message } = req.body;
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Xabar matni kiritilmadi' });
+    }
+
+    const cleanMsg = message.trim();
+
+    // Find student in DB by ID, customId, or name
+    let studentUser = null;
+    if (studentId || studentEmail || studentName) {
+      studentUser = await prisma.user.findFirst({
+        where: {
+          OR: [
+            ...(studentId ? [{ id: studentId }, { customId: studentId }, { customId: `#${studentId.replace(/^#+/, '')}` }] : []),
+            ...(studentEmail ? [{ email: { equals: studentEmail, mode: 'insensitive' } }] : []),
+            ...(studentName ? [{ name: { equals: studentName, mode: 'insensitive' } }] : [])
+          ]
+        }
+      });
+    }
+
+    const targetEmail = studentUser?.email || studentEmail;
+    const targetUserId = studentUser?.id || studentId || 'ALL';
+
+    // 1. Create In-App Notification in DB
+    const newNotif = await prisma.notification.create({
+      data: {
+        userId: studentUser?.customId || targetUserId,
+        title: `💬 O'qituvchidan habar (${teacherName || "O'qituvchi"})`,
+        message: cleanMsg,
+        type: 'ADMIN',
+        status: 'PENDING'
+      }
+    });
+
+    // 2. Emit Real-time Socket Event
+    io.emit('teacher_message_sent', {
+      studentId: studentUser?.id,
+      studentCustomId: studentUser?.customId,
+      teacherName: teacherName || "O'qituvchi",
+      title: `💬 O'qituvchidan habar`,
+      message: cleanMsg,
+      createdAt: newNotif.createdAt
+    });
+
+    // 3. Send Stylized Email if student has valid email
+    if (targetEmail && targetEmail.includes('@')) {
+      const mailOptions = {
+        from: `"IQROMAX O'qituvchi Portal" <${process.env.SMTP_USER}>`,
+        to: targetEmail,
+        subject: `IQROMAX - O'qituvchingiz ${teacherName || ''} dan yangi xabar!`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #070712; color: #ffffff; padding: 40px; border-radius: 20px; border: 1.5px solid #A855F7;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #ffffff; font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 2px;">
+                IQRO<span style="color: #A855F7;">MAX</span>
+              </h1>
+              <p style="color: #9CA3AF; font-size: 13px; margin-top: 4px;">O'qituvchilar va O'quvchilar Portali</p>
+            </div>
+            
+            <h2 style="color: #ffffff; font-size: 22px; margin-bottom: 16px;">Salom, ${studentUser?.name || studentName || "O'quvchi"}! 👋</h2>
+            <p style="color: #C7D2FE; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+              Sizning o'qituvchingiz <strong>${teacherName || "O'qituvchi"}</strong> sizga IQROMAX ilovasi orqali maxsus xabar yubordi:
+            </p>
+            
+            <div style="background-color: #121228; padding: 24px; border-radius: 16px; border: 1px solid #A855F7; margin-bottom: 30px; shadow-color: #A855F7;">
+              <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 24px; margin-right: 10px;">💬</span>
+                <strong style="color: #A855F7; font-size: 16px;">O'qituvchi Xabari:</strong>
+              </div>
+              <p style="color: #FFFFFF; font-size: 16px; line-height: 1.6; margin: 0; font-style: italic; white-space: pre-wrap;">"${cleanMsg}"</p>
+            </div>
+            
+            <p style="color: #818CF8; font-size: 14px; text-align: center;">
+              Ushbu xabarni IQROMAX mobil ilovangizdagi Bildirishnomalar bo'limida ham ko'rishingiz mumkin.
+            </p>
+          </div>
+        `
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+      } catch (mailErr) {
+        console.error('Teacher email sending error:', mailErr);
+      }
+    }
+
+    res.json({ message: 'Xabar o\'quvchiga va emailiga muvaffaqiyatli yuborildi!' });
+  } catch (error) {
+    console.error('Send teacher message error:', error);
+    res.status(500).json({ error: 'Xabarni yuborishda xatolik yuz berdi' });
+  }
+});
+
 // --- BATTLE INVITE & NOTIFICATION REST API ---
 app.get('/api/notifications/:customId', async (req, res) => {
   try {
