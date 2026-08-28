@@ -85,12 +85,13 @@ export default function MysteryBoxScreen({ navigation, route }) {
       const storedRewards = await AsyncStorage.getItem(REWARDS_STORAGE_KEY);
       if (storedRewards) {
         const parsed = JSON.parse(storedRewards);
-        // Recalculate 'Faol' status for premium items based on current time
+        const currentPremExp = await AsyncStorage.getItem('user_premium_expires_at');
         const now = Date.now();
         const updated = parsed.map(item => {
-          if (item.type === 'premium' && item.expiresAt) {
-            const isStillActive = now < item.expiresAt;
-            const expDateObj = new Date(item.expiresAt);
+          if (item.type === 'premium') {
+            const hasActivePremKey = !!currentPremExp && parseInt(currentPremExp, 10) > now;
+            const isStillActive = hasActivePremKey && item.expiresAt && now < item.expiresAt;
+            const expDateObj = item.expiresAt ? new Date(item.expiresAt) : new Date();
             const dateStr = expDateObj.toLocaleDateString();
             const timeStr = expDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             return {
@@ -144,21 +145,39 @@ export default function MysteryBoxScreen({ navigation, route }) {
     }
     fetchAdminItems();
 
-    // Socket listener: when admin revokes premium, clear active premium item from user's Sovg'alarim list
+    // Socket listener: when admin revokes premium, update or clear active premium item from user's Sovg'alarim list
     const socket = io(API_URL, { transports: ['websocket'] });
     socket.on('premium_revoked', async (data) => {
-      if (!user || data.userId === user.id || data.customId === user.customId) {
+      // Check if event targets current user or matches customId/id
+      const matchesUser = !user || 
+        (data.userId && data.userId === user.id) || 
+        (data.customId && data.customId === user.customId) ||
+        (data.userId && data.userId === user.customId);
+
+      if (matchesUser) {
         try {
           await AsyncStorage.removeItem('user_premium_expires_at');
           const storedRewards = await AsyncStorage.getItem(REWARDS_STORAGE_KEY);
           if (storedRewards) {
             const parsed = JSON.parse(storedRewards);
-            // Remove active premium reward item from history array or set status to Tarix
-            const updated = parsed.filter(item => item.type !== 'premium');
+            // Update active premium reward item status to 'Tarix' or remove active premium
+            const updated = parsed.map(item => {
+              if (item.type === 'premium') {
+                return {
+                  ...item,
+                  status: 'Tarix',
+                  date: `Tugagan sana: ${new Date().toLocaleDateString()}`
+                };
+              }
+              return item;
+            }).filter(item => item.status !== 'Faol' || item.type !== 'premium');
+
             setRewardsList(updated);
             await AsyncStorage.setItem(REWARDS_STORAGE_KEY, JSON.stringify(updated));
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error('Revoke socket handling error:', e);
+        }
       }
     });
 
