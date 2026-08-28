@@ -253,12 +253,11 @@ export default function MysteryBoxScreen({ navigation, route }) {
                 <Text style={styles.howItemSub}>Har bir yangi do'st uchun +1 ta kalit oling.</Text>
               </View>
               <TouchableOpacity 
-                style={styles.howInvitePlusBtn} 
+                style={styles.howInvitePlusCircleBtn} 
                 activeOpacity={0.8}
                 onPress={() => setActiveScreen('invite')}
               >
-                <MaterialCommunityIcons name="plus" size={18} color="#FFF" style={{ marginRight: 2 }} />
-                <Text style={styles.howInvitePlusBtnText}>Taklif qilish</Text>
+                <MaterialCommunityIcons name="plus" size={20} color="#FFF" />
               </TouchableOpacity>
             </View>
 
@@ -696,23 +695,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  howInvitePlusBtn: {
-    flexDirection: 'row',
+  howInvitePlusCircleBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#3B82F6',
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2563EB',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 12,
-    shadowColor: '#2563EB',
+    shadowColor: '#3B82F6',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.4,
     shadowRadius: 8,
     elevation: 5,
-  },
-  howInvitePlusBtnText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontFamily: 'Inter_700Bold',
   },
   howClaimBtn: {
     backgroundColor: '#F59E0B',
