@@ -373,7 +373,7 @@ export default function AuthScreen({ navigation, route }) {
 
           {/* Form */}
           {activeTab === 'register' ? (
-            <View style={{ marginBottom: 65 }}>
+            <View style={{ marginBottom: 120 }}>
               <CustomAnimatedInput
                 icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
                 placeholder={t.fullName}
