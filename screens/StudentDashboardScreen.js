@@ -3088,9 +3088,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* PROFILE TAB CONTENT */}
         
-        <View style={{ flex: 1, display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingTop: 10 }}>
+        <View style={{ flex: 1, width: '100%', height: '100%', display: activeTab === 'profile' ? 'flex' : 'none', backgroundColor: '#05050C', paddingTop: 10 }}>
           
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 20 }}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 160, paddingHorizontal: 20 }} nestedScrollEnabled={true} keyboardShouldPersistTaps="handled">
             {/* Header: Title */}
             <View style={{flexDirection: 'row', justifyContent: 'center', marginBottom: 20}}>
               <Text style={{color: '#fff', fontSize: 22, fontFamily: 'Inter_700Bold'}}>{t.navProfile}</Text>
