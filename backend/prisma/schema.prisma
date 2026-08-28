@@ -87,8 +87,9 @@ model MysteryBoxItem {
   id          String   @id @default(uuid())
   name        String
   description String
-  badge       String?  // Optional badge tag e.g. "⚡ 3 kun", "🪙 +500 Coin"
-  type        String   @default("premium") // "premium", "coin", "discount", "skin"
+  badge       String?  // Optional badge tag e.g. "⚡ 3 kun", "⚡ +5 Energiya"
+  type        String   @default("premium") // "premium" (kunlar), "energy" (1-10 chaqmoq)
+  value       Int      @default(1) // Value: Days for premium, 1-10 count for energy
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

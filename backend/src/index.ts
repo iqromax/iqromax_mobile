@@ -920,14 +920,13 @@ app.get('/api/mystery-box', async (req, res) => {
 
 app.post('/api/admin/mystery-box', async (req, res) => {
   try {
-    const { name, description, badge, type } = req.body;
+    const { name, description, type, value } = req.body;
     if (!name || !description) {
       return res.status(400).json({ error: 'Nomi va tavsifi kiritilishi shart!' });
     }
 
-    // Automatically derive badge and type if not provided
-    const derivedBadge = badge || (name.toLowerCase().includes('premium') ? '⚡ Premium' : name.toLowerCase().includes('coin') ? '🪙 Coin' : '🏷️ Kupon');
-    const derivedType = type || (name.toLowerCase().includes('coin') ? 'coin' : name.toLowerCase().includes('kupon') ? 'discount' : 'premium');
+    const itemValue = parseInt(value, 10) || 1;
+    const derivedBadge = type === 'energy' ? `⚡ ${itemValue} Energiya` : `👑 ${itemValue} kun Premium`;
 
     // @ts-ignore
     const newItem = await prisma.mysteryBoxItem.create({
@@ -935,7 +934,8 @@ app.post('/api/admin/mystery-box', async (req, res) => {
         name: name.trim(),
         description: description.trim(),
         badge: derivedBadge,
-        type: derivedType,
+        type: type || 'premium',
+        value: itemValue,
         isActive: true
       }
     });
@@ -943,6 +943,33 @@ app.post('/api/admin/mystery-box', async (req, res) => {
     res.status(201).json({ message: 'Sirli sovg\'a muvaffaqiyatli yaratildi', item: newItem });
   } catch (error) {
     console.error('Create mystery box item error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.put('/api/admin/mystery-box/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, type, value } = req.body;
+
+    const itemValue = parseInt(value, 10) || 1;
+    const derivedBadge = type === 'energy' ? `⚡ ${itemValue} Energiya` : `👑 ${itemValue} kun Premium`;
+
+    // @ts-ignore
+    const updatedItem = await prisma.mysteryBoxItem.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        description: description.trim(),
+        badge: derivedBadge,
+        type: type || 'premium',
+        value: itemValue
+      }
+    });
+
+    res.json({ message: 'Sirli sovg\'a muvaffaqiyatli yangilandi', item: updatedItem });
+  } catch (error) {
+    console.error('Update mystery box item error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
