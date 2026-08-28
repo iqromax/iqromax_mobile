@@ -298,42 +298,61 @@ export default function StepFiveScreen({ navigation, route }) {
   };
 
   const handleFinish = async () => {
-    const { role = 'student', name = 'Mehmon', country = 'UZ' } = route.params || {};
+    const { role = 'student', name = 'Mehmon', country = 'UZ', referralCode = '' } = route.params || {};
     
     // Determine character name
     const charList = gender === 'boys' ? t.boysChars : t.girlsChars;
     const charIndex = gender === 'boys' ? selectedChar : selectedChar - 4;
     const characterName = charList[charIndex];
 
-    const tempGuestUser = {
-      name: name || 'Mehmon',
-      character: characterName,
-      country,
-      role,
-      isGuest: true,
-      xp: 0,
-      customId: Math.floor(100000 + Math.random() * 900000).toString()
-    };
-
+    setIsRegistering(true);
     try {
-      await AsyncStorage.setItem('user_data', JSON.stringify(tempGuestUser));
-    } catch (e) {
-      console.error('AsyncStorage error', e);
-    }
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          role: role,
+          country: country,
+          language: language,
+          character: characterName,
+          referralCode: referralCode.trim() || undefined
+        })
+      });
 
-    // Reset navigation directly to StudentDashboard
-    navigation.reset({
-      index: 0,
-      routes: [{ 
-        name: 'StudentDashboard', 
-        params: { 
-          user: tempGuestUser,
-          language,
-          selectedChar,
-          gender
-        } 
-      }]
-    });
+      const data = await res.json();
+      const finalUser = (res.ok && data.user) ? data.user : {
+        name: name || 'Mehmon',
+        character: characterName,
+        country,
+        role,
+        isGuest: true,
+        xp: 0,
+        customId: Math.floor(100000 + Math.random() * 900000).toString()
+      };
+
+      try {
+        await AsyncStorage.setItem('user_data', JSON.stringify(finalUser));
+      } catch (e) {}
+
+      setUserData(finalUser);
+      setShowSuccessModal(true);
+    } catch (e) {
+      console.error('Registration fetch error:', e);
+      const fallbackUser = {
+        name: name || 'Mehmon',
+        character: characterName,
+        country,
+        role,
+        isGuest: true,
+        xp: 0,
+        customId: Math.floor(100000 + Math.random() * 900000).toString()
+      };
+      setUserData(fallbackUser);
+      setShowSuccessModal(true);
+    } finally {
+      setIsRegistering(false);
+    }
   };
 
   return (
@@ -526,7 +545,18 @@ export default function StepFiveScreen({ navigation, route }) {
               activeOpacity={0.8}
               onPress={() => {
                 setShowSuccessModal(false);
-                navigation.navigate('StudentDashboard', { language, selectedChar, gender, user: userData });
+                navigation.reset({
+                  index: 0,
+                  routes: [{ 
+                    name: 'StudentDashboard', 
+                    params: { 
+                      user: userData,
+                      language,
+                      selectedChar,
+                      gender
+                    } 
+                  }]
+                });
               }}
             >
               <Text style={styles.modalButtonText}>{t.startBtn}</Text>

@@ -214,6 +214,7 @@ export default function AuthScreen({ navigation, route }) {
         ...route.params,
         role,
         name: name.trim(),
+        referralCode: referralCode.trim(),
         language
       });
       return;
@@ -359,7 +360,7 @@ export default function AuthScreen({ navigation, route }) {
                 onChangeText={setName}
               />
 
-              {role === 'teacher' && (
+              {role === 'teacher' ? (
                 <>
                   <CustomAnimatedInput
                     icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
@@ -379,6 +380,15 @@ export default function AuthScreen({ navigation, route }) {
                     onChangeText={setEmail}
                   />
                 </>
+              ) : (
+                <CustomAnimatedInput
+                  icon={<MaterialCommunityIcons name="ticket-percent-outline" size={18} color="#888899" style={styles.inputIcon} />}
+                  placeholder="Promokod (ixtiyoriy)"
+                  placeholderTextColor="#555566"
+                  value={referralCode}
+                  onChangeText={setReferralCode}
+                  autoCapitalize="characters"
+                />
               )}
             </View>
           ) : (
