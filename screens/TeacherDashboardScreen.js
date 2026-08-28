@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, 
-  ScrollView, Platform, TextInput, Modal, ImageBackground 
+  ScrollView, Platform, TextInput, Modal, ImageBackground, ActivityIndicator 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
