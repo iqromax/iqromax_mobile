@@ -3930,12 +3930,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <View style={[styles.modalContent, { backgroundColor: '#0B0F19', borderWidth: 1.5, borderColor: '#38BDF8', padding: 22, borderRadius: 24, maxHeight: '85%' }]}>
             
             {/* Header */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, width: '100%' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, paddingRight: 10 }}>
                 <MaterialCommunityIcons name="ticket-percent" size={24} color="#38BDF8" />
-                <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>PROMOKOD & KESHBEK</Text>
+                <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }} numberOfLines={1}>PROMOKOD & KESHBEK</Text>
               </View>
-              <TouchableOpacity onPress={() => setIsReferralModalOpen(false)}>
+              <TouchableOpacity 
+                onPress={() => setIsReferralModalOpen(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
                 <MaterialCommunityIcons name="close-circle" size={26} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
