@@ -443,17 +443,6 @@ export default function AuthScreen({ navigation, route }) {
               />
 
               {role !== 'teacher' && (
-                <CustomAnimatedInput
-                  icon={<MaterialCommunityIcons name="ticket-percent-outline" size={18} color="#888899" style={styles.inputIcon} />}
-                  placeholder="Promokod (ixtiyoriy)"
-                  placeholderTextColor="#555566"
-                  value={referralCode}
-                  onChangeText={setReferralCode}
-                  autoCapitalize="characters"
-                />
-              )}
-
-              {role !== 'teacher' && (
                 <TouchableOpacity 
                   style={styles.forgotPasswordContainer} 
                   onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
