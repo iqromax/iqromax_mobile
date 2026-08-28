@@ -30,9 +30,30 @@ const getAvatarByName = (name) => {
   return require('../assets/avatar_maks.png');
 };
 
+const AVAILABLE_LANGUAGES = [
+  { code: 'uz', name: "O'zbek", flag: '🇺🇿' },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
+  { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'ky', name: 'Кыргызча', flag: '🇰🇬' },
+  { code: 'kk', name: 'Қазақша', flag: '🇰🇿' },
+  { code: 'tg', name: 'Тоҷикӣ', flag: '🇹🇯' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
+];
+
 export default function TeacherDashboardScreen({ navigation, route }) {
   const { user, language = 'uz' } = route.params || {};
-  const t = DASHBOARD_TRANSLATIONS[language] || DASHBOARD_TRANSLATIONS['uz'];
+  const [currentLang, setCurrentLang] = useState(language);
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
+  const t = DASHBOARD_TRANSLATIONS[currentLang] || DASHBOARD_TRANSLATIONS['uz'];
+
+  const handleLanguageChange = (langCode) => {
+    setCurrentLang(langCode);
+    setIsLangModalOpen(false);
+  };
 
   // Tabs: 'home' | 'exercise' | 'stats' | 'ranking' | 'profile'
   const [activeTab, setActiveTab] = useState('home');
@@ -168,7 +189,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
     } catch (e) {}
     navigation.reset({
       index: 0,
-      routes: [{ name: 'StepTwo', params: { language } }]
+      routes: [{ name: 'StepTwo', params: { language: currentLang } }]
     });
   };
 
@@ -178,7 +199,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
       operation: selectedOpType,
       speed: selectedSpeed,
       digits: selectedDigits,
-      language,
+      language: currentLang,
       isSpeedMode: activeExerciseType === 'speed',
       isTeacher: true
     });
@@ -614,7 +635,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                 <TouchableOpacity 
                   style={styles.primaryBtn} 
                   activeOpacity={0.8} 
-                  onPress={() => navigation.navigate('AbacusSimulator', { language })}
+                  onPress={() => navigation.navigate('AbacusSimulator', { language: currentLang })}
                 >
                   <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FFF" />
                   <Text style={styles.primaryBtnText}>ABAKUSNI OCHISH</Text>
@@ -759,6 +780,26 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               </View>
             </View>
 
+            {/* LANGUAGE SELECTOR BOX */}
+            <TouchableOpacity 
+              style={styles.langSelectorBox} 
+              activeOpacity={0.8}
+              onPress={() => setIsLangModalOpen(true)}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={styles.langIconCircle}>
+                  <Feather name="globe" size={20} color="#A855F7" />
+                </View>
+                <View>
+                  <Text style={styles.langTitleText}>{t.changeLang || "Tilni o'zgartirish"}</Text>
+                  <Text style={styles.langSubtitleText}>
+                    {AVAILABLE_LANGUAGES.find(l => l.code === currentLang)?.flag} {AVAILABLE_LANGUAGES.find(l => l.code === currentLang)?.name}
+                  </Text>
+                </View>
+              </View>
+              <Feather name="chevron-right" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+
             {/* AMALLAR (PDF WORKSHEETS GENERATOR) SECTION */}
             <View style={styles.pdfCardBox}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 }}>
@@ -883,7 +924,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
           onPress={() => setActiveTab('home')}
         >
           <Feather name="home" size={22} color={activeTab === 'home' ? '#A855F7' : '#6B7280'} />
-          <Text style={[styles.navText, activeTab === 'home' && styles.navTextActive]}>Bosh sahifa</Text>
+          <Text style={[styles.navText, activeTab === 'home' && styles.navTextActive]}>{t.navHome || "Bosh sahifa"}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -891,7 +932,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
           onPress={() => setActiveTab('exercise')}
         >
           <MaterialCommunityIcons name="brain" size={24} color={activeTab === 'exercise' ? '#A855F7' : '#6B7280'} />
-          <Text style={[styles.navText, activeTab === 'exercise' && styles.navTextActive]}>Mashq</Text>
+          <Text style={[styles.navText, activeTab === 'exercise' && styles.navTextActive]}>{t.navExercise || "Mashq"}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -899,7 +940,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
           onPress={() => setActiveTab('stats')}
         >
           <Feather name="bar-chart-2" size={22} color={activeTab === 'stats' ? '#A855F7' : '#6B7280'} />
-          <Text style={[styles.navText, activeTab === 'stats' && styles.navTextActive]}>Statistika</Text>
+          <Text style={[styles.navText, activeTab === 'stats' && styles.navTextActive]}>{t.stats || "Statistika"}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -907,7 +948,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
           onPress={() => setActiveTab('ranking')}
         >
           <Ionicons name="trophy-outline" size={22} color={activeTab === 'ranking' ? '#A855F7' : '#6B7280'} />
-          <Text style={[styles.navText, activeTab === 'ranking' && styles.navTextActive]}>Reyting</Text>
+          <Text style={[styles.navText, activeTab === 'ranking' && styles.navTextActive]}>{t.navRanking || "Reyting"}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -915,9 +956,47 @@ export default function TeacherDashboardScreen({ navigation, route }) {
           onPress={() => setActiveTab('profile')}
         >
           <Feather name="user" size={22} color={activeTab === 'profile' ? '#A855F7' : '#6B7280'} />
-          <Text style={[styles.navText, activeTab === 'profile' && styles.navTextActive]}>Profil</Text>
+          <Text style={[styles.navText, activeTab === 'profile' && styles.navTextActive]}>{t.navProfile || "Profil"}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* LANGUAGE SELECTOR MODAL */}
+      <Modal visible={isLangModalOpen} transparent animationType="slide">
+        <View style={styles.langModalOverlay}>
+          <View style={styles.langModalContainer}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <Text style={styles.langModalTitle}>{t.changeLang || "Tilni o'zgartirish"}</Text>
+              <TouchableOpacity onPress={() => setIsLangModalOpen(false)}>
+                <Feather name="x" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 380 }}>
+              {AVAILABLE_LANGUAGES.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  style={[
+                    styles.langItem,
+                    currentLang === lang.code && styles.langItemActive
+                  ]}
+                  onPress={() => handleLanguageChange(lang.code)}
+                >
+                  <Text style={{ fontSize: 24, marginRight: 12 }}>{lang.flag}</Text>
+                  <Text style={[
+                    styles.langItemText,
+                    currentLang === lang.code && styles.langItemTextActive
+                  ]}>
+                    {lang.name}
+                  </Text>
+                  {currentLang === lang.code && (
+                    <Feather name="check" size={20} color="#A855F7" style={{ marginLeft: 'auto' }} />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* REAL-TIME ACCOUNT DELETED ALERT MODAL */}
       <Modal visible={isDeletedModalVisible} transparent animationType="fade">
@@ -1070,6 +1149,30 @@ const styles = StyleSheet.create({
   },
   detailItem: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   detailText: { color: '#FFFFFF', fontSize: 14 },
+  langSelectorBox: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#0D0D1F', borderRadius: 18, padding: 16,
+    borderWidth: 1, borderColor: '#1A1A35', marginBottom: 20
+  },
+  langIconCircle: {
+    width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.3)'
+  },
+  langTitleText: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold' },
+  langSubtitleText: { color: '#9CA3AF', fontSize: 12, marginTop: 2, fontFamily: 'Inter_500Medium' },
+  langModalOverlay: { flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.85)', justifyContent: 'flex-end' },
+  langModalContainer: {
+    backgroundColor: '#0D0D1A', borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: 24, borderWidth: 1, borderColor: '#A855F7'
+  },
+  langModalTitle: { color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_700Bold' },
+  langItem: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16,
+    borderRadius: 14, marginBottom: 8, backgroundColor: '#121228', borderWidth: 1, borderColor: '#1A1A35'
+  },
+  langItemActive: { backgroundColor: 'rgba(168, 85, 247, 0.2)', borderColor: '#A855F7' },
+  langItemText: { color: '#9CA3AF', fontSize: 15, fontFamily: 'Inter_600SemiBold' },
+  langItemTextActive: { color: '#FFFFFF', fontFamily: 'Inter_700Bold' },
   logoutFullBtn: {
     flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
     paddingVertical: 14, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 16,
