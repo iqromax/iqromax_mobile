@@ -335,8 +335,32 @@ export default function StepFiveScreen({ navigation, route }) {
         await AsyncStorage.setItem('user_data', JSON.stringify(finalUser));
       } catch (e) {}
 
-      setUserData(finalUser);
-      setShowSuccessModal(true);
+      // Directly navigate to Main Dashboard without modal
+      if (role?.toLowerCase() === 'teacher' || role === "O'qituvchi") {
+        navigation.reset({
+          index: 0,
+          routes: [{
+            name: 'TeacherDashboard',
+            params: {
+              user: finalUser,
+              language: language
+            }
+          }]
+        });
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{
+            name: 'StudentDashboard',
+            params: {
+              user: finalUser,
+              language: language,
+              selectedChar: selectedChar,
+              gender: gender
+            }
+          }]
+        });
+      }
     } catch (e) {
       console.error('Registration fetch error:', e);
       const fallbackUser = {
@@ -348,8 +372,22 @@ export default function StepFiveScreen({ navigation, route }) {
         xp: 0,
         customId: Math.floor(100000 + Math.random() * 900000).toString()
       };
-      setUserData(fallbackUser);
-      setShowSuccessModal(true);
+      try {
+        await AsyncStorage.setItem('user_data', JSON.stringify(fallbackUser));
+      } catch (err) {}
+
+      navigation.reset({
+        index: 0,
+        routes: [{
+          name: 'StudentDashboard',
+          params: {
+            user: fallbackUser,
+            language: language,
+            selectedChar: selectedChar,
+            gender: gender
+          }
+        }]
+      });
     } finally {
       setIsRegistering(false);
     }
