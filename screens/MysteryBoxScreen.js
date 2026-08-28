@@ -126,16 +126,22 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
       {/* SCREEN 2: OPENING ANIMATION */}
       {activeScreen === 'opening' && (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          {renderHeader("SIRLI SANDIQ")}
-
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-            <View style={[styles.chestGlowContainer, { width: 400, height: 400 }]}>
-              <Image source={require('../assets/sirli_sandiq_juda_tez_high_speed.gif')} style={{ width: 380, height: 380 }} contentFit="contain" />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#070714' }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', marginTop: -40 }}>
+            <View style={[styles.chestGlowContainer, { width: 420, height: 420, marginVertical: 0 }]}>
+              <Image source={require('../assets/sirli_sandiq_juda_tez_high_speed.gif')} style={{ width: 400, height: 400 }} contentFit="contain" />
             </View>
 
-            <Text style={{ color: '#9CA3AF', fontSize: 16, fontFamily: 'Inter_600SemiBold', marginTop: 14 }}>
-              Sandiq ochilmoqda...
+            {/* Premium Animated Glowing Status Badge */}
+            <View style={styles.openingStatusBadge}>
+              <MaterialCommunityIcons name="sparkles" size={20} color="#F59E0B" style={{ marginRight: 8 }} />
+              <Text style={styles.openingStatusText}>
+                SANDIQ OCHILMOQDA... ✨
+              </Text>
+            </View>
+
+            <Text style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', marginTop: 10 }}>
+              Omadingiz sinalmoqda, kuting! 🎁
             </Text>
           </View>
         </View>
@@ -508,6 +514,29 @@ const styles = StyleSheet.create({
     color: '#38BDF8',
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
+  },
+
+  openingStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#13112A',
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+    borderRadius: 20,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 14,
+    elevation: 10,
+    marginTop: 10,
+  },
+  openingStatusText: {
+    color: '#F59E0B',
+    fontSize: 15,
+    fontFamily: 'Inter_900Black',
+    letterSpacing: 1.5,
   },
 
   // REWARD CARD
