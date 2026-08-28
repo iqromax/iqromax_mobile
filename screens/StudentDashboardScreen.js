@@ -4031,7 +4031,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 activeOpacity={0.8}
                 onPress={() => {
                   const promo = user?.customId ? user.customId.replace(/^#+/, '') : 'IQROMAX';
-                  const link = `https://iqromax.uz/invite/${promo}`;
+                  const link = `https://iqromax.net/downloading?promo=${promo}`;
                   Share.share({
                     message: `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling!\n\nMening promokodim: ${promo}\n\nIlovani yuklab olish uchun havola:\n${link}`
                   });

@@ -23,7 +23,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
   // Invitation & Referral state
   const rawPromo = user?.customId ? user.customId.replace(/^#+/, '') : 'MICHAEL';
-  const referralLink = `https://iqromax.uz/invite/${rawPromo}`;
+  const referralLink = `https://iqromax.net/downloading?promo=${rawPromo}`;
   const shareMessage = `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling!\n\nMening promokodim: ${rawPromo}\n\nIlovani yuklab olish uchun havola:\n${referralLink}`;
   const [isCopied, setIsCopied] = useState(false);
 

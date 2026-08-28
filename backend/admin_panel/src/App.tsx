@@ -9,11 +9,14 @@ import EnergyCenter from './pages/EnergyCenter';
 import Notifications from './pages/Notifications';
 import MysteryBoxAdmin from './pages/MysteryBoxAdmin';
 
+import AppDownloadLanding from './pages/AppDownloadLanding';
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/downloading" element={<AppDownloadLanding />} />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/mystery-box" element={<MysteryBoxAdmin />} />
