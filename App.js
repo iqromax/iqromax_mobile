@@ -2,7 +2,7 @@ import './src/utils/safeWeakMap';
 import { Asset } from 'expo-asset';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter } from 'react-native';
+import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -265,9 +265,35 @@ export default function App() {
     // Check after a short delay to allow socket to connect and app to render
     setTimeout(checkPendingInvites, 2000);
 
+    // Deep Linking: parse promo parameter from url and save to AsyncStorage
+    const handleDeepLinkUrl = async (url) => {
+      if (!url) return;
+      try {
+        let extractedPromo = null;
+        if (url.includes('promo=')) {
+          extractedPromo = url.split('promo=')[1]?.split('&')[0];
+        } else if (url.includes('ref=')) {
+          extractedPromo = url.split('ref=')[1]?.split('&')[0];
+        } else if (url.includes('/invite/')) {
+          extractedPromo = url.split('/invite/')[1]?.split('?')[0];
+        }
+
+        if (extractedPromo) {
+          const cleanPromo = decodeURIComponent(extractedPromo).replace(/^#+/, '').trim().toUpperCase();
+          await AsyncStorage.setItem('pending_referral_promo', cleanPromo);
+        }
+      } catch (e) {
+        console.error('Deep link url parse error:', e);
+      }
+    };
+
+    Linking.getInitialURL().then(handleDeepLinkUrl).catch(() => {});
+    const urlSub = Linking.addEventListener('url', (event) => handleDeepLinkUrl(event.url));
+
     return () => {
       socket.disconnect();
       clearInterval(authInterval);
+      urlSub.remove();
     };
   }, []);
 

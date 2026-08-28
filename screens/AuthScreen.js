@@ -161,6 +161,22 @@ export default function AuthScreen({ navigation, route }) {
   const [requestModal, setRequestModal] = useState({ visible: false, title: '', message: '' });
   const [customAlert, setCustomAlert] = useState({ visible: false, title: '', message: '', type: 'error' });
 
+  useEffect(() => {
+    async function loadSavedPromo() {
+      try {
+        if (route.params?.referralCode) {
+          setReferralCode(route.params.referralCode);
+          return;
+        }
+        const savedPromo = await AsyncStorage.getItem('pending_referral_promo');
+        if (savedPromo) {
+          setReferralCode(savedPromo);
+        }
+      } catch (e) {}
+    }
+    loadSavedPromo();
+  }, [route.params?.referralCode]);
+
   const showAlert = (title, message, type = 'error') => {
     setCustomAlert({ visible: true, title, message, type });
   };

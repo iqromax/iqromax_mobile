@@ -399,6 +399,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const checkGuestAuth = (actionCallback) => {
     if (isGuestUser) {
+      AsyncStorage.getItem('pending_referral_promo').then(savedPromo => {
+        if (savedPromo) setAuthPromo(savedPromo);
+      }).catch(() => {});
       setIsAuthModalOpen(true);
       return false;
     }
