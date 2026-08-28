@@ -218,8 +218,9 @@ export default function AuthScreen({ navigation, route }) {
       });
       return;
     } else {
-      // Login logic
-      const loginIdentifier = role === 'teacher' ? usernameInput.trim() : phone.trim();
+      // Login logic (allows username, email, or phone)
+      const rawIdentifier = role === 'teacher' ? (usernameInput || phone) : (phone || usernameInput);
+      const loginIdentifier = String(rawIdentifier || '').trim();
       if (!loginIdentifier || !password) {
         showAlert(t.errorTitle, role === 'teacher' ? 'Iltimos, username va parolni kiriting!' : t.errPhonePass);
         return;

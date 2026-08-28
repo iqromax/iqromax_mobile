@@ -568,15 +568,20 @@ app.post('/api/auth/login', async (req, res) => {
     const phoneWithoutPlus = cleanPhone.replace(/^\+/, '');
     const phoneWithPlus = '+' + phoneWithoutPlus;
 
-    // Search by phone (with or without +), email, or name (case-insensitive username)
+    // Search by phone (with or without +), email, customId, or name (case-insensitive username)
+    const cleanIdentifier = identifier.trim();
+    const cleanIdWithoutHash = cleanIdentifier.replace(/^#+/, '');
+
     const user = await prisma.user.findFirst({
       where: {
         OR: [
           { phone: identifier },
           { phone: phoneWithPlus },
           { phone: phoneWithoutPlus },
-          { email: { equals: identifier, mode: 'insensitive' } },
-          { name: { equals: identifier, mode: 'insensitive' } }
+          { email: { equals: cleanIdentifier, mode: 'insensitive' } },
+          { name: { equals: cleanIdentifier, mode: 'insensitive' } },
+          { customId: { equals: cleanIdentifier.toUpperCase(), mode: 'insensitive' } },
+          { customId: { equals: `#${cleanIdWithoutHash.toUpperCase()}`, mode: 'insensitive' } }
         ]
       }
     });
