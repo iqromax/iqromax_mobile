@@ -11,6 +11,23 @@ export function useEnergy() {
   const [energy, setEnergy] = useState(2);
   const [timeRemaining, setTimeRemaining] = useState(0); // in seconds
   const [isLoading, setIsLoading] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+
+  // Check if Premium is currently active (unlimited energy)
+  const checkPremiumActive = useCallback(async () => {
+    try {
+      const expStr = await AsyncStorage.getItem('user_premium_expires_at');
+      if (expStr) {
+        const expTime = parseInt(expStr, 10);
+        if (Date.now() < expTime) {
+          setIsPremium(true);
+          return true; // Premium active!
+        }
+      }
+    } catch (e) {}
+    setIsPremium(false);
+    return false;
+  }, []);
 
   const calculateEnergy = useCallback(async () => {
     try {
@@ -18,13 +35,9 @@ export function useEnergy() {
       const now = Date.now();
 
       if (!storedData) {
-        // First time initialization
         const initialData = { energy: 2, lastUpdated: now };
         await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify(initialData));
         setEnergy(2);
-        setTimeRemaining(0); // No timer needed if they just started (wait, actually they need a timer to get to 10!)
-        // Wait, if energy is 2, it should start regenerating to 10.
-        // So time remaining is 3 minutes.
         setTimeRemaining(REGEN_TIME_MS / 1000);
       } else {
         let { energy: storedEnergy, lastUpdated } = JSON.parse(storedData);
@@ -64,27 +77,28 @@ export function useEnergy() {
     }
   }, []);
 
-  // Recalculate on mount and app state change (foreground/background)
-
   useFocusEffect(
     useCallback(() => {
       calculateEnergy();
-    }, [calculateEnergy])
+      checkPremiumActive();
+    }, [calculateEnergy, checkPremiumActive])
   );
 
   useEffect(() => {
     calculateEnergy();
+    checkPremiumActive();
 
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
         calculateEnergy();
+        checkPremiumActive();
       }
     });
 
     return () => {
       subscription.remove();
     };
-  }, [calculateEnergy]);
+  }, [calculateEnergy, checkPremiumActive]);
 
   // Tick the timer every second for UI
   useEffect(() => {
@@ -93,7 +107,6 @@ export function useEnergy() {
     const interval = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
-          // Time's up! Recalculate to add energy and reset timer
           calculateEnergy();
           return 0;
         }
@@ -113,25 +126,11 @@ export function useEnergy() {
 
   const formattedTime = formatTime(timeRemaining);
 
-  // Premium status check: if premium is active, consumeEnergy returns true without deducting energy
-  const checkPremiumActive = async () => {
-    try {
-      const expStr = await AsyncStorage.getItem('user_premium_expires_at');
-      if (expStr) {
-        const expTime = parseInt(expStr, 10);
-        if (Date.now() < expTime) {
-          return true; // Premium active! Unlimited energy.
-        }
-      }
-    } catch (e) {}
-    return false;
-  };
-
   // Expose a function to consume energy
   const consumeEnergy = async (amount) => {
     // 1. Check if user has active Premium
-    const isPremium = await checkPremiumActive();
-    if (isPremium) {
+    const hasPremium = await checkPremiumActive();
+    if (hasPremium) {
       // Unlimited energy during active Premium duration!
       return true;
     }
@@ -140,8 +139,6 @@ export function useEnergy() {
       const newEnergy = energy - amount;
       let lastUpdated = Date.now();
       
-      // If we were at max, the regeneration starts now. 
-      // If we were already regenerating, we don't reset lastUpdated so the timer continues.
       if (energy < MAX_ENERGY) {
         const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
         if (storedData) {
@@ -171,30 +168,6 @@ export function useEnergy() {
     await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newEnergy, lastUpdated }));
     calculateEnergy();
   };
-
-  const [isPremium, setIsPremium] = useState(false);
-
-  const checkPremiumActive = useCallback(async () => {
-    try {
-      const expStr = await AsyncStorage.getItem('user_premium_expires_at');
-      if (expStr) {
-        const expTime = parseInt(expStr, 10);
-        if (Date.now() < expTime) {
-          setIsPremium(true);
-          return true; // Premium active! Unlimited energy.
-        }
-      }
-    } catch (e) {}
-    setIsPremium(false);
-    return false;
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      calculateEnergy();
-      checkPremiumActive();
-    }, [calculateEnergy, checkPremiumActive])
-  );
 
   return {
     energy,
