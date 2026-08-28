@@ -1079,6 +1079,37 @@ app.post('/api/admin/revoke-premium', async (req, res) => {
   }
 });
 
+// --- PROMO CODE VALIDATION API ---
+app.get('/api/promo/validate/:promoCode', async (req, res) => {
+  try {
+    const { promoCode } = req.params;
+    if (!promoCode) {
+      return res.status(400).json({ valid: false, error: 'Promokod kiritilmadi' });
+    }
+
+    const cleanPromo = promoCode.replace(/^#+/, '').trim().toUpperCase();
+    const searchId = '#' + cleanPromo;
+
+    const referrer = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: searchId },
+          { customId: cleanPromo }
+        ]
+      }
+    });
+
+    if (!referrer || referrer.status !== 'Faol') {
+      return res.json({ valid: false, promo: cleanPromo, error: 'Promokod mavjud emas yoki foydalanuvchi o\'chirib yuborilgan' });
+    }
+
+    res.json({ valid: true, promo: cleanPromo, referrerName: referrer.name });
+  } catch (error) {
+    console.error('Validate promo error:', error);
+    res.status(500).json({ valid: false, error: 'Server error' });
+  }
+});
+
 // --- APP DOWNLOAD LINK SETTING API ---
 app.get('/api/download-link', async (req, res) => {
   try {

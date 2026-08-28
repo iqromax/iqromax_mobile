@@ -164,13 +164,19 @@ export default function AuthScreen({ navigation, route }) {
   useEffect(() => {
     async function loadSavedPromo() {
       try {
-        if (route.params?.referralCode) {
-          setReferralCode(route.params.referralCode);
-          return;
-        }
-        const savedPromo = await AsyncStorage.getItem('pending_referral_promo');
-        if (savedPromo) {
-          setReferralCode(savedPromo);
+        const candidatePromo = route.params?.referralCode || (await AsyncStorage.getItem('pending_referral_promo'));
+        if (candidatePromo) {
+          const clean = candidatePromo.replace(/^#+/, '').trim();
+          const res = await fetch(`${API_URL}/promo/validate/${encodeURIComponent(clean)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.valid && data.promo) {
+              setReferralCode(data.promo);
+            } else {
+              setReferralCode('');
+              await AsyncStorage.removeItem('pending_referral_promo');
+            }
+          }
         }
       } catch (e) {}
     }

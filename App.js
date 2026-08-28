@@ -280,7 +280,15 @@ export default function App() {
 
         if (extractedPromo) {
           const cleanPromo = decodeURIComponent(extractedPromo).replace(/^#+/, '').trim().toUpperCase();
-          await AsyncStorage.setItem('pending_referral_promo', cleanPromo);
+          const res = await fetch(`${API_URL}/promo/validate/${encodeURIComponent(cleanPromo)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.valid && data.promo) {
+              await AsyncStorage.setItem('pending_referral_promo', data.promo);
+            } else {
+              await AsyncStorage.removeItem('pending_referral_promo');
+            }
+          }
         }
       } catch (e) {
         console.error('Deep link url parse error:', e);
