@@ -426,9 +426,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 50,
+    paddingTop: 10,
   },
   keysPillCard: {
     flexDirection: 'row',
@@ -440,7 +443,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     gap: 14,
-    marginTop: 10,
+    marginTop: 6,
   },
   keyIconImg: {
     width: 32,
@@ -457,19 +460,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_800ExtraBold',
   },
   chestGlowContainer: {
-    width: 250,
-    height: 250,
+    width: 320,
+    height: 320,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 10,
-    position: 'relative',
+    marginVertical: 15,
+    alignSelf: 'center',
   },
   chestGlowCircle: {
     display: 'none',
   },
   chestImg: {
-    width: 240,
-    height: 240,
+    width: 310,
+    height: 310,
   },
   mainDescText: {
     color: '#9CA3AF',
@@ -478,12 +481,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 20,
     lineHeight: 20,
-    marginBottom: 30,
+    marginTop: 10,
+    marginBottom: 20,
   },
   mainGradientBtn: {
     width: '100%',
     backgroundColor: '#F59E0B',
-    paddingVertical: 16,
+    paddingVertical: 18,
     borderRadius: 18,
     alignItems: 'center',
     shadowColor: '#F59E0B',
@@ -499,7 +503,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   howToLinkBtn: {
-    marginTop: 20,
+    marginTop: 16,
   },
   howToLinkText: {
     color: '#38BDF8',
