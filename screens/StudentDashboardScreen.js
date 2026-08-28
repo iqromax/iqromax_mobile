@@ -385,6 +385,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authConfirmPassword, setAuthConfirmPassword] = useState('');
+  const [authPromo, setAuthPromo] = useState('');
   const [authShowPassword, setAuthShowPassword] = useState(false);
   const [authShowConfirmPassword, setAuthShowConfirmPassword] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
@@ -3597,6 +3598,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Feather name={authShowConfirmPassword ? "eye" : "eye-off"} size={16} color="#888899" />
                 </TouchableOpacity>
               </View>
+
+              <View style={styles.authInputWrapper}>
+                <MaterialCommunityIcons name="ticket-percent-outline" size={16} color="#888899" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.authInputField}
+                  placeholder="Promokod (ixtiyoriy)"
+                  placeholderTextColor="#555566"
+                  autoCapitalize="characters"
+                  value={authPromo}
+                  onChangeText={setAuthPromo}
+                />
+              </View>
             </View>
 
             <View style={{ flexDirection: 'row', gap: 10, width: '100%' }}>
@@ -3775,7 +3788,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         password: authPassword,
                         country: user?.country || 'UZ',
                         language,
-                        character: user?.character || 'maks'
+                        character: user?.character || 'maks',
+                        referralCode: authPromo.trim() || undefined
                       })
                     });
 
