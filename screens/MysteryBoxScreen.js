@@ -13,8 +13,46 @@ export default function MysteryBoxScreen({ navigation, route }) {
   const [claimedReward, setClaimedReward] = useState(null);
   const [rewardsTab, setRewardsTab] = useState('Barchasi'); // 'Barchasi' | 'Faol' | 'Tarix'
 
-  // Invitation & Referral state
-  const rawPromo = user?.customId ? user.customId.replace(/^#+/, '') : 'MICHAEL';
+  // Real dynamic states for bonus keys & streak
+  const [welcomeBonusClaimed, setWelcomeBonusClaimed] = useState(true); // User received 1 bonus key on registration
+  const [streakDays, setStreakDays] = useState(0);
+  const [streakClaimed, setStreakClaimed] = useState(false);
+
+  React.useEffect(() => {
+    // Load daily streak activity from AsyncStorage
+    async function loadStreakActivity() {
+      try {
+        const storedStreak = await AsyncStorage.getItem('user_daily_streak_days');
+        const lastExerciseDate = await AsyncStorage.getItem('user_last_exercise_date');
+        const todayStr = new Date().toISOString().slice(0, 10);
+        
+        let daysCount = storedStreak ? parseInt(storedStreak, 10) : 0;
+        
+        // If user solved exercise today or recently, ensure streak is active
+        if (lastExerciseDate === todayStr && daysCount === 0) {
+          daysCount = 1;
+        }
+
+        setStreakDays(Math.min(7, Math.max(0, daysCount)));
+        if (daysCount >= 7) {
+          const claimed = await AsyncStorage.getItem('streak_7_key_claimed');
+          setStreakClaimed(claimed === 'true');
+        }
+      } catch (e) {}
+    }
+    loadStreakActivity();
+  }, []);
+
+  const handleClaimStreakBonus = async () => {
+    if (streakDays >= 7 && !streakClaimed) {
+      setKeysCount(prev => prev + 1);
+      setStreakClaimed(true);
+      try {
+        await AsyncStorage.setItem('streak_7_key_claimed', 'true');
+      } catch(e) {}
+      Alert.alert("Tabriklaymiz! 🎉", "7 kunlik faollik uchun +1 ta oltin kalit berildi!");
+    }
+  };
   const referralLink = `https://iqromax.uz/invite/${rawPromo}`;
   const shareMessage = `IQROMAX ilovasida ro'yxatdan o'ting va 3 kunlik BEPUL Premium hamda Sirli Sandiq sovg'asini oling!\n\nMening promokodim: ${rawPromo}\n\nIlovani yuklab olish uchun havola:\n${referralLink}`;
   const [isCopied, setIsCopied] = useState(false);
@@ -187,46 +225,63 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
           <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 10, gap: 14 }} showsVerticalScrollIndicator={false}>
             
-            {/* Item 1 */}
+            {/* Item 1: Yangi foydalanuvchi bonusi */}
             <View style={styles.howItemCard}>
-              <View style={[styles.howIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
-                <MaterialCommunityIcons name="account-outline" size={24} color="#3B82F6" />
+              <View style={[styles.howIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.15)', borderColor: '#3B82F6', borderWidth: 1 }]}>
+                <MaterialCommunityIcons name="account-star-outline" size={24} color="#3B82F6" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.howItemTitle}>Yangi foydalanuvchi bonusi</Text>
-                <Text style={styles.howItemSub}>Ro'yxatdan o'tganingiz uchun 1 ta bepul kalit berildi.</Text>
+                <Text style={styles.howItemSub}>Ro'yxatdan o'tganingiz uchun +1 ta oltin kalit berildi.</Text>
               </View>
               <View style={styles.howCheckBtn}>
-                <MaterialCommunityIcons name="check" size={18} color="#10B981" />
+                <MaterialCommunityIcons name="check-bold" size={16} color="#10B981" />
               </View>
             </View>
 
-            {/* Item 2 */}
+            {/* Item 2: Do'stlarni taklif eting (Ideal Plus Button) */}
             <View style={styles.howItemCard}>
-              <View style={[styles.howIconBox, { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
-                <MaterialCommunityIcons name="account-group-outline" size={24} color="#22C55E" />
+              <View style={[styles.howIconBox, { backgroundColor: 'rgba(34, 197, 94, 0.15)', borderColor: '#22C55E', borderWidth: 1 }]}>
+                <MaterialCommunityIcons name="account-multiple-plus-outline" size={24} color="#22C55E" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.howItemTitle}>Do'stlarni taklif eting</Text>
                 <Text style={styles.howItemSub}>Har bir yangi do'st uchun +1 ta kalit oling.</Text>
               </View>
-              <TouchableOpacity style={styles.howInviteBtn} onPress={() => setActiveScreen('invite')}>
-                <Text style={styles.howInviteBtnText}>Taklif etish</Text>
+              <TouchableOpacity 
+                style={styles.howInvitePlusBtn} 
+                activeOpacity={0.8}
+                onPress={() => setActiveScreen('invite')}
+              >
+                <MaterialCommunityIcons name="plus" size={18} color="#FFF" style={{ marginRight: 2 }} />
+                <Text style={styles.howInvitePlusBtnText}>Taklif qilish</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Item 3 */}
+            {/* Item 3: Kunlik faollik (Real Streak calculation) */}
             <View style={styles.howItemCard}>
-              <View style={[styles.howIconBox, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
-                <MaterialCommunityIcons name="calendar-month-outline" size={24} color="#EF4444" />
+              <View style={[styles.howIconBox, { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderColor: '#F59E0B', borderWidth: 1 }]}>
+                <MaterialCommunityIcons name="calendar-fire" size={24} color="#F59E0B" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.howItemTitle}>Kunlik faollik</Text>
-                <Text style={styles.howItemSub}>7 kun ketma-ket o'ynang va bonus kalit oling.</Text>
+                <Text style={styles.howItemSub}>Har kuni kamida 1 ta mashq ishlang va 7 kunda kalit oling.</Text>
               </View>
-              <View style={styles.howProgressChip}>
-                <Text style={styles.howProgressChipText}>✓ 5/7</Text>
-              </View>
+              {streakDays >= 7 ? (
+                streakClaimed ? (
+                  <View style={styles.howCheckBtn}>
+                    <MaterialCommunityIcons name="check-bold" size={16} color="#10B981" />
+                  </View>
+                ) : (
+                  <TouchableOpacity style={styles.howClaimBtn} onPress={handleClaimStreakBonus}>
+                    <Text style={styles.howClaimBtnText}>Olish 🔑</Text>
+                  </TouchableOpacity>
+                )
+              ) : (
+                <View style={styles.howProgressChip}>
+                  <Text style={styles.howProgressChipText}>🔥 {streakDays}/7 kun</Text>
+                </View>
+              )}
             </View>
 
             {/* Bottom Banner */}
@@ -637,27 +692,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  howInviteBtn: {
-    backgroundColor: '#3B82F6',
+  howInvitePlusBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  howInvitePlusBtnText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontFamily: 'Inter_700Bold',
+  },
+  howClaimBtn: {
+    backgroundColor: '#F59E0B',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 10,
   },
-  howInviteBtnText: {
-    color: '#FFF',
+  howClaimBtnText: {
+    color: '#070714',
     fontSize: 11,
-    fontFamily: 'Inter_700Bold',
+    fontFamily: 'Inter_800ExtraBold',
   },
   howProgressChip: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(245, 158, 11, 0.3)',
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 10,
   },
   howProgressChipText: {
-    color: '#9CA3AF',
+    color: '#F59E0B',
     fontSize: 11,
-    fontFamily: 'Inter_600SemiBold',
+    fontFamily: 'Inter_700Bold',
   },
   howBottomBanner: {
     flexDirection: 'row',
