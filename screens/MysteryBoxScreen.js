@@ -130,12 +130,11 @@ export default function MysteryBoxScreen({ navigation, route }) {
           {renderHeader("SIRLI SANDIQ")}
 
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-            <View style={styles.chestGlowContainer}>
-              <View style={[styles.chestGlowCircle, { backgroundColor: 'rgba(245, 158, 11, 0.3)', width: 260, height: 260 }]} />
-              <Image source={require('../assets/sirli_sandiq_high_quality_nurli.gif')} style={[styles.chestImg, { width: 220, height: 220 }]} contentFit="contain" />
+            <View style={[styles.chestGlowContainer, { width: 310, height: 310 }]}>
+              <Image source={require('../assets/sirli_sandiq_juda_tez_high_speed.gif')} style={{ width: 300, height: 300 }} contentFit="contain" />
             </View>
 
-            <Text style={{ color: '#9CA3AF', fontSize: 16, fontFamily: 'Inter_600SemiBold', marginTop: 30 }}>
+            <Text style={{ color: '#9CA3AF', fontSize: 16, fontFamily: 'Inter_600SemiBold', marginTop: 24 }}>
               Sandiq ochilmoqda...
             </Text>
           </View>
