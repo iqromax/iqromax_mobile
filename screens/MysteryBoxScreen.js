@@ -74,9 +74,14 @@ export default function MysteryBoxScreen({ navigation, route }) {
         const now = Date.now();
         const updated = parsed.map(item => {
           if (item.type === 'premium' && item.expiresAt) {
+            const isStillActive = now < item.expiresAt;
+            const expDateObj = new Date(item.expiresAt);
+            const dateStr = expDateObj.toLocaleDateString();
+            const timeStr = expDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             return {
               ...item,
-              status: now < item.expiresAt ? 'Faol' : 'Tarix'
+              date: isStillActive ? `Tugash muddati: ${dateStr} ${timeStr}` : `Tugagan sana: ${dateStr} ${timeStr}`,
+              status: isStillActive ? 'Faol' : 'Tarix'
             };
           }
           return item;
@@ -171,13 +176,21 @@ export default function MysteryBoxScreen({ navigation, route }) {
           await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newEnergy, lastUpdated }));
         }
 
+        let dateLabel = `Yutib olindi: ${new Date().toLocaleDateString()}`;
+        if (selected.type === 'premium' && expTime) {
+          const expDateObj = new Date(expTime);
+          const dateStr = expDateObj.toLocaleDateString();
+          const timeStr = expDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          dateLabel = `Tugash muddati: ${dateStr} ${timeStr}`;
+        }
+
         // Save new reward to user's real rewards history array
         const newHistoryItem = {
           id: Date.now().toString(),
           title: selected.title,
           sub: selected.sub,
-          date: `Yutib olindi: ${new Date().toLocaleDateString()}`,
-          status: selected.type === 'premium' ? 'Faol' : 'Faol',
+          date: dateLabel,
+          status: 'Faol',
           expiresAt: expTime,
           type: selected.type,
           icon: selected.type === 'energy' ? 'lightning-bolt' : 'crown',
