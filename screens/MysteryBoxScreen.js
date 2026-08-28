@@ -63,12 +63,13 @@ export default function MysteryBoxScreen({ navigation, route }) {
     }
   };
 
-  // Rewards List State with real storage
-  const [rewardsList, setRewardsList] = useState([]);
+  // Per-user isolated storage key
+  const userIdKey = user?.customId || user?.id || 'guest';
+  const REWARDS_STORAGE_KEY = `user_won_rewards_history_${userIdKey}`;
 
   const loadSavedRewards = async () => {
     try {
-      const storedRewards = await AsyncStorage.getItem('user_won_rewards_history');
+      const storedRewards = await AsyncStorage.getItem(REWARDS_STORAGE_KEY);
       if (storedRewards) {
         const parsed = JSON.parse(storedRewards);
         // Recalculate 'Faol' status for premium items based on current time
@@ -89,12 +90,12 @@ export default function MysteryBoxScreen({ navigation, route }) {
         });
         setRewardsList(updated);
       } else {
-        // Initial default rewards if empty
+        // Initial default rewards if empty for this user
         const initialRewards = [
           { id: '1', title: 'Yangi Foydalanuvchi Bonusi', date: 'Berilgan sana: Bugun', status: 'Faol', type: 'premium', icon: 'crown', color: '#F59E0B', badge: '1 ta Kalit' }
         ];
         setRewardsList(initialRewards);
-        await AsyncStorage.setItem('user_won_rewards_history', JSON.stringify(initialRewards));
+        await AsyncStorage.setItem(REWARDS_STORAGE_KEY, JSON.stringify(initialRewards));
       }
     } catch (e) {}
   };
@@ -136,13 +137,13 @@ export default function MysteryBoxScreen({ navigation, route }) {
       if (!user || data.userId === user.id || data.customId === user.customId) {
         try {
           await AsyncStorage.removeItem('user_premium_expires_at');
-          const storedRewards = await AsyncStorage.getItem('user_won_rewards_history');
+          const storedRewards = await AsyncStorage.getItem(REWARDS_STORAGE_KEY);
           if (storedRewards) {
             const parsed = JSON.parse(storedRewards);
             // Remove active premium reward item from history array or set status to Tarix
             const updated = parsed.filter(item => item.type !== 'premium');
             setRewardsList(updated);
-            await AsyncStorage.setItem('user_won_rewards_history', JSON.stringify(updated));
+            await AsyncStorage.setItem(REWARDS_STORAGE_KEY, JSON.stringify(updated));
           }
         } catch (e) {}
       }
@@ -152,7 +153,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
       socket.off('premium_revoked');
       socket.disconnect();
     };
-  }, []);
+  }, [userIdKey]);
 
   const openBoxHandler = () => {
     if (keysCount <= 0) return;
@@ -236,7 +237,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
         const updatedHistory = [newHistoryItem, ...rewardsList];
         setRewardsList(updatedHistory);
-        await AsyncStorage.setItem('user_won_rewards_history', JSON.stringify(updatedHistory));
+        await AsyncStorage.setItem(REWARDS_STORAGE_KEY, JSON.stringify(updatedHistory));
 
       } catch (e) {
         console.error('Save reward error:', e);
