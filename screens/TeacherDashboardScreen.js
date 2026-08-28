@@ -527,7 +527,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
     } catch (e) {}
     navigation.reset({
       index: 0,
-      routes: [{ name: 'StepTwo', params: { language: currentLang } }]
+      routes: [{ name: 'StepOne', params: { language: currentLang } }]
     });
   };
 
