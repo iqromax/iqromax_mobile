@@ -227,8 +227,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
             </LinearGradient>
           </View>
           <View>
-            <Text style={styles.welcomeText}>O'QITUVCHI</Text>
-            <Text style={styles.userName}>{user?.name || "O'qituvchi"}</Text>
+            <Text style={styles.welcomeText}>{t.teacherLabel || "O'QITUVCHI"}</Text>
+            <Text style={styles.userName}>{user?.name || (t.teacherLabel || "O'qituvchi")}</Text>
           </View>
         </View>
 
@@ -253,9 +253,9 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               >
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <View style={{ flex: 1, paddingRight: 15 }}>
-                    <Text style={styles.heroTitle}>O'qituvchi Portali 🎓</Text>
+                    <Text style={styles.heroTitle}>{t.teacherPortalTitle || "O'qituvchi Portali 🎓"}</Text>
                     <Text style={styles.heroSub}>
-                      Xush kelibsiz! Barcha mashqlar va imkoniyatlar siz uchun cheksiz rejimda ochiq.
+                      {t.teacherPortalSub || "Xush kelibsiz! Barcha mashqlar va imkoniyatlar siz uchun cheksiz rejimda ochiq."}
                     </Text>
                   </View>
                   <View style={styles.heroIconBox}>
@@ -266,7 +266,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
             </View>
 
             {/* QUICK ACTIONS GRID */}
-            <Text style={styles.sectionTitle}>Tezkor bo'limlar</Text>
+            <Text style={styles.sectionTitle}>{t.quickSections || "Tezkor bo'limlar"}</Text>
             <View style={styles.actionGrid}>
               <TouchableOpacity 
                 style={styles.actionCard} 
@@ -275,8 +275,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               >
                 <LinearGradient colors={['rgba(168, 85, 247, 0.2)', 'rgba(168, 85, 247, 0.05)']} style={styles.actionGradient}>
                   <MaterialCommunityIcons name="brain" size={32} color="#A855F7" />
-                  <Text style={styles.actionTitle}>Mashqlar</Text>
-                  <Text style={styles.actionDesc}>3 ta mashq turi cheksiz</Text>
+                  <Text style={styles.actionTitle}>{t.navExercise || "Mashqlar"}</Text>
+                  <Text style={styles.actionDesc}>{t.unlimitedExercisesDesc || "3 ta mashq turi cheksiz"}</Text>
                 </LinearGradient>
               </TouchableOpacity>
 
@@ -287,8 +287,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               >
                 <LinearGradient colors={['rgba(245, 158, 11, 0.2)', 'rgba(245, 158, 11, 0.05)']} style={styles.actionGradient}>
                   <Ionicons name="trophy" size={32} color="#F59E0B" />
-                  <Text style={styles.actionTitle}>Reyting</Text>
-                  <Text style={styles.actionDesc}>O'quvchilar ro'yxati</Text>
+                  <Text style={styles.actionTitle}>{t.navRanking || "Reyting"}</Text>
+                  <Text style={styles.actionDesc}>{t.studentsListDesc || "O'quvchilar ro'yxati"}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -297,9 +297,9 @@ export default function TeacherDashboardScreen({ navigation, route }) {
             <View style={styles.infoBanner}>
               <MaterialCommunityIcons name="shield-check" size={24} color="#10B981" style={{ marginRight: 12 }} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.infoBannerTitle}>Tizim Ta'rif: Premium O'qituvchi</Text>
+                <Text style={styles.infoBannerTitle}>{t.systemTariffTitle || "Tizim Ta'rif: Premium O'qituvchi"}</Text>
                 <Text style={styles.infoBannerDesc}>
-                  Sizning akkauntingizda energiya yoki XP cheklovlari mavjud emas. Xohlagan mashqingizni tanlab mashg'ulot o'tkazishingiz mumkin.
+                  {t.systemTariffDesc || "Sizning akkauntingizda energiya yoki XP cheklovlari mavjud emas. Xohlagan mashqingizni tanlab mashg'ulot o'tkazishingiz mumkin."}
                 </Text>
               </View>
             </View>
@@ -310,7 +310,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
         {activeTab === 'exercise' && (
           <View style={{ flex: 1 }}>
             <View style={{ paddingHorizontal: 20, paddingTop: 10 }}>
-              <Text style={styles.sectionTitle}>Mashq turini tanlang</Text>
+              <Text style={styles.sectionTitle}>{t.selectExerciseType || "Mashq turini tanlang"}</Text>
               
               {/* 3 EXERCISE CARDS */}
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 15 }}>
@@ -320,7 +320,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => setActiveExerciseType('abacus')}
                 >
                   <MaterialCommunityIcons name="abacus" size={26} color={activeExerciseType === 'abacus' ? '#A855F7' : '#9CA3AF'} />
-                  <Text style={[styles.exTabCardText, activeExerciseType === 'abacus' && styles.exTabCardTextActive]}>Abakus</Text>
+                  <Text style={[styles.exTabCardText, activeExerciseType === 'abacus' && styles.exTabCardTextActive]}>{t.abacusTitle || "Abakus"}</Text>
                 </TouchableOpacity>
 
                 {/* 2. TASAVVUR (ODDIY HISOB) */}
@@ -329,7 +329,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => setActiveExerciseType('calc')}
                 >
                   <MaterialCommunityIcons name="calculator" size={26} color={activeExerciseType === 'calc' ? '#22C55E' : '#9CA3AF'} />
-                  <Text style={[styles.exTabCardText, activeExerciseType === 'calc' && styles.exTabCardTextActive]}>Tasavvur</Text>
+                  <Text style={[styles.exTabCardText, activeExerciseType === 'calc' && styles.exTabCardTextActive]}>{t.calcTitle || "Tasavvur"}</Text>
                 </TouchableOpacity>
 
                 {/* 3. KO'PAYTIRISH VA BO'LISH */}
@@ -338,7 +338,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => setActiveExerciseType('speed')}
                 >
                   <MaterialCommunityIcons name="lightning-bolt" size={26} color={activeExerciseType === 'speed' ? '#3B82F6' : '#9CA3AF'} />
-                  <Text style={[styles.exTabCardText, activeExerciseType === 'speed' && styles.exTabCardTextActive, { textAlign: 'center' }]}>Ko'paytirish va bo'lish</Text>
+                  <Text style={[styles.exTabCardText, activeExerciseType === 'speed' && styles.exTabCardTextActive, { textAlign: 'center' }]}>{t.speedTitle || "Ko'paytirish va bo'lish"}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -349,7 +349,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                 <View style={{ marginTop: 10 }}>
                   <View style={{ backgroundColor: '#0D0D1F', padding: 20, borderWidth: 1.5, borderColor: 'rgba(168, 85, 247, 0.3)', borderRadius: 18, marginBottom: 20 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                      <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>ABAKUS (SOROBAN) HAQIDA</Text>
+                      <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>{t.abacusInfoTitle || "ABAKUS (SOROBAN) HAQIDA"}</Text>
                       <MaterialCommunityIcons name="information-outline" size={20} color="#9CA3AF" />
                     </View>
                     
@@ -359,7 +359,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                       </View>
                       <View style={{ flex: 1, paddingLeft: 12 }}>
                         <Text style={{ fontSize: 12, lineHeight: 18, color: '#D1D5DB' }}>
-                          Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.
+                          {t.abacusInfoDesc || "Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi."}
                         </Text>
                       </View>
                     </View>
@@ -379,8 +379,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>HADLAR SONI</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>5 dan 25 hadgacha tanlang</Text>
+                        <Text style={styles.configTitle}>{t.examplesCountTitle || "HADLAR SONI"}</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{t.examplesCountSubtitle || "5 dan 25 hadgacha tanlang"}</Text>
                       </View>
                     </View>
 
@@ -391,7 +391,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           style={[styles.digitBtn, exampleCount === c && styles.digitBtnActive]}
                           onPress={() => setExampleCount(c)}
                         >
-                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} had</Text>
+                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} {t.exampleWord || "had"}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -404,8 +404,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <MaterialCommunityIcons name="calculator-variant" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>AMALLAR</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Amallar turini tanlang</Text>
+                        <Text style={styles.configTitle}>{t.opsTitle || "AMALLAR"}</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{t.opsSubtitle || "Amallar turini tanlang"}</Text>
                       </View>
                     </View>
 
@@ -422,7 +422,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           </View>
                         )}
                         <MaterialCommunityIcons name="plus" size={26} color={selectedOpType === 'oddiy' ? '#A855F7' : '#9CA3AF'} />
-                        <Text style={[styles.opCardText, selectedOpType === 'oddiy' && styles.opCardTextActive]}>Oddiy</Text>
+                        <Text style={[styles.opCardText, selectedOpType === 'oddiy' && styles.opCardTextActive]}>{t.opsOddiy || "Oddiy"}</Text>
                       </TouchableOpacity>
 
                       {/* Formula 5 */}
@@ -437,7 +437,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           </View>
                         )}
                         <Text style={[styles.opFormulaIcon, selectedOpType === 'f5' && { color: '#A855F7' }]}>f(x)</Text>
-                        <Text style={[styles.opCardText, selectedOpType === 'f5' && styles.opCardTextActive]}>Formula 5</Text>
+                        <Text style={[styles.opCardText, selectedOpType === 'f5' && styles.opCardTextActive]}>{t.opsF5 || "Formula 5"}</Text>
                       </TouchableOpacity>
 
                       {/* Formula 10 */}
@@ -452,7 +452,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           </View>
                         )}
                         <Text style={[styles.opFormulaIcon, selectedOpType === 'f10' && { color: '#A855F7' }]}>f(x)</Text>
-                        <Text style={[styles.opCardText, selectedOpType === 'f10' && styles.opCardTextActive]}>Formula 10</Text>
+                        <Text style={[styles.opCardText, selectedOpType === 'f10' && styles.opCardTextActive]}>{t.opsF10 || "Formula 10"}</Text>
                       </TouchableOpacity>
 
                       {/* Aralash */}
@@ -467,7 +467,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           </View>
                         )}
                         <MaterialCommunityIcons name="shuffle-variant" size={24} color={selectedOpType === 'aralash' ? '#A855F7' : '#9CA3AF'} />
-                        <Text style={[styles.opCardText, selectedOpType === 'aralash' && styles.opCardTextActive]}>Aralash</Text>
+                        <Text style={[styles.opCardText, selectedOpType === 'aralash' && styles.opCardTextActive]}>{t.opsAralash || "Aralash"}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -479,8 +479,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <MaterialCommunityIcons name="lightning-bolt" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>TEZLIK</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Mashq bajarish tezligini tanlang</Text>
+                        <Text style={styles.configTitle}>{t.speedSelectTitle || "TEZLIK"}</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{t.speedSelectSubtitle || "Mashq bajarish tezligini tanlang"}</Text>
                       </View>
                     </View>
 
@@ -491,7 +491,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           style={[styles.digitBtn, selectedSpeed === s && styles.digitBtnActive]}
                           onPress={() => setSelectedSpeed(s)}
                         >
-                          <Text style={[styles.digitBtnText, selectedSpeed === s && styles.digitBtnTextActive]}>{s} soniya</Text>
+                          <Text style={[styles.digitBtnText, selectedSpeed === s && styles.digitBtnTextActive]}>{s} {t.secondWord || "soniya"}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -504,8 +504,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <MaterialCommunityIcons name="numeric" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>SON XONASI</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Qatnashadigan sonlar xonasini tanlang</Text>
+                        <Text style={styles.configTitle}>{t.digitsTitle || "SON XONASI"}</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{t.digitsSubtitle || "Qatnashadigan sonlar xonasini tanlang"}</Text>
                       </View>
                     </View>
 
@@ -516,7 +516,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           style={[styles.digitBtn, selectedDigits === d && styles.digitBtnActive]}
                           onPress={() => setSelectedDigits(d)}
                         >
-                          <Text style={[styles.digitBtnText, selectedDigits === d && styles.digitBtnTextActive]}>{d} xonali</Text>
+                          <Text style={[styles.digitBtnText, selectedDigits === d && styles.digitBtnTextActive]}>{d} {t.digitsLabel || "xonali"}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -536,8 +536,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>HADLAR SONI</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>5 dan 25 hadgacha tanlang</Text>
+                        <Text style={styles.configTitle}>{t.examplesCountTitle || "HADLAR SONI"}</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{t.examplesCountSubtitle || "5 dan 25 hadgacha tanlang"}</Text>
                       </View>
                     </View>
 
@@ -548,7 +548,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           style={[styles.digitBtn, exampleCount === c && styles.digitBtnActive]}
                           onPress={() => setExampleCount(c)}
                         >
-                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} had</Text>
+                          <Text style={[styles.digitBtnText, exampleCount === c && styles.digitBtnTextActive]}>{c} {t.exampleWord || "had"}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -561,12 +561,12 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <MaterialCommunityIcons name="calculator-variant" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>AMALLAR</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Amallar turini tanlang</Text>
+                        <Text style={styles.configTitle}>{t.opsTitle || "AMALLAR"}</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{t.opsSubtitle || "Amallar turini tanlang"}</Text>
                       </View>
                     </View>
 
-                    <View style={{ flexDirection: 'row', gap: 12 }}>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
                       {/* Ko'paytirish */}
                       <TouchableOpacity 
                         style={[styles.opCard, { paddingVertical: 18 }, selectedOpType === 'kopaytirish' && styles.opCardActive]}
@@ -579,7 +579,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           </View>
                         )}
                         <MaterialCommunityIcons name="close" size={30} color={selectedOpType === 'kopaytirish' ? '#A855F7' : '#9CA3AF'} />
-                        <Text style={[styles.opCardText, { fontSize: 13, marginTop: 6 }, selectedOpType === 'kopaytirish' && styles.opCardTextActive]}>Ko'paytirish</Text>
+                        <Text style={[styles.opCardText, { fontSize: 13, marginTop: 6 }, selectedOpType === 'kopaytirish' && styles.opCardTextActive]}>{t.speedKopaytirish || "Ko'paytirish"}</Text>
                       </TouchableOpacity>
 
                       {/* Bo'lish */}
@@ -594,7 +594,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           </View>
                         )}
                         <MaterialCommunityIcons name="division" size={30} color={selectedOpType === 'bolish' ? '#A855F7' : '#9CA3AF'} />
-                        <Text style={[styles.opCardText, { fontSize: 13, marginTop: 6 }, selectedOpType === 'bolish' && styles.opCardTextActive]}>Bo'lish</Text>
+                        <Text style={[styles.opCardText, { fontSize: 13, marginTop: 6 }, selectedOpType === 'bolish' && styles.opCardTextActive]}>{t.speedBolish || "Bo'lish"}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -606,8 +606,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <MaterialCommunityIcons name="numeric" size={20} color="#A855F7" />
                       </View>
                       <View>
-                        <Text style={styles.configTitle}>SON XONASI</Text>
-                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>Qatnashadigan sonlar xonasini tanlang</Text>
+                        <Text style={styles.configTitle}>{t.digitsTitle || "SON XONASI"}</Text>
+                        <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{t.digitsSubtitle || "Qatnashadigan sonlar xonasini tanlang"}</Text>
                       </View>
                     </View>
 
@@ -618,7 +618,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                           style={[styles.digitBtn, selectedDigits === d && styles.digitBtnActive]}
                           onPress={() => setSelectedDigits(d)}
                         >
-                          <Text style={[styles.digitBtnText, selectedDigits === d && styles.digitBtnTextActive]}>{d} xonali</Text>
+                          <Text style={[styles.digitBtnText, selectedDigits === d && styles.digitBtnTextActive]}>{d} {t.digitsLabel || "xonali"}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>
@@ -638,12 +638,12 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => navigation.navigate('AbacusSimulator', { language: currentLang })}
                 >
                   <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FFF" />
-                  <Text style={styles.primaryBtnText}>ABAKUSNI OCHISH</Text>
+                  <Text style={styles.primaryBtnText}>{t.openAbacusBtn || "ABAKUSNI OCHISH"}</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={styles.primaryBtn} activeOpacity={0.8} onPress={handleStartExercise}>
                   <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FFF" />
-                  <Text style={styles.primaryBtnText}>MASHQNI BOSHLASH</Text>
+                  <Text style={styles.primaryBtnText}>{t.startExercise || "MASHQNI BOSHLASH"}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -653,34 +653,34 @@ export default function TeacherDashboardScreen({ navigation, route }) {
         {/* 3. STATISTIKALAR SAHIFA (STATS) */}
         {activeTab === 'stats' && (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sectionTitle}>Statistikalar</Text>
+            <Text style={styles.sectionTitle}>{t.stats || "Statistikalar"}</Text>
             
             <View style={styles.statsCardGrid}>
               <View style={styles.statBoxCard}>
                 <MaterialCommunityIcons name="brain" size={28} color="#A855F7" />
                 <Text style={styles.statBoxNum}>0%</Text>
-                <Text style={styles.statBoxLabel}>Mantiq</Text>
+                <Text style={styles.statBoxLabel}>{t.logic || "Mantiq"}</Text>
               </View>
 
               <View style={styles.statBoxCard}>
                 <MaterialCommunityIcons name="lightning-bolt" size={28} color="#FBBF24" />
                 <Text style={styles.statBoxNum}>0.0s</Text>
-                <Text style={styles.statBoxLabel}>Tezlik</Text>
+                <Text style={styles.statBoxLabel}>{t.speed || "Tezlik"}</Text>
               </View>
 
               <View style={styles.statBoxCard}>
                 <MaterialCommunityIcons name="bullseye-arrow" size={28} color="#10B981" />
                 <Text style={styles.statBoxNum}>0%</Text>
-                <Text style={styles.statBoxLabel}>Aniqlik</Text>
+                <Text style={styles.statBoxLabel}>{t.accuracy || "Aniqlik"}</Text>
               </View>
             </View>
 
-            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Faoliyat tarixi</Text>
+            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>{t.activityTitle || "Faoliyat tarixi"}</Text>
             <View style={styles.emptyHistoryBox}>
               <Feather name="clock" size={36} color="#4B5563" style={{ marginBottom: 10 }} />
-              <Text style={{ color: '#9CA3AF', fontSize: 14, fontFamily: 'Inter_500Medium' }}>Faoliyat tarixi mavjud emas</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 14, fontFamily: 'Inter_500Medium' }}>{t.noActivityText || "Faoliyat tarixi mavjud emas"}</Text>
               <Text style={{ color: '#6B7280', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
-                Mashqlarni bajarib tugatganingizdan so'ng natijalaringiz shu yerda ko'rinadi.
+                {t.noActivityDesc || "Mashqlarni bajarib tugatganingizdan so'ng natijalaringiz shu yerda ko'rinadi."}
               </Text>
             </View>
           </ScrollView>
@@ -760,10 +760,10 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               <View style={styles.profileAvatarBox}>
                 <Feather name="user" size={40} color="#A855F7" />
               </View>
-              <Text style={styles.profileName}>{user?.name || "O'qituvchi"}</Text>
+              <Text style={styles.profileName}>{user?.name || (t.teacherLabel || "O'qituvchi")}</Text>
               <Text style={styles.profileTag}>{user?.email || "oqituvchi@iqromax.net"}</Text>
               <View style={styles.roleBadge}>
-                <Text style={styles.roleBadgeText}>O'QITUVCHI AKKAUNTI</Text>
+                <Text style={styles.roleBadgeText}>{t.teacherAccountBadge || "O'QITUVCHI AKKAUNTI"}</Text>
               </View>
             </View>
 
@@ -776,7 +776,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
 
               <View style={styles.detailItem}>
                 <Feather name="mail" size={18} color="#9CA3AF" />
-                <Text style={styles.detailText}>{user?.email || "Email mavjud emas"}</Text>
+                <Text style={styles.detailText}>{user?.email || (t.noEmailText || "Email mavjud emas")}</Text>
               </View>
             </View>
 
@@ -807,15 +807,15 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="file-pdf-box" size={24} color="#A855F7" />
                 </View>
                 <View>
-                  <Text style={styles.pdfCardTitle}>AMALLAR (PDF JADVAL GENERATORI)</Text>
+                  <Text style={styles.pdfCardTitle}>{t.pdfSectionTitle || "AMALLAR (PDF JADVAL GENERATORI)"}</Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>
-                    A4 shaklidagi topshiriq jadvallarini generatsiya qilish
+                    {t.pdfSectionSub || "A4 shaklidagi topshiriq jadvallarini generatsiya qilish"}
                   </Text>
                 </View>
               </View>
 
               <Text style={{ color: '#E2E8F0', fontSize: 13, fontFamily: 'Inter_600SemiBold', marginBottom: 10 }}>
-                Amal turini tanlang:
+                {t.opsSubtitle || "Amal turini tanlang"}:
               </Text>
 
               {/* OP SELECTION GRID */}
@@ -826,7 +826,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => { setPdfOpType('oddiy'); handleRefreshPdf(); }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'oddiy' && styles.pdfOpBtnTextActive]}>Oddiy</Text>
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'oddiy' && styles.pdfOpBtnTextActive]}>{t.opsOddiy || "Oddiy"}</Text>
                 </TouchableOpacity>
 
                 {/* Formula 5 */}
@@ -835,7 +835,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => { setPdfOpType('f5'); handleRefreshPdf(); }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'f5' && styles.pdfOpBtnTextActive]}>Formula 5</Text>
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'f5' && styles.pdfOpBtnTextActive]}>{t.opsF5 || "Formula 5"}</Text>
                 </TouchableOpacity>
 
                 {/* Formula 10 */}
@@ -844,7 +844,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => { setPdfOpType('f10'); handleRefreshPdf(); }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'f10' && styles.pdfOpBtnTextActive]}>Formula 10</Text>
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'f10' && styles.pdfOpBtnTextActive]}>{t.opsF10 || "Formula 10"}</Text>
                 </TouchableOpacity>
 
                 {/* Aralash */}
@@ -853,7 +853,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   onPress={() => { setPdfOpType('aralash'); handleRefreshPdf(); }}
                   activeOpacity={0.8}
                 >
-                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'aralash' && styles.pdfOpBtnTextActive]}>Aralash</Text>
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'aralash' && styles.pdfOpBtnTextActive]}>{t.opsAralash || "Aralash"}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -868,7 +868,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   <LinearGradient colors={['#A855F7', '#7C3AED']} style={styles.generatePdfGradient}>
                     <MaterialCommunityIcons name="lightning-bolt" size={20} color="#FFF" style={{ marginRight: 6 }} />
                     <Text style={styles.generatePdfBtnText}>
-                      {isGeneratingPdf ? "PDF generatsiya qilinmoqda..." : "GENERATE PDF"}
+                      {isGeneratingPdf ? (t.pdfGenerating || "PDF generatsiya qilinmoqda...") : (t.generatePdfBtnText || "GENERATE PDF")}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
@@ -877,7 +877,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   <View style={styles.pdfSuccessBox}>
                     <MaterialCommunityIcons name="check-circle" size={22} color="#10B981" />
                     <Text style={styles.pdfSuccessText}>
-                      Yangi PDF jadval muvaffaqiyatli yaratildi!
+                      {t.pdfSuccessMsg || "Yangi PDF jadval muvaffaqiyatli yaratildi!"}
                     </Text>
                   </View>
 
@@ -889,7 +889,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                       activeOpacity={0.8}
                     >
                       <Feather name="share-2" size={18} color="#FFF" style={{ marginRight: 6 }} />
-                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13 }}>Yuklab olish / Ulashish</Text>
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13 }}>{t.downloadShare || "Yuklab olish / Ulashish"}</Text>
                     </TouchableOpacity>
 
                     {/* Refresh */}
@@ -903,7 +903,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   </View>
 
                   <Text style={{ color: '#6B7280', fontSize: 11, textAlign: 'center', marginTop: 4, fontFamily: 'Inter_500Medium' }}>
-                    Amal turini refresh qiling va qayta generatsiya qiling (eski PDF yangilanadi).
+                    {t.pdfRefreshHint || "Amal turini refresh qiling va qayta generatsiya qiling (eski PDF yangilanadi)."}
                   </Text>
                 </View>
               )}
@@ -911,7 +911,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
 
             <TouchableOpacity style={styles.logoutFullBtn} onPress={handleReturnToHome}>
               <Feather name="log-out" size={20} color="#EF4444" style={{ marginRight: 8 }} />
-              <Text style={{ color: '#EF4444', fontFamily: 'Inter_700Bold', fontSize: 16 }}>Tizimdan chiqish</Text>
+              <Text style={{ color: '#EF4444', fontFamily: 'Inter_700Bold', fontSize: 16 }}>{t.logout || "Tizimdan chiqish"}</Text>
             </TouchableOpacity>
           </ScrollView>
         )}
