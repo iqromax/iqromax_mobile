@@ -900,36 +900,334 @@ export default function TeacherDashboardScreen({ navigation, route }) {
         {/* 3. STATISTIKALAR SAHIFA (STATS) */}
         {activeTab === 'stats' && (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            <Text style={styles.sectionTitle}>{t.stats || "Statistikalar"}</Text>
-            
-            <View style={styles.statsCardGrid}>
-              <View style={styles.statBoxCard}>
-                <MaterialCommunityIcons name="brain" size={28} color="#A855F7" />
-                <Text style={styles.statBoxNum}>0%</Text>
-                <Text style={styles.statBoxLabel}>{t.logic || "Mantiq"}</Text>
+            {/* 1. YUQORI QISM - 4 TA ASOSIY STATISTIK KARTA */}
+            <Text style={styles.sectionTitle}>Statistika Ko'rsatkichlari</Text>
+            <View style={styles.statsKpiGrid}>
+              <View style={styles.kpiCard}>
+                <LinearGradient colors={['rgba(168, 85, 247, 0.2)', 'rgba(168, 85, 247, 0.05)']} style={styles.kpiGradient}>
+                  <View style={styles.kpiHeader}>
+                    <Text style={styles.kpiIcon}>👨‍🎓</Text>
+                    <Text style={styles.kpiLabel}>O'quvchilar</Text>
+                  </View>
+                  <Text style={styles.kpiValue}>128</Text>
+                  <Text style={styles.kpiSub}>Faol ta'lim oluvchilar</Text>
+                </LinearGradient>
               </View>
 
-              <View style={styles.statBoxCard}>
-                <MaterialCommunityIcons name="lightning-bolt" size={28} color="#FBBF24" />
-                <Text style={styles.statBoxNum}>0.0s</Text>
-                <Text style={styles.statBoxLabel}>{t.speed || "Tezlik"}</Text>
+              <View style={styles.kpiCard}>
+                <LinearGradient colors={['rgba(59, 130, 246, 0.2)', 'rgba(59, 130, 246, 0.05)']} style={styles.kpiGradient}>
+                  <View style={styles.kpiHeader}>
+                    <Text style={styles.kpiIcon}>📝</Text>
+                    <Text style={styles.kpiLabel}>Jami mashqlar</Text>
+                  </View>
+                  <Text style={styles.kpiValue}>2,450</Text>
+                  <Text style={styles.kpiSub}>Bajarilgan ushbu oyda</Text>
+                </LinearGradient>
               </View>
 
-              <View style={styles.statBoxCard}>
-                <MaterialCommunityIcons name="bullseye-arrow" size={28} color="#10B981" />
-                <Text style={styles.statBoxNum}>0%</Text>
-                <Text style={styles.statBoxLabel}>{t.accuracy || "Aniqlik"}</Text>
+              <View style={styles.kpiCard}>
+                <LinearGradient colors={['rgba(16, 185, 129, 0.2)', 'rgba(16, 185, 129, 0.05)']} style={styles.kpiGradient}>
+                  <View style={styles.kpiHeader}>
+                    <Text style={styles.kpiIcon}>✅</Text>
+                    <Text style={styles.kpiLabel}>To'g'ri javoblar</Text>
+                  </View>
+                  <Text style={styles.kpiValue}>87%</Text>
+                  <Text style={styles.kpiSub}>O'rtacha aniqlik</Text>
+                </LinearGradient>
+              </View>
+
+              <View style={styles.kpiCard}>
+                <LinearGradient colors={['rgba(245, 158, 11, 0.2)', 'rgba(245, 158, 11, 0.05)']} style={styles.kpiGradient}>
+                  <View style={styles.kpiHeader}>
+                    <Text style={styles.kpiIcon}>⏱</Text>
+                    <Text style={styles.kpiLabel}>O'rtacha vaqt</Text>
+                  </View>
+                  <Text style={styles.kpiValue}>2m 18s</Text>
+                  <Text style={styles.kpiSub}>Mashq davomiyligi</Text>
+                </LinearGradient>
               </View>
             </View>
 
-            <Text style={[styles.sectionTitle, { marginTop: 20 }]}>{t.activityTitle || "Faoliyat tarixi"}</Text>
-            <View style={styles.emptyHistoryBox}>
-              <Feather name="clock" size={36} color="#4B5563" style={{ marginBottom: 10 }} />
-              <Text style={{ color: '#9CA3AF', fontSize: 14, fontFamily: 'Inter_500Medium' }}>{t.noActivityText || "Faoliyat tarixi mavjud emas"}</Text>
-              <Text style={{ color: '#6B7280', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
-                {t.noActivityDesc || "Mashqlarni bajarib tugatganingizdan so'ng natijalaringiz shu yerda ko'rinadi."}
+            {/* 2. FAOLLIK GRAFIGI */}
+            <View style={styles.statsCardBox}>
+              <View style={styles.statsCardHeaderRow}>
+                <View>
+                  <Text style={styles.statsCardTitle}>📈 O'quvchilar faolligi</Text>
+                  <Text style={styles.statsCardSub}>Haftalik ko'rsatkichlar</Text>
+                </View>
+
+                {/* FILTER BUTTONS */}
+                <View style={styles.timeFilterContainer}>
+                  {['today', '7days', '30days', '3months'].map((filterKey) => (
+                    <TouchableOpacity 
+                      key={filterKey}
+                      style={[styles.timeFilterBtn, statsTimeFilter === filterKey && styles.timeFilterBtnActive]}
+                      onPress={() => setStatsTimeFilter(filterKey)}
+                    >
+                      <Text style={[styles.timeFilterText, statsTimeFilter === filterKey && styles.timeFilterTextActive]}>
+                        {filterKey === 'today' ? 'Bugun' : filterKey === '7days' ? '7 kun' : filterKey === '30days' ? '30 kun' : '3 oy'}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* BAR CHART */}
+              <View style={styles.barChartContainer}>
+                {[
+                  { day: 'Dush', count: 84 },
+                  { day: 'Sesh', count: 102 },
+                  { day: 'Chor', count: 76 },
+                  { day: 'Pay', count: 119 },
+                  { day: 'Jum', count: 134 },
+                  { day: 'Shan', count: 98 },
+                  { day: 'Yak', count: 67 }
+                ].map((item, i) => {
+                  const maxVal = 140;
+                  const heightPercent = (item.count / maxVal) * 100;
+                  return (
+                    <View key={i} style={styles.barColumn}>
+                      <Text style={styles.barValueText}>{item.count}</Text>
+                      <View style={styles.barTrack}>
+                        <LinearGradient
+                          colors={item.count >= 110 ? ['#A855F7', '#6D28D9'] : ['#3B82F6', '#1D4ED8']}
+                          style={[styles.barFill, { height: `${heightPercent}%` }]}
+                        />
+                      </View>
+                      <Text style={styles.barLabelText}>{item.day}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+
+            {/* 3. O'QUVCHILAR NATIJALARI */}
+            <View style={styles.statsCardBox}>
+              <Text style={styles.statsCardTitle}>🏆 O'quvchilar natijalari</Text>
+              <Text style={styles.statsCardSub}>Umumiy o'zlashtirish ko'rsatkichi</Text>
+
+              {/* PERCENTAGE BARS */}
+              <View style={{ gap: 14, marginVertical: 16 }}>
+                {/* 🟢 Yuqori natija */}
+                <View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <Text style={{ color: '#10B981', fontFamily: 'Inter_700Bold', fontSize: 13 }}>🟢 Yuqori natija</Text>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>42%</Text>
+                  </View>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: '42%', backgroundColor: '#10B981' }]} />
+                  </View>
+                </View>
+
+                {/* 🟡 O'rtacha */}
+                <View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 13 }}>🟡 O'rtacha</Text>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>38%</Text>
+                  </View>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: '38%', backgroundColor: '#F59E0B' }]} />
+                  </View>
+                </View>
+
+                {/* 🔴 E'tibor talab qiladi */}
+                <View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <Text style={{ color: '#EF4444', fontFamily: 'Inter_700Bold', fontSize: 13 }}>🔴 E'tibor talab qiladi</Text>
+                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>20%</Text>
+                  </View>
+                  <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: '20%', backgroundColor: '#EF4444' }]} />
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.statInsightBox}>
+                <Feather name="trending-up" size={20} color="#10B981" style={{ marginRight: 10 }} />
+                <Text style={styles.statInsightText}>
+                  <Text style={{ fontFamily: 'Inter_700Bold', color: '#10B981' }}>26 ta o'quvchi</Text> oxirgi 7 kun ichida natijasini yaxshiladi.
+                </Text>
+              </View>
+            </View>
+
+            {/* 4. MASHQLAR SAMARADORLIGI */}
+            <View style={styles.statsCardBox}>
+              <Text style={styles.statsCardTitle}>🎯 Mashqlar samaradorligi</Text>
+              <Text style={styles.statsCardSub}>Qaysi mashq turi qanday bajarilmoqda</Text>
+
+              <View style={{ gap: 12, marginTop: 14 }}>
+                {/* 🧮 Misollar (Tasavvur / Oddiy) */}
+                <View style={styles.exEffCard}>
+                  <View style={styles.exEffIconCircle}>
+                    <Text style={{ fontSize: 20 }}>🧮</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.exEffTitle}>Misollar (Tasavvur)</Text>
+                    <Text style={styles.exEffSub}>1,240 ta bajarilgan</Text>
+                  </View>
+                  <View style={styles.exEffBadgeSuccess}>
+                    <Text style={styles.exEffBadgeText}>91% to'g'ri</Text>
+                  </View>
+                </View>
+
+                {/* 🧠 Mantiqiy savsavollar / Formulalar */}
+                <View style={styles.exEffCard}>
+                  <View style={styles.exEffIconCircle}>
+                    <Text style={{ fontSize: 20 }}>🧠</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.exEffTitle}>Mantiqiy savollar / Formulalar</Text>
+                    <Text style={styles.exEffSub}>680 ta bajarilgan</Text>
+                  </View>
+                  <View style={styles.exEffBadgeInfo}>
+                    <Text style={styles.exEffBadgeText}>84% to'g'ri</Text>
+                  </View>
+                </View>
+
+                {/* 📐 Ko'paytirish va Bo'lish */}
+                <View style={styles.exEffCard}>
+                  <View style={styles.exEffIconCircle}>
+                    <Text style={{ fontSize: 20 }}>📐</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.exEffTitle}>Ko'paytirish va bo'lish</Text>
+                    <Text style={styles.exEffSub}>530 ta bajarilgan</Text>
+                  </View>
+                  <View style={styles.exEffBadgeWarning}>
+                    <Text style={styles.exEffBadgeText}>79% to'g'ri</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* 5. ENG FAOL O'QUVCHILAR */}
+            <View style={styles.statsCardBox}>
+              <Text style={styles.statsCardTitle}>🔥 Eng faol o'quvchilar</Text>
+              <Text style={styles.statsCardSub}>TOP sinf o'quvchilaringiz</Text>
+
+              <View style={{ gap: 10, marginTop: 14 }}>
+                {/* 🥇 Abdulloh Karimov */}
+                <View style={styles.topUserRow}>
+                  <Text style={{ fontSize: 22, marginRight: 12 }}>🥇</Text>
+                  <Image source={require('../assets/avatar_maks.png')} style={styles.topUserAvatar} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.topUserName}>Abdulloh Karimov</Text>
+                    <Text style={styles.topUserSub}>1,280 ta mashq · 96% aniqlik</Text>
+                  </View>
+                </View>
+
+                {/* 🥈 Muhammadali Aliyev */}
+                <View style={styles.topUserRow}>
+                  <Text style={{ fontSize: 22, marginRight: 12 }}>🥈</Text>
+                  <Image source={require('../assets/avatar_alex.png')} style={styles.topUserAvatar} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.topUserName}>Muhammadali Aliyev</Text>
+                    <Text style={styles.topUserSub}>1,150 ta mashq · 94% aniqlik</Text>
+                  </View>
+                </View>
+
+                {/* 🥉 Sardorbek */}
+                <View style={styles.topUserRow}>
+                  <Text style={{ fontSize: 22, marginRight: 12 }}>🥉</Text>
+                  <Image source={require('../assets/avatar_david.png')} style={styles.topUserAvatar} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.topUserName}>Sardorbek</Text>
+                    <Text style={styles.topUserSub}>980 ta mashq · 92% aniqlik</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* 6. E'TIBOR TALAB QILADIGAN O'QUVCHILAR */}
+            <View style={styles.statsCardBox}>
+              <Text style={styles.statsCardTitle}>⚠️ E'tibor talab qilmoqda</Text>
+              <Text style={styles.statsCardSub}>Past ko'rsatkichdagi va sust o'quvchilar</Text>
+
+              <View style={{ gap: 10, marginTop: 14 }}>
+                {/* 🔴 Azizbek */}
+                <View style={styles.alertUserCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                    <View style={[styles.alertDot, { backgroundColor: '#EF4444' }]} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.alertUserName}>Azizbek</Text>
+                      <Text style={styles.alertUserReason}>5 kundan beri mashq bajarmadi</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.alertUserBtn} activeOpacity={0.8} onPress={() => setActiveTab('ranking')}>
+                    <Text style={styles.alertUserBtnText}>Ko'rish</Text>
+                    <Feather name="chevron-right" size={14} color="#A855F7" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* 🟠 Madina */}
+                <View style={styles.alertUserCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                    <View style={[styles.alertDot, { backgroundColor: '#F59E0B' }]} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.alertUserName}>Madina</Text>
+                      <Text style={styles.alertUserReason}>O'rtacha natija: 54%</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.alertUserBtn} activeOpacity={0.8} onPress={() => setActiveTab('ranking')}>
+                    <Text style={styles.alertUserBtnText}>Ko'rish</Text>
+                    <Feather name="chevron-right" size={14} color="#A855F7" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* 🟠 Jasur */}
+                <View style={styles.alertUserCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                    <View style={[styles.alertDot, { backgroundColor: '#F59E0B' }]} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.alertUserName}>Jasur</Text>
+                      <Text style={styles.alertUserReason}>So'nggi 10 ta mashqdan 6 tasida xato</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity style={styles.alertUserBtn} activeOpacity={0.8} onPress={() => setActiveTab('ranking')}>
+                    <Text style={styles.alertUserBtnText}>Ko'rish</Text>
+                    <Feather name="chevron-right" size={14} color="#A855F7" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+            {/* 7. UMUMIY RIVOJLANISH */}
+            <View style={styles.statsCardBox}>
+              <Text style={styles.statsCardTitle}>📊 O'quvchilar rivojlanishi</Text>
+              <Text style={styles.statsCardSub}>Haftalar kesimida bilim darajasining oshib borishi</Text>
+
+              <View style={styles.trendGraphBox}>
+                <View style={styles.trendYAxis}>
+                  <Text style={styles.trendYText}>100%</Text>
+                  <Text style={styles.trendYText}>80%</Text>
+                  <Text style={styles.trendYText}>60%</Text>
+                  <Text style={styles.trendYText}>40%</Text>
+                </View>
+
+                <View style={styles.trendPlotArea}>
+                  {/* STEPPED GRAPH POINTS */}
+                  <View style={styles.trendLineCanvas}>
+                    <View style={[styles.trendBarSegment, { height: '55%', left: '10%' }]} />
+                    <View style={[styles.trendBarSegment, { height: '68%', left: '32%' }]} />
+                    <View style={[styles.trendBarSegment, { height: '82%', left: '55%' }]} />
+                    <View style={[styles.trendBarSegment, { height: '94%', left: '78%' }]} />
+                  </View>
+
+                  <View style={styles.trendXAxis}>
+                    <Text style={styles.trendXText}>1-hafta</Text>
+                    <Text style={styles.trendXText}>2-hafta</Text>
+                    <Text style={styles.trendXText}>3-hafta</Text>
+                    <Text style={styles.trendXText}>4-hafta</Text>
+                  </View>
+                </View>
+              </View>
+
+              <Text style={{ color: '#10B981', fontSize: 12, textAlign: 'center', marginTop: 14, fontFamily: 'Inter_600SemiBold' }}>
+                🚀 So'nggi 4 haftada umumiy o'zlashtirish 39% ga oshdi!
               </Text>
             </View>
+
+            <View style={{ height: 30 }} />
           </ScrollView>
         )}
 
@@ -1466,4 +1764,85 @@ const styles = StyleSheet.create({
   modalDescText: { color: '#9CA3AF', fontSize: 14, textAlign: 'center', marginBottom: 28, lineHeight: 22 },
   modalCloseBtn: { width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 16, borderRadius: 16, backgroundColor: '#EF4444' },
   modalCloseBtnText: { color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 16 },
+
+  // TEACHER DASHBOARD STATS STYLES
+  statsKpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
+  kpiCard: { width: '48.5%', borderRadius: 18, overflow: 'hidden', borderWidth: 1, borderColor: '#1A1A35' },
+  kpiGradient: { padding: 16 },
+  kpiHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
+  kpiIcon: { fontSize: 18 },
+  kpiLabel: { color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_600SemiBold' },
+  kpiValue: { color: '#FFFFFF', fontSize: 24, fontFamily: 'Inter_700Bold' },
+  kpiSub: { color: '#6B7280', fontSize: 10, marginTop: 4, fontFamily: 'Inter_500Medium' },
+
+  statsCardBox: {
+    backgroundColor: '#0D0D1F', borderRadius: 20, padding: 18,
+    borderWidth: 1, borderColor: '#1A1A35', marginBottom: 16
+  },
+  statsCardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 },
+  statsCardTitle: { color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' },
+  statsCardSub: { color: '#9CA3AF', fontSize: 12, marginTop: 2, fontFamily: 'Inter_500Medium' },
+
+  timeFilterContainer: { flexDirection: 'row', backgroundColor: '#121228', borderRadius: 10, padding: 3, gap: 2 },
+  timeFilterBtn: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  timeFilterBtnActive: { backgroundColor: '#A855F7' },
+  timeFilterText: { color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' },
+  timeFilterTextActive: { color: '#FFFFFF' },
+
+  barChartContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 160, paddingTop: 20 },
+  barColumn: { alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end' },
+  barValueText: { color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginBottom: 6 },
+  barTrack: { width: 14, height: 100, backgroundColor: '#121228', borderRadius: 7, justifyContent: 'flex-end', overflow: 'hidden' },
+  barFill: { width: '100%', borderRadius: 7 },
+  barLabelText: { color: '#6B7280', fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 8 },
+
+  progressTrack: { height: 10, backgroundColor: '#121228', borderRadius: 5, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 5 },
+  statInsightBox: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    padding: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)'
+  },
+  statInsightText: { color: '#E2E8F0', fontSize: 12, fontFamily: 'Inter_500Medium', flex: 1 },
+
+  exEffCard: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#121228',
+    padding: 12, borderRadius: 14, borderWidth: 1, borderColor: '#1A1A35'
+  },
+  exEffIconCircle: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  exEffTitle: { color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_700Bold' },
+  exEffSub: { color: '#9CA3AF', fontSize: 11, marginTop: 2, fontFamily: 'Inter_500Medium' },
+  exEffBadgeSuccess: { backgroundColor: 'rgba(16, 185, 129, 0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#10B981' },
+  exEffBadgeInfo: { backgroundColor: 'rgba(59, 130, 246, 0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#3B82F6' },
+  exEffBadgeWarning: { backgroundColor: 'rgba(245, 158, 11, 0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#F59E0B' },
+  exEffBadgeText: { color: '#FFFFFF', fontSize: 11, fontFamily: 'Inter_700Bold' },
+
+  topUserRow: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#121228',
+    padding: 12, borderRadius: 14, borderWidth: 1, borderColor: '#1A1A35'
+  },
+  topUserAvatar: { width: 38, height: 38, borderRadius: 19, marginRight: 10 },
+  topUserName: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold' },
+  topUserSub: { color: '#9CA3AF', fontSize: 11, marginTop: 2, fontFamily: 'Inter_500Medium' },
+
+  alertUserCard: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#121228', padding: 12, borderRadius: 14, borderWidth: 1, borderColor: '#1A1A35'
+  },
+  alertDot: { width: 10, height: 10, borderRadius: 5 },
+  alertUserName: { color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_700Bold' },
+  alertUserReason: { color: '#EF4444', fontSize: 11, marginTop: 2, fontFamily: 'Inter_500Medium' },
+  alertUserBtn: { flexDirection: 'row', alignItems: 'center', gap: 2, backgroundColor: 'rgba(168, 85, 247, 0.15)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+  alertUserBtnText: { color: '#A855F7', fontSize: 12, fontFamily: 'Inter_700Bold' },
+
+  trendGraphBox: { flexDirection: 'row', height: 140, marginTop: 14, alignItems: 'stretch' },
+  trendYAxis: { justifyContent: 'space-between', paddingRight: 10, borderRightWidth: 1, borderRightColor: '#1A1A35' },
+  trendYText: { color: '#6B7280', fontSize: 10, fontFamily: 'Inter_600SemiBold' },
+  trendPlotArea: { flex: 1, paddingLeft: 10, justifyContent: 'space-between' },
+  trendLineCanvas: { flex: 1, position: 'relative', justifyContent: 'flex-end' },
+  trendBarSegment: {
+    position: 'absolute', width: 24, backgroundColor: '#A855F7',
+    borderTopLeftRadius: 6, borderTopRightRadius: 6, bottom: 0
+  },
+  trendXAxis: { flexDirection: 'row', justifyContent: 'space-around', paddingTop: 8, borderTopWidth: 1, borderTopColor: '#1A1A35' },
+  trendXText: { color: '#6B7280', fontSize: 10, fontFamily: 'Inter_600SemiBold' },
 });
