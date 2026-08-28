@@ -74,6 +74,22 @@ const MysteryBoxAdmin = () => {
   useEffect(() => {
     fetchMysteryBoxItems();
     fetchPremiumUsers();
+
+    // Real-time socket listener when a student wins premium from mobile app
+    // @ts-ignore
+    if (window.io) {
+      // @ts-ignore
+      const socket = window.io();
+      socket.on('new_premium_user_claimed', (newUser: PremiumUser) => {
+        setPremiumUsers(prev => {
+          const filtered = prev.filter(u => u.id !== newUser.id);
+          return [newUser, ...filtered];
+        });
+      });
+      return () => {
+        socket.off('new_premium_user_claimed');
+      };
+    }
   }, []);
 
   const handleOpenCreateModal = () => {

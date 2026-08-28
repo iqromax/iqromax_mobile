@@ -162,6 +162,18 @@ export default function MysteryBoxScreen({ navigation, route }) {
           const baseTime = (currentExp && parseInt(currentExp, 10) > Date.now()) ? parseInt(currentExp, 10) : Date.now();
           expTime = baseTime + (days * 24 * 60 * 60 * 1000); // Add days * 24 Hours
           await AsyncStorage.setItem('user_premium_expires_at', expTime.toString());
+
+          // Send to backend server to update DB and emit real-time socket event for Admin Panel
+          if (user?.id || user?.customId) {
+            fetch(`${API_URL}/user/claim-premium`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: user.id || user.customId,
+                days: days
+              })
+            }).catch(() => {});
+          }
         } else if (selected.type === 'energy') {
           const addVal = selected.value || 1;
           const storedData = await AsyncStorage.getItem('user_energy_data');

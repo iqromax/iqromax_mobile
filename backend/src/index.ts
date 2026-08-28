@@ -986,6 +986,47 @@ app.delete('/api/admin/mystery-box/:id', async (req, res) => {
   }
 });
 
+// Claim Premium endpoint for app when user wins premium from Mystery Box
+app.post('/api/user/claim-premium', async (req, res) => {
+  try {
+    const { userId, days } = req.body;
+    if (!userId || !days) {
+      return res.status(400).json({ error: 'userId va days kerak' });
+    }
+
+    // Find user in DB by ID or customId
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ id: userId }, { customId: userId }, { email: userId }]
+      }
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({ error: 'User topilmadi' });
+    }
+
+    const currentExp = existingUser.premiumExpiresAt ? new Date(existingUser.premiumExpiresAt).getTime() : Date.now();
+    const baseTime = currentExp > Date.now() ? currentExp : Date.now();
+    const newExpDate = new Date(baseTime + (parseInt(days, 10) * 24 * 60 * 60 * 1000));
+
+    const updatedUser = await prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        premiumExpiresAt: newExpDate,
+        role: 'Premium Student'
+      }
+    });
+
+    // Real-time broadcast to update Admin Panel instantly
+    io.emit('new_premium_user_claimed', updatedUser);
+
+    res.json({ message: 'Premium muvaffaqiyatli saqlandi', user: updatedUser });
+  } catch (error) {
+    console.error('Claim premium error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // --- ADMIN PREMIUM USERS MANAGEMENT API ---
 app.get('/api/admin/premium-users', async (req, res) => {
   try {
