@@ -12,6 +12,7 @@ import { API_URL } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { DASHBOARD_TRANSLATIONS } from './StudentDashboardScreen';
+import { generateMathWorksheetPDF, sharePDFFile } from '../src/lib/pdfWorksheetGenerator';
 
 const SOCKET_SERVER_URL = API_URL.replace(/\/api\/?$/, '');
 
@@ -44,6 +45,33 @@ export default function TeacherDashboardScreen({ navigation, route }) {
   const [exampleCount, setExampleCount] = useState(10);
   const [selectedOpType, setSelectedOpType] = useState('oddiy');
   const [selectedSpeed, setSelectedSpeed] = useState(1);
+
+  // PDF Worksheet Generator State
+  const [pdfOpType, setPdfOpType] = useState('oddiy'); // 'oddiy' | 'f5' | 'f10' | 'aralash'
+  const [generatedPdfUri, setGeneratedPdfUri] = useState(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handleGeneratePdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      const uri = await generateMathWorksheetPDF(pdfOpType);
+      setGeneratedPdfUri(uri);
+    } catch (e) {
+      console.error('Generate PDF Error:', e);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleRefreshPdf = () => {
+    setGeneratedPdfUri(null);
+  };
+
+  const handleSharePdf = async () => {
+    if (generatedPdfUri) {
+      await sharePDFFile(generatedPdfUri);
+    }
+  };
 
   // Real-time deletion modal
   const [isDeletedModalVisible, setIsDeletedModalVisible] = useState(false);
@@ -731,6 +759,115 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               </View>
             </View>
 
+            {/* AMALLAR (PDF WORKSHEETS GENERATOR) SECTION */}
+            <View style={styles.pdfCardBox}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center' }}>
+                  <MaterialCommunityIcons name="file-pdf-box" size={24} color="#A855F7" />
+                </View>
+                <View>
+                  <Text style={styles.pdfCardTitle}>AMALLAR (PDF JADVAL GENERATORI)</Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>
+                    A4 shaklidagi topshiriq jadvallarini generatsiya qilish
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={{ color: '#E2E8F0', fontSize: 13, fontFamily: 'Inter_600SemiBold', marginBottom: 10 }}>
+                Amal turini tanlang:
+              </Text>
+
+              {/* OP SELECTION GRID */}
+              <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+                {/* Oddiy */}
+                <TouchableOpacity 
+                  style={[styles.pdfOpBtn, pdfOpType === 'oddiy' && styles.pdfOpBtnActive]}
+                  onPress={() => { setPdfOpType('oddiy'); handleRefreshPdf(); }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'oddiy' && styles.pdfOpBtnTextActive]}>Oddiy</Text>
+                </TouchableOpacity>
+
+                {/* Formula 5 */}
+                <TouchableOpacity 
+                  style={[styles.pdfOpBtn, pdfOpType === 'f5' && styles.pdfOpBtnActive]}
+                  onPress={() => { setPdfOpType('f5'); handleRefreshPdf(); }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'f5' && styles.pdfOpBtnTextActive]}>Formula 5</Text>
+                </TouchableOpacity>
+
+                {/* Formula 10 */}
+                <TouchableOpacity 
+                  style={[styles.pdfOpBtn, pdfOpType === 'f10' && styles.pdfOpBtnActive]}
+                  onPress={() => { setPdfOpType('f10'); handleRefreshPdf(); }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'f10' && styles.pdfOpBtnTextActive]}>Formula 10</Text>
+                </TouchableOpacity>
+
+                {/* Aralash */}
+                <TouchableOpacity 
+                  style={[styles.pdfOpBtn, pdfOpType === 'aralash' && styles.pdfOpBtnActive]}
+                  onPress={() => { setPdfOpType('aralash'); handleRefreshPdf(); }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.pdfOpBtnText, pdfOpType === 'aralash' && styles.pdfOpBtnTextActive]}>Aralash</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* GENERATE / ACTIONS AREA */}
+              {!generatedPdfUri ? (
+                <TouchableOpacity 
+                  style={[styles.generatePdfBtn, isGeneratingPdf && { opacity: 0.6 }]}
+                  onPress={handleGeneratePdf}
+                  disabled={isGeneratingPdf}
+                  activeOpacity={0.85}
+                >
+                  <LinearGradient colors={['#A855F7', '#7C3AED']} style={styles.generatePdfGradient}>
+                    <MaterialCommunityIcons name="lightning-bolt" size={20} color="#FFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.generatePdfBtnText}>
+                      {isGeneratingPdf ? "PDF generatsiya qilinmoqda..." : "GENERATE PDF"}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ) : (
+                <View style={{ gap: 10 }}>
+                  <View style={styles.pdfSuccessBox}>
+                    <MaterialCommunityIcons name="check-circle" size={22} color="#10B981" />
+                    <Text style={styles.pdfSuccessText}>
+                      Yangi PDF jadval muvaffaqiyatli yaratildi!
+                    </Text>
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    {/* Share / Download */}
+                    <TouchableOpacity 
+                      style={[styles.pdfActionBtn, { backgroundColor: '#10B981', flex: 1 }]}
+                      onPress={handleSharePdf}
+                      activeOpacity={0.8}
+                    >
+                      <Feather name="share-2" size={18} color="#FFF" style={{ marginRight: 6 }} />
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13 }}>Yuklab olish / Ulashish</Text>
+                    </TouchableOpacity>
+
+                    {/* Refresh */}
+                    <TouchableOpacity 
+                      style={[styles.pdfActionBtn, { backgroundColor: '#374151', paddingHorizontal: 16 }]}
+                      onPress={handleRefreshPdf}
+                      activeOpacity={0.8}
+                    >
+                      <Feather name="refresh-cw" size={18} color="#9CA3AF" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <Text style={{ color: '#6B7280', fontSize: 11, textAlign: 'center', marginTop: 4, fontFamily: 'Inter_500Medium' }}>
+                    Amal turini refresh qiling va qayta generatsiya qiling (eski PDF yangilanadi).
+                  </Text>
+                </View>
+              )}
+            </View>
+
             <TouchableOpacity style={styles.logoutFullBtn} onPress={handleReturnToHome}>
               <Feather name="log-out" size={20} color="#EF4444" style={{ marginRight: 8 }} />
               <Text style={{ color: '#EF4444', fontFamily: 'Inter_700Bold', fontSize: 16 }}>Tizimdan chiqish</Text>
@@ -911,7 +1048,7 @@ const styles = StyleSheet.create({
   opCardText: { color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold', marginTop: 4 },
   opCardTextActive: { color: '#FFFFFF' },
 
-  // PROFILE STYLES
+  // PROFILE & PDF STYLES
   profileCard: {
     backgroundColor: '#0D0D1F', borderRadius: 24, padding: 24, alignItems: 'center',
     borderWidth: 1, borderColor: '#1A1A35', marginBottom: 16
@@ -937,6 +1074,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'center', alignItems: 'center',
     paddingVertical: 14, backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: 16,
     borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)', marginBottom: 30
+  },
+  pdfCardBox: {
+    backgroundColor: '#0D0D1F', borderRadius: 20, padding: 18,
+    borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.3)', marginBottom: 20
+  },
+  pdfCardTitle: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold' },
+  pdfOpBtn: {
+    flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: '#121228',
+    alignItems: 'center', borderWidth: 1, borderColor: '#1A1A35'
+  },
+  pdfOpBtnActive: { backgroundColor: '#A855F7', borderColor: '#A855F7' },
+  pdfOpBtnText: { color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' },
+  pdfOpBtnTextActive: { color: '#FFFFFF' },
+  generatePdfBtn: { borderRadius: 14, overflow: 'hidden', marginTop: 4 },
+  generatePdfGradient: { paddingVertical: 14, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+  generatePdfBtnText: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold', letterSpacing: 0.5 },
+  pdfSuccessBox: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    padding: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(16, 185, 129, 0.3)'
+  },
+  pdfSuccessText: { color: '#10B981', fontSize: 12, fontFamily: 'Inter_600SemiBold', flex: 1 },
+  pdfActionBtn: {
+    paddingVertical: 12, borderRadius: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center'
   },
 
   // BOTTOM NAV
