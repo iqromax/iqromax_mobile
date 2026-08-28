@@ -296,7 +296,7 @@ const getAvatarByName = (name) => {
 };
 
 export default function StudentDashboardScreen({ navigation, route }) {
-  const { energy: currentEnergy, consumeEnergy, formattedTime } = useEnergy();
+  const { energy: currentEnergy, consumeEnergy, formattedTime, isPremium } = useEnergy();
   const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
   const [requiredEnergyAlert, setRequiredEnergyAlert] = useState(1);

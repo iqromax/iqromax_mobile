@@ -103,23 +103,49 @@ export default function MysteryBoxScreen({ navigation, route }) {
   const openBoxHandler = () => {
     if (keysCount <= 0) return;
     setActiveScreen('opening');
-    setTimeout(() => {
+    setTimeout(async () => {
       let selected = null;
       if (adminBoxItems.length > 0) {
         const randomItem = adminBoxItems[Math.floor(Math.random() * adminBoxItems.length)];
         selected = {
           title: randomItem.name,
           sub: randomItem.description,
-          badge: randomItem.badge || (randomItem.type === 'coin' ? '🪙 Coin' : '⚡ Premium'),
-          type: randomItem.type || 'premium'
+          badge: randomItem.badge || (randomItem.type === 'energy' ? `⚡ ${randomItem.value || 1} Energiya` : `👑 ${randomItem.value || 1} kun Premium`),
+          type: randomItem.type || 'premium',
+          value: randomItem.value || 1
         };
       } else {
         const rewardOptions = [
-          { title: '3 KUNLIK BEPUL PREMIUM', sub: 'Ajoyib! Siz 3 kunlik Premium status yutdingiz!', badge: '⚡ 3 kun', type: 'premium' },
-          { title: '500 OLTIN COINLAR', sub: 'Ajoyib! Siz 500 Coin yutdingiz!', badge: '🪙 +500 Coin', type: 'coin' },
-          { title: '20% CHEGIRMA KUPONI', sub: 'Ajoyib! Siz 20% Chegirma kuponini yutdingiz!', badge: '🏷️ 20% Off', type: 'discount' },
+          { title: '1 KUNLIK BEPUL PREMIUM', sub: 'Ajoyib! Siz 1 kunlik (24 soat) Premium status yutdingiz! Chaqmoqlaringiz cheksiz bo\'ldi!', badge: '👑 1 kun Premium', type: 'premium', value: 1 },
+          { title: '3 KUNLIK BEPUL PREMIUM', sub: 'Ajoyib! Siz 3 kunlik Premium status yutdingiz! Chaqmoqlaringiz cheksiz bo\'ldi!', badge: '👑 3 kun Premium', type: 'premium', value: 3 },
+          { title: '5 TA ENERGIYA CHAQMOQLAR', sub: 'Ajoyib! Siz +5 ta energiya chaqmoq yutdingiz!', badge: '⚡ +5 Energiya', type: 'energy', value: 5 },
         ];
         selected = rewardOptions[Math.floor(Math.random() * rewardOptions.length)];
+      }
+
+      // Activate Premium logic or Energy logic
+      try {
+        if (selected.type === 'premium') {
+          const days = selected.value || 1;
+          const currentExp = await AsyncStorage.getItem('user_premium_expires_at');
+          const baseTime = (currentExp && parseInt(currentExp, 10) > Date.now()) ? parseInt(currentExp, 10) : Date.now();
+          const newExpTime = baseTime + (days * 24 * 60 * 60 * 1000); // Add days * 24 Hours
+          await AsyncStorage.setItem('user_premium_expires_at', newExpTime.toString());
+        } else if (selected.type === 'energy') {
+          const addVal = selected.value || 1;
+          const storedData = await AsyncStorage.getItem('user_energy_data');
+          let curEnergy = 2;
+          let lastUpdated = Date.now();
+          if (storedData) {
+            const parsed = JSON.parse(storedData);
+            curEnergy = parsed.energy || 2;
+            lastUpdated = parsed.lastUpdated || Date.now();
+          }
+          const newEnergy = Math.min(10, curEnergy + addVal);
+          await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newEnergy, lastUpdated }));
+        }
+      } catch (e) {
+        console.error('Save reward error:', e);
       }
 
       setClaimedReward(selected);

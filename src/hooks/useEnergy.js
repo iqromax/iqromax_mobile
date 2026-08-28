@@ -113,8 +113,29 @@ export function useEnergy() {
 
   const formattedTime = formatTime(timeRemaining);
 
+  // Premium status check: if premium is active, consumeEnergy returns true without deducting energy
+  const checkPremiumActive = async () => {
+    try {
+      const expStr = await AsyncStorage.getItem('user_premium_expires_at');
+      if (expStr) {
+        const expTime = parseInt(expStr, 10);
+        if (Date.now() < expTime) {
+          return true; // Premium active! Unlimited energy.
+        }
+      }
+    } catch (e) {}
+    return false;
+  };
+
   // Expose a function to consume energy
   const consumeEnergy = async (amount) => {
+    // 1. Check if user has active Premium
+    const isPremium = await checkPremiumActive();
+    if (isPremium) {
+      // Unlimited energy during active Premium duration!
+      return true;
+    }
+
     if (energy >= amount) {
       const newEnergy = energy - amount;
       let lastUpdated = Date.now();
@@ -151,13 +172,39 @@ export function useEnergy() {
     calculateEnergy();
   };
 
+  const [isPremium, setIsPremium] = useState(false);
+
+  const checkPremiumActive = useCallback(async () => {
+    try {
+      const expStr = await AsyncStorage.getItem('user_premium_expires_at');
+      if (expStr) {
+        const expTime = parseInt(expStr, 10);
+        if (Date.now() < expTime) {
+          setIsPremium(true);
+          return true; // Premium active! Unlimited energy.
+        }
+      }
+    } catch (e) {}
+    setIsPremium(false);
+    return false;
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      calculateEnergy();
+      checkPremiumActive();
+    }, [calculateEnergy, checkPremiumActive])
+  );
+
   return {
     energy,
     maxEnergy: MAX_ENERGY,
     timeRemaining,
     formattedTime,
     isLoading,
+    isPremium,
     consumeEnergy,
     addEnergy,
+    checkPremiumActive
   };
 }
