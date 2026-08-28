@@ -1119,7 +1119,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                 {/* 🥈 Muhammadali Aliyev */}
                 <View style={styles.topUserRow}>
                   <Text style={{ fontSize: 22, marginRight: 12 }}>🥈</Text>
-                  <Image source={require('../assets/avatar_alex.png')} style={styles.topUserAvatar} />
+                  <Image source={require('../assets/avatar_alex.jpg')} style={styles.topUserAvatar} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.topUserName}>Muhammadali Aliyev</Text>
                     <Text style={styles.topUserSub}>1,150 ta mashq · 94% aniqlik</Text>
@@ -1129,7 +1129,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                 {/* 🥉 Sardorbek */}
                 <View style={styles.topUserRow}>
                   <Text style={{ fontSize: 22, marginRight: 12 }}>🥉</Text>
-                  <Image source={require('../assets/avatar_david.png')} style={styles.topUserAvatar} />
+                  <Image source={require('../assets/avatar_david.jpg')} style={styles.topUserAvatar} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.topUserName}>Sardorbek</Text>
                     <Text style={styles.topUserSub}>980 ta mashq · 92% aniqlik</Text>
