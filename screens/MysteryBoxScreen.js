@@ -62,13 +62,36 @@ export default function MysteryBoxScreen({ navigation, route }) {
     }
   };
 
-  // Rewards List State
-  const [rewardsList, setRewardsList] = useState([
-    { id: 1, title: '3 kunlik Premium', date: 'Yakunlanish: 15.06.2026', status: 'Faol', type: 'premium', icon: 'crown-outline', color: '#F59E0B' },
-    { id: 2, title: '500 Coin', date: 'Yakunlanish: -', status: 'Tarix', type: 'coin', icon: 'amber', color: '#EAB308' },
-    { id: 3, title: '20% Chegirma kuponi', date: 'Yakunlanish: 30.06.2026', status: 'Faol', type: 'discount', icon: 'ticket-percent-outline', color: '#EF4444' },
-    { id: 4, title: 'Eksklyuziv Skin', date: 'Yakunlanish: -', status: 'Tarix', type: 'skin', icon: 'emoticon-cool-outline', color: '#A855F7' }
-  ]);
+  // Rewards List State with real storage
+  const [rewardsList, setRewardsList] = useState([]);
+
+  const loadSavedRewards = async () => {
+    try {
+      const storedRewards = await AsyncStorage.getItem('user_won_rewards_history');
+      if (storedRewards) {
+        const parsed = JSON.parse(storedRewards);
+        // Recalculate 'Faol' status for premium items based on current time
+        const now = Date.now();
+        const updated = parsed.map(item => {
+          if (item.type === 'premium' && item.expiresAt) {
+            return {
+              ...item,
+              status: now < item.expiresAt ? 'Faol' : 'Tarix'
+            };
+          }
+          return item;
+        });
+        setRewardsList(updated);
+      } else {
+        // Initial default rewards if empty
+        const initialRewards = [
+          { id: '1', title: 'Yangi Foydalanuvchi Bonusi', date: 'Berilgan sana: Bugun', status: 'Faol', type: 'premium', icon: 'crown', color: '#F59E0B', badge: '1 ta Kalit' }
+        ];
+        setRewardsList(initialRewards);
+        await AsyncStorage.setItem('user_won_rewards_history', JSON.stringify(initialRewards));
+      }
+    } catch (e) {}
+  };
 
   const copyLink = async () => {
     await Clipboard.setStringAsync(referralLink);
@@ -86,6 +109,8 @@ export default function MysteryBoxScreen({ navigation, route }) {
   const [adminBoxItems, setAdminBoxItems] = useState([]);
 
   React.useEffect(() => {
+    loadSavedRewards();
+
     async function fetchAdminItems() {
       try {
         const res = await fetch(`${API_URL}/mystery-box`);
@@ -123,14 +148,15 @@ export default function MysteryBoxScreen({ navigation, route }) {
         selected = rewardOptions[Math.floor(Math.random() * rewardOptions.length)];
       }
 
-      // Activate Premium logic or Energy logic
+      // Activate Premium logic or Energy logic & save to history
       try {
+        let expTime = null;
         if (selected.type === 'premium') {
           const days = selected.value || 1;
           const currentExp = await AsyncStorage.getItem('user_premium_expires_at');
           const baseTime = (currentExp && parseInt(currentExp, 10) > Date.now()) ? parseInt(currentExp, 10) : Date.now();
-          const newExpTime = baseTime + (days * 24 * 60 * 60 * 1000); // Add days * 24 Hours
-          await AsyncStorage.setItem('user_premium_expires_at', newExpTime.toString());
+          expTime = baseTime + (days * 24 * 60 * 60 * 1000); // Add days * 24 Hours
+          await AsyncStorage.setItem('user_premium_expires_at', expTime.toString());
         } else if (selected.type === 'energy') {
           const addVal = selected.value || 1;
           const storedData = await AsyncStorage.getItem('user_energy_data');
@@ -144,6 +170,25 @@ export default function MysteryBoxScreen({ navigation, route }) {
           const newEnergy = Math.min(10, curEnergy + addVal);
           await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newEnergy, lastUpdated }));
         }
+
+        // Save new reward to user's real rewards history array
+        const newHistoryItem = {
+          id: Date.now().toString(),
+          title: selected.title,
+          sub: selected.sub,
+          date: `Yutib olindi: ${new Date().toLocaleDateString()}`,
+          status: selected.type === 'premium' ? 'Faol' : 'Faol',
+          expiresAt: expTime,
+          type: selected.type,
+          icon: selected.type === 'energy' ? 'lightning-bolt' : 'crown',
+          color: selected.type === 'energy' ? '#F59E0B' : '#A855F7',
+          badge: selected.badge
+        };
+
+        const updatedHistory = [newHistoryItem, ...rewardsList];
+        setRewardsList(updatedHistory);
+        await AsyncStorage.setItem('user_won_rewards_history', JSON.stringify(updatedHistory));
+
       } catch (e) {
         console.error('Save reward error:', e);
       }
@@ -465,7 +510,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
         <View style={{ flex: 1 }}>
           {renderHeader("SOVG'ALARIM")}
 
-          <View style={{ paddingHorizontal: 20 }}>
+          <View style={{ flex: 1, paddingHorizontal: 20 }}>
             {/* Tabs Row */}
             <View style={styles.rewardsTabRow}>
               {['Barchasi', 'Faol', 'Tarix'].map((tab) => (
@@ -480,27 +525,45 @@ export default function MysteryBoxScreen({ navigation, route }) {
             </View>
 
             {/* List */}
-            <ScrollView contentContainerStyle={{ gap: 12, paddingTop: 10 }} showsVerticalScrollIndicator={false}>
-              {rewardsList
-                .filter(item => rewardsTab === 'Barchasi' || item.status === rewardsTab)
-                .map((item) => (
-                  <View key={item.id} style={styles.rewardListItem}>
-                    <View style={[styles.rewardListIconBox, { backgroundColor: `${item.color}20` }]}>
-                      <MaterialCommunityIcons name={item.icon} size={24} color={item.color} />
-                    </View>
-                    <View style={{ flex: 1, paddingLeft: 12 }}>
-                      <Text style={styles.rewardListTitle}>{item.title}</Text>
-                      <Text style={styles.rewardListDate}>{item.date}</Text>
-                    </View>
-                    {item.status === 'Faol' ? (
-                      <View style={styles.activeTagBadge}>
-                        <Text style={styles.activeTagBadgeText}>Faol</Text>
+            <ScrollView contentContainerStyle={{ gap: 12, paddingTop: 10, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+              {rewardsList.filter(item => rewardsTab === 'Barchasi' || item.status === rewardsTab).length > 0 ? (
+                rewardsList
+                  .filter(item => rewardsTab === 'Barchasi' || item.status === rewardsTab)
+                  .map((item) => (
+                    <View key={item.id} style={styles.rewardListItem}>
+                      <View style={[styles.rewardListIconBox, { backgroundColor: `${item.color || '#F59E0B'}20` }]}>
+                        <MaterialCommunityIcons name={item.icon || 'gift-outline'} size={24} color={item.color || '#F59E0B'} />
                       </View>
-                    ) : (
-                      <MaterialCommunityIcons name="chevron-right" size={20} color="#64748B" />
-                    )}
-                  </View>
-                ))}
+                      <View style={{ flex: 1, paddingLeft: 12 }}>
+                        <Text style={styles.rewardListTitle}>{item.title}</Text>
+                        <Text style={styles.rewardListDate}>{item.date}</Text>
+                      </View>
+                      {item.badge ? (
+                        <View style={[styles.activeTagBadge, { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderColor: '#F59E0B', borderWidth: 1 }]}>
+                          <Text style={[styles.activeTagBadgeText, { color: '#F59E0B' }]}>{item.badge}</Text>
+                        </View>
+                      ) : item.status === 'Faol' ? (
+                        <View style={styles.activeTagBadge}>
+                          <Text style={styles.activeTagBadgeText}>Faol</Text>
+                        </View>
+                      ) : (
+                        <View style={[styles.activeTagBadge, { backgroundColor: 'rgba(100, 116, 139, 0.15)' }]}>
+                          <Text style={[styles.activeTagBadgeText, { color: '#94A3B8' }]}>Tarix</Text>
+                        </View>
+                      )}
+                    </View>
+                  ))
+              ) : (
+                <View style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 60 }}>
+                  <MaterialCommunityIcons name="gift-off-outline" size={54} color="#475569" />
+                  <Text style={{ color: '#94A3B8', fontSize: 14, fontFamily: 'Inter_600SemiBold', marginTop: 12 }}>
+                    Hozircha sovg'alar mavjud emas
+                  </Text>
+                  <Text style={{ color: '#64748B', fontSize: 12, fontFamily: 'Inter_400Regular', marginTop: 4 }}>
+                    Sandiqni oching va birinchi sovg'angizni yutib oling!
+                  </Text>
+                </View>
+              )}
             </ScrollView>
           </View>
         </View>
