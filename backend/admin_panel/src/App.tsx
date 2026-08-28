@@ -8,6 +8,7 @@ import Parents from './pages/Parents';
 import EnergyCenter from './pages/EnergyCenter';
 import Notifications from './pages/Notifications';
 import MysteryBoxAdmin from './pages/MysteryBoxAdmin';
+import AppDownloadingAdmin from './pages/AppDownloadingAdmin';
 
 import AppDownloadLanding from './pages/AppDownloadLanding';
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/downloading" element={<AppDownloadLanding />} />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/app-downloading" element={<AppDownloadingAdmin />} />
         <Route path="/mystery-box" element={<MysteryBoxAdmin />} />
         <Route path="/users" element={<Users />} />
         <Route path="/students" element={<Students />} />

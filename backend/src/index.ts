@@ -1079,6 +1079,38 @@ app.post('/api/admin/revoke-premium', async (req, res) => {
   }
 });
 
+// --- APP DOWNLOAD LINK SETTING API ---
+app.get('/api/download-link', async (req, res) => {
+  try {
+    const setting = await prisma.appSetting.findUnique({
+      where: { key: 'app_download_link' }
+    });
+    res.json({ link: setting?.value || 'https://iqromax.net' });
+  } catch (error) {
+    res.json({ link: 'https://iqromax.net' });
+  }
+});
+
+app.post('/api/admin/download-link', async (req, res) => {
+  try {
+    const { link } = req.body;
+    if (!link || !link.trim()) {
+      return res.status(400).json({ error: 'Link manzili kiritilmadi' });
+    }
+
+    const updated = await prisma.appSetting.upsert({
+      where: { key: 'app_download_link' },
+      update: { value: link.trim() },
+      create: { key: 'app_download_link', value: link.trim() }
+    });
+
+    res.json({ message: 'Download link muvaffaqiyatli saqlandi', link: updated.value });
+  } catch (error) {
+    console.error('Save download link error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Serve admin panel static files in production
 app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
 
