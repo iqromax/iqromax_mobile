@@ -319,6 +319,9 @@ export default function TeacherDashboardScreen({ navigation, route }) {
   const [generatedPdfUri, setGeneratedPdfUri] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
+  // Statistics Dashboard Filter State
+  const [statsTimeFilter, setStatsTimeFilter] = useState('7days'); // 'today' | '7days' | '30days' | '3months'
+
   const handleGeneratePdf = async () => {
     setIsGeneratingPdf(true);
     try {
