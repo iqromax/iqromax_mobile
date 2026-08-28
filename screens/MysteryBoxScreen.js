@@ -94,7 +94,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
             {/* Glowing Chest */}
             <View style={styles.chestGlowContainer}>
               <View style={styles.chestGlowCircle} />
-              <Image source={require('../assets/level_chest.png')} style={styles.chestImg} contentFit="contain" />
+              <Image source={require('../assets/sirli_sandiq_high_quality_nurli.gif')} style={styles.chestImg} contentFit="contain" />
             </View>
 
             <Text style={styles.mainDescText}>
@@ -132,7 +132,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' }}>
             <View style={styles.chestGlowContainer}>
               <View style={[styles.chestGlowCircle, { backgroundColor: 'rgba(245, 158, 11, 0.3)', width: 260, height: 260 }]} />
-              <Image source={require('../assets/level_chest.png')} style={[styles.chestImg, { width: 220, height: 220 }]} contentFit="contain" />
+              <Image source={require('../assets/sirli_sandiq_high_quality_nurli.gif')} style={[styles.chestImg, { width: 220, height: 220 }]} contentFit="contain" />
             </View>
 
             <Text style={{ color: '#9CA3AF', fontSize: 16, fontFamily: 'Inter_600SemiBold', marginTop: 30 }}>
@@ -457,24 +457,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_800ExtraBold',
   },
   chestGlowContainer: {
-    width: 220,
-    height: 220,
+    width: 250,
+    height: 250,
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 10,
     position: 'relative',
   },
   chestGlowCircle: {
-    position: 'absolute',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: 'rgba(168, 85, 247, 0.25)',
-    filter: 'blur(20px)',
+    display: 'none',
   },
   chestImg: {
-    width: 190,
-    height: 190,
+    width: 240,
+    height: 240,
   },
   mainDescText: {
     color: '#9CA3AF',
