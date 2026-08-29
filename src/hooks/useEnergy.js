@@ -54,7 +54,9 @@ export function useEnergy() {
         setEnergy(2);
         setTimeRemaining(REGEN_TIME_MS / 1000);
       } else {
-        let { energy: storedEnergy, lastUpdated } = JSON.parse(storedData);
+        let parsed = JSON.parse(storedData);
+        let storedEnergy = typeof parsed.energy === 'number' ? parsed.energy : 2;
+        let lastUpdated = parsed.lastUpdated || now;
 
         if (storedEnergy < MAX_ENERGY) {
           const diffMs = now - lastUpdated;
@@ -80,7 +82,7 @@ export function useEnergy() {
             setTimeRemaining(0);
           }
         } else {
-          setEnergy(MAX_ENERGY);
+          setEnergy(storedEnergy);
           setTimeRemaining(0);
         }
       }
