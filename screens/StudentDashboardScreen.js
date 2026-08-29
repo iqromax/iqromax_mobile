@@ -1449,14 +1449,42 @@ export default function StudentDashboardScreen({ navigation, route }) {
     } catch (e) {}
   };
 
+  const deductEnergy = async (reqEnergy) => {
+    if (isPremium) return true; // Unlimited energy for premium users
+
+    try {
+      const storedData = await AsyncStorage.getItem('user_energy_data');
+      let currentVal = currentEnergy;
+      let lastUpdated = Date.now();
+
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        currentVal = typeof parsed.energy === 'number' ? parsed.energy : currentEnergy;
+        lastUpdated = parsed.lastUpdated || Date.now();
+      }
+
+      if (currentVal < reqEnergy) {
+        setRequiredEnergyAlert(reqEnergy);
+        setIsEnergyAlertVisible(true);
+        return false;
+      }
+
+      const newVal = currentVal - reqEnergy;
+      if (currentVal >= 10) {
+        lastUpdated = Date.now();
+      }
+
+      await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newVal, lastUpdated }));
+      consumeEnergy(reqEnergy); // trigger hook update
+      return true;
+    } catch (e) {
+      return true;
+    }
+  };
+
   const handleStartBattle = async () => {
     if (!checkGuestAuth()) return;
-    if (!isPremium && currentEnergy < 2) {
-      setRequiredEnergyAlert(2);
-      setIsEnergyAlertVisible(true);
-      return;
-    }
-    const success = await consumeEnergy(2);
+    const success = await deductEnergy(2);
     if (success) {
       saveActivityLog("1v1 Boshma-bosh o'yin", 0);
       if (activeBattleMode === 'dost') {
@@ -1473,12 +1501,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (!checkGuestAuth()) return;
     const isSpeed = activeExerciseType === 'speed';
     const reqEnergy = isSpeed ? 2 : 1;
-    if (!isPremium && currentEnergy < reqEnergy) {
-      setRequiredEnergyAlert(reqEnergy);
-      setIsEnergyAlertVisible(true);
-      return;
-    }
-    const success = await consumeEnergy(reqEnergy);
+    const success = await deductEnergy(reqEnergy);
     if (success) {
       if (activeExerciseType === 'abacus') {
         saveActivityLog("Abakus simulyatori", 10);
