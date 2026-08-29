@@ -151,19 +151,30 @@ export function useEnergy() {
       return true;
     }
 
-    if (energy >= amount) {
-      const newEnergy = energy - amount;
-      let lastUpdated = Date.now();
+    // 2. Read latest energy state from AsyncStorage to avoid stale closure state
+    let currentStoredEnergy = energy;
+    let lastUpdated = Date.now();
+
+    try {
+      const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        currentStoredEnergy = typeof parsed.energy === 'number' ? parsed.energy : energy;
+        lastUpdated = parsed.lastUpdated || Date.now();
+      }
+    } catch (e) {}
+
+    if (currentStoredEnergy >= amount) {
+      const newEnergy = currentStoredEnergy - amount;
       
-      if (energy < MAX_ENERGY) {
-        const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
-        if (storedData) {
-          lastUpdated = JSON.parse(storedData).lastUpdated;
-        }
+      // If we were at MAX_ENERGY, set lastUpdated to now so countdown starts fresh
+      if (currentStoredEnergy >= MAX_ENERGY) {
+        lastUpdated = Date.now();
       }
 
       await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newEnergy, lastUpdated }));
-      calculateEnergy();
+      setEnergy(newEnergy);
+      await calculateEnergy();
       return true;
     }
     return false; // Not enough energy
