@@ -1451,7 +1451,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const handleStartBattle = async () => {
     if (!checkGuestAuth()) return;
-    if (currentEnergy < 2) {
+    if (!isPremium && currentEnergy < 2) {
       setRequiredEnergyAlert(2);
       setIsEnergyAlertVisible(true);
       return;
@@ -1473,7 +1473,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (!checkGuestAuth()) return;
     const isSpeed = activeExerciseType === 'speed';
     const reqEnergy = isSpeed ? 2 : 1;
-    if (currentEnergy < reqEnergy) {
+    if (!isPremium && currentEnergy < reqEnergy) {
       setRequiredEnergyAlert(reqEnergy);
       setIsEnergyAlertVisible(true);
       return;
