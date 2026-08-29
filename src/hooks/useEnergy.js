@@ -126,9 +126,6 @@ export function useEnergy() {
 
   // Consume Energy Function
   const consumeEnergy = async (amount) => {
-    const hasPremium = await checkPremiumActive();
-    if (hasPremium) return true;
-
     try {
       const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
       const now = Date.now();
@@ -141,22 +138,20 @@ export function useEnergy() {
         if (parsed.lastUpdated) lastUpdated = parsed.lastUpdated;
       }
 
-      if (currentVal >= amount) {
-        const newVal = currentVal - amount;
-        // If it was full, start timer now
-        const newLastUpdated = currentVal >= MAX_ENERGY ? now : lastUpdated;
+      // Deduct energy
+      const newVal = Math.max(0, currentVal - amount);
+      const newLastUpdated = currentVal >= MAX_ENERGY ? now : lastUpdated;
 
-        await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
-        setEnergy(newVal);
-        if (newVal < MAX_ENERGY) {
-          setTimeRemaining(REGEN_TIME_MS / 1000);
-        }
-        return true;
+      await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
+      setEnergy(newVal);
+      if (newVal < MAX_ENERGY) {
+        setTimeRemaining(REGEN_TIME_MS / 1000);
       }
+      return true;
     } catch (e) {
       console.error('consumeEnergy error:', e);
     }
-    return false;
+    return true;
   };
 
   const addEnergy = async (amount) => {
