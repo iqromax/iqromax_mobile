@@ -26,18 +26,6 @@ export function useEnergy() {
           return true; // Premium active!
         }
       }
-      
-      const userDataStr = await AsyncStorage.getItem('user_data');
-      if (userDataStr) {
-        const userData = JSON.parse(userDataStr);
-        if (userData?.premiumExpiresAt) {
-          const expTime = new Date(userData.premiumExpiresAt).getTime();
-          if (!isNaN(expTime) && Date.now() < expTime) {
-            setIsPremium(true);
-            return true;
-          }
-        }
-      }
     } catch (e) {}
     setIsPremium(false);
     return false;
