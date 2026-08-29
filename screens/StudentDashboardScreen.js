@@ -296,7 +296,7 @@ const getAvatarByName = (name) => {
 };
 
 export default function StudentDashboardScreen({ navigation, route }) {
-  const { energy: currentEnergy, consumeEnergy, formattedTime, isPremium } = useEnergy();
+  const { energy: currentEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
   const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
   const [requiredEnergyAlert, setRequiredEnergyAlert] = useState(1);
@@ -1450,17 +1450,20 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const deductEnergy = async (reqEnergy) => {
-    if (isPremium) return true; // Unlimited energy for premium users
+    // 1. Strictly check if user has active premium
+    const isUserPremium = await checkPremiumActive();
+    if (isUserPremium) return true;
 
     try {
       const storedData = await AsyncStorage.getItem('user_energy_data');
-      let currentVal = currentEnergy;
-      let lastUpdated = Date.now();
+      let now = Date.now();
+      let currentVal = 2; // Default starting energy
+      let lastUpdated = now;
 
       if (storedData) {
         const parsed = JSON.parse(storedData);
-        currentVal = typeof parsed.energy === 'number' ? parsed.energy : currentEnergy;
-        lastUpdated = parsed.lastUpdated || Date.now();
+        currentVal = typeof parsed.energy === 'number' ? parsed.energy : 2;
+        lastUpdated = parsed.lastUpdated || now;
       }
 
       if (currentVal < reqEnergy) {
@@ -1469,15 +1472,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
         return false;
       }
 
-      const newVal = currentVal - reqEnergy;
+      const newVal = Math.max(0, currentVal - reqEnergy);
       if (currentVal >= 10) {
-        lastUpdated = Date.now();
+        lastUpdated = now;
       }
 
       await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newVal, lastUpdated }));
-      consumeEnergy(reqEnergy); // trigger hook update
+      await consumeEnergy(reqEnergy);
       return true;
     } catch (e) {
+      console.error('deductEnergy error:', e);
       return true;
     }
   };

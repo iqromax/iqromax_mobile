@@ -21,7 +21,7 @@ export function useEnergy() {
       const expStr = await AsyncStorage.getItem('user_premium_expires_at');
       if (expStr) {
         const expTime = parseInt(expStr, 10);
-        if (Date.now() < expTime) {
+        if (!isNaN(expTime) && Date.now() < expTime) {
           setIsPremium(true);
           return true; // Premium active!
         }
