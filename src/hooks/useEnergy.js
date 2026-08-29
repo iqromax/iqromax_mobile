@@ -158,13 +158,6 @@ export function useEnergy() {
 
   // Expose a function to consume energy
   const consumeEnergy = async (amount) => {
-    // 1. Check if user has active Premium
-    const hasPremium = await checkPremiumActive();
-    if (hasPremium) {
-      // Unlimited energy during active Premium duration!
-      return true;
-    }
-
     try {
       const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
       let now = Date.now();
@@ -182,12 +175,17 @@ export function useEnergy() {
       }
 
       if (currentVal >= amount) {
-        const newVal = currentVal - amount;
+        const newVal = Math.max(0, currentVal - amount);
         const newLastUpdated = currentVal >= MAX_ENERGY ? now : lastUpdated;
 
         await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
         setEnergy(newVal);
         return true;
+      } else {
+        const newVal = 0;
+        await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated }));
+        setEnergy(0);
+        return false;
       }
     } catch (e) {
       console.error('consumeEnergy error:', e);
