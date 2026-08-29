@@ -2,12 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import io from 'socket.io-client';
-import { API_URL } from '../config/api';
 
 const ENERGY_STORAGE_KEY = 'user_energy_data';
 const MAX_ENERGY = 10;
-const REGEN_TIME_MS = 3 * 60 * 1000; // 3 minutes
+const REGEN_TIME_MS = 3 * 60 * 1000; // 3 minutes per 1 energy
 
 export function useEnergy() {
   const [energy, setEnergy] = useState(2);
@@ -15,7 +13,7 @@ export function useEnergy() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
-  // Check if Premium is currently active (unlimited energy)
+  // Check Premium
   const checkPremiumActive = useCallback(async () => {
     try {
       const expStr = await AsyncStorage.getItem('user_premium_expires_at');
@@ -23,7 +21,7 @@ export function useEnergy() {
         const expTime = parseInt(expStr, 10);
         if (!isNaN(expTime) && Date.now() < expTime) {
           setIsPremium(true);
-          return true; // Premium active!
+          return true;
         }
       }
     } catch (e) {}
@@ -31,51 +29,52 @@ export function useEnergy() {
     return false;
   }, []);
 
+  // Calculate & Refresh Energy
   const calculateEnergy = useCallback(async () => {
     try {
       const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
       const now = Date.now();
 
       if (!storedData) {
+        // Initial setup for new user: 2 energy
         const initialData = { energy: 2, lastUpdated: now };
         await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify(initialData));
         setEnergy(2);
         setTimeRemaining(REGEN_TIME_MS / 1000);
       } else {
-        let parsed = JSON.parse(storedData);
-        let storedEnergy = typeof parsed.energy === 'number' ? parsed.energy : 2;
+        const parsed = JSON.parse(storedData);
+        let currentVal = typeof parsed.energy === 'number' ? parsed.energy : 2;
         let lastUpdated = parsed.lastUpdated || now;
 
-        if (storedEnergy < MAX_ENERGY) {
+        if (currentVal < MAX_ENERGY) {
           const diffMs = now - lastUpdated;
           const energyToAdd = Math.floor(diffMs / REGEN_TIME_MS);
-          
+
           if (energyToAdd > 0) {
-            storedEnergy = Math.min(MAX_ENERGY, storedEnergy + energyToAdd);
+            currentVal = Math.min(MAX_ENERGY, currentVal + energyToAdd);
             lastUpdated = lastUpdated + (energyToAdd * REGEN_TIME_MS);
-            
-            if (storedEnergy === MAX_ENERGY) {
+            if (currentVal >= MAX_ENERGY) {
               lastUpdated = now;
             }
-            
-            await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: storedEnergy, lastUpdated }));
+            await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: currentVal, lastUpdated }));
           }
 
-          setEnergy(storedEnergy);
-          
-          if (storedEnergy < MAX_ENERGY) {
-            const remainder = diffMs % REGEN_TIME_MS;
-            setTimeRemaining(Math.floor((REGEN_TIME_MS - remainder) / 1000));
+          setEnergy(currentVal);
+
+          if (currentVal < MAX_ENERGY) {
+            const remainder = (now - lastUpdated) % REGEN_TIME_MS;
+            const secondsLeft = Math.max(0, Math.floor((REGEN_TIME_MS - remainder) / 1000));
+            setTimeRemaining(secondsLeft);
           } else {
             setTimeRemaining(0);
           }
         } else {
-          setEnergy(storedEnergy);
+          setEnergy(MAX_ENERGY);
           setTimeRemaining(0);
         }
       }
     } catch (e) {
-      console.error('Failed to load energy data', e);
+      console.error('Energy calc error:', e);
     } finally {
       setIsLoading(false);
     }
@@ -92,18 +91,6 @@ export function useEnergy() {
     calculateEnergy();
     checkPremiumActive();
 
-    // Real-time socket listener for admin revoking premium
-    const socket = io(API_URL, { transports: ['websocket'] });
-    const handlePremiumRevoked = async () => {
-      try {
-        await AsyncStorage.removeItem('user_premium_expires_at');
-      } catch (e) {}
-      setIsPremium(false);
-      calculateEnergy();
-    };
-
-    socket.on('premium_revoked', handlePremiumRevoked);
-
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
         calculateEnergy();
@@ -111,14 +98,10 @@ export function useEnergy() {
       }
     });
 
-    return () => {
-      socket.off('premium_revoked', handlePremiumRevoked);
-      socket.disconnect();
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, [calculateEnergy, checkPremiumActive]);
 
-  // Tick the timer every second for UI
+  // Timer Tick
   useEffect(() => {
     if (energy >= MAX_ENERGY || isLoading) return;
 
@@ -135,65 +118,52 @@ export function useEnergy() {
     return () => clearInterval(interval);
   }, [energy, isLoading, calculateEnergy]);
 
-  // Format time remaining as mm:ss
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  const formattedTime = formatTime(timeRemaining);
-
-  // Expose a function to consume energy
+  // Consume Energy Function
   const consumeEnergy = async (amount) => {
+    const hasPremium = await checkPremiumActive();
+    if (hasPremium) return true;
+
     try {
       const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
-      let now = Date.now();
+      const now = Date.now();
       let currentVal = energy;
       let lastUpdated = now;
 
       if (storedData) {
         const parsed = JSON.parse(storedData);
-        if (typeof parsed.energy === 'number') {
-          currentVal = parsed.energy;
-        }
-        if (parsed.lastUpdated) {
-          lastUpdated = parsed.lastUpdated;
-        }
+        if (typeof parsed.energy === 'number') currentVal = parsed.energy;
+        if (parsed.lastUpdated) lastUpdated = parsed.lastUpdated;
       }
 
       if (currentVal >= amount) {
-        const newVal = Math.max(0, currentVal - amount);
+        const newVal = currentVal - amount;
+        // If it was full, start timer now
         const newLastUpdated = currentVal >= MAX_ENERGY ? now : lastUpdated;
 
         await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
         setEnergy(newVal);
+        if (newVal < MAX_ENERGY) {
+          setTimeRemaining(REGEN_TIME_MS / 1000);
+        }
         return true;
-      } else {
-        const newVal = 0;
-        await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated }));
-        setEnergy(0);
-        return false;
       }
     } catch (e) {
       console.error('consumeEnergy error:', e);
     }
     return false;
   };
-  
-  // Expose a function to add energy (e.g. from gifts/videos)
-  const addEnergy = async (amount) => {
-    const newEnergy = Math.min(MAX_ENERGY, energy + amount);
-    let lastUpdated = Date.now();
-    
-    if (newEnergy < MAX_ENERGY) {
-      const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
-      if (storedData) {
-        lastUpdated = JSON.parse(storedData).lastUpdated;
-      }
-    }
 
-    await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newEnergy, lastUpdated }));
+  const addEnergy = async (amount) => {
+    const now = Date.now();
+    const newEnergy = Math.min(MAX_ENERGY, energy + amount);
+    await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newEnergy, lastUpdated: now }));
+    setEnergy(newEnergy);
     calculateEnergy();
   };
 
@@ -201,7 +171,7 @@ export function useEnergy() {
     energy,
     maxEnergy: MAX_ENERGY,
     timeRemaining,
-    formattedTime,
+    formattedTime: formatTime(timeRemaining),
     isLoading,
     isPremium,
     consumeEnergy,

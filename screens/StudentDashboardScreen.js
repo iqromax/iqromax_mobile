@@ -1449,54 +1449,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
     } catch (e) {}
   };
 
-  const deductEnergy = async (reqEnergy) => {
-    // Check if user is premium
-    let isUserPremium = false;
-    try {
-      const expStr = await AsyncStorage.getItem('user_premium_expires_at');
-      if (expStr) {
-        const expTime = parseInt(expStr, 10);
-        if (!isNaN(expTime) && Date.now() < expTime) {
-          isUserPremium = true;
-        }
-      }
-    } catch (e) {}
-
-    if (isUserPremium) return true;
-
-    try {
-      const storedData = await AsyncStorage.getItem('user_energy_data');
-      let now = Date.now();
-      let currentVal = currentEnergy;
-      let lastUpdated = now;
-
-      if (storedData) {
-        const parsed = JSON.parse(storedData);
-        currentVal = typeof parsed.energy === 'number' ? parsed.energy : currentEnergy;
-        lastUpdated = parsed.lastUpdated || now;
-      }
-
-      if (currentVal < reqEnergy) {
-        setRequiredEnergyAlert(reqEnergy);
-        setIsEnergyAlertVisible(true);
-        return false;
-      }
-
-      const newVal = Math.max(0, currentVal - reqEnergy);
-      const newLastUpdated = currentVal >= 10 ? now : lastUpdated;
-
-      await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
-      await consumeEnergy(reqEnergy);
-      return true;
-    } catch (e) {
-      console.error('deductEnergy error:', e);
-      return true;
-    }
-  };
-
   const handleStartBattle = async () => {
     if (!checkGuestAuth()) return;
-    const success = await deductEnergy(2);
+    const isUserPremium = await checkPremiumActive();
+    if (!isUserPremium && currentEnergy < 2) {
+      setRequiredEnergyAlert(2);
+      setIsEnergyAlertVisible(true);
+      return;
+    }
+    const success = await consumeEnergy(2);
     if (success) {
       saveActivityLog("1v1 Boshma-bosh o'yin", 0);
       if (activeBattleMode === 'dost') {
@@ -1513,7 +1474,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (!checkGuestAuth()) return;
     const isSpeed = activeExerciseType === 'speed';
     const reqEnergy = isSpeed ? 2 : 1;
-    const success = await deductEnergy(reqEnergy);
+    const isUserPremium = await checkPremiumActive();
+    if (!isUserPremium && currentEnergy < reqEnergy) {
+      setRequiredEnergyAlert(reqEnergy);
+      setIsEnergyAlertVisible(true);
+      return;
+    }
+    const success = await consumeEnergy(reqEnergy);
     if (success) {
       if (activeExerciseType === 'abacus') {
         saveActivityLog("Abakus simulyatori", 10);
