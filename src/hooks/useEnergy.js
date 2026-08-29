@@ -165,33 +165,34 @@ export function useEnergy() {
       return true;
     }
 
-    // 2. Read latest energy state from AsyncStorage to avoid stale closure state
-    let currentStoredEnergy = energy;
-    let lastUpdated = Date.now();
-
     try {
       const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
+      let now = Date.now();
+      let currentVal = energy;
+      let lastUpdated = now;
+
       if (storedData) {
         const parsed = JSON.parse(storedData);
-        currentStoredEnergy = typeof parsed.energy === 'number' ? parsed.energy : energy;
-        lastUpdated = parsed.lastUpdated || Date.now();
-      }
-    } catch (e) {}
-
-    if (currentStoredEnergy >= amount) {
-      const newEnergy = currentStoredEnergy - amount;
-      
-      // If we were at MAX_ENERGY, set lastUpdated to now so countdown starts fresh
-      if (currentStoredEnergy >= MAX_ENERGY) {
-        lastUpdated = Date.now();
+        if (typeof parsed.energy === 'number') {
+          currentVal = parsed.energy;
+        }
+        if (parsed.lastUpdated) {
+          lastUpdated = parsed.lastUpdated;
+        }
       }
 
-      await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newEnergy, lastUpdated }));
-      setEnergy(newEnergy);
-      await calculateEnergy();
-      return true;
+      if (currentVal >= amount) {
+        const newVal = currentVal - amount;
+        const newLastUpdated = currentVal >= MAX_ENERGY ? now : lastUpdated;
+
+        await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
+        setEnergy(newVal);
+        return true;
+      }
+    } catch (e) {
+      console.error('consumeEnergy error:', e);
     }
-    return false; // Not enough energy
+    return false;
   };
   
   // Expose a function to add energy (e.g. from gifts/videos)
