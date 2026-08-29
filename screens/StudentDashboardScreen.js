@@ -1450,19 +1450,29 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const deductEnergy = async (reqEnergy) => {
-    // 1. Strictly check if user has active premium
-    const isUserPremium = await checkPremiumActive();
+    // Check if user is premium
+    let isUserPremium = false;
+    try {
+      const expStr = await AsyncStorage.getItem('user_premium_expires_at');
+      if (expStr) {
+        const expTime = parseInt(expStr, 10);
+        if (!isNaN(expTime) && Date.now() < expTime) {
+          isUserPremium = true;
+        }
+      }
+    } catch (e) {}
+
     if (isUserPremium) return true;
 
     try {
       const storedData = await AsyncStorage.getItem('user_energy_data');
       let now = Date.now();
-      let currentVal = 2; // Default starting energy
+      let currentVal = currentEnergy;
       let lastUpdated = now;
 
       if (storedData) {
         const parsed = JSON.parse(storedData);
-        currentVal = typeof parsed.energy === 'number' ? parsed.energy : 2;
+        currentVal = typeof parsed.energy === 'number' ? parsed.energy : currentEnergy;
         lastUpdated = parsed.lastUpdated || now;
       }
 
@@ -1473,11 +1483,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
       }
 
       const newVal = Math.max(0, currentVal - reqEnergy);
-      if (currentVal >= 10) {
-        lastUpdated = now;
-      }
+      const newLastUpdated = currentVal >= 10 ? now : lastUpdated;
 
-      await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newVal, lastUpdated }));
+      await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
       await consumeEnergy(reqEnergy);
       return true;
     } catch (e) {
