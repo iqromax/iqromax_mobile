@@ -55,7 +55,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "Yangi Foydalanuvchi Bonusi",
     keyBadge: "1 ta Kalit",
     daysBadge: "kun",
-    doneTag: "Bajarildi"
+    doneTag: "Bajarildi",
+    cashbackLockedTag: "TEZ ORADA (QULFLANGAN 🔒)"
   },
   ru: {
     mysteryBox: "ТАЙНЫЙ СУНДУК",
@@ -104,7 +105,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "Бонус нового пользователя",
     keyBadge: "1 Ключ",
     daysBadge: "дн.",
-    doneTag: "Выполнено"
+    doneTag: "Выполнено",
+    cashbackLockedTag: "СКОРО (ЗАКРЫТО 🔒)"
   },
   en: {
     mysteryBox: "MYSTERY BOX",
@@ -153,7 +155,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "New User Bonus",
     keyBadge: "1 Key",
     daysBadge: "days",
-    doneTag: "Completed"
+    doneTag: "Completed",
+    cashbackLockedTag: "COMING SOON (LOCKED 🔒)"
   },
   ar: {
     mysteryBox: "الصندوق السري",
