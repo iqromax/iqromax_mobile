@@ -1143,62 +1143,63 @@ export default function StudentDashboardScreen({ navigation, route }) {
               contentFit="cover" 
             />
           </View>
-          <View style={{ flexDirection: 'row', flex: 1, zIndex: 1, paddingVertical: 10 }}>
           
-          {/* Left Column: Vertical Categories */}
-          <View style={{ width: 95, justifyContent: 'flex-start', gap: 10 }}>
-            {[
-              { key: 'ustki_kiyim', label: 'USTKI KIYIM', icon: 'tshirt-crew' },
-              { key: 'shim', label: 'SHIM', icon: 'human-handsdown' },
-              { key: 'oyoq_kiyim', label: 'OYOQ KIYIM', icon: 'shoe-sneaker' },
-              { key: 'aksessuar', label: 'AKSESSUAR', icon: 'glasses' },
-              { key: 'ryukzak', label: 'RYUKZAK', icon: 'bag-personal' },
-            ].map((item) => {
-              const isActive = kiyimKategoriya === item.key;
-              return (
-                <TouchableOpacity
-                  key={item.key}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingVertical: 12,
-                    paddingHorizontal: 8,
-                    borderRadius: 12,
-                    backgroundColor: isActive ? 'rgba(217, 119, 6, 0.4)' : 'rgba(15,17,30,0.6)',
-                    borderWidth: 1,
-                    borderColor: isActive ? '#D97706' : 'rgba(255,255,255,0.1)',
-                    position: 'relative',
-                  }}
-                  onPress={() => setKiyimKategoriya(item.key)}
-                  activeOpacity={0.8}
-                >
-                  <MaterialCommunityIcons name={item.icon} size={14} color={isActive ? '#F59E0B' : '#9CA3AF'} style={{ marginRight: 6 }} />
-                  <Text style={{ color: isActive ? '#F59E0B' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 8 }}>
-                    {item.label}
-                  </Text>
-                  {isActive && (
-                    <View style={{ position: 'absolute', right: -6, width: 0, height: 0, borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 6, borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: '#F59E0B' }} />
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {/* Center Column: Showcase */}
-          <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
-            <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                <ambientLight intensity={2} color="#ffffff" />
-                <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
-                <Suspense fallback={null}>
-                  <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={0.5} />
-                </Suspense>
-              </Canvas>
+          <View style={{ flexDirection: 'row', flex: 1, zIndex: 1, paddingVertical: 10 }}>
+            {/* Left Column: Vertical Categories */}
+            <View style={{ width: 95, justifyContent: 'flex-start', gap: 10 }}>
+              {[
+                { key: 'ustki_kiyim', label: 'USTKI KIYIM', icon: 'tshirt-crew' },
+                { key: 'shim', label: 'SHIM', icon: 'human-handsdown' },
+                { key: 'oyoq_kiyim', label: 'OYOQ KIYIM', icon: 'shoe-sneaker' },
+                { key: 'aksessuar', label: 'AKSESSUAR', icon: 'glasses' },
+                { key: 'ryukzak', label: 'RYUKZAK', icon: 'bag-personal' },
+              ].map((item) => {
+                const isActive = kiyimKategoriya === item.key;
+                return (
+                  <TouchableOpacity
+                    key={item.key}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      paddingVertical: 12,
+                      paddingHorizontal: 8,
+                      borderRadius: 12,
+                      backgroundColor: isActive ? 'rgba(217, 119, 6, 0.4)' : 'rgba(15,17,30,0.6)',
+                      borderWidth: 1,
+                      borderColor: isActive ? '#D97706' : 'rgba(255,255,255,0.1)',
+                      position: 'relative',
+                    }}
+                    onPress={() => setKiyimKategoriya(item.key)}
+                    activeOpacity={0.8}
+                  >
+                    <MaterialCommunityIcons name={item.icon} size={14} color={isActive ? '#F59E0B' : '#9CA3AF'} style={{ marginRight: 6 }} />
+                    <Text style={{ color: isActive ? '#F59E0B' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 8 }}>
+                      {item.label}
+                    </Text>
+                    {isActive && (
+                      <View style={{ position: 'absolute', right: -6, width: 0, height: 0, borderTopWidth: 6, borderBottomWidth: 6, borderLeftWidth: 6, borderTopColor: 'transparent', borderBottomColor: 'transparent', borderLeftColor: '#F59E0B' }} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-            <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
-              <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
+
+            {/* Center Column: Showcase */}
+            <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
+              <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
+                <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
+                  <ambientLight intensity={2} color="#ffffff" />
+                  <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                  <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                  <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
+                  <Suspense fallback={null}>
+                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={0.5} />
+                  </Suspense>
+                </Canvas>
+              </View>
+              <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
+                <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
+              </View>
             </View>
           </View>
         </View>
