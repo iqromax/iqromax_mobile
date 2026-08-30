@@ -787,13 +787,23 @@ app.get('/api/admin/users', async (req, res) => {
   try {
     const { role } = req.query;
     
-    const filter = role ? {
-      OR: [
-        { role: String(role) },
-        { role: String(role).toLowerCase() },
-        { role: String(role).charAt(0).toUpperCase() + String(role).slice(1).toLowerCase() }
-      ]
-    } : {};
+    let filter: any = {};
+    if (role) {
+      const roleStr = String(role).toLowerCase();
+      if (roleStr === 'student') {
+        filter = {
+          OR: [
+            { role: { equals: 'student', mode: 'insensitive' } },
+            { role: { contains: 'Student', mode: 'insensitive' } }
+          ]
+        };
+      } else {
+        filter = {
+          role: { contains: String(role), mode: 'insensitive' }
+        };
+      }
+    }
+
     const users = await prisma.user.findMany({ 
       where: filter,
       orderBy: { createdAt: 'desc' } 
@@ -1017,8 +1027,7 @@ app.post('/api/user/claim-premium', async (req, res) => {
     const updatedUser = await prisma.user.update({
       where: { id: existingUser.id },
       data: {
-        premiumExpiresAt: newExpDate,
-        role: 'Premium Student'
+        premiumExpiresAt: newExpDate
       }
     });
 
