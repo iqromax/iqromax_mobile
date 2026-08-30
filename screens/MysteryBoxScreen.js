@@ -85,12 +85,39 @@ export default function MysteryBoxScreen({ navigation, route }) {
       const storedRewards = await AsyncStorage.getItem(REWARDS_STORAGE_KEY);
       if (storedRewards) {
         const parsed = JSON.parse(storedRewards);
-        const currentPremExp = await AsyncStorage.getItem('user_premium_expires_at');
+        let currentPremExp = await AsyncStorage.getItem('user_premium_expires_at');
+        
+        // Query backend for real DB status to ensure sync with Admin Panel
+        try {
+          if (user?.id || user?.customId) {
+            const res = await fetch(`${API_URL}/admin/users`);
+            if (res.ok) {
+              const allUsers = await res.json();
+              const me = allUsers.find(u => u.id === user.id || u.customId === user.customId || u.email === user.email);
+              if (me) {
+                if (me.premiumExpiresAt) {
+                  const expTime = new Date(me.premiumExpiresAt).getTime();
+                  if (!isNaN(expTime) && Date.now() < expTime) {
+                    currentPremExp = expTime.toString();
+                    await AsyncStorage.setItem('user_premium_expires_at', expTime.toString());
+                  } else {
+                    currentPremExp = null;
+                    await AsyncStorage.removeItem('user_premium_expires_at');
+                  }
+                } else {
+                  currentPremExp = null;
+                  await AsyncStorage.removeItem('user_premium_expires_at');
+                }
+              }
+            }
+          }
+        } catch (err) {}
+
         const now = Date.now();
         const updated = parsed.map(item => {
           if (item.type === 'premium') {
             const hasActivePremKey = !!currentPremExp && parseInt(currentPremExp, 10) > now;
-            const isStillActive = hasActivePremKey && item.expiresAt && now < item.expiresAt;
+            const isStillActive = hasActivePremKey && (!item.expiresAt || now < item.expiresAt);
             const expDateObj = item.expiresAt ? new Date(item.expiresAt) : new Date();
             const dateStr = expDateObj.toLocaleDateString();
             const timeStr = expDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -103,6 +130,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
           return item;
         });
         setRewardsList(updated);
+        await AsyncStorage.setItem(REWARDS_STORAGE_KEY, JSON.stringify(updated));
       } else {
         // Initial default rewards if empty for this user
         const initialRewards = [

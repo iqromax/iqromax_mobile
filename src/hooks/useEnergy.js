@@ -15,9 +15,38 @@ export function useEnergy() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
 
-  // Check Premium
+  // Check Premium against local storage & backend DB
   const checkPremiumActive = useCallback(async () => {
     try {
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      const userData = userDataStr ? JSON.parse(userDataStr) : null;
+      const userId = userData?.id || userData?.customId;
+
+      if (userId) {
+        // Query backend for real DB status
+        try {
+          const res = await fetch(`${API_URL}/admin/users`);
+          if (res.ok) {
+            const allUsers = await res.json();
+            const me = allUsers.find(u => u.id === userId || u.customId === userId || u.email === userData.email);
+            if (me) {
+              if (me.premiumExpiresAt) {
+                const expTime = new Date(me.premiumExpiresAt).getTime();
+                if (!isNaN(expTime) && Date.now() < expTime) {
+                  await AsyncStorage.setItem('user_premium_expires_at', expTime.toString());
+                  setIsPremium(true);
+                  return true;
+                }
+              }
+              // If backend DB shows no premium, clear local storage
+              await AsyncStorage.removeItem('user_premium_expires_at');
+              setIsPremium(false);
+              return false;
+            }
+          }
+        } catch (err) {}
+      }
+
       const expStr = await AsyncStorage.getItem('user_premium_expires_at');
       if (expStr) {
         const expTime = parseInt(expStr, 10);
