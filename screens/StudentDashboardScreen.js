@@ -1201,7 +1201,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
             </View>
           </View>
-          </View>
           
         </View>
 
