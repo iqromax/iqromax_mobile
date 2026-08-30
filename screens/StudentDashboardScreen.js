@@ -3172,14 +3172,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   alignItems: 'center'
                 }}
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate('MysteryBox', { user })}
+                onPress={() => navigation.navigate('MysteryBox', { user, language })}
               >
                 <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(168, 85, 247, 0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#A855F7' }}>
                   <MaterialCommunityIcons name="treasure-chest" size={26} color="#F59E0B" />
                 </View>
-                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>SIRLI SANDIQ</Text>
+                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>{t.mysteryBox || 'SIRLI SANDIQ'}</Text>
                 <View style={{ backgroundColor: '#A855F7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, marginTop: 6 }}>
-                  <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{mysteryKeysCount} ta sandiq</Text>
+                  <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{mysteryKeysCount} {t.taBox || 'ta sandiq'}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -3204,9 +3204,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(56, 189, 248, 0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#38BDF8' }}>
                   <MaterialCommunityIcons name="ticket-percent" size={26} color="#38BDF8" />
                 </View>
-                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>PROMOKOD & KESHBEK</Text>
+                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>{t.promoCashback || 'PROMOKOD & KESHBEK'}</Text>
                 <View style={{ backgroundColor: 'rgba(56, 189, 248, 0.2)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, marginTop: 6 }}>
-                  <Text style={{ color: '#38BDF8', fontSize: 10, fontFamily: 'Inter_700Bold' }}>25% Keshbek</Text>
+                  <Text style={{ color: '#38BDF8', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{t.cashbackTag || '25% Keshbek'}</Text>
                 </View>
               </TouchableOpacity>
             </View>
