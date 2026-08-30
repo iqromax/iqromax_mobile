@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import io from 'socket.io-client';
+import { API_URL } from '../config/api';
 
 const ENERGY_STORAGE_KEY = 'user_energy_data';
 const MAX_ENERGY = 10;
@@ -91,6 +93,29 @@ export function useEnergy() {
     calculateEnergy();
     checkPremiumActive();
 
+    // Real-time socket listener for admin revoking premium
+    let socket;
+    try {
+      socket = io(API_URL, { transports: ['websocket'] });
+      socket.on('premium_revoked', async (data) => {
+        try {
+          const userDataStr = await AsyncStorage.getItem('user_data');
+          const userData = userDataStr ? JSON.parse(userDataStr) : null;
+          
+          const isTarget = !data.userId || !userData || 
+            data.userId === userData.id || 
+            data.customId === userData.customId ||
+            data.userId === userData.customId;
+
+          if (isTarget) {
+            await AsyncStorage.removeItem('user_premium_expires_at');
+            setIsPremium(false);
+            calculateEnergy();
+          }
+        } catch (e) {}
+      });
+    } catch (e) {}
+
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
         calculateEnergy();
@@ -98,7 +123,13 @@ export function useEnergy() {
       }
     });
 
-    return () => subscription.remove();
+    return () => {
+      if (socket) {
+        socket.off('premium_revoked');
+        socket.disconnect();
+      }
+      subscription.remove();
+    };
   }, [calculateEnergy, checkPremiumActive]);
 
   // Timer Tick
