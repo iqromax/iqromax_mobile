@@ -126,6 +126,12 @@ export function useEnergy() {
 
   // Consume Energy Function
   const consumeEnergy = async (amount) => {
+    const hasPremium = await checkPremiumActive();
+    if (hasPremium) {
+      // Premium is active! Unlimited energy during premium duration.
+      return true;
+    }
+
     try {
       const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
       const now = Date.now();
