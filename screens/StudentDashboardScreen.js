@@ -4027,16 +4027,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </Text>
               </View>
 
-              {/* Cashback Stats Grid - Locked/Coming Soon style */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>KESHBEK HAMYONI (25%)</Text>
-                <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: '#EF4444', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <MaterialCommunityIcons name="lock" size={12} color="#EF4444" />
-                  <Text style={{ color: '#EF4444', fontSize: 9, fontFamily: 'Inter_700Bold' }}>TEZ ORADA (QULFLANGAN)</Text>
-                </View>
-              </View>
+              {/* Cashback Stats Grid - Clean Locked Overlay */}
+              <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold', marginTop: 4 }}>KESHBEK HAMYONI (25%)</Text>
 
-              <View style={{ position: 'relative' }}>
+              <View style={{ position: 'relative', marginTop: 8 }}>
                 <View style={{ flexDirection: 'row', gap: 10, opacity: 0.35 }}>
                   {/* 1. Potential Cashback */}
                   <View style={{ flex: 1, backgroundColor: '#0B132B', padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#1E293B' }}>
@@ -4057,9 +4051,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* Center Lock Badge Overlay */}
                 <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, justifyContent: 'center', alignItems: 'center' }}>
-                  <View style={{ backgroundColor: 'rgba(15, 23, 42, 0.92)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.4)', flexDirection: 'row', alignItems: 'center', gap: 8, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 6, elevation: 5 }}>
+                  <View style={{ backgroundColor: 'rgba(15, 23, 42, 0.94)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14, borderWidth: 1, borderColor: '#F59E0B', flexDirection: 'row', alignItems: 'center', gap: 8, shadowColor: '#F59E0B', shadowOpacity: 0.3, shadowRadius: 6, elevation: 5 }}>
                     <MaterialCommunityIcons name="lock-clock" size={20} color="#F59E0B" />
-                    <Text style={{ color: '#F1F5F9', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Real to'lovlar bilan faollashadi</Text>
+                    <Text style={{ color: '#F1F5F9', fontSize: 11, fontFamily: 'Inter_700Bold' }}>{mt.realPaymentsLock || "Real to'lovlar bilan faollashadi"}</Text>
                   </View>
                 </View>
               </View>

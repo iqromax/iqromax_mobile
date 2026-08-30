@@ -56,7 +56,7 @@ export const MYSTERY_TRANSLATIONS = {
     keyBadge: "1 ta Kalit",
     daysBadge: "kun",
     doneTag: "Bajarildi",
-    cashbackLockedTag: "TEZ ORADA (QULFLANGAN 🔒)"
+    realPaymentsLock: "Real to'lovlar bilan faollashadi"
   },
   ru: {
     mysteryBox: "ТАЙНЫЙ СУНДУК",
@@ -106,7 +106,7 @@ export const MYSTERY_TRANSLATIONS = {
     keyBadge: "1 Ключ",
     daysBadge: "дн.",
     doneTag: "Выполнено",
-    cashbackLockedTag: "СКОРО (ЗАКРЫТО 🔒)"
+    realPaymentsLock: "Активируется с реальными платежами"
   },
   en: {
     mysteryBox: "MYSTERY BOX",
@@ -156,7 +156,7 @@ export const MYSTERY_TRANSLATIONS = {
     keyBadge: "1 Key",
     daysBadge: "days",
     doneTag: "Completed",
-    cashbackLockedTag: "COMING SOON (LOCKED 🔒)"
+    realPaymentsLock: "Activates with real payments"
   },
   ar: {
     mysteryBox: "الصندوق السري",
@@ -205,7 +205,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "مكافأة المستخدم الجديد",
     keyBadge: "مفتاح 1",
     daysBadge: "أيام",
-    doneTag: "مكتمل"
+    doneTag: "مكتمل",
+    realPaymentsLock: "يتم التفعيل مع المدفوعات الحقيقية"
   },
   tr: {
     mysteryBox: "GİZEMLİ KUTU",
@@ -254,7 +255,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "Yeni Kullanıcı Bonusu",
     keyBadge: "1 Anahtar",
     daysBadge: "gün",
-    doneTag: "Tamamlandı"
+    doneTag: "Tamamlandı",
+    realPaymentsLock: "Gerçek ödemelerle aktifleşir"
   },
   zh: {
     mysteryBox: "神秘宝箱",
@@ -303,7 +305,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "新用户奖励",
     keyBadge: "1 把钥匙",
     daysBadge: "天",
-    doneTag: "已完成"
+    doneTag: "已完成",
+    realPaymentsLock: "通过真实支付激活"
   },
   ky: {
     mysteryBox: "СЫРДУУ САНДЫК",
@@ -352,7 +355,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "Жаңы Колдонуучу Бонусу",
     keyBadge: "1 Ачкыч",
     daysBadge: "күн",
-    doneTag: "Аткарылды"
+    doneTag: "Аткарылды",
+    realPaymentsLock: "Реалдуу төлөмдөр менен активдешет"
   },
   kk: {
     mysteryBox: "СЫРЛЫ САНДЫҚ",
@@ -499,7 +503,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "新規ユーザーボーナス",
     keyBadge: "1 キー",
     daysBadge: "日",
-    doneTag: "完了"
+    doneTag: "完了",
+    realPaymentsLock: "実際の決済で有効化されます"
   },
   ko: {
     mysteryBox: "미스테리 상자",
@@ -548,7 +553,8 @@ export const MYSTERY_TRANSLATIONS = {
     bonusTitle: "신규 유저 보너스",
     keyBadge: "열쇠 1개",
     daysBadge: "일",
-    doneTag: "완료"
+    doneTag: "완료",
+    realPaymentsLock: "실제 결제 시 활성화됩니다"
   }
 };
 
