@@ -1133,16 +1133,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
     return (
       <View style={{ flex: 1, backgroundColor: '#05050C' }}>
         
-        {/* Header Section */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, marginTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 20, marginBottom: 15 }}>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 18, letterSpacing: 1, marginBottom: 4, textTransform: 'uppercase' }}>{currentHeader.title}</Text>
-            <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 11 }}>{currentHeader.subtitle}</Text>
-          </View>
-        </View>
-
-        {/* Top Section (3 Columns) */}
-        <View style={{ paddingHorizontal: 15, height: 350 }}>
+        {/* Top Section (Showcase & Categories) */}
+        <View style={{ paddingHorizontal: 15, height: 350, marginTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 20 }}>
           {/* Main Background Image for the whole top section */}
           <View style={{ position: 'absolute', top: 0, left: 15, right: 15, bottom: 0, borderRadius: 16, overflow: 'hidden' }}>
             <Image 
@@ -1207,47 +1199,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
             <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
               <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
-            </View>
-          </View>
-
-          {/* Right Column: Info Panel */}
-          <View style={{ width: 130, justifyContent: 'space-between', gap: 10 }}>
-            {/* Top Info Box */}
-            <View style={{ backgroundColor: 'rgba(15,17,30,0.6)', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}>
-              <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, marginBottom: 4 }}>IQ Hoodie</Text>
-              <View style={{ alignSelf: 'flex-start', backgroundColor: 'rgba(168,85,247,0.2)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 10 }}>
-                <Text style={{ color: '#A855F7', fontFamily: 'Inter_700Bold', fontSize: 8 }}>EPIC</Text>
-              </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                 <MaterialCommunityIcons name="check-circle" size={12} color="#EAB308" style={{ marginRight: 4 }} />
-                 <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 9 }}>Kiyilgan</Text>
-              </View>
-            </View>
-
-            {/* Bottom Stats Box */}
-            <View style={{ backgroundColor: 'rgba(15,17,30,0.6)', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', flex: 1 }}>
-              <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 8, marginBottom: 4 }}>OCHILGAN:</Text>
-              <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 16, marginBottom: 6 }}>8 / 24</Text>
-              <View style={{ height: 4, backgroundColor: '#1F2937', borderRadius: 2, width: '100%', marginBottom: 15 }}>
-                <View style={{ height: '100%', backgroundColor: '#EAB308', borderRadius: 2, width: '33%' }} />
-              </View>
-              
-              <View style={{ gap: 8 }}>
-                {[
-                  { label: 'ODDIY', color: '#10B981', count: 3 },
-                  { label: 'RARE', color: '#3B82F6', count: 3 },
-                  { label: 'EPIC', color: '#A855F7', count: 2 },
-                  { label: 'LEGENDARY', color: '#EAB308', count: 0 },
-                ].map((stat, i) => (
-                  <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: stat.color, marginRight: 6 }} />
-                      <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 8 }}>{stat.label}</Text>
-                    </View>
-                    <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 9 }}>{stat.count}</Text>
-                  </View>
-                ))}
-              </View>
             </View>
           </View>
           </View>
