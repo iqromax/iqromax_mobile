@@ -4017,7 +4017,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ flex: 1, backgroundColor: '#131C2E', padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#1E293B' }}>
                   <MaterialCommunityIcons name="clock-outline" size={20} color="#F59E0B" />
                   <Text style={{ color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 6 }}>Ehtimoliy Keshbek</Text>
-                  <Text style={{ color: '#F59E0B', fontSize: 16, fontFamily: 'Inter_800ExtraBold', marginTop: 2 }}>{potentialCashback} XP</Text>
+                  <Text style={{ color: '#F59E0B', fontSize: 16, fontFamily: 'Inter_800ExtraBold', marginTop: 2 }}>${potentialCashback}</Text>
                   <Text style={{ color: '#64748B', fontSize: 8, marginTop: 4, lineHeight: 11 }}>Taklif etilgan do'stlaringiz balansidan 25% qismi.</Text>
                 </View>
 
@@ -4025,7 +4025,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ flex: 1, backgroundColor: '#131C2E', padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#10B981' }}>
                   <MaterialCommunityIcons name="cash-multiple" size={20} color="#10B981" />
                   <Text style={{ color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 6 }}>Haqiqiy Keshbek</Text>
-                  <Text style={{ color: '#10B981', fontSize: 16, fontFamily: 'Inter_800ExtraBold', marginTop: 2 }}>{realCashback} XP</Text>
+                  <Text style={{ color: '#10B981', fontSize: 16, fontFamily: 'Inter_800ExtraBold', marginTop: 2 }}>${realCashback}</Text>
                   <Text style={{ color: '#64748B', fontSize: 8, marginTop: 4, lineHeight: 11 }}>Yechib olish yoki harid qilish uchun tayyor.</Text>
                 </View>
               </View>
