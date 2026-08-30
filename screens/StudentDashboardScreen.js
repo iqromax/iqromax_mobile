@@ -1134,9 +1134,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
       <View style={{ flex: 1, backgroundColor: '#05050C' }}>
         
         {/* Top Section (Showcase & Categories) */}
-        <View style={{ paddingHorizontal: 10, height: 500, marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
+        <View style={{ paddingHorizontal: 15, height: 420, marginTop: Platform.OS === 'android' ? StatusBar.currentHeight + 4 : 8 }}>
           {/* Main Background Image for the whole top section */}
-          <View style={{ position: 'absolute', top: 0, left: 10, right: 10, bottom: 0, borderRadius: 22, overflow: 'hidden' }}>
+          <View style={{ position: 'absolute', top: 0, left: 15, right: 15, bottom: 0, borderRadius: 20, overflow: 'hidden' }}>
             <Image 
               source={require('../assets/dashboard_bg_new.jpg')} 
               style={{ width: '100%', height: '100%' }} 
