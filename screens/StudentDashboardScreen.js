@@ -3251,6 +3251,21 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   const themeColor = colors[index % colors.length];
                   const isLast = index === activityHistory.length - 1;
 
+                  // Translate activity title dynamically if matches known titles
+                  let translatedTitle = item.title;
+                  if (item.title === "1v1 Boshma-bosh o'yin") {
+                    translatedTitle = t.bmOddiy || "1v1 Battle";
+                  } else if (item.title === "Abakus simulyatori") {
+                    translatedTitle = t.actAbacus || "Abacus Simulator";
+                  } else if (item.title === "Ko'paytirish va bo'lish") {
+                    translatedTitle = `${t.abacusMult || 'Multiplication'} & ${t.abacusDiv || 'Division'}`;
+                  } else if (item.title === "Tasavvur (Oddiy hisob)") {
+                    translatedTitle = t.actSimple || "Simple Math";
+                  }
+
+                  // Translate 'Bugun' in time string
+                  const translatedTime = item.time ? item.time.replace("Bugun", t.actToday || "Today") : "";
+
                   return (
                     <View key={item.id || index} style={styles.proTimelineItem}>
                       <View style={styles.proTimelineDotLine}>
@@ -3259,12 +3274,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       </View>
                       <View style={styles.proTimelineContent}>
                         <View style={{ flex: 1 }}>
-                          <Text style={styles.proTimelineTitle}>{item.title}</Text>
-                          <Text style={styles.proTimelineSub}>{item.time}</Text>
+                          <Text style={styles.proTimelineTitle}>{translatedTitle}</Text>
+                          <Text style={styles.proTimelineSub}>{translatedTime}</Text>
                         </View>
                         <View style={[styles.proTimelineTag, { backgroundColor: `${themeColor}20` }]}>
                           <Text style={[styles.proTimelineTagText, { color: themeColor }]}>
-                            {item.xpGained > 0 ? `+${item.xpGained} XP` : 'Bajarildi'}
+                            {item.xpGained > 0 ? `+${item.xpGained} XP` : (t.doneTag || 'Bajarildi')}
                           </Text>
                         </View>
                       </View>

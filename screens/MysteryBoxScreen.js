@@ -1075,7 +1075,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
             {/* Referral Link Box */}
             <View style={styles.inviteLinkCard}>
-              <Text style={{ color: '#64748B', fontSize: 11, textAlign: 'center', fontFamily: 'Inter_500Medium', marginBottom: 6 }}>Sizning taklif havolangiz</Text>
+              <Text style={{ color: '#64748B', fontSize: 11, textAlign: 'center', fontFamily: 'Inter_500Medium', marginBottom: 6 }}>{t.yourInviteLink}</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                 <Text style={{ color: '#A855F7', fontSize: 14, fontFamily: 'Inter_700Bold' }}>{referralLink}</Text>
                 <TouchableOpacity onPress={copyLink}>
