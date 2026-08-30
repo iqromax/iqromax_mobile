@@ -18,6 +18,7 @@ import { SOCKET_URL, API_URL } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { useEnergy } from '../src/hooks/useEnergy';
+import { MYSTERY_TRANSLATIONS } from './MysteryBoxScreen';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',
@@ -524,6 +525,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   });
 
   const t = DASHBOARD_TRANSLATIONS[language] || DASHBOARD_TRANSLATIONS['en'];
+  const mt = MYSTERY_TRANSLATIONS[language] || MYSTERY_TRANSLATIONS['uz'];
   const ext = EXERCISE_TYPES_TRANSLATIONS[language] || EXERCISE_TYPES_TRANSLATIONS['en'];
   const coinText = COIN_TRANSLATIONS[language] || COIN_TRANSLATIONS['en'];
   const energyText = ENERGY_TRANSLATIONS[language] || ENERGY_TRANSLATIONS['uz'];
@@ -3177,9 +3179,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(168, 85, 247, 0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#A855F7' }}>
                   <MaterialCommunityIcons name="treasure-chest" size={26} color="#F59E0B" />
                 </View>
-                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>{t.mysteryBox || 'SIRLI SANDIQ'}</Text>
+                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>{mt.mysteryBox || 'SIRLI SANDIQ'}</Text>
                 <View style={{ backgroundColor: '#A855F7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, marginTop: 6 }}>
-                  <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{mysteryKeysCount} {t.taBox || 'ta sandiq'}</Text>
+                  <Text style={{ color: '#FFF', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{mysteryKeysCount} {mt.taBox || 'ta sandiq'}</Text>
                 </View>
               </TouchableOpacity>
 
@@ -3204,9 +3206,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(56, 189, 248, 0.2)', justifyContent: 'center', alignItems: 'center', marginBottom: 8, borderWidth: 1, borderColor: '#38BDF8' }}>
                   <MaterialCommunityIcons name="ticket-percent" size={26} color="#38BDF8" />
                 </View>
-                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>{t.promoCashback || 'PROMOKOD & KESHBEK'}</Text>
+                <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_700Bold', textAlign: 'center' }}>{mt.promoCashback || 'PROMOKOD & KESHBEK'}</Text>
                 <View style={{ backgroundColor: 'rgba(56, 189, 248, 0.2)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, marginTop: 6 }}>
-                  <Text style={{ color: '#38BDF8', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{t.cashbackTag || '25% Keshbek'}</Text>
+                  <Text style={{ color: '#38BDF8', fontSize: 10, fontFamily: 'Inter_700Bold' }}>{mt.cashbackTag || '25% Keshbek'}</Text>
                 </View>
               </TouchableOpacity>
             </View>
