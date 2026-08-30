@@ -4026,7 +4026,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="cash-multiple" size={20} color="#10B981" />
                   <Text style={{ color: '#94A3B8', fontSize: 10, fontFamily: 'Inter_600SemiBold', marginTop: 6 }}>Haqiqiy Keshbek</Text>
                   <Text style={{ color: '#10B981', fontSize: 16, fontFamily: 'Inter_800ExtraBold', marginTop: 2 }}>${realCashback}</Text>
-                  <Text style={{ color: '#64748B', fontSize: 8, marginTop: 4, lineHeight: 11 }}>Yechib olish yoki harid qilish uchun tayyor.</Text>
+                  <Text style={{ color: '#64748B', fontSize: 8, marginTop: 4, lineHeight: 11 }}>Ilova ichida xarid qilish uchun tayyor.</Text>
                 </View>
               </View>
 
