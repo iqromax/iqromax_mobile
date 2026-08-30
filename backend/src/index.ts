@@ -726,7 +726,10 @@ app.get('/api/ranking', async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       where: { 
-        role: { in: ['student', 'Student'] },
+        OR: [
+          { role: { contains: 'student', mode: 'insensitive' } },
+          { role: { contains: 'Student', mode: 'insensitive' } }
+        ],
         status: 'Faol'
       },
       orderBy: {
