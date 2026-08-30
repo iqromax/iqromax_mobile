@@ -19,7 +19,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
   const [keysCount, setKeysCount] = useState(1); // 1 key for new registered user
   const [claimedReward, setClaimedReward] = useState(null);
-  const [rewardsTab, setRewardsTab] = useState('Barchasi'); // 'Barchasi' | 'Faol' | 'Tarix'
+  const [rewardsTab, setRewardsTab] = useState('Faol'); // 'Faol' | 'Tarix'
 
   // Invitation & Referral state
   const rawPromo = user?.customId ? user.customId.replace(/^#+/, '') : 'MICHAEL';
@@ -627,7 +627,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
           <View style={{ flex: 1, paddingHorizontal: 20 }}>
             {/* Tabs Row */}
             <View style={styles.rewardsTabRow}>
-              {['Barchasi', 'Faol', 'Tarix'].map((tab) => (
+              {['Faol', 'Tarix'].map((tab) => (
                 <TouchableOpacity 
                   key={tab} 
                   style={[styles.rewardsTabItem, rewardsTab === tab && styles.rewardsTabItemActive]}
@@ -640,9 +640,9 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
             {/* List */}
             <ScrollView contentContainerStyle={{ gap: 12, paddingTop: 10, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
-              {rewardsList.filter(item => rewardsTab === 'Barchasi' || item.status === rewardsTab).length > 0 ? (
+              {rewardsList.filter(item => item.status === rewardsTab).length > 0 ? (
                 rewardsList
-                  .filter(item => rewardsTab === 'Barchasi' || item.status === rewardsTab)
+                  .filter(item => item.status === rewardsTab)
                   .map((item) => (
                     <View key={item.id} style={styles.rewardListItem}>
                       <View style={[styles.rewardListIconBox, { backgroundColor: `${item.color || '#F59E0B'}20` }]}>
