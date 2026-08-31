@@ -4288,6 +4288,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {/* Skin Sub-categories filter horizontal scroll */}
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 10 }}>
                     {[
+                      { id: 'headwear', label: t.shopHeadwear || 'Bosh kiyim', icon: 'hat-cowboy' },
                       { id: 'top', label: t.shopTop || 'Ustki kiyim', icon: 'tshirt' },
                       { id: 'pants', label: t.shopPants || 'Shim', icon: 'user-ninja' },
                       { id: 'shoes', label: t.shopShoes || 'Oyoq kiyim', icon: 'shoe-prints' },
@@ -4320,7 +4321,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     {shopItems
                       .filter(item => item.category === 'inventory' && (item.subcategory || 'top') === activeSkinCategory)
                       .map(item => {
-                        const iconName = activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'glasses' : 'suitcase';
+                        const iconName = activeSkinCategory === 'headwear' ? 'hat-cowboy' : activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'glasses' : 'suitcase';
                         const itemColor = '#F59E0B';
                         return (
                           <View 

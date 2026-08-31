@@ -26,7 +26,7 @@ const ShopAdmin = () => {
 
   // Form states
   const [category, setCategory] = useState<'inventory' | 'energy' | 'mystery'>('inventory');
-  const [subcategory, setSubcategory] = useState<'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'>('top');
+  const [subcategory, setSubcategory] = useState<'headwear' | 'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'>('headwear');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [value, setValue] = useState<number>(1);
@@ -53,7 +53,7 @@ const ShopAdmin = () => {
   const handleOpenCreateModal = () => {
     setEditingItem(null);
     setCategory('inventory');
-    setSubcategory('top');
+    setSubcategory('headwear');
     setName('');
     setDescription('');
     setValue(1);
@@ -66,7 +66,7 @@ const ShopAdmin = () => {
   const handleOpenEditModal = (item: ShopItem) => {
     setEditingItem(item);
     setCategory(item.category);
-    setSubcategory((item.subcategory as any) || 'top');
+    setSubcategory((item.subcategory as any) || 'headwear');
     setName(item.name);
     setDescription(item.description || '');
     setValue(item.value || 1);
@@ -160,6 +160,7 @@ const ShopAdmin = () => {
 
   const getSubcategoryLabel = (sub?: string | null) => {
     switch (sub) {
+      case 'headwear': return 'Bosh kiyim';
       case 'top': return 'Ustki kiyim';
       case 'pants': return 'Shim';
       case 'shoes': return 'Oyoq kiyim';
@@ -434,6 +435,7 @@ const ShopAdmin = () => {
                       onChange={(e) => setSubcategory(e.target.value as any)}
                       className="w-full bg-[#121225] border border-[#1A1A35] focus:border-amber-500 text-purple-300 font-bold rounded-xl p-3.5 text-sm focus:outline-none transition-colors"
                     >
+                      <option value="headwear">🤠 Bosh kiyim</option>
                       <option value="top">🧥 Ustki kiyim</option>
                       <option value="pants">👖 Shim</option>
                       <option value="shoes">👟 Oyoq kiyim</option>
