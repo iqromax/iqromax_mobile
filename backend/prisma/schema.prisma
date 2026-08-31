@@ -97,6 +97,20 @@ model MysteryBoxItem {
   updatedAt   DateTime @updatedAt
 }
 
+model ShopItem {
+  id          String   @id @default(uuid())
+  category    String   // "inventory", "energy", "mystery"
+  subcategory String?  // "top", "pants", "shoes", "accessories", "backpacks" for inventory
+  name        String
+  description String?
+  imageUrl    String?  // uploaded image URL or static asset identifier
+  value       Int      @default(1) // energy count or key count
+  price       Int      // Coin price e.g. 50
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model AppSetting {
   key       String   @id
   value     String
