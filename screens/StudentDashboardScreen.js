@@ -14,7 +14,11 @@ import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/v
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+if (GLTFLoader && GLTFLoader.prototype) {
+  GLTFLoader.prototype.setMeshoptDecoder(MeshoptDecoder);
+}
 if (useGLTF.setMeshoptDecoder) {
   useGLTF.setMeshoptDecoder(MeshoptDecoder);
 }
