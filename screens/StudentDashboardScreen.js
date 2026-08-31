@@ -1196,7 +1196,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             ) : isPricedOrLocked ? (
               <TouchableOpacity onPress={handleSkinPress} style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                  <Image source={require('../assets/s_coin.png')} style={{ width: 10, height: 10, marginRight: 3 }} />
-                 <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{item.price || 'BUY'}</Text>
+                 <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{String(item.price || 'BUY')}</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', alignItems: 'center' }}>
