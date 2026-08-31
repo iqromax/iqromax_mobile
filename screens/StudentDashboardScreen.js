@@ -4103,17 +4103,17 @@ export default function StudentDashboardScreen({ navigation, route }) {
       </Modal>
 
       {/* SHOP MODAL (Oldi-Sotti Do'kon) */}
-      <Modal visible={isShopModalOpen} transparent={false} animationType="slide">
-        <View style={{ flex: 1, backgroundColor: '#05050C' }}>
-          <StatusBar barStyle="light-content" backgroundColor="#05050C" translucent={false} />
-          <SafeAreaView style={{ flex: 1 }}>
-            {/* Shop Header (Generous Top Spacing) */}
+      <Modal visible={isShopModalOpen} transparent={false} animationType="slide" statusBarTranslucent={true}>
+        <View style={{ flex: 1, backgroundColor: '#05050C', paddingTop: Platform.OS === 'ios' ? 44 : (StatusBar.currentHeight || 24) }}>
+          <StatusBar barStyle="light-content" backgroundColor="#05050C" translucent={true} />
+          <View style={{ flex: 1 }}>
+            {/* Shop Header (Fixed Strict Standard Height) */}
             <View style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
               paddingHorizontal: 18,
-              paddingTop: Platform.OS === 'ios' ? 55 : (StatusBar.currentHeight ? StatusBar.currentHeight + 20 : 45),
+              paddingTop: 12,
               paddingBottom: 14,
               backgroundColor: 'rgba(15, 15, 30, 0.95)',
               borderBottomWidth: 1,
@@ -4646,7 +4646,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
             </Modal>
-          </SafeAreaView>
+          </View>
         </View>
       </Modal>
 
