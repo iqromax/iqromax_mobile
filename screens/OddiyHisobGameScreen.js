@@ -871,22 +871,39 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
               </Text>
             </View>
 
-            {/* Right side: XP Badge (Only for Students) */}
+            {/* Right side: XP & Coin Badges (Only for Students) */}
             {!isTeacher && (
-              <View style={{
-                backgroundColor: 'rgba(0, 0, 0, 0.35)',
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                borderRadius: 16,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.15)',
-                alignItems: 'center',
-              }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Image source={require('../assets/xp_icon.jpg')} style={{ width: 22, height: 22, borderRadius: 11, marginRight: 6 }} contentFit="cover" />
-                  <Text style={{ color: '#FBBF24', fontFamily: 'Inter_900Black', fontSize: 20 }}>+{totalGainedXP}</Text>
+              <View style={{ flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                <View style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                  paddingHorizontal: 14,
+                  paddingVertical: 8,
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                }}>
+                  <Image source={require('../assets/xp_icon.jpg')} style={{ width: 18, height: 18, borderRadius: 9, marginRight: 6 }} contentFit="cover" />
+                  <Text style={{ color: '#FBBF24', fontFamily: 'Inter_900Black', fontSize: 16 }}>+{totalGainedXP} XP</Text>
                 </View>
-                <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 9, marginTop: 2, textTransform: 'uppercase' }}>{t.earnedXPLabel || "TO'PLANGAN XP"}</Text>
+
+                {/* Coin Badge */}
+                {correctCount >= Math.ceil(totalQuestions / 2) && (
+                  <View style={{
+                    backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: 'rgba(234, 179, 8, 0.4)',
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                  }}>
+                    <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, marginRight: 6 }} contentFit="contain" />
+                    <Text style={{ color: '#F59E0B', fontFamily: 'Inter_900Black', fontSize: 16 }}>+{examplesCount} Coin</Text>
+                  </View>
+                )}
               </View>
             )}
           </View>
