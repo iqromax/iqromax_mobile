@@ -223,7 +223,7 @@ function AccessoryModel({ modelPath, yPos, characterIndex }) {
   );
 }
 
-function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
+function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null, cameraTargetY = 0, scaleMultiplier = 1 }) {
   const models = {
     0: require('../assets/models/athletic_man_optimized.glb'),
     1: require('../assets/models/adult_male_optimized.glb'),
@@ -266,9 +266,11 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   let yPos = -0.2 + yOffset; // Standard position for all characters
   if (characterIndex === 1) yPos = 1.2 + yOffset; // Maks is positioned lower by default, so we move him up
 
+  const modelScale = 5.3 * scaleMultiplier;
+
   return (
     <>
-      <primitive object={scene} scale={5.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
+      <primitive object={scene} scale={modelScale} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
       {accessoryPath && <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} />}
       <OrbitControls 
         enableZoom={false} 
@@ -276,7 +278,7 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
         minPolarAngle={Math.PI / 2} 
         maxPolarAngle={Math.PI / 2} 
         rotateSpeed={4.0}
-        target={[0, 0, 0]}
+        target={[0, cameraTargetY, 0]}
       />
     </>
   );
@@ -1258,13 +1260,21 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
                   <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                   <Suspense fallback={null}>
-                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={0.5} />
+                    <CharacterModel 
+                      characterIndex={activeAvatarIndex} 
+                      accessoryPath={equippedAccessory} 
+                      yOffset={kiyimKategoriya === 'ustki_kiyim' ? -0.7 : 0.5} 
+                      cameraTargetY={kiyimKategoriya === 'ustki_kiyim' ? 0.3 : 0}
+                      scaleMultiplier={kiyimKategoriya === 'ustki_kiyim' ? 1.65 : 1.0}
+                    />
                   </Suspense>
                 </Canvas>
               </View>
-              <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
-                <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
-              </View>
+              {kiyimKategoriya !== 'ustki_kiyim' && (
+                <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
+                  <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
+                </View>
+              )}
             </View>
           </View>
         </View>
