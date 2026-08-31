@@ -420,7 +420,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isMysteryBoxModalOpen, setIsMysteryBoxModalOpen] = useState(false);
   const [isShopModalOpen, setIsShopModalOpen] = useState(false);
   const [activeShopTab, setActiveShopTab] = useState('inventory'); // 'inventory' | 'energy' | 'mystery'
-  const [activeSkinCategory, setActiveSkinCategory] = useState('top'); // 'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'
+  const [activeSkinCategory, setActiveSkinCategory] = useState('headwear'); // 'headwear' | 'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'
   const [shopItems, setShopItems] = useState([]);
 
   useEffect(() => {
@@ -4178,41 +4178,84 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <View style={{ flex: 1, backgroundColor: '#05050C' }}>
           <StatusBar barStyle="light-content" backgroundColor="#05050C" translucent={true} />
           <SafeAreaView style={{ flex: 1 }}>
-            {/* Shop Header */}
+            {/* Shop Header (Redesigned Modern Gaming Style) */}
             <View style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              paddingHorizontal: 16,
+              paddingHorizontal: 18,
               paddingTop: Platform.OS === 'ios' ? 55 : (StatusBar.currentHeight ? StatusBar.currentHeight + 15 : 40),
-              paddingBottom: 16,
+              paddingBottom: 18,
+              backgroundColor: 'rgba(15, 15, 30, 0.95)',
               borderBottomWidth: 1,
-              borderBottomColor: 'rgba(255, 255, 255, 0.08)'
+              borderBottomColor: 'rgba(245, 158, 11, 0.2)',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.4,
+              shadowRadius: 10,
+              elevation: 8
             }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <LinearGradient
-                  colors={['#FFE259', '#FFA751']}
-                  style={{ width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}
+                  colors={['#F59E0B', '#D97706']}
+                  style={{ 
+                    width: 44, 
+                    height: 44, 
+                    borderRadius: 14, 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    marginRight: 12,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    shadowColor: '#F59E0B',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.5,
+                    shadowRadius: 6
+                  }}
                 >
-                  <FontAwesome5 name="store" size={16} color="#3B1800" />
+                  <FontAwesome5 name="store" size={18} color="#FFF" />
                 </LinearGradient>
-                <View style={{ flex: 1, marginRight: 6 }}>
-                  <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_900Black', letterSpacing: 0.5 }} numberOfLines={1}>{t.shopTitle || "IQROSHOP DO'KON"}</Text>
-                  <Text style={{ color: '#F59E0B', fontSize: 10, fontFamily: 'Inter_600SemiBold' }} numberOfLines={1}>{t.shopSubtitle || "Tangalaringizni sarflang va buyumlarga ega bo'ling!"}</Text>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={{ color: '#FFF', fontSize: 17, fontFamily: 'Inter_900Black', letterSpacing: 0.6 }} numberOfLines={1}>
+                    {t.shopTitle || "IQROSHOP DO'KON"}
+                  </Text>
+                  <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_600SemiBold', opacity: 0.9, marginTop: 1 }} numberOfLines={1}>
+                    {t.shopSubtitle || "Tangalaringizni sarflang va buyumlarga ega bo'ling!"}
+                  </Text>
                 </View>
               </View>
 
               {/* User Balance Badge */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(245, 158, 11, 0.15)', borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.4)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginRight: 10 }}>
-                <Image source={require('../assets/s_coin.png')} style={{ width: 18, height: 18, marginRight: 6 }} />
-                <Text style={{ color: '#F59E0B', fontFamily: 'Inter_900Black', fontSize: 14 }}>{userCoin}</Text>
+              <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                backgroundColor: 'rgba(245, 158, 11, 0.15)', 
+                borderWidth: 1.5, 
+                borderColor: '#F59E0B', 
+                paddingHorizontal: 12, 
+                paddingVertical: 7, 
+                borderRadius: 22, 
+                marginRight: 10 
+              }}>
+                <Image source={require('../assets/s_coin.png')} style={{ width: 20, height: 20, marginRight: 6 }} />
+                <Text style={{ color: '#F59E0B', fontFamily: 'Inter_900Black', fontSize: 15 }}>{userCoin}</Text>
               </View>
 
               <TouchableOpacity 
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 8, borderRadius: 20 }}
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)', 
+                  borderWidth: 1, 
+                  borderColor: 'rgba(255, 255, 255, 0.15)', 
+                  width: 38, 
+                  height: 38, 
+                  borderRadius: 19, 
+                  justifyContent: 'center', 
+                  alignItems: 'center' 
+                }}
+                activeOpacity={0.7}
                 onPress={() => setIsShopModalOpen(false)}
               >
-                <Ionicons name="close" size={20} color="#FFF" />
+                <Ionicons name="close" size={22} color="#FFF" />
               </TouchableOpacity>
             </View>
 
