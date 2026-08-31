@@ -173,9 +173,10 @@ useGLTF.preload(require('../assets/models/beige_trench_coat_optimized.glb'));
 useGLTF.preload(require('../assets/models/ochki_9_optimized.glb'));
 useGLTF.preload(require('../assets/models/ochki_4_optimized.glb'));
 
-function AccessoryModel({ modelPath, yPos, characterIndex }) {
+function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false }) {
   if (!modelPath) return null;
-  const { scene } = useGLTF(modelPath);
+  const glbSource = typeof modelPath === 'string' ? (modelPath.startsWith('http') ? modelPath : `${API_URL}${modelPath.replace('/api', '')}`) : modelPath;
+  const { scene } = useGLTF(glbSource);
   
   // Fix for WebGL Shader Error: ERROR___ERROR_IN_EXPONENT caused by hyphens (e-5) in material names
   React.useMemo(() => {
@@ -192,38 +193,34 @@ function AccessoryModel({ modelPath, yPos, characterIndex }) {
     });
   }, [scene]);
   
-  // Glasses specific adjustments (world coordinates)
-  const glassesScale = 0.50; // Yana ozgina kichraytirdik
-  // Agar personaj [0, -Math.PI / 2, 0] aylanib +X (o'ng) tomonga qarayotgan bo'lsa:
-  // X - oldinga surish, Y - balandlik, Z - o'ng/chap (quloqdan quloqqa)
+  const accessoryScale = isHeadwear ? 0.65 : 0.50;
   
-  let xOffset = -0.02; // Juda ozgina o'ngga surdik
-  let heightOffset = 2.10; // Standart balandlik
-  let zOffset = 0.20; // Yana ozgina ichkariroq kiritdik
+  let xOffset = -0.02;
+  let heightOffset = isHeadwear ? 2.35 : 2.10; // Bosh kiyim (hat/cap) head height positioning
+  let zOffset = isHeadwear ? 0.05 : 0.20;
   
-  if (characterIndex === 1) { // Maks (index 1) uchun ko'zoynakni pastroqqa tushiramiz
-    heightOffset = 1.50; 
-  } else if (characterIndex >= 4) { // Qizlar uchun
-    heightOffset = 2.05; // Qizlar uchun balandlik
-    zOffset = 0.30; // Yana ozgina yuziga (oldinga) chiqardik
+  if (characterIndex === 1) { // Maks
+    heightOffset = isHeadwear ? 1.75 : 1.50; 
+  } else if (characterIndex >= 4) { // Qizlar
+    heightOffset = isHeadwear ? 2.30 : 2.05; 
+    zOffset = isHeadwear ? 0.10 : 0.30; 
   }
   
   const posX = xOffset;
   const posY = yPos + heightOffset;
   const posZ = zOffset;
   
-  
   return (
     <primitive 
       object={scene.clone()} 
-      scale={glassesScale} 
+      scale={accessoryScale} 
       position={[posX, posY, posZ]} 
       rotation={[0, -Math.PI / 2, 0]}
     />
   );
 }
 
-function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
+function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null, headwearPath = null, isHeadwear = false }) {
   const models = {
     0: require('../assets/models/athletic_man_optimized.glb'),
     1: require('../assets/models/adult_male_optimized.glb'),
@@ -269,7 +266,8 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
   return (
     <>
       <primitive object={scene} scale={6.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
-      {accessoryPath && <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} />}
+      {accessoryPath && <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} isHeadwear={false} />}
+      {headwearPath && <AccessoryModel modelPath={headwearPath} yPos={yPos} characterIndex={characterIndex} isHeadwear={true} />}
       <OrbitControls 
         enableZoom={false} 
         enablePan={false} 
@@ -306,6 +304,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(selectedChar);
   const [equippedAccessories, setEquippedAccessories] = useState({});
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
+  const [equippedHeadwears, setEquippedHeadwears] = useState({});
+  const equippedHeadwear = equippedHeadwears[activeAvatarIndex] || null;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const toggleDropdown = () => {
@@ -1153,14 +1153,63 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
     return filteredData.map((item, i) => {
       const rarityColor = item.rarity === 'LEGENDARY' ? '#EAB308' : item.rarity === 'EPIC' ? '#A855F7' : item.rarity === 'RARE' ? '#3B82F6' : '#10B981';
-      let currentItemState = item.state || 'KIYISH';
-      const imgSrc = item.imageUrl ? { uri: item.imageUrl.startsWith('http') ? item.imageUrl : `${API_URL}${item.imageUrl.replace('/api', '')}` } : (item.image || require('../assets/yangi_1.png'));
-
+      
       const isPricedOrLocked = Boolean(item.isLocked || (item.price && Number(item.price) > 0));
+      
+      // Determine if item is equipped
+      const itemGlb = item.modelUrl || item.glbModel || item.model;
+      let currentItemState = item.state || 'KIYISH';
+
+      if (item.category === 'bosh_kiyim') {
+        if (itemGlb && equippedHeadwear === itemGlb) {
+          currentItemState = 'KIYILGAN';
+        } else if (equippedHeadwear && currentItemState === 'KIYILGAN') {
+          currentItemState = 'KIYISH';
+        }
+      } else if (item.category === 'aksessuar') {
+        if (itemGlb && equippedAccessory === itemGlb) {
+          currentItemState = 'KIYILGAN';
+        } else if (equippedAccessory && currentItemState === 'KIYILGAN') {
+          currentItemState = 'KIYISH';
+        }
+      }
+
+      const imgSrc = item.imageUrl ? { uri: item.imageUrl.startsWith('http') ? item.imageUrl : `${API_URL}${item.imageUrl.replace('/api', '')}` } : (item.image || require('../assets/yangi_1.png'));
 
       const handleSkinPress = () => {
         if (isPricedOrLocked) {
           setSkinPurchaseAlertItem(item);
+        } else {
+          handleEquip();
+        }
+      };
+
+      const handleEquip = () => {
+        if (isPricedOrLocked) {
+          setSkinPurchaseAlertItem(item);
+          return;
+        }
+
+        if (item.category === 'bosh_kiyim') {
+          setEquippedHeadwears(prev => {
+            const current = prev[activeAvatarIndex];
+            if (current === itemGlb) {
+              const updated = { ...prev };
+              delete updated[activeAvatarIndex];
+              return updated;
+            }
+            return { ...prev, [activeAvatarIndex]: itemGlb };
+          });
+        } else if (item.category === 'aksessuar') {
+          setEquippedAccessories(prev => {
+            const current = prev[activeAvatarIndex];
+            if (current === itemGlb) {
+              const updated = { ...prev };
+              delete updated[activeAvatarIndex];
+              return updated;
+            }
+            return { ...prev, [activeAvatarIndex]: itemGlb };
+          });
         }
       };
 
@@ -1189,17 +1238,17 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
             
             {currentItemState === 'KIYILGAN' ? (
-              <View style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+              <TouchableOpacity onPress={handleEquip} style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                  <MaterialCommunityIcons name="check-circle" size={10} color="#EAB308" style={{ marginRight: 4 }} />
                  <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>KIYILGAN</Text>
-              </View>
+              </TouchableOpacity>
             ) : isPricedOrLocked ? (
               <TouchableOpacity onPress={handleSkinPress} style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                  <Image source={require('../assets/s_coin.png')} style={{ width: 10, height: 10, marginRight: 3 }} />
                  <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{String(item.price || 'BUY')}</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', alignItems: 'center' }}>
+              <TouchableOpacity onPress={handleEquip} style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', alignItems: 'center' }}>
                  <Text style={{ color: '#3B82F6', fontFamily: 'Inter_700Bold', fontSize: 8 }}>KIYISH</Text>
               </TouchableOpacity>
             )}
@@ -1284,7 +1333,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
                   <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                   <Suspense fallback={null}>
-                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={0.5} />
+                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={0.5} />
                   </Suspense>
                 </Canvas>
               </View>
