@@ -286,7 +286,7 @@ const ShopAdmin = () => {
                       <div className="flex items-center gap-3">
                         {item.imageUrl ? (
                           <img 
-                            src={item.imageUrl} 
+                            src={item.imageUrl.startsWith('http') ? item.imageUrl : item.imageUrl} 
                             alt={item.name} 
                             className="w-11 h-11 rounded-xl object-cover border border-amber-500/30 bg-[#121225]" 
                           />

@@ -36,7 +36,8 @@ app.use('/api', adVideoRoutes);
 app.use('/api', missionRoutes);
 app.use('/api', shopRoutes);
 
-// Serve the uploads directory for video files
+// Serve the uploads directory for files and shop images
+app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
 app.use('/api/uploads', express.static(path.join(__dirname, '../../public/uploads')));
 
 // Nodemailer Config
