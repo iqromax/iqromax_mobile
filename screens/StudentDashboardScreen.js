@@ -4622,7 +4622,131 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               )}
 
-            </ScrollView>
+            {/* SHOP PURCHASE SUCCESS ANIMATED OVERLAY (INSIDE SHOP CONTAINER) */}
+            {purchaseSuccessItem && (
+              <View 
+                style={{ 
+                  position: 'absolute', 
+                  top: 0, 
+                  left: 0, 
+                  right: 0, 
+                  bottom: 0, 
+                  backgroundColor: 'rgba(5, 5, 15, 0.94)', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  zIndex: 999999
+                }}
+              >
+                <View
+                  style={{
+                    width: '88%',
+                    backgroundColor: '#0E0E1E',
+                    borderRadius: 28,
+                    borderWidth: 2,
+                    borderColor: '#F59E0B',
+                    padding: 24,
+                    alignItems: 'center',
+                    shadowColor: '#F59E0B',
+                    shadowOffset: { width: 0, height: 12 },
+                    shadowOpacity: 0.5,
+                    shadowRadius: 20,
+                    elevation: 25
+                  }}
+                >
+                  {/* Glowing Top Badge */}
+                  <View style={{
+                    width: 74,
+                    height: 74,
+                    borderRadius: 37,
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    borderWidth: 2,
+                    borderColor: '#F59E0B',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: 14,
+                    shadowColor: '#F59E0B',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.6,
+                    shadowRadius: 10
+                  }}>
+                    {getShopImageUrl(purchaseSuccessItem.imageUrl) ? (
+                      <Image source={{ uri: getShopImageUrl(purchaseSuccessItem.imageUrl) }} style={{ width: 48, height: 48, resizeMode: 'contain' }} />
+                    ) : purchaseSuccessItem.category === 'energy' ? (
+                      <MaterialCommunityIcons name="lightning-bolt" size={44} color="#F59E0B" />
+                    ) : purchaseSuccessItem.category === 'mystery' ? (
+                      <MaterialCommunityIcons name="key-gold" size={44} color="#F59E0B" />
+                    ) : (
+                      <MaterialCommunityIcons name="star-two-points" size={44} color="#F59E0B" />
+                    )}
+                  </View>
+
+                  <Text style={{ color: '#F59E0B', fontSize: 13, fontFamily: 'Inter_800ExtraBold', letterSpacing: 1.2, textTransform: 'uppercase' }}>
+                    MUVAFFAQIYATLI XARID! 🎉
+                  </Text>
+
+                  <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_900Black', textAlign: 'center', marginTop: 6 }}>
+                    {purchaseSuccessItem.name}
+                  </Text>
+
+                  <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginTop: 6, lineHeight: 18 }}>
+                    {purchaseSuccessItem.description || "Ushbu mahsulot muvaffaqiyatli harid qilindi!"}
+                  </Text>
+
+                  {/* Where to find info card */}
+                  <View style={{
+                    width: '100%',
+                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(245, 158, 11, 0.3)',
+                    borderRadius: 16,
+                    padding: 12,
+                    marginTop: 16,
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    gap: 10
+                  }}>
+                    <MaterialCommunityIcons name="map-marker-path" size={22} color="#F59E0B" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_700Bold', textTransform: 'uppercase' }}>
+                        Qayerdan topish mumkin?
+                      </Text>
+                      <Text style={{ color: '#FFF', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                        {purchaseSuccessItem.targetLocation || "Bosh sahifa bo'limida"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Price spent info */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14 }}>
+                    <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>To'landi:</Text>
+                    <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                    <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_800ExtraBold' }}>-{purchaseSuccessItem.price} Coin</Text>
+                  </View>
+
+                  {/* OK / YOPISH BUTTON */}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={{
+                      width: '100%',
+                      paddingVertical: 14,
+                      borderRadius: 16,
+                      backgroundColor: '#F59E0B',
+                      alignItems: 'center',
+                      marginTop: 18,
+                      shadowColor: '#F59E0B',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.4,
+                      shadowRadius: 8
+                    }}
+                    onPress={closePurchaseOverlay}
+                  >
+                    <Text style={{ color: '#000', fontFamily: 'Inter_900Black', fontSize: 15, letterSpacing: 0.5 }}>
+                      TUSHUNARLI
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
 
             {/* CUSTOM ALERT MODAL INSIDE SHOP */}
             <Modal visible={customAlert.visible} transparent animationType="fade">
@@ -4704,117 +4828,132 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
       </Modal>
 
-      {/* SHOP PURCHASE SUCCESS ANIMATED MODAL */}
-      <Modal visible={Boolean(purchaseSuccessItem)} transparent animationType="fade">
-        <View style={{ flex: 1, backgroundColor: 'rgba(5, 5, 15, 0.92)', justifyContent: 'center', alignItems: 'center', zIndex: 99999 }}>
-          {purchaseSuccessItem && (
-            <View
-              style={{
-                width: '86%',
-                backgroundColor: '#0E0E1E',
-                borderRadius: 28,
-                borderWidth: 2,
-                borderColor: '#F59E0B',
-                padding: 24,
-                alignItems: 'center',
-                shadowColor: '#F59E0B',
-                shadowOffset: { width: 0, height: 12 },
-                shadowOpacity: 0.5,
-                shadowRadius: 20,
-                elevation: 25
-              }}
-            >
-              {/* Glowing Top Badge */}
-              <View style={{
-                width: 70,
-                height: 70,
-                borderRadius: 35,
-                backgroundColor: 'rgba(245, 158, 11, 0.15)',
-                borderWidth: 2,
-                borderColor: '#F59E0B',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 14,
-                shadowColor: '#F59E0B',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.6,
-                shadowRadius: 10
-              }}>
-                {getShopImageUrl(purchaseSuccessItem.imageUrl) ? (
-                  <Image source={{ uri: getShopImageUrl(purchaseSuccessItem.imageUrl) }} style={{ width: 44, height: 44, resizeMode: 'contain' }} />
-                ) : (
-                  <MaterialCommunityIcons name="star-two-points" size={38} color="#F59E0B" />
-                )}
-              </View>
+            {/* SHOP PURCHASE SUCCESS ANIMATED OVERLAY (INSIDE SHOP) */}
+            {purchaseSuccessItem && (
+              <View 
+                style={{ 
+                  position: 'absolute', 
+                  top: 0, 
+                  left: 0, 
+                  right: 0, 
+                  bottom: 0, 
+                  backgroundColor: 'rgba(5, 5, 15, 0.92)', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  zIndex: 99999,
+                  borderRadius: 24
+                }}
+              >
+                <View
+                  style={{
+                    width: '88%',
+                    backgroundColor: '#0E0E1E',
+                    borderRadius: 28,
+                    borderWidth: 2,
+                    borderColor: '#F59E0B',
+                    padding: 24,
+                    alignItems: 'center',
+                    shadowColor: '#F59E0B',
+                    shadowOffset: { width: 0, height: 12 },
+                    shadowOpacity: 0.5,
+                    shadowRadius: 20,
+                    elevation: 25
+                  }}
+                >
+                  {/* Glowing Top Badge */}
+                  <View style={{
+                    width: 74,
+                    height: 74,
+                    borderRadius: 37,
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    borderWidth: 2,
+                    borderColor: '#F59E0B',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: 14,
+                    shadowColor: '#F59E0B',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.6,
+                    shadowRadius: 10
+                  }}>
+                    {getShopImageUrl(purchaseSuccessItem.imageUrl) ? (
+                      <Image source={{ uri: getShopImageUrl(purchaseSuccessItem.imageUrl) }} style={{ width: 48, height: 48, resizeMode: 'contain' }} />
+                    ) : purchaseSuccessItem.category === 'energy' ? (
+                      <MaterialCommunityIcons name="lightning-bolt" size={44} color="#F59E0B" />
+                    ) : purchaseSuccessItem.category === 'mystery' ? (
+                      <MaterialCommunityIcons name="key-gold" size={44} color="#F59E0B" />
+                    ) : (
+                      <MaterialCommunityIcons name="star-two-points" size={44} color="#F59E0B" />
+                    )}
+                  </View>
 
-              <Text style={{ color: '#F59E0B', fontSize: 13, fontFamily: 'Inter_800ExtraBold', letterSpacing: 1.2, textTransform: 'uppercase' }}>
-                MUVAFFAQIYATLI XARID! 🎉
-              </Text>
-
-              <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_900Black', textAlign: 'center', marginTop: 6 }}>
-                {purchaseSuccessItem.name}
-              </Text>
-
-              <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginTop: 6, lineHeight: 18 }}>
-                {purchaseSuccessItem.description || "Ushbu mahsulot muvaffaqiyatli harid qilindi!"}
-              </Text>
-
-              {/* Where to find info card */}
-              <View style={{
-                width: '100%',
-                backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                borderWidth: 1,
-                borderColor: 'rgba(245, 158, 11, 0.3)',
-                borderRadius: 16,
-                padding: 12,
-                marginTop: 16,
-                alignItems: 'center',
-                flexDirection: 'row',
-                gap: 10
-              }}>
-                <MaterialCommunityIcons name="map-marker-path" size={22} color="#F59E0B" />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_700Bold', textTransform: 'uppercase' }}>
-                    Qayerdan topish mumkin?
+                  <Text style={{ color: '#F59E0B', fontSize: 13, fontFamily: 'Inter_800ExtraBold', letterSpacing: 1.2, textTransform: 'uppercase' }}>
+                    MUVAFFAQIYATLI XARID! 🎉
                   </Text>
-                  <Text style={{ color: '#FFF', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
-                    {purchaseSuccessItem.targetLocation || "Bosh sahifa bo'limida"}
+
+                  <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_900Black', textAlign: 'center', marginTop: 6 }}>
+                    {purchaseSuccessItem.name}
                   </Text>
+
+                  <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginTop: 6, lineHeight: 18 }}>
+                    {purchaseSuccessItem.description || "Ushbu mahsulot muvaffaqiyatli harid qilindi!"}
+                  </Text>
+
+                  {/* Where to find info card */}
+                  <View style={{
+                    width: '100%',
+                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(245, 158, 11, 0.3)',
+                    borderRadius: 16,
+                    padding: 12,
+                    marginTop: 16,
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    gap: 10
+                  }}>
+                    <MaterialCommunityIcons name="map-marker-path" size={22} color="#F59E0B" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_700Bold', textTransform: 'uppercase' }}>
+                        Qayerdan topish mumkin?
+                      </Text>
+                      <Text style={{ color: '#FFF', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                        {purchaseSuccessItem.targetLocation || "Bosh sahifa bo'limida"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Price spent info */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14 }}>
+                    <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>To'landi:</Text>
+                    <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                    <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_800ExtraBold' }}>-{purchaseSuccessItem.price} Coin</Text>
+                  </View>
+
+                  {/* OK / YOPISH BUTTON */}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={{
+                      width: '100%',
+                      paddingVertical: 14,
+                      borderRadius: 16,
+                      backgroundColor: '#F59E0B',
+                      alignItems: 'center',
+                      marginTop: 18,
+                      shadowColor: '#F59E0B',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.4,
+                      shadowRadius: 8
+                    }}
+                    onPress={closePurchaseOverlay}
+                  >
+                    <Text style={{ color: '#000', fontFamily: 'Inter_900Black', fontSize: 15, letterSpacing: 0.5 }}>
+                      TUSHUNARLI
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-
-              {/* Price spent info */}
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14 }}>
-                <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>To'landi:</Text>
-                <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
-                <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_800ExtraBold' }}>-{purchaseSuccessItem.price} Coin</Text>
-              </View>
-
-              {/* OK / YOPISH BUTTON */}
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={{
-                  width: '100%',
-                  paddingVertical: 14,
-                  borderRadius: 16,
-                  backgroundColor: '#F59E0B',
-                  alignItems: 'center',
-                  marginTop: 18,
-                  shadowColor: '#F59E0B',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 8
-                }}
-                onPress={closePurchaseOverlay}
-              >
-                <Text style={{ color: '#000', fontFamily: 'Inter_900Black', fontSize: 15, letterSpacing: 0.5 }}>
-                  TUSHUNARLI
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-      </Modal>
+            )}
 
       {/* GLOBAL ROOT ALERT MODAL */}
       <Modal visible={customAlert.visible && !isShopModalOpen} transparent animationType="fade">
