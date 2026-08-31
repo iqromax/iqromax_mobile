@@ -1377,7 +1377,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           <View style={{ flex: 1, marginHorizontal: 0, borderRadius: 16, overflow: 'hidden', position: 'relative', borderWidth: 1, borderColor: '#3B82F6' }}>
             <Image 
               source={require('../assets/dashboard_bg_new.jpg')} 
-              style={{ position: 'absolute', width: '100%', height: '100%' }} 
+              style={{ position: 'absolute', width: '100%', height: '100%', transform: [{ scale: 1.25 }] }} 
               contentFit="cover" 
             />
             {/* 3D Model */}
