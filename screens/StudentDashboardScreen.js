@@ -1388,7 +1388,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
                 <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
                 <Suspense fallback={null}>
-                  <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={0.5} />
+                  <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={1.1} />
                 </Suspense>
               </Canvas>
             </View>
