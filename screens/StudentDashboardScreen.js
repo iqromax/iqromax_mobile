@@ -4107,13 +4107,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <View style={{ flex: 1, backgroundColor: '#05050C' }}>
           <StatusBar barStyle="light-content" backgroundColor="#05050C" translucent={false} />
           <SafeAreaView style={{ flex: 1 }}>
-            {/* Shop Header (Perfect Margin) */}
+            {/* Shop Header (Generous Top Spacing) */}
             <View style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
               paddingHorizontal: 18,
-              paddingTop: Platform.OS === 'ios' ? 12 : 24,
+              paddingTop: Platform.OS === 'ios' ? 55 : (StatusBar.currentHeight ? StatusBar.currentHeight + 20 : 45),
               paddingBottom: 14,
               backgroundColor: 'rgba(15, 15, 30, 0.95)',
               borderBottomWidth: 1,
