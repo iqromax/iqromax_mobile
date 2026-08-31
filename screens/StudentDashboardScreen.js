@@ -4515,10 +4515,22 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                 if (uDataStr) {
                                   const uData = JSON.parse(uDataStr);
                                   uData.coin = newCoin;
-                                  uData.energy = Math.min(10, (uData.energy || 7) + (item.value || 1));
                                   await AsyncStorage.setItem('user_data', JSON.stringify(uData));
                                 }
-                                showCustomAlert("Muvaffaqiyatli! ⚡", `+${item.value || 1} ta energiya balansingizga qo'shildi!`, "success");
+
+                                const existingPurchasedStr = await AsyncStorage.getItem('purchased_energy_inventory');
+                                const existingPurchased = existingPurchasedStr ? JSON.parse(existingPurchasedStr) : [];
+                                const newItemEntry = {
+                                  id: `purchased_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                                  name: item.name,
+                                  value: item.value || 1,
+                                  purchasedAt: Date.now()
+                                };
+                                existingPurchased.push(newItemEntry);
+                                await AsyncStorage.setItem('purchased_energy_inventory', JSON.stringify(existingPurchased));
+                                DeviceEventEmitter.emit('purchased_energy_updated');
+
+                                showCustomAlert("Muvaffaqiyatli! ⚡", `${item.name} (+${item.value || 1} Energiya chaqmoq) harid qilindi va Energiya Markaziga qo'shildi!`, "success");
                               } catch(e) {}
                             }}
                           >

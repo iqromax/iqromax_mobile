@@ -41,7 +41,18 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [missionsList, setMissionsList] = useState([]);
   const [playingMission, setPlayingMission] = useState(null);
   
-  const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
+  const [purchasedEnergyList, setPurchasedEnergyList] = useState([]);
+
+  const loadPurchasedEnergy = async () => {
+    try {
+      const str = await AsyncStorage.getItem('purchased_energy_inventory');
+      if (str) {
+        setPurchasedEnergyList(JSON.parse(str));
+      } else {
+        setPurchasedEnergyList([]);
+      }
+    } catch(e) {}
+  };
 
   useEffect(() => {
     // Enable audio even if the device is in silent mode
@@ -59,6 +70,11 @@ export default function EnergyCenterScreen({ navigation, route }) {
     enableAudio();
 
     checkClaims();
+    loadPurchasedEnergy();
+
+    const subPurchased = DeviceEventEmitter.addListener('purchased_energy_updated', () => {
+      loadPurchasedEnergy();
+    });
 
     const socket = io(SOCKET_URL, {
       path: '/api/socket.io',
@@ -88,6 +104,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
     });
 
     return () => {
+      subPurchased.remove();
       sub1.remove();
       sub2.remove();
       socket.disconnect();
@@ -265,6 +282,22 @@ export default function EnergyCenterScreen({ navigation, route }) {
     outputRange: ['rgba(168, 85, 247, 0.2)', 'rgba(168, 85, 247, 1)']
   });
   
+  const activatePurchasedEnergy = async (item) => {
+    if (currentEnergy >= maxEnergy) {
+      setIsAlertVisible(true);
+      return;
+    }
+
+    try {
+      await addEnergy(item.value || 1);
+      const remaining = purchasedEnergyList.filter(i => i.id !== item.id);
+      setPurchasedEnergyList(remaining);
+      await AsyncStorage.setItem('purchased_energy_inventory', JSON.stringify(remaining));
+    } catch (e) {
+      console.error('Error activating energy:', e);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#05050C" />
@@ -369,6 +402,45 @@ export default function EnergyCenterScreen({ navigation, route }) {
             </View>
           </View>
         </View>
+
+        {/* HARID QILINGAN ENERGIYALAR BO'LIMI */}
+        {purchasedEnergyList.length > 0 && (
+          <View style={{ marginBottom: 20 }}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionHeaderLine} />
+              <Text style={[styles.sectionTitle, { color: '#F59E0B' }]}>HARID QILINGAN ENERGIYALAR</Text>
+              <View style={styles.sectionHeaderLine} />
+            </View>
+
+            <View style={{ gap: 10, marginTop: 10 }}>
+              {purchasedEnergyList.map((item) => (
+                <View 
+                  key={item.id}
+                  style={[styles.taskCard, { borderLeftWidth: 3, borderLeftColor: '#F59E0B', backgroundColor: 'rgba(245, 158, 11, 0.08)' }]}
+                >
+                  <View style={[styles.taskIconContainer, { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderColor: 'rgba(245, 158, 11, 0.4)' }]}>
+                    <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FBBF24" />
+                  </View>
+                  <View style={[styles.taskContent, { flex: 1 }]}>
+                    <Text style={[styles.taskTitle, { color: '#FFF' }]}>{item.name}</Text>
+                    <Text style={styles.taskReward}>
+                      Miqdori: <MaterialCommunityIcons name="lightning-bolt" size={13} color="#FBBF24" /> +{item.value || 1} Energiya
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.primaryButton, { backgroundColor: '#F59E0B', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14 }]}
+                    activeOpacity={0.8}
+                    onPress={() => activatePurchasedEnergy(item)}
+                  >
+                    <Text style={[styles.primaryButtonText, { color: '#000', fontFamily: 'Inter_800ExtraBold', fontSize: 12 }]}>
+                      FAOLLASHTIRISH
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* WAYS TO GET ENERGY SECTION */}
         <View style={styles.sectionHeader}>
