@@ -12,6 +12,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Canvas, useFrame } from '@react-three/fiber/native';
+import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL, getShopImageUrl } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
