@@ -821,7 +821,8 @@ export default function MysteryBoxScreen({ navigation, route }) {
           }
         } else if (selected.type === 'energy') {
           const addVal = selected.value || 1;
-          const storedData = await AsyncStorage.getItem('user_energy_data');
+          const energyKey = `user_energy_data_${userIdKey}`;
+          const storedData = await AsyncStorage.getItem(energyKey);
           let curEnergy = 2;
           let lastUpdated = Date.now();
           if (storedData) {
@@ -830,7 +831,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
             lastUpdated = parsed.lastUpdated || Date.now();
           }
           const newEnergy = Math.min(10, curEnergy + addVal);
-          await AsyncStorage.setItem('user_energy_data', JSON.stringify({ energy: newEnergy, lastUpdated }));
+          await AsyncStorage.setItem(energyKey, JSON.stringify({ energy: newEnergy, lastUpdated }));
         }
 
         let dateLabel = `Yutib olindi: ${new Date().toLocaleDateString()}`;

@@ -5,7 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
 import { API_URL } from '../config/api';
 
-const ENERGY_STORAGE_KEY = 'user_energy_data';
 const MAX_ENERGY = 10;
 const REGEN_TIME_MS = 3 * 60 * 1000; // 3 minutes per 1 energy
 
@@ -14,6 +13,19 @@ export function useEnergy() {
   const [timeRemaining, setTimeRemaining] = useState(0); // in seconds
   const [isLoading, setIsLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+
+  // Dynamic per-user energy storage key helper
+  const getEnergyStorageKey = async () => {
+    try {
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      if (userDataStr) {
+        const uData = JSON.parse(userDataStr);
+        const uKey = uData?.customId || uData?.id;
+        if (uKey) return `user_energy_data_${uKey}`;
+      }
+    } catch (e) {}
+    return 'user_energy_data_guest';
+  };
 
   // Check Premium against local storage & backend DB
   const checkPremiumActive = useCallback(async () => {
@@ -63,13 +75,14 @@ export function useEnergy() {
   // Calculate & Refresh Energy
   const calculateEnergy = useCallback(async () => {
     try {
-      const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
+      const storageKey = await getEnergyStorageKey();
+      const storedData = await AsyncStorage.getItem(storageKey);
       const now = Date.now();
 
       if (!storedData) {
         // Initial setup for new user: 2 energy
         const initialData = { energy: 2, lastUpdated: now };
-        await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify(initialData));
+        await AsyncStorage.setItem(storageKey, JSON.stringify(initialData));
         setEnergy(2);
         setTimeRemaining(REGEN_TIME_MS / 1000);
       } else {
@@ -87,7 +100,7 @@ export function useEnergy() {
             if (currentVal >= MAX_ENERGY) {
               lastUpdated = now;
             }
-            await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: currentVal, lastUpdated }));
+            await AsyncStorage.setItem(storageKey, JSON.stringify({ energy: currentVal, lastUpdated }));
           }
 
           setEnergy(currentVal);
@@ -193,7 +206,8 @@ export function useEnergy() {
     }
 
     try {
-      const storedData = await AsyncStorage.getItem(ENERGY_STORAGE_KEY);
+      const storageKey = await getEnergyStorageKey();
+      const storedData = await AsyncStorage.getItem(storageKey);
       const now = Date.now();
       let currentVal = energy;
       let lastUpdated = now;
@@ -208,7 +222,7 @@ export function useEnergy() {
       const newVal = Math.max(0, currentVal - amount);
       const newLastUpdated = currentVal >= MAX_ENERGY ? now : lastUpdated;
 
-      await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
+      await AsyncStorage.setItem(storageKey, JSON.stringify({ energy: newVal, lastUpdated: newLastUpdated }));
       setEnergy(newVal);
       if (newVal < MAX_ENERGY) {
         setTimeRemaining(REGEN_TIME_MS / 1000);
@@ -221,9 +235,10 @@ export function useEnergy() {
   };
 
   const addEnergy = async (amount) => {
+    const storageKey = await getEnergyStorageKey();
     const now = Date.now();
     const newEnergy = Math.min(MAX_ENERGY, energy + amount);
-    await AsyncStorage.setItem(ENERGY_STORAGE_KEY, JSON.stringify({ energy: newEnergy, lastUpdated: now }));
+    await AsyncStorage.setItem(storageKey, JSON.stringify({ energy: newEnergy, lastUpdated: now }));
     setEnergy(newEnergy);
     calculateEnergy();
   };
