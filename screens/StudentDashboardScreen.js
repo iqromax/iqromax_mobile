@@ -1263,31 +1263,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <CharacterModel 
                       characterIndex={activeAvatarIndex} 
                       accessoryPath={equippedAccessory} 
-                      yOffset={kiyimKategoriya === 'ustki_kiyim' ? -0.7 : kiyimKategoriya === 'shim' ? 1.5 : 0.5} 
-                      cameraTargetY={kiyimKategoriya === 'ustki_kiyim' ? 0.3 : kiyimKategoriya === 'shim' ? -0.5 : 0}
-                      scaleMultiplier={kiyimKategoriya === 'ustki_kiyim' ? 1.65 : kiyimKategoriya === 'shim' ? 1.7 : 1.0}
+                      yOffset={kiyimKategoriya === 'ustki_kiyim' ? -0.7 : 0.5} 
+                      cameraTargetY={kiyimKategoriya === 'ustki_kiyim' ? 0.3 : 0}
+                      scaleMultiplier={kiyimKategoriya === 'ustki_kiyim' ? 1.65 : 1.0}
                     />
                   </Suspense>
                 </Canvas>
               </View>
-              {/* Dark overlay for upper body when SHIM category is active */}
-              {kiyimKategoriya === 'shim' && (
-                <View 
-                  style={{ 
-                    position: 'absolute', 
-                    top: 0, 
-                    left: 0, 
-                    right: 0, 
-                    height: '42%', 
-                    backgroundColor: '#05050C', 
-                    zIndex: 3, 
-                    borderBottomLeftRadius: 16, 
-                    borderBottomRightRadius: 16 
-                  }} 
-                  pointerEvents="none" 
-                />
-              )}
-              {kiyimKategoriya !== 'ustki_kiyim' && kiyimKategoriya !== 'shim' && (
+              {kiyimKategoriya !== 'ustki_kiyim' && (
                 <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
                   <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
                 </View>
