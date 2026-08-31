@@ -1596,7 +1596,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
               <TouchableOpacity
                 style={[styles.rightStatBlock, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: '#F59E0B' }]}
                 activeOpacity={0.8}
-                onPress={() => checkGuestAuth(() => setIsShopModalOpen(true))}
+                onPress={() => checkGuestAuth(() => {
+                  setActiveShopTab('inventory');
+                  setActiveSkinCategory('headwear');
+                  setIsShopModalOpen(true);
+                })}
               >
                 <FontAwesome5 name="store" size={18} color="#F59E0B" />
                 <View style={styles.rightStatTextCol}>
