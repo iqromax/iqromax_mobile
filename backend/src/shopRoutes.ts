@@ -48,7 +48,7 @@ router.post('/admin/shop-items', upload.single('image'), async (req, res) => {
     let imageUrl = req.body.imageUrl || null;
 
     if (req.file) {
-      imageUrl = `/uploads/shop/${req.file.filename}`;
+      imageUrl = `/api/uploads/shop/${req.file.filename}`;
     }
 
     if (!category || !name || price === undefined) {
@@ -92,7 +92,7 @@ router.put('/admin/shop-items/:id', upload.single('image'), async (req, res) => 
 
     let imageUrl = existing.imageUrl;
     if (req.file) {
-      imageUrl = `/uploads/shop/${req.file.filename}`;
+      imageUrl = `/api/uploads/shop/${req.file.filename}`;
     } else if (req.body.imageUrl !== undefined) {
       imageUrl = req.body.imageUrl;
     }
