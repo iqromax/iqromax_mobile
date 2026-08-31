@@ -887,6 +887,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
       setShopItems(prev => prev.filter(i => i.id !== deletedId));
     });
 
+    socket.on('inventory_skin_created', (newSkin) => {
+      setBackendSkins(prev => {
+        const exists = prev.some(s => s.id === newSkin.id);
+        if (exists) return prev.map(s => s.id === newSkin.id ? newSkin : s);
+        return [newSkin, ...prev];
+      });
+    });
+
+    socket.on('inventory_skins_updated', (skin) => {
+      setBackendSkins(prev => {
+        const exists = prev.some(s => s.id === skin.id);
+        if (exists) return prev.map(s => s.id === skin.id ? skin : s);
+        return [skin, ...prev];
+      });
+    });
+
+    socket.on('inventory_skin_deleted', (deletedId) => {
+      setBackendSkins(prev => prev.filter(s => s.id !== deletedId));
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -999,7 +1019,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     { id: 10, name: 'Dark Matter', rarity: 'EPIC', color: '#A855F7', state: 'BUY', price: '9 000', image: require('../assets/character_bg.png') },
   ];
 
-  const [kiyimKategoriya, setKiyimKategoriya] = useState('ustki_kiyim'); // 'ustki_kiyim', 'shim', 'oyoq_kiyim', 'aksessuar', 'ryukzak'
+  const [kiyimKategoriya, setKiyimKategoriya] = useState('bosh_kiyim');
   const [activeKiyimFilter, setActiveKiyimFilter] = useState('BARCHASI');
 
   const kiyimData = [];
