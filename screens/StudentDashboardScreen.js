@@ -425,28 +425,29 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   // Shop Purchase Animation state
   const purchaseAnim = useRef(new Animated.Value(0)).current;
-  const [purchaseSuccessMessage, setPurchaseSuccessMessage] = useState('');
+  const [purchaseSuccessItem, setPurchaseSuccessItem] = useState(null);
   const [showPurchaseOverlay, setShowPurchaseOverlay] = useState(false);
 
-  const triggerPurchaseAnimation = (itemName) => {
-    setPurchaseSuccessMessage(`${itemName} MUVAFFAQIYATLI HARID QILINDI! ✨`);
+  const triggerPurchaseAnimation = (item, targetLocation) => {
+    setPurchaseSuccessItem({ ...item, targetLocation });
     setShowPurchaseOverlay(true);
     purchaseAnim.setValue(0);
-    Animated.sequence([
-      Animated.spring(purchaseAnim, {
-        toValue: 1,
-        friction: 5,
-        tension: 80,
-        useNativeDriver: true,
-      }),
-      Animated.delay(1200),
-      Animated.timing(purchaseAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      })
-    ]).start(() => {
+    Animated.spring(purchaseAnim, {
+      toValue: 1,
+      friction: 6,
+      tension: 70,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closePurchaseOverlay = () => {
+    Animated.timing(purchaseAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
       setShowPurchaseOverlay(false);
+      setPurchaseSuccessItem(null);
     });
   };
 
@@ -4401,7 +4402,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                             uData.coin = newCoin;
                                             await AsyncStorage.setItem('user_data', JSON.stringify(uData));
                                           }
-                                          triggerPurchaseAnimation(item.name);
+                                          triggerPurchaseAnimation(item, "Bosh sahifa -> INVENTAR");
                                         } catch(e) {}
                                       }
                                     }
@@ -4510,7 +4511,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                         await AsyncStorage.setItem('purchased_energy_inventory', JSON.stringify(existingPurchased));
                                         DeviceEventEmitter.emit('purchased_energy_updated');
 
-                                        triggerPurchaseAnimation(item.name);
+                                        triggerPurchaseAnimation(item, "Energiya Markazi -> Harid qilingan energiyalar");
                                       } catch(e) {}
                                     }
                                   }
@@ -4614,7 +4615,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                           await AsyncStorage.setItem('user_data', JSON.stringify(uData));
                                         }
                                         setMysteryKeysCount(prev => prev + (item.value || 1));
-                                        triggerPurchaseAnimation(item.name);
+                                        triggerPurchaseAnimation(item, "Bosh sahifa -> Sirli Sandiq bo'limi");
                                       } catch(e) {}
                                     }
                                   }
@@ -4641,53 +4642,131 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </ScrollView>
 
             {/* SHOP PURCHASE SUCCESS ANIMATED OVERLAY */}
-            {showPurchaseOverlay && (
+            {showPurchaseOverlay && purchaseSuccessItem && (
               <Animated.View
-                pointerEvents="none"
                 style={{
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundColor: 'rgba(5, 5, 12, 0.85)',
+                  backgroundColor: 'rgba(5, 5, 15, 0.88)',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  zIndex: 999,
+                  zIndex: 9999,
                   opacity: purchaseAnim,
                   transform: [{
                     scale: purchaseAnim.interpolate({
                       inputRange: [0, 1],
-                      outputRange: [0.6, 1]
+                      outputRange: [0.75, 1]
                     })
                   }]
                 }}
               >
-                <LinearGradient
-                  colors={['rgba(245, 158, 11, 0.25)', 'rgba(168, 85, 247, 0.25)']}
+                <View
                   style={{
-                    padding: 30,
+                    width: '86%',
+                    backgroundColor: '#0E0E1E',
                     borderRadius: 28,
                     borderWidth: 2,
                     borderColor: '#F59E0B',
+                    padding: 24,
                     alignItems: 'center',
-                    justifyContent: 'center',
                     shadowColor: '#F59E0B',
-                    shadowOffset: { width: 0, height: 10 },
-                    shadowOpacity: 0.6,
+                    shadowOffset: { width: 0, height: 12 },
+                    shadowOpacity: 0.5,
                     shadowRadius: 20,
-                    elevation: 15,
-                    marginHorizontal: 30
+                    elevation: 20
                   }}
                 >
-                  <MaterialCommunityIcons name="star-two-points" size={60} color="#F59E0B" />
-                  <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_900Black', textAlign: 'center', marginTop: 12, letterSpacing: 0.5 }}>
-                    {purchaseSuccessMessage}
+                  {/* Glowing Top Badge */}
+                  <View style={{
+                    width: 70,
+                    height: 70,
+                    borderRadius: 35,
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    borderWidth: 2,
+                    borderColor: '#F59E0B',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: 14,
+                    shadowColor: '#F59E0B',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.6,
+                    shadowRadius: 10
+                  }}>
+                    {getShopImageUrl(purchaseSuccessItem.imageUrl) ? (
+                      <Image source={{ uri: getShopImageUrl(purchaseSuccessItem.imageUrl) }} style={{ width: 44, height: 44, resizeMode: 'contain' }} />
+                    ) : (
+                      <MaterialCommunityIcons name="star-two-points" size={38} color="#F59E0B" />
+                    )}
+                  </View>
+
+                  <Text style={{ color: '#F59E0B', fontSize: 13, fontFamily: 'Inter_800ExtraBold', letterSpacing: 1.2, textTransform: 'uppercase' }}>
+                    MUVAFFAQIYATLI XARID! 🎉
                   </Text>
-                  <Text style={{ color: '#F59E0B', fontSize: 13, fontFamily: 'Inter_600SemiBold', textAlign: 'center', marginTop: 6 }}>
-                    Tangalaringiz sarflandi va buyum saqlandi!
+
+                  <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_900Black', textAlign: 'center', marginTop: 6 }}>
+                    {purchaseSuccessItem.name}
                   </Text>
-                </LinearGradient>
+
+                  <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginTop: 6, lineHeight: 18 }}>
+                    {purchaseSuccessItem.description || "Ushbu mahsulot muvaffaqiyatli harid qilindi!"}
+                  </Text>
+
+                  {/* Where to find info card */}
+                  <View style={{
+                    width: '100%',
+                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(245, 158, 11, 0.3)',
+                    borderRadius: 16,
+                    padding: 12,
+                    marginTop: 16,
+                    alignItems: 'center',
+                    flexDirection: 'row',
+                    gap: 10
+                  }}>
+                    <MaterialCommunityIcons name="map-marker-path" size={22} color="#F59E0B" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_700Bold', textTransform: 'uppercase' }}>
+                        Qayerdan topish mumkin?
+                      </Text>
+                      <Text style={{ color: '#FFF', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                        {purchaseSuccessItem.targetLocation || "Bosh sahifa bo'limida"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Price spent info */}
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14 }}>
+                    <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>To'landi:</Text>
+                    <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                    <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_800ExtraBold' }}>-{purchaseSuccessItem.price} Coin</Text>
+                  </View>
+
+                  {/* OK / YOPISH BUTTON */}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={{
+                      width: '100%',
+                      paddingVertical: 14,
+                      borderRadius: 16,
+                      backgroundColor: '#F59E0B',
+                      alignItems: 'center',
+                      marginTop: 18,
+                      shadowColor: '#F59E0B',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.4,
+                      shadowRadius: 8
+                    }}
+                    onPress={closePurchaseOverlay}
+                  >
+                    <Text style={{ color: '#000', fontFamily: 'Inter_900Black', fontSize: 15, letterSpacing: 0.5 }}>
+                      TUSHUNARLI
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </Animated.View>
             )}
 
