@@ -13,6 +13,11 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+
+if (useGLTF.setMeshoptDecoder) {
+  useGLTF.setMeshoptDecoder(MeshoptDecoder);
+}
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL, getShopImageUrl } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -176,7 +181,11 @@ useGLTF.preload(require('../assets/models/ochki_4_optimized.glb'));
 function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false }) {
   if (!modelPath) return null;
   const glbSource = typeof modelPath === 'string' ? (modelPath.startsWith('http') ? modelPath : `${API_URL}${modelPath.replace('/api', '')}`) : modelPath;
-  const { scene } = useGLTF(glbSource);
+  const { scene } = useGLTF(glbSource, true, true, (loader) => {
+    if (loader && loader.setMeshoptDecoder) {
+      loader.setMeshoptDecoder(MeshoptDecoder);
+    }
+  });
   
   // Fix for WebGL Shader Error: ERROR___ERROR_IN_EXPONENT caused by hyphens (e-5) in material names
   React.useMemo(() => {
@@ -233,7 +242,11 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null, hea
   };
   
   const modelPath = models[characterIndex] || models[0];
-  const { scene } = useGLTF(modelPath);
+  const { scene } = useGLTF(modelPath, true, true, (loader) => {
+    if (loader && loader.setMeshoptDecoder) {
+      loader.setMeshoptDecoder(MeshoptDecoder);
+    }
+  });
 
   // Fix Android GL materials: Convert materials to MeshLambertMaterial so textures render clearly with lighting instead of black silhouette
   React.useMemo(() => {
