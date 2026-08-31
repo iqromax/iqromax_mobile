@@ -430,24 +430,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         if (Array.isArray(data)) setShopItems(data);
       })
       .catch(err => console.log('Shop items fetch err:', err));
-
-    if (socket) {
-      socket.on('shop_item_updated', (newItem) => {
-        setShopItems(prev => {
-          const exists = prev.some(i => i.id === newItem.id);
-          if (exists) return prev.map(i => i.id === newItem.id ? newItem : i);
-          return [newItem, ...prev];
-        });
-      });
-      socket.on('shop_item_deleted', (deletedId) => {
-        setShopItems(prev => prev.filter(i => i.id !== deletedId));
-      });
-      return () => {
-        socket.off('shop_item_updated');
-        socket.off('shop_item_deleted');
-      };
-    }
-  }, [socket]);
+  }, []);
   const [myPromoCode, setMyPromoCode] = useState(user?.customId ? `IQ-${user.customId}` : 'IQROMAX2026');
   const [promoChangeCount, setPromoChangeCount] = useState(0);
   const [newPromoInput, setNewPromoInput] = useState('');
@@ -848,6 +831,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
     });
 
     
+    socket.on('shop_item_updated', (newItem) => {
+      setShopItems(prev => {
+        const exists = prev.some(i => i.id === newItem.id);
+        if (exists) return prev.map(i => i.id === newItem.id ? newItem : i);
+        return [newItem, ...prev];
+      });
+    });
+
+    socket.on('shop_item_deleted', (deletedId) => {
+      setShopItems(prev => prev.filter(i => i.id !== deletedId));
+    });
+
     return () => {
       socket.disconnect();
     };
