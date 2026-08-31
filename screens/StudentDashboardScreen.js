@@ -206,17 +206,18 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
   const scene = gltf?.scene;
   if (!scene) return null;
   
-  // Fix for WebGL Shader Error: ERROR___ERROR_IN_EXPONENT caused by hyphens (e-5) in material names
+  // Fix for WebGL Shader Error and WEBP texture fallback
   React.useMemo(() => {
     scene.traverse((child) => {
       if (child.isMesh && child.material) {
-         if (Array.isArray(child.material)) {
-            child.material.forEach(mat => {
-               if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-            });
-         } else {
-            if (child.material.name) child.material.name = child.material.name.replace(/-/g, '_');
-         }
+         const mats = Array.isArray(child.material) ? child.material : [child.material];
+         mats.forEach(mat => {
+           if (mat.name) mat.name = mat.name.replace(/-/g, '_');
+           // Fallback for WebP textures in EXGL
+           if (mat.map && mat.map.image && !mat.map.image.width) {
+             mat.map.needsUpdate = true;
+           }
+         });
       }
     });
   }, [scene]);
