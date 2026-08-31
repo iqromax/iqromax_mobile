@@ -42,6 +42,7 @@ export default function EnergyCenterScreen({ navigation, route }) {
   const [playingMission, setPlayingMission] = useState(null);
   
   const [purchasedEnergyList, setPurchasedEnergyList] = useState([]);
+  const [adVideoTimestamp, setAdVideoTimestamp] = useState(null);
 
   const loadPurchasedEnergy = async () => {
     try {
