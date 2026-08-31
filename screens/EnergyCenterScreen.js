@@ -24,10 +24,13 @@ const TRANSLATIONS = {
 };
 
 export default function EnergyCenterScreen({ navigation, route }) {
-  const { language = 'uz' } = route?.params || {};
+  const { language = 'uz', user } = route?.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
   const { energy: currentEnergy, maxEnergy, formattedTime, addEnergy } = useEnergy();
   
+  const userIdKey = user?.customId || user?.id || 'guest';
+  const INVENTORY_STORAGE_KEY = `purchased_energy_inventory_${userIdKey}`;
+
   const borderAnim = useRef(new Animated.Value(0)).current;
 
   const [isAlertVisible, setIsAlertVisible] = useState(false);
@@ -46,7 +49,12 @@ export default function EnergyCenterScreen({ navigation, route }) {
 
   const loadPurchasedEnergy = async () => {
     try {
-      const str = await AsyncStorage.getItem('purchased_energy_inventory');
+      const dataStr = await AsyncStorage.getItem('user_data');
+      const uData = dataStr ? JSON.parse(dataStr) : null;
+      const activeIdKey = user?.customId || user?.id || uData?.customId || uData?.id || 'guest';
+      const keyToUse = `purchased_energy_inventory_${activeIdKey}`;
+      
+      const str = await AsyncStorage.getItem(keyToUse);
       if (str) {
         setPurchasedEnergyList(JSON.parse(str));
       } else {
@@ -293,7 +301,11 @@ export default function EnergyCenterScreen({ navigation, route }) {
       await addEnergy(item.value || 1);
       const remaining = purchasedEnergyList.filter(i => i.id !== item.id);
       setPurchasedEnergyList(remaining);
-      await AsyncStorage.setItem('purchased_energy_inventory', JSON.stringify(remaining));
+      const dataStr = await AsyncStorage.getItem('user_data');
+      const uData = dataStr ? JSON.parse(dataStr) : null;
+      const activeIdKey = user?.customId || user?.id || uData?.customId || uData?.id || 'guest';
+      const keyToUse = `purchased_energy_inventory_${activeIdKey}`;
+      await AsyncStorage.setItem(keyToUse, JSON.stringify(remaining));
     } catch (e) {
       console.error('Error activating energy:', e);
     }

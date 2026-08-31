@@ -4511,7 +4511,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                           await AsyncStorage.setItem('user_data', JSON.stringify(uData));
                                         }
 
-                                        const existingPurchasedStr = await AsyncStorage.getItem('purchased_energy_inventory');
+                                        const existingPurchasedStr = await AsyncStorage.getItem('purchased_energy_inventory_${user?.customId || user?.id || "guest"}');
                                         const existingPurchased = existingPurchasedStr ? JSON.parse(existingPurchasedStr) : [];
                                         const newItemEntry = {
                                           id: `purchased_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
@@ -4520,7 +4520,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                           purchasedAt: Date.now()
                                         };
                                         existingPurchased.push(newItemEntry);
-                                        await AsyncStorage.setItem('purchased_energy_inventory', JSON.stringify(existingPurchased));
+                                        await AsyncStorage.setItem('purchased_energy_inventory_${user?.customId || user?.id || "guest"}', JSON.stringify(existingPurchased));
                                         DeviceEventEmitter.emit('purchased_energy_updated');
 
                                         triggerPurchaseAnimation(item, "Energiya Markazi -> Harid qilingan energiyalar");
