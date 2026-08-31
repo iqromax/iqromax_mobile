@@ -418,6 +418,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
   // Referral, Cashback & Mystery Box Modals
   const [isReferralModalOpen, setIsReferralModalOpen] = useState(false);
   const [isMysteryBoxModalOpen, setIsMysteryBoxModalOpen] = useState(false);
+  const [isShopModalOpen, setIsShopModalOpen] = useState(false);
+  const [activeShopTab, setActiveShopTab] = useState('inventory'); // 'inventory' | 'energy' | 'mystery'
+  const [activeSkinCategory, setActiveSkinCategory] = useState('top'); // 'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'
   const [myPromoCode, setMyPromoCode] = useState(user?.customId ? `IQ-${user.customId}` : 'IQROMAX2026');
   const [promoChangeCount, setPromoChangeCount] = useState(0);
   const [newPromoInput, setNewPromoInput] = useState('');
@@ -1564,6 +1567,25 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </Canvas>
             </View>
             
+
+            {/* Golden Shop Icon Button above right stats */}
+            <TouchableOpacity 
+              style={styles.goldenShopButton} 
+              activeOpacity={0.8}
+              onPress={() => checkGuestAuth(() => setIsShopModalOpen(true))}
+            >
+              <LinearGradient
+                colors={['#FFE259', '#FFA751']}
+                style={styles.goldenShopGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <FontAwesome5 name="store" size={20} color="#3B1800" />
+              </LinearGradient>
+              <View style={styles.shopBadge}>
+                <Text style={styles.shopBadgeText}>SHOP</Text>
+              </View>
+            </TouchableOpacity>
 
             {/* Right Panel with Vertical Stats */}
             <View style={styles.rightSideStatsPanel}>
@@ -4133,6 +4155,366 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           </View>
         </View>
+      {/* SHOP MODAL (Oldi-Sotti Do'kon) */}
+      <Modal visible={isShopModalOpen} transparent={true} animationType="slide">
+        <View style={{ flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.96)' }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            {/* Shop Header */}
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingHorizontal: 20,
+              paddingVertical: 14,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255, 255, 255, 0.08)'
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <LinearGradient
+                  colors={['#FFE259', '#FFA751']}
+                  style={{ width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}
+                >
+                  <FontAwesome5 name="store" size={18} color="#3B1800" />
+                </LinearGradient>
+                <View>
+                  <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_900Black', letterSpacing: 0.5 }}>IQROSHOP DO'KON</Text>
+                  <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>Tangalaringizni sarflang va buyumlarga ega bo'ling!</Text>
+                </View>
+              </View>
+
+              {/* User Balance Badge */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(245, 158, 11, 0.15)', borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.4)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginRight: 10 }}>
+                <Image source={require('../assets/s_coin.png')} style={{ width: 18, height: 18, marginRight: 6 }} />
+                <Text style={{ color: '#F59E0B', fontFamily: 'Inter_900Black', fontSize: 14 }}>{userCoin}</Text>
+              </View>
+
+              <TouchableOpacity 
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: 8, borderRadius: 20 }}
+                onPress={() => setIsShopModalOpen(false)}
+              >
+                <Ionicons name="close" size={20} color="#FFF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Shop Main Category Tabs */}
+            <View style={{ flexDirection: 'row', paddingHorizontal: 15, paddingTop: 15, paddingBottom: 10, gap: 8 }}>
+              {/* Tab 1: Inventar */}
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  borderRadius: 14,
+                  backgroundColor: activeShopTab === 'inventory' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                  borderWidth: 1.5,
+                  borderColor: activeShopTab === 'inventory' ? '#F59E0B' : 'rgba(255, 255, 255, 0.08)',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
+                onPress={() => setActiveShopTab('inventory')}
+              >
+                <FontAwesome5 name="tshirt" size={14} color={activeShopTab === 'inventory' ? '#F59E0B' : '#888899'} />
+                <Text style={{ color: activeShopTab === 'inventory' ? '#F59E0B' : '#888899', fontFamily: 'Inter_700Bold', fontSize: 12 }}>INVENTAR</Text>
+              </TouchableOpacity>
+
+              {/* Tab 2: Energiya */}
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  borderRadius: 14,
+                  backgroundColor: activeShopTab === 'energy' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                  borderWidth: 1.5,
+                  borderColor: activeShopTab === 'energy' ? '#F59E0B' : 'rgba(255, 255, 255, 0.08)',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
+                onPress={() => setActiveShopTab('energy')}
+              >
+                <MaterialCommunityIcons name="lightning-bolt" size={16} color={activeShopTab === 'energy' ? '#F59E0B' : '#888899'} />
+                <Text style={{ color: activeShopTab === 'energy' ? '#F59E0B' : '#888899', fontFamily: 'Inter_700Bold', fontSize: 12 }}>ENERGIYA</Text>
+              </TouchableOpacity>
+
+              {/* Tab 3: Sirli Sandiq */}
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  paddingVertical: 10,
+                  borderRadius: 14,
+                  backgroundColor: activeShopTab === 'mystery' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                  borderWidth: 1.5,
+                  borderColor: activeShopTab === 'mystery' ? '#F59E0B' : 'rgba(255, 255, 255, 0.08)',
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  gap: 6
+                }}
+                onPress={() => setActiveShopTab('mystery')}
+              >
+                <MaterialCommunityIcons name="treasure-chest" size={16} color={activeShopTab === 'mystery' ? '#F59E0B' : '#888899'} />
+                <Text style={{ color: activeShopTab === 'mystery' ? '#F59E0B' : '#888899', fontFamily: 'Inter_700Bold', fontSize: 12 }}>SANDIQ</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* TAB CONTENT AREA */}
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+              
+              {/* === INVENTAR (SKINLAR) SECTION === */}
+              {activeShopTab === 'inventory' && (
+                <View>
+                  {/* Skin Sub-categories filter horizontal scroll */}
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 10 }}>
+                    {[
+                      { id: 'top', label: 'Ustki kiyim', icon: 'tshirt' },
+                      { id: 'pants', label: 'Shim', icon: 'user-ninja' },
+                      { id: 'shoes', label: 'Oyoq kiyim', icon: 'shoe-prints' },
+                      { id: 'accessories', label: 'Aksessuarlar', icon: 'glasses' },
+                      { id: 'backpacks', label: 'Ryukzaklar', icon: 'suitcase' }
+                    ].map(sub => (
+                      <TouchableOpacity
+                        key={sub.id}
+                        style={{
+                          paddingHorizontal: 14,
+                          paddingVertical: 8,
+                          borderRadius: 20,
+                          backgroundColor: activeSkinCategory === sub.id ? '#A855F7' : 'rgba(255, 255, 255, 0.06)',
+                          borderWidth: 1,
+                          borderColor: activeSkinCategory === sub.id ? '#C084FC' : 'rgba(255, 255, 255, 0.1)',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6
+                        }}
+                        onPress={() => setActiveSkinCategory(sub.id)}
+                      >
+                        <FontAwesome5 name={sub.icon} size={12} color={activeSkinCategory === sub.id ? '#FFF' : '#AAA'} />
+                        <Text style={{ color: activeSkinCategory === sub.id ? '#FFF' : '#AAA', fontFamily: 'Inter_600SemiBold', fontSize: 12 }}>{sub.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+
+                  {/* Skins Items Grid */}
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, marginTop: 10 }}>
+                    {[
+                      { id: 1, name: activeSkinCategory === 'top' ? 'Cyber Huddi' : activeSkinCategory === 'pants' ? 'Neon Shim' : activeSkinCategory === 'shoes' ? 'Speed Krossovka' : activeSkinCategory === 'accessories' ? 'Oltin Ko\'zoynak' : 'Cyber Ryukzak', price: 50, icon: activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'glasses' : 'suitcase', color: '#3B82F6' },
+                      { id: 2, name: activeSkinCategory === 'top' ? 'Gold Jacket' : activeSkinCategory === 'pants' ? 'Gold Jogger' : activeSkinCategory === 'shoes' ? 'Golden Boots' : activeSkinCategory === 'accessories' ? 'Tilla Quloqchin' : 'Gold Backpack', price: 100, icon: activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'headphones' : 'suitcase', color: '#F59E0B' },
+                      { id: 3, name: activeSkinCategory === 'top' ? 'Shadow Coat' : activeSkinCategory === 'pants' ? 'Shadow Pants' : activeSkinCategory === 'shoes' ? 'Shadow Sneakers' : activeSkinCategory === 'accessories' ? 'Vip Binoqul' : 'Tactical Bag', price: 150, icon: activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'crown' : 'suitcase', color: '#A855F7' },
+                      { id: 4, name: activeSkinCategory === 'top' ? 'VIP Suit' : activeSkinCategory === 'pants' ? 'VIP Jeans' : activeSkinCategory === 'shoes' ? 'VIP Shoes' : activeSkinCategory === 'accessories' ? 'Oltin Zanjir' : 'Legendary Bag', price: 250, icon: activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'gem' : 'suitcase', color: '#EF4444' }
+                    ].map(item => (
+                      <View 
+                        key={item.id} 
+                        style={{
+                          width: '48%',
+                          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                          borderRadius: 16,
+                          borderWidth: 1,
+                          borderColor: 'rgba(255, 255, 255, 0.08)',
+                          padding: 14,
+                          alignItems: 'center',
+                          justify: 'space-between',
+                          gap: 10
+                        }}
+                      >
+                        <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.05)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: item.color }}>
+                          <FontAwesome5 name={item.icon} size={24} color={item.color} />
+                        </View>
+
+                        <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13, textAlign: 'center' }}>{item.name}</Text>
+                        
+                        <TouchableOpacity
+                          style={{
+                            width: '100%',
+                            backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
+                            borderWidth: 1,
+                            borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
+                            paddingVertical: 8,
+                            borderRadius: 10,
+                            flexDirection: 'row',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            gap: 6
+                          }}
+                          onPress={async () => {
+                            if (userCoin < item.price) {
+                              showCustomAlert("Tangalar yetarli emas!", `Ushbu skinni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
+                              return;
+                            }
+                            try {
+                              const newCoin = userCoin - item.price;
+                              setUserCoin(newCoin);
+                              const uDataStr = await AsyncStorage.getItem('user_data');
+                              if (uDataStr) {
+                                const uData = JSON.parse(uDataStr);
+                                uData.coin = newCoin;
+                                await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                              }
+                              showCustomAlert("Tabriklaymiz! 🎉", `${item.name} skini muvaffaqiyatli sotib olindi!`, "success");
+                            } catch(e) {}
+                          }}
+                        >
+                          <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                          <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {/* === ENERGIYA SECTION === */}
+              {activeShopTab === 'energy' && (
+                <View style={{ gap: 12, marginTop: 10 }}>
+                  {[
+                    { id: 1, count: 2, price: 10, title: '+2 Energiya Chaqmoq', desc: 'Tezkor mashq bajarish uchun!' },
+                    { id: 2, count: 5, price: 20, title: '+5 Energiya Chaqmoq', desc: 'Eng mashhur energiya to\'plami' },
+                    { id: 3, count: 10, price: 35, title: 'Maksimal +10 Energiya', desc: 'Energiyangizni to\'liq to\'ldiring!' },
+                    { id: 4, count: 20, price: 60, title: '+20 Zaxira Energiya', desc: 'Katta energiya zaxirasi!' }
+                  ].map(item => (
+                    <View 
+                      key={item.id} 
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        borderRadius: 16,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
+                        padding: 14,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                        <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(245, 158, 11, 0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#F59E0B' }}>
+                          <MaterialCommunityIcons name="lightning-bolt" size={24} color="#F59E0B" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>{item.title}</Text>
+                          <Text style={{ color: '#888899', fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 }}>{item.desc}</Text>
+                        </View>
+                      </View>
+
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
+                          borderWidth: 1,
+                          borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
+                          paddingHorizontal: 14,
+                          paddingVertical: 10,
+                          borderRadius: 12,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6
+                        }}
+                        onPress={async () => {
+                          if (userCoin < item.price) {
+                            showCustomAlert("Tangalar yetarli emas!", `Ushbu energiyani sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
+                            return;
+                          }
+                          try {
+                            const newCoin = userCoin - item.price;
+                            setUserCoin(newCoin);
+                            const uDataStr = await AsyncStorage.getItem('user_data');
+                            if (uDataStr) {
+                              const uData = JSON.parse(uDataStr);
+                              uData.coin = newCoin;
+                              uData.energy = Math.min(10, (uData.energy || 7) + item.count);
+                              await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                            }
+                            showCustomAlert("Muvaffaqiyatli! ⚡", `+${item.count} ta energiya balansingizga qo'shildi!`, "success");
+                          } catch(e) {}
+                        }}
+                      >
+                        <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                        <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* === SIRLI SANDIQ SECTION === */}
+              {activeShopTab === 'mystery' && (
+                <View style={{ gap: 12, marginTop: 10 }}>
+                  <View style={{ backgroundColor: 'rgba(168, 85, 247, 0.1)', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.3)', borderRadius: 16, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <MaterialCommunityIcons name="treasure-chest" size={32} color="#A855F7" />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>Sirli Sandiq Kalitlari</Text>
+                      <Text style={{ color: '#C084FC', fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 }}>Kalitlar bilan sandiqni oching va nodir mukofotlarni qo'lga kiriting!</Text>
+                    </View>
+                  </View>
+
+                  {[
+                    { id: 1, count: 1, price: 15, title: '1 ta Oltin Kalit 🔑', desc: '1 marotaba Sirli Sandiqni ochish imkoni' },
+                    { id: 2, count: 3, price: 40, title: '3 ta Oltin Kalit 🔑🔑🔑', desc: '3 marotaba sandiq ochish imkoniyati (Arzonroq!)' },
+                    { id: 3, count: 5, price: 60, title: '5 ta Oltin Kalit (VIP) 🗝️', desc: '5 marotaba sandiq ochish uchun katta to\'plam' }
+                  ].map(item => (
+                    <View 
+                      key={item.id} 
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                        borderRadius: 16,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.08)',
+                        padding: 14,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                        <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#A855F7' }}>
+                          <MaterialCommunityIcons name="key-gold" size={24} color="#F59E0B" />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>{item.title}</Text>
+                          <Text style={{ color: '#888899', fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 }}>{item.desc}</Text>
+                        </View>
+                      </View>
+
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
+                          borderWidth: 1,
+                          borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
+                          paddingHorizontal: 14,
+                          paddingVertical: 10,
+                          borderRadius: 12,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 6
+                        }}
+                        onPress={async () => {
+                          if (userCoin < item.price) {
+                            showCustomAlert("Tangalar yetarli emas!", `Ushbu kalitni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
+                            return;
+                          }
+                          try {
+                            const newCoin = userCoin - item.price;
+                            setUserCoin(newCoin);
+                            const uDataStr = await AsyncStorage.getItem('user_data');
+                            if (uDataStr) {
+                              const uData = JSON.parse(uDataStr);
+                              uData.coin = newCoin;
+                              await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                            }
+                            setMysteryKeysCount(prev => prev + item.count);
+                            showCustomAlert("Tabriklaymiz! 🎉", `+${item.count} ta oltin kalit Sirli Sandiq bo'limingizga qo'shildi!`, "success");
+                          } catch(e) {}
+                        }}
+                      >
+                        <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                        <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+            </ScrollView>
+          </SafeAreaView>
+        </View>
       </Modal>
 
     </SafeAreaView>
@@ -4368,6 +4750,41 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
     marginRight: 2,
+  },
+  goldenShopButton: {
+    position: 'absolute',
+    right: 20,
+    top: 40,
+    zIndex: 20,
+    alignItems: 'center',
+  },
+  goldenShopGradient: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF5C0',
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  shopBadge: {
+    backgroundColor: '#EAB308',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 8,
+    marginTop: -8,
+    borderWidth: 1,
+    borderColor: '#FFF',
+  },
+  shopBadgeText: {
+    color: '#000',
+    fontSize: 9,
+    fontFamily: 'Inter_900Black',
   },
   rightSideStatsPanel: {
     position: 'absolute',
