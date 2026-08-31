@@ -423,6 +423,33 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [activeSkinCategory, setActiveSkinCategory] = useState('headwear'); // 'headwear' | 'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'
   const [shopItems, setShopItems] = useState([]);
 
+  // Shop Purchase Animation state
+  const purchaseAnim = useRef(new Animated.Value(0)).current;
+  const [purchaseSuccessMessage, setPurchaseSuccessMessage] = useState('');
+  const [showPurchaseOverlay, setShowPurchaseOverlay] = useState(false);
+
+  const triggerPurchaseAnimation = (itemName) => {
+    setPurchaseSuccessMessage(`${itemName} MUVAFFAQIYATLI HARID QILINDI! ✨`);
+    setShowPurchaseOverlay(true);
+    purchaseAnim.setValue(0);
+    Animated.sequence([
+      Animated.spring(purchaseAnim, {
+        toValue: 1,
+        friction: 5,
+        tension: 80,
+        useNativeDriver: true,
+      }),
+      Animated.delay(1200),
+      Animated.timing(purchaseAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      setShowPurchaseOverlay(false);
+    });
+  };
+
   useEffect(() => {
     fetch(`${API_URL}/shop-items`)
       .then(res => res.json())
@@ -4350,22 +4377,36 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                 gap: 6
                               }}
                               activeOpacity={0.8}
-                              onPress={async () => {
+                              onPress={() => {
                                 if (userCoin < item.price) {
                                   showCustomAlert("Tangalar yetarli emas!", `Ushbu skinni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
                                   return;
                                 }
-                                try {
-                                  const newCoin = userCoin - item.price;
-                                  setUserCoin(newCoin);
-                                  const uDataStr = await AsyncStorage.getItem('user_data');
-                                  if (uDataStr) {
-                                    const uData = JSON.parse(uDataStr);
-                                    uData.coin = newCoin;
-                                    await AsyncStorage.setItem('user_data', JSON.stringify(uData));
-                                  }
-                                  showCustomAlert("Tabriklaymiz! 🎉", `${item.name} skini muvaffaqiyatli sotib olindi!`, "success");
-                                } catch(e) {}
+
+                                showCustomAlert(
+                                  "Mahsulot Xaridi",
+                                  `Siz ushbu "${item.name}" mahsulotini ${item.price} tangaga xarid qilmoqchimisiz?\n\n${item.description || "Ushbu buyum profilingiz va personajingiz uchun moslashtiriladi."}`,
+                                  "warning",
+                                  [
+                                    { text: "Bekor qilish", onPress: () => {} },
+                                    {
+                                      text: "Xarid qilish",
+                                      onPress: async () => {
+                                        try {
+                                          const newCoin = userCoin - item.price;
+                                          setUserCoin(newCoin);
+                                          const uDataStr = await AsyncStorage.getItem('user_data');
+                                          if (uDataStr) {
+                                            const uData = JSON.parse(uDataStr);
+                                            uData.coin = newCoin;
+                                            await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                                          }
+                                          triggerPurchaseAnimation(item.name);
+                                        } catch(e) {}
+                                      }
+                                    }
+                                  ]
+                                );
                               }}
                             >
                               <Image source={require('../assets/s_coin.png')} style={{ width: 15, height: 15 }} />
@@ -4432,35 +4473,49 @@ export default function StudentDashboardScreen({ navigation, route }) {
                               alignItems: 'center',
                               gap: 6
                             }}
-                            onPress={async () => {
+                            onPress={() => {
                               if (userCoin < item.price) {
                                 showCustomAlert("Tangalar yetarli emas!", `Ushbu energiyani sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
                                 return;
                               }
-                              try {
-                                const newCoin = userCoin - item.price;
-                                setUserCoin(newCoin);
-                                const uDataStr = await AsyncStorage.getItem('user_data');
-                                if (uDataStr) {
-                                  const uData = JSON.parse(uDataStr);
-                                  uData.coin = newCoin;
-                                  await AsyncStorage.setItem('user_data', JSON.stringify(uData));
-                                }
 
-                                const existingPurchasedStr = await AsyncStorage.getItem('purchased_energy_inventory');
-                                const existingPurchased = existingPurchasedStr ? JSON.parse(existingPurchasedStr) : [];
-                                const newItemEntry = {
-                                  id: `purchased_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                                  name: item.name,
-                                  value: item.value || 1,
-                                  purchasedAt: Date.now()
-                                };
-                                existingPurchased.push(newItemEntry);
-                                await AsyncStorage.setItem('purchased_energy_inventory', JSON.stringify(existingPurchased));
-                                DeviceEventEmitter.emit('purchased_energy_updated');
+                              showCustomAlert(
+                                "Mahsulot Xaridi",
+                                `Siz ushbu "${item.name}" (+${item.value || 1} Energiya chaqmoq) paketini ${item.price} tangaga xarid qilmoqchimisiz?\n\n${item.description || "Harid qilingan energiya Energiya Markaziga saqlanadi."}`,
+                                "warning",
+                                [
+                                  { text: "Bekor qilish", onPress: () => {} },
+                                  {
+                                    text: "Xarid qilish",
+                                    onPress: async () => {
+                                      try {
+                                        const newCoin = userCoin - item.price;
+                                        setUserCoin(newCoin);
+                                        const uDataStr = await AsyncStorage.getItem('user_data');
+                                        if (uDataStr) {
+                                          const uData = JSON.parse(uDataStr);
+                                          uData.coin = newCoin;
+                                          await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                                        }
 
-                                showCustomAlert("Muvaffaqiyatli! ⚡", `${item.name} (+${item.value || 1} Energiya chaqmoq) harid qilindi va Energiya Markaziga qo'shildi!`, "success");
-                              } catch(e) {}
+                                        const existingPurchasedStr = await AsyncStorage.getItem('purchased_energy_inventory');
+                                        const existingPurchased = existingPurchasedStr ? JSON.parse(existingPurchasedStr) : [];
+                                        const newItemEntry = {
+                                          id: `purchased_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                                          name: item.name,
+                                          value: item.value || 1,
+                                          purchasedAt: Date.now()
+                                        };
+                                        existingPurchased.push(newItemEntry);
+                                        await AsyncStorage.setItem('purchased_energy_inventory', JSON.stringify(existingPurchased));
+                                        DeviceEventEmitter.emit('purchased_energy_updated');
+
+                                        triggerPurchaseAnimation(item.name);
+                                      } catch(e) {}
+                                    }
+                                  }
+                                ]
+                              );
                             }}
                           >
                             <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
@@ -4534,23 +4589,37 @@ export default function StudentDashboardScreen({ navigation, route }) {
                               alignItems: 'center',
                               gap: 6
                             }}
-                            onPress={async () => {
+                            onPress={() => {
                               if (userCoin < item.price) {
                                 showCustomAlert("Tangalar yetarli emas!", `Ushbu kalitni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
                                 return;
                               }
-                              try {
-                                const newCoin = userCoin - item.price;
-                                setUserCoin(newCoin);
-                                const uDataStr = await AsyncStorage.getItem('user_data');
-                                if (uDataStr) {
-                                  const uData = JSON.parse(uDataStr);
-                                  uData.coin = newCoin;
-                                  await AsyncStorage.setItem('user_data', JSON.stringify(uData));
-                                }
-                                setMysteryKeysCount(prev => prev + (item.value || 1));
-                                showCustomAlert("Tabriklaymiz! 🎉", `+${item.value || 1} ta oltin kalit Sirli Sandiq bo'limingizga qo'shildi!`, "success");
-                              } catch(e) {}
+
+                              showCustomAlert(
+                                "Mahsulot Xaridi",
+                                `Siz ushbu "${item.name}" kalitini ${item.price} tangaga xarid qilmoqchimisiz?\n\n${item.description || "Sirli Sandiq bo'limida ishlatiladi."}`,
+                                "warning",
+                                [
+                                  { text: "Bekor qilish", onPress: () => {} },
+                                  {
+                                    text: "Xarid qilish",
+                                    onPress: async () => {
+                                      try {
+                                        const newCoin = userCoin - item.price;
+                                        setUserCoin(newCoin);
+                                        const uDataStr = await AsyncStorage.getItem('user_data');
+                                        if (uDataStr) {
+                                          const uData = JSON.parse(uDataStr);
+                                          uData.coin = newCoin;
+                                          await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                                        }
+                                        setMysteryKeysCount(prev => prev + (item.value || 1));
+                                        triggerPurchaseAnimation(item.name);
+                                      } catch(e) {}
+                                    }
+                                  }
+                                ]
+                              );
                             }}
                           >
                             <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
@@ -4570,6 +4639,57 @@ export default function StudentDashboardScreen({ navigation, route }) {
               )}
 
             </ScrollView>
+
+            {/* SHOP PURCHASE SUCCESS ANIMATED OVERLAY */}
+            {showPurchaseOverlay && (
+              <Animated.View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: 'rgba(5, 5, 12, 0.85)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 999,
+                  opacity: purchaseAnim,
+                  transform: [{
+                    scale: purchaseAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.6, 1]
+                    })
+                  }]
+                }}
+              >
+                <LinearGradient
+                  colors={['rgba(245, 158, 11, 0.25)', 'rgba(168, 85, 247, 0.25)']}
+                  style={{
+                    padding: 30,
+                    borderRadius: 28,
+                    borderWidth: 2,
+                    borderColor: '#F59E0B',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    shadowColor: '#F59E0B',
+                    shadowOffset: { width: 0, height: 10 },
+                    shadowOpacity: 0.6,
+                    shadowRadius: 20,
+                    elevation: 15,
+                    marginHorizontal: 30
+                  }}
+                >
+                  <MaterialCommunityIcons name="star-two-points" size={60} color="#F59E0B" />
+                  <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_900Black', textAlign: 'center', marginTop: 12, letterSpacing: 0.5 }}>
+                    {purchaseSuccessMessage}
+                  </Text>
+                  <Text style={{ color: '#F59E0B', fontSize: 13, fontFamily: 'Inter_600SemiBold', textAlign: 'center', marginTop: 6 }}>
+                    Tangalaringiz sarflandi va buyum saqlandi!
+                  </Text>
+                </LinearGradient>
+              </Animated.View>
+            )}
 
             {/* CUSTOM ALERT MODAL INSIDE SHOP */}
             <Modal visible={customAlert.visible} transparent animationType="fade">
