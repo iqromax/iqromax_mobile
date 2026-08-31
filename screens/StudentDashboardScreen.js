@@ -4676,9 +4676,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   }}>
                     {getShopImageUrl(purchaseSuccessItem.imageUrl) ? (
                       <Image source={{ uri: getShopImageUrl(purchaseSuccessItem.imageUrl) }} style={{ width: 48, height: 48, resizeMode: 'contain' }} />
-                    ) : purchaseSuccessItem.category === 'energy' ? (
+                    ) : (purchaseSuccessItem.category === 'energy' || (purchaseSuccessItem.name && purchaseSuccessItem.name.toLowerCase().includes('energiya'))) ? (
                       <MaterialCommunityIcons name="lightning-bolt" size={44} color="#F59E0B" />
-                    ) : purchaseSuccessItem.category === 'mystery' ? (
+                    ) : (purchaseSuccessItem.category === 'mystery' || (purchaseSuccessItem.name && purchaseSuccessItem.name.toLowerCase().includes('kalit'))) ? (
                       <MaterialCommunityIcons name="key-gold" size={44} color="#F59E0B" />
                     ) : (
                       <MaterialCommunityIcons name="star-two-points" size={44} color="#F59E0B" />
