@@ -424,31 +424,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [shopItems, setShopItems] = useState([]);
 
   // Shop Purchase Animation state
-  const purchaseAnim = useRef(new Animated.Value(0)).current;
   const [purchaseSuccessItem, setPurchaseSuccessItem] = useState(null);
-  const [showPurchaseOverlay, setShowPurchaseOverlay] = useState(false);
 
   const triggerPurchaseAnimation = (item, targetLocation) => {
     setPurchaseSuccessItem({ ...item, targetLocation });
-    setShowPurchaseOverlay(true);
-    purchaseAnim.setValue(0);
-    Animated.spring(purchaseAnim, {
-      toValue: 1,
-      friction: 6,
-      tension: 70,
-      useNativeDriver: true,
-    }).start();
   };
 
   const closePurchaseOverlay = () => {
-    Animated.timing(purchaseAnim, {
-      toValue: 0,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      setShowPurchaseOverlay(false);
-      setPurchaseSuccessItem(null);
-    });
+    setPurchaseSuccessItem(null);
   };
 
   useEffect(() => {
@@ -4642,10 +4625,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </ScrollView>
 
             {/* SHOP PURCHASE SUCCESS ANIMATED MODAL */}
-            <Modal visible={showPurchaseOverlay} transparent animationType="fade">
+            <Modal visible={Boolean(purchaseSuccessItem)} transparent animationType="fade">
               <View style={{ flex: 1, backgroundColor: 'rgba(5, 5, 15, 0.88)', justifyContent: 'center', alignItems: 'center' }}>
                 {purchaseSuccessItem && (
-                  <Animated.View
+                  <View
                     style={{
                       width: '86%',
                       backgroundColor: '#0E0E1E',
@@ -4658,14 +4641,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       shadowOffset: { width: 0, height: 12 },
                       shadowOpacity: 0.5,
                       shadowRadius: 20,
-                      elevation: 20,
-                      opacity: purchaseAnim,
-                      transform: [{
-                        scale: purchaseAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.75, 1]
-                        })
-                      }]
+                      elevation: 20
                     }}
                   >
                     {/* Glowing Top Badge */}
@@ -4755,7 +4731,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         TUSHUNARLI
                       </Text>
                     </TouchableOpacity>
-                  </Animated.View>
+                  </View>
                 )}
               </View>
             </Modal>
