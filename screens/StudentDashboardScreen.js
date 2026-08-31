@@ -1600,7 +1600,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
       {/* Main Content Area */}
       <View style={styles.mainContent}>
-        <Image source={require('../assets/dashboard_bg_new.jpg')} style={styles.backgroundImage} />
+        <Image source={require('../assets/character_bg.png')} style={[styles.backgroundImage, { transform: [{ scale: 1.8 }] }]} />
         
         {/* Fixed Top Section */}
         <View style={styles.fixedTopSection} pointerEvents="box-none">
