@@ -11,7 +11,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { Canvas, useFrame } from '@react-three/fiber/native';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
@@ -192,11 +192,13 @@ useGLTF.preload(require('../assets/models/ochki_4_optimized.glb'));
 function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false }) {
   if (!modelPath) return null;
   const glbSource = typeof modelPath === 'string' ? (modelPath.startsWith('http') ? modelPath : `${API_URL}${modelPath.replace('/api', '')}`) : modelPath;
-  const { scene } = useGLTF(glbSource, true, true, (loader) => {
+  const gltf = useLoader(GLTFLoader, glbSource, (loader) => {
     if (loader && loader.setMeshoptDecoder) {
       loader.setMeshoptDecoder(MeshoptDecoder);
     }
   });
+  const scene = gltf?.scene;
+  if (!scene) return null;
   
   // Fix for WebGL Shader Error: ERROR___ERROR_IN_EXPONENT caused by hyphens (e-5) in material names
   React.useMemo(() => {
