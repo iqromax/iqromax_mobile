@@ -1156,7 +1156,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       let currentItemState = item.state || 'KIYISH';
       const imgSrc = item.imageUrl ? { uri: item.imageUrl.startsWith('http') ? item.imageUrl : `${API_URL}${item.imageUrl.replace('/api', '')}` } : (item.image || require('../assets/yangi_1.png'));
 
-      const isPricedOrLocked = item.isLocked || (item.price && item.price > 0);
+      const isPricedOrLocked = Boolean(item.isLocked || (item.price && Number(item.price) > 0));
 
       const handleSkinPress = () => {
         if (isPricedOrLocked) {
@@ -1171,19 +1171,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
           onPress={handleSkinPress}
           style={{ width: '22%', aspectRatio: 0.55, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, borderWidth: 1, borderColor: currentItemState === 'KIYILGAN' ? '#EAB308' : 'rgba(255,255,255,0.08)', marginBottom: 12, padding: 6, alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}
         >
-          {currentItemState === 'KIYILGAN' && (
+          {currentItemState === 'KIYILGAN' ? (
              <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EAB308', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
                <MaterialCommunityIcons name="check" size={10} color="#000" />
              </View>
-          )}
-          {isPricedOrLocked && (
+          ) : null}
+          {isPricedOrLocked ? (
              <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#1F2937', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
                <MaterialCommunityIcons name="lock" size={8} color="#FFFFFF" />
              </View>
-          )}
+          ) : null}
           <Image source={imgSrc} style={{ width: '85%', height: '50%', borderRadius: 6, marginTop: 6 }} contentFit="contain" />
           <View style={{ alignItems: 'center', width: '100%', marginTop: 6, marginBottom: 2 }}>
-            <Text style={{ color: isPricedOrLocked ? '#9CA3AF' : '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
+            <Text style={{ color: isPricedOrLocked ? '#9CA3AF' : '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{String(item.name || '')}</Text>
             <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 6 }}>
               <Text style={{ color: rarityColor, fontFamily: 'Inter_700Bold', fontSize: 7 }}>{item.rarity || 'ODDIY'}</Text>
             </View>
