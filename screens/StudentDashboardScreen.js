@@ -424,7 +424,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [shopItems, setShopItems] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/shop-items')
+    fetch(`${API_URL}/shop-items`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setShopItems(data);
@@ -4317,50 +4317,70 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   </ScrollView>
 
                   {/* Skins Items Grid */}
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, marginTop: 10 }}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginTop: 10 }}>
                     {shopItems
                       .filter(item => item.category === 'inventory' && (item.subcategory || 'top') === activeSkinCategory)
                       .map(item => {
                         const iconName = activeSkinCategory === 'headwear' ? 'hat-cowboy' : activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'glasses' : 'suitcase';
                         const itemColor = '#F59E0B';
+                        const fullImgUrl = item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `${SOCKET_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`) : null;
+
                         return (
                           <View 
                             key={item.id} 
                             style={{
                               width: '48%',
-                              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                              borderRadius: 16,
-                              borderWidth: 1,
-                              borderColor: 'rgba(255, 255, 255, 0.08)',
-                              padding: 14,
+                              backgroundColor: 'rgba(18, 18, 35, 0.75)',
+                              borderRadius: 18,
+                              borderWidth: 1.5,
+                              borderColor: 'rgba(245, 158, 11, 0.25)',
+                              padding: 12,
                               alignItems: 'center',
                               justifyContent: 'space-between',
-                              gap: 10
+                              gap: 10,
+                              shadowColor: '#000',
+                              shadowOffset: { width: 0, height: 4 },
+                              shadowOpacity: 0.3,
+                              shadowRadius: 6,
+                              elevation: 5
                             }}
                           >
-                            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: 'rgba(255,255,255,0.05)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: itemColor, overflow: 'hidden' }}>
-                              {item.imageUrl ? (
-                                <Image source={{ uri: item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000/api${item.imageUrl}` }} style={{ width: 40, height: 40, resizeMode: 'contain' }} />
+                            {/* Product Preview Image Frame (Non-circular) */}
+                            <View style={{ 
+                              width: '100%', 
+                              height: 105, 
+                              borderRadius: 14, 
+                              backgroundColor: 'rgba(7, 7, 18, 0.85)', 
+                              justifyContent: 'center', 
+                              alignItems: 'center', 
+                              borderWidth: 1, 
+                              borderColor: 'rgba(255, 255, 255, 0.08)',
+                              overflow: 'hidden',
+                              padding: 6
+                            }}>
+                              {fullImgUrl ? (
+                                <Image source={{ uri: fullImgUrl }} style={{ width: '100%', height: '100%', resizeMode: 'contain' }} />
                               ) : (
-                                <FontAwesome5 name={iconName} size={24} color={itemColor} />
+                                <FontAwesome5 name={iconName} size={36} color={itemColor} />
                               )}
                             </View>
 
-                            <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13, textAlign: 'center' }} numberOfLines={1}>{item.name}</Text>
+                            <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13, textAlign: 'center', marginTop: 2 }} numberOfLines={1}>{item.name}</Text>
                             
                             <TouchableOpacity
                               style={{
                                 width: '100%',
-                                backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
-                                borderWidth: 1,
+                                backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255,255,255,0.05)',
+                                borderWidth: 1.5,
                                 borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
-                                paddingVertical: 8,
-                                borderRadius: 10,
+                                paddingVertical: 10,
+                                borderRadius: 12,
                                 flexDirection: 'row',
                                 justifyContent: 'center',
                                 alignItems: 'center',
                                 gap: 6
                               }}
+                              activeOpacity={0.8}
                               onPress={async () => {
                                 if (userCoin < item.price) {
                                   showCustomAlert("Tangalar yetarli emas!", `Ushbu skinni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
@@ -4379,7 +4399,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                 } catch(e) {}
                               }}
                             >
-                              <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                              <Image source={require('../assets/s_coin.png')} style={{ width: 15, height: 15 }} />
                               <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
                             </TouchableOpacity>
                           </View>
@@ -4401,70 +4421,73 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ gap: 12, marginTop: 10 }}>
                   {shopItems
                     .filter(item => item.category === 'energy')
-                    .map(item => (
-                      <View 
-                        key={item.id} 
-                        style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                          borderRadius: 16,
-                          borderWidth: 1,
-                          borderColor: 'rgba(255, 255, 255, 0.08)',
-                          padding: 14,
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                          <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(245, 158, 11, 0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#F59E0B', overflow: 'hidden' }}>
-                            {item.imageUrl ? (
-                              <Image source={{ uri: item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000/api${item.imageUrl}` }} style={{ width: 30, height: 30, resizeMode: 'contain' }} />
-                            ) : (
-                              <MaterialCommunityIcons name="lightning-bolt" size={24} color="#F59E0B" />
-                            )}
-                          </View>
-                          <View style={{ flex: 1 }}>
-                            <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>{item.name}</Text>
-                            <Text style={{ color: '#888899', fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 }}>{item.description || `+${item.value || 1} ta energiya chaqmoq`}</Text>
-                          </View>
-                        </View>
-
-                        <TouchableOpacity
+                    .map(item => {
+                      const fullImgUrl = item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `${SOCKET_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`) : null;
+                      return (
+                        <View 
+                          key={item.id} 
                           style={{
-                            backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                            borderRadius: 16,
                             borderWidth: 1,
-                            borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
-                            paddingHorizontal: 14,
-                            paddingVertical: 10,
-                            borderRadius: 12,
+                            borderColor: 'rgba(255, 255, 255, 0.08)',
+                            padding: 14,
                             flexDirection: 'row',
-                            alignItems: 'center',
-                            gap: 6
-                          }}
-                          onPress={async () => {
-                            if (userCoin < item.price) {
-                              showCustomAlert("Tangalar yetarli emas!", `Ushbu energiyani sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
-                              return;
-                            }
-                            try {
-                              const newCoin = userCoin - item.price;
-                              setUserCoin(newCoin);
-                              const uDataStr = await AsyncStorage.getItem('user_data');
-                              if (uDataStr) {
-                                const uData = JSON.parse(uDataStr);
-                                uData.coin = newCoin;
-                                uData.energy = Math.min(10, (uData.energy || 7) + (item.value || 1));
-                                await AsyncStorage.setItem('user_data', JSON.stringify(uData));
-                              }
-                              showCustomAlert("Muvaffaqiyatli! ⚡", `+${item.value || 1} ta energiya balansingizga qo'shildi!`, "success");
-                            } catch(e) {}
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
                           }}
                         >
-                          <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
-                          <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                            <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(245, 158, 11, 0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#F59E0B', overflow: 'hidden' }}>
+                              {fullImgUrl ? (
+                                <Image source={{ uri: fullImgUrl }} style={{ width: 30, height: 30, resizeMode: 'contain' }} />
+                              ) : (
+                                <MaterialCommunityIcons name="lightning-bolt" size={24} color="#F59E0B" />
+                              )}
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>{item.name}</Text>
+                              <Text style={{ color: '#888899', fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 }}>{item.description || `+${item.value || 1} ta energiya chaqmoq`}</Text>
+                            </View>
+                          </View>
+
+                          <TouchableOpacity
+                            style={{
+                              backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
+                              borderWidth: 1,
+                              borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
+                              paddingHorizontal: 14,
+                              paddingVertical: 10,
+                              borderRadius: 12,
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: 6
+                            }}
+                            onPress={async () => {
+                              if (userCoin < item.price) {
+                                showCustomAlert("Tangalar yetarli emas!", `Ushbu energiyani sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
+                                return;
+                              }
+                              try {
+                                const newCoin = userCoin - item.price;
+                                setUserCoin(newCoin);
+                                const uDataStr = await AsyncStorage.getItem('user_data');
+                                if (uDataStr) {
+                                  const uData = JSON.parse(uDataStr);
+                                  uData.coin = newCoin;
+                                  uData.energy = Math.min(10, (uData.energy || 7) + (item.value || 1));
+                                  await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                                }
+                                showCustomAlert("Muvaffaqiyatli! ⚡", `+${item.value || 1} ta energiya balansingizga qo'shildi!`, "success");
+                              } catch(e) {}
+                            }}
+                          >
+                            <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                            <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      );
+                    })}
 
                   {shopItems.filter(item => item.category === 'energy').length === 0 && (
                     <View style={{ width: '100%', paddingVertical: 30, alignItems: 'center' }}>
@@ -4488,33 +4511,73 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                   {shopItems
                     .filter(item => item.category === 'mystery')
-                    .map(item => (
-                      <View 
-                        key={item.id} 
-                        style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                          borderRadius: 16,
-                          borderWidth: 1,
-                          borderColor: 'rgba(255, 255, 255, 0.08)',
-                          padding: 14,
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-                          <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#A855F7', overflow: 'hidden' }}>
-                            {item.imageUrl ? (
-                              <Image source={{ uri: item.imageUrl.startsWith('http') ? item.imageUrl : `http://localhost:5000/api${item.imageUrl}` }} style={{ width: 30, height: 30, resizeMode: 'contain' }} />
-                            ) : (
-                              <MaterialCommunityIcons name="key-gold" size={24} color="#F59E0B" />
-                            )}
+                    .map(item => {
+                      const fullImgUrl = item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `${SOCKET_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`) : null;
+                      return (
+                        <View 
+                          key={item.id} 
+                          style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                            borderRadius: 16,
+                            borderWidth: 1,
+                            borderColor: 'rgba(255, 255, 255, 0.08)',
+                            padding: 14,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center'
+                          }}
+                        >
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
+                            <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#A855F7', overflow: 'hidden' }}>
+                              {fullImgUrl ? (
+                                <Image source={{ uri: fullImgUrl }} style={{ width: 30, height: 30, resizeMode: 'contain' }} />
+                              ) : (
+                                <MaterialCommunityIcons name="key-gold" size={24} color="#F59E0B" />
+                              )}
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>{item.name}</Text>
+                              <Text style={{ color: '#888899', fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 }}>{item.description || `${item.value || 1} marotaba sandiq ochish imkoni`}</Text>
+                            </View>
                           </View>
-                          <View style={{ flex: 1 }}>
-                            <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>{item.name}</Text>
-                            <Text style={{ color: '#888899', fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 }}>{item.description || `${item.value || 1} marotaba sandiq ochish imkoni`}</Text>
-                          </View>
+
+                          <TouchableOpacity
+                            style={{
+                              backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
+                              borderWidth: 1,
+                              borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
+                              paddingHorizontal: 14,
+                              paddingVertical: 10,
+                              borderRadius: 12,
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              gap: 6
+                            }}
+                            onPress={async () => {
+                              if (userCoin < item.price) {
+                                showCustomAlert("Tangalar yetarli emas!", `Ushbu kalitni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
+                                return;
+                              }
+                              try {
+                                const newCoin = userCoin - item.price;
+                                setUserCoin(newCoin);
+                                const uDataStr = await AsyncStorage.getItem('user_data');
+                                if (uDataStr) {
+                                  const uData = JSON.parse(uDataStr);
+                                  uData.coin = newCoin;
+                                  await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                                }
+                                setMysteryKeysCount(prev => prev + (item.value || 1));
+                                showCustomAlert("Tabriklaymiz! 🎉", `+${item.value || 1} ta oltin kalit Sirli Sandiq bo'limingizga qo'shildi!`, "success");
+                              } catch(e) {}
+                            }}
+                          >
+                            <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
+                            <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
+                          </TouchableOpacity>
                         </View>
+                      );
+                    })}
 
                         <TouchableOpacity
                           style={{
