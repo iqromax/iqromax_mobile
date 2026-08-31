@@ -4219,9 +4219,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Text style={{ color: '#FFF', fontSize: 17, fontFamily: 'Inter_900Black', letterSpacing: 0.6 }} numberOfLines={1}>
                     {t.shopTitle || "IQROSHOP DO'KON"}
                   </Text>
-                  <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_600SemiBold', opacity: 0.9, marginTop: 1 }} numberOfLines={1}>
-                    {t.shopSubtitle || "Tangalaringizni sarflang va buyumlarga ega bo'ling!"}
-                  </Text>
                 </View>
               </View>
 
