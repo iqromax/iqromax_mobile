@@ -4555,7 +4555,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                               {fullImgUrl ? (
                                 <Image source={{ uri: fullImgUrl }} style={{ width: 30, height: 30, resizeMode: 'contain' }} />
                               ) : (
-                                <MaterialCommunityIcons name="key-gold" size={24} color="#F59E0B" />
+                                <MaterialCommunityIcons name="key-variant" size={24} color="#F59E0B" />
                               )}
                             </View>
                             <View style={{ flex: 1 }}>
@@ -4679,7 +4679,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     ) : (purchaseSuccessItem.category === 'energy' || (purchaseSuccessItem.name && purchaseSuccessItem.name.toLowerCase().includes('energiya'))) ? (
                       <MaterialCommunityIcons name="lightning-bolt" size={44} color="#F59E0B" />
                     ) : (purchaseSuccessItem.category === 'mystery' || (purchaseSuccessItem.name && purchaseSuccessItem.name.toLowerCase().includes('kalit'))) ? (
-                      <MaterialCommunityIcons name="key-gold" size={44} color="#F59E0B" />
+                      <MaterialCommunityIcons name="key-variant" size={44} color="#F59E0B" />
                     ) : (
                       <MaterialCommunityIcons name="star-two-points" size={44} color="#F59E0B" />
                     )}
