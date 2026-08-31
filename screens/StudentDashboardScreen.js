@@ -297,7 +297,7 @@ const getAvatarByName = (name) => {
 };
 
 export default function StudentDashboardScreen({ navigation, route }) {
-  const { energy: currentEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
+  const { energy: currentEnergy, addEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
   const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
   const [requiredEnergyAlert, setRequiredEnergyAlert] = useState(1);
@@ -4511,19 +4511,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                           await AsyncStorage.setItem('user_data', JSON.stringify(uData));
                                         }
 
-                                        const existingPurchasedStr = await AsyncStorage.getItem('purchased_energy_inventory_${user?.customId || user?.id || "guest"}');
-                                        const existingPurchased = existingPurchasedStr ? JSON.parse(existingPurchasedStr) : [];
-                                        const newItemEntry = {
-                                          id: `purchased_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                                          name: item.name,
-                                          value: item.value || 1,
-                                          purchasedAt: Date.now()
-                                        };
-                                        existingPurchased.push(newItemEntry);
-                                        await AsyncStorage.setItem('purchased_energy_inventory_${user?.customId || user?.id || "guest"}', JSON.stringify(existingPurchased));
-                                        DeviceEventEmitter.emit('purchased_energy_updated');
-
-                                        triggerPurchaseAnimation(item, "Energiya Markazi -> Harid qilingan energiyalar");
+                                        const energyValue = item.value || 1;
+                                         if (currentEnergy < 10) {
+                                           await addEnergy(energyValue);
+                                           triggerPurchaseAnimation(item, "Balansingizga qo'shildi!");
+                                         } else {
+                                           const activeIdKey = user?.customId || user?.id || (uDataStr ? JSON.parse(uDataStr).customId || JSON.parse(uDataStr).id : 'guest');
+                                           const energyStorageKey = `purchased_energy_inventory_${activeIdKey}`;
+                                           const existingPurchasedStr = await AsyncStorage.getItem(energyStorageKey);
+                                           const existingPurchased = existingPurchasedStr ? JSON.parse(existingPurchasedStr) : [];
+                                           const newItemEntry = {
+                                             id: `purchased_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                                             name: item.name,
+                                             value: energyValue,
+                                             purchasedAt: Date.now()
+                                           };
+                                           existingPurchased.push(newItemEntry);
+                                           await AsyncStorage.setItem(energyStorageKey, JSON.stringify(existingPurchased));
+                                           DeviceEventEmitter.emit('purchased_energy_updated');
+                                           triggerPurchaseAnimation(item, "Energiya Markazi -> Harid qilingan energiyalar");
+                                         }
                                       } catch(e) {}
                                     }
                                   }
