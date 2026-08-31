@@ -4617,6 +4617,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <View style={{ width: '100%', paddingVertical: 30, alignItems: 'center' }}>
                       <MaterialCommunityIcons name="key-remove" size={32} color="#666" />
                       <Text style={{ color: '#888', fontFamily: 'Inter_500Medium', fontSize: 13, marginTop: 8 }}>Sandiq bo'limida hozircha kalitlar yo'q</Text>
+                    </View>
+                  )}
                 </View>
               )}
 
