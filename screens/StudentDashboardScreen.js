@@ -513,14 +513,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }, [user?.customId, user?.id, route.params])
   );
 
-  useEffect(() => {
-    if (user?.xp !== undefined) {
-      setUserXp(user.xp);
-    }
-    if (user?.coin !== undefined) {
-      setUserCoin(user.coin);
-    }
-  }, [user?.xp, user?.coin]);
+
 
   useEffect(() => {
     const subscription = DeviceEventEmitter.addListener('user_data_updated', () => {
