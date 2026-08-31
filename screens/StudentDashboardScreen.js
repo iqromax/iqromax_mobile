@@ -435,6 +435,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const [backendSkins, setBackendSkins] = useState([]);
+  const [skinPurchaseAlertItem, setSkinPurchaseAlertItem] = useState(null);
 
   useEffect(() => {
     fetch(`${API_URL}/shop-items`)
@@ -1135,21 +1136,34 @@ export default function StudentDashboardScreen({ navigation, route }) {
       let currentItemState = item.state || 'KIYISH';
       const imgSrc = item.imageUrl ? { uri: item.imageUrl.startsWith('http') ? item.imageUrl : `${API_URL}${item.imageUrl.replace('/api', '')}` } : (item.image || require('../assets/yangi_1.png'));
 
+      const isPricedOrLocked = item.isLocked || (item.price && item.price > 0);
+
+      const handleSkinPress = () => {
+        if (isPricedOrLocked) {
+          setSkinPurchaseAlertItem(item);
+        }
+      };
+
       return (
-        <View key={item.id || i} style={{ width: '22%', aspectRatio: 0.55, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, borderWidth: 1, borderColor: currentItemState === 'KIYILGAN' ? '#EAB308' : 'rgba(255,255,255,0.08)', marginBottom: 12, padding: 6, alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+        <TouchableOpacity 
+          key={item.id || i} 
+          activeOpacity={0.8}
+          onPress={handleSkinPress}
+          style={{ width: '22%', aspectRatio: 0.55, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, borderWidth: 1, borderColor: currentItemState === 'KIYILGAN' ? '#EAB308' : 'rgba(255,255,255,0.08)', marginBottom: 12, padding: 6, alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}
+        >
           {currentItemState === 'KIYILGAN' && (
              <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EAB308', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
                <MaterialCommunityIcons name="check" size={10} color="#000" />
              </View>
           )}
-          {item.isLocked && (
+          {isPricedOrLocked && (
              <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#1F2937', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
                <MaterialCommunityIcons name="lock" size={8} color="#FFFFFF" />
              </View>
           )}
           <Image source={imgSrc} style={{ width: '85%', height: '50%', borderRadius: 6, marginTop: 6 }} contentFit="contain" />
           <View style={{ alignItems: 'center', width: '100%', marginTop: 6, marginBottom: 2 }}>
-            <Text style={{ color: item.isLocked ? '#9CA3AF' : '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
+            <Text style={{ color: isPricedOrLocked ? '#9CA3AF' : '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
             <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 6 }}>
               <Text style={{ color: rarityColor, fontFamily: 'Inter_700Bold', fontSize: 7 }}>{item.rarity || 'ODDIY'}</Text>
             </View>
@@ -1159,10 +1173,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                  <MaterialCommunityIcons name="check-circle" size={10} color="#EAB308" style={{ marginRight: 4 }} />
                  <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>KIYILGAN</Text>
               </View>
-            ) : item.price > 0 ? (
-              <TouchableOpacity style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+            ) : isPricedOrLocked ? (
+              <TouchableOpacity onPress={handleSkinPress} style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                  <Image source={require('../assets/s_coin.png')} style={{ width: 10, height: 10, marginRight: 3 }} />
-                 <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{item.price}</Text>
+                 <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{item.price || 'BUY'}</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', alignItems: 'center' }}>
@@ -1170,7 +1184,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </TouchableOpacity>
             )}
           </View>
-        </View>
+        </TouchableOpacity>
       );
     });
   };
@@ -4931,6 +4945,98 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>OK</Text>
                 </TouchableOpacity>
               )}
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* SKIN PURCHASE ALERT MODAL */}
+      <Modal visible={!!skinPurchaseAlertItem} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[
+            styles.modalContent, 
+            { 
+              backgroundColor: '#0D0D1A', 
+              borderWidth: 1.5, 
+              borderColor: '#EAB308', 
+              padding: 24, 
+              alignItems: 'center',
+              borderRadius: 24,
+              shadowColor: '#EAB308',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.35,
+              shadowRadius: 16,
+              elevation: 12
+            }
+          ]}>
+            <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(234,179,8,0.15)', justifyContent: 'center', alignItems: 'center', marginBottom: 16, borderWidth: 1, borderColor: '#EAB308' }}>
+              <MaterialCommunityIcons name="lock" size={30} color="#EAB308" />
+            </View>
+
+            <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8 }}>
+              {skinPurchaseAlertItem?.name || "Skin xaridi"}
+            </Text>
+
+            <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 20, lineHeight: 20 }}>
+              Ushbu skinni kiyish uchun avval uni IQROSHOP do'konidan xarid qilishingiz kerak!
+            </Text>
+
+            {skinPurchaseAlertItem?.price > 0 && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(234,179,8,0.1)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, marginBottom: 20, borderWidth: 1, borderColor: 'rgba(234,179,8,0.3)' }}>
+                <Image source={require('../assets/s_coin.png')} style={{ width: 18, height: 18, marginRight: 8 }} />
+                <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 16 }}>{skinPurchaseAlertItem.price} Coin</Text>
+              </View>
+            )}
+
+            <View style={{ width: '100%', gap: 10 }}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={{
+                  width: '100%',
+                  paddingVertical: 14,
+                  borderRadius: 14,
+                  backgroundColor: '#EAB308',
+                  alignItems: 'center',
+                  shadowColor: '#EAB308',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8
+                }}
+                onPress={() => {
+                  setSkinPurchaseAlertItem(null);
+                  setActiveShopTab('inventory');
+                  const catSubmap = {
+                    'ustki_kiyim': 'top',
+                    'bosh_kiyim': 'top',
+                    'shim': 'pants',
+                    'oyoq_kiyim': 'shoes',
+                    'aksessuar': 'accessories',
+                    'ryukzak': 'backpacks'
+                  };
+                  if (skinPurchaseAlertItem?.category) {
+                    setActiveSkinCategory(catSubmap[skinPurchaseAlertItem.category] || 'top');
+                  }
+                  setIsShopModalOpen(true);
+                }}
+              >
+                <Text style={{ color: '#000', fontFamily: 'Inter_700Bold', fontSize: 15 }}>XARID QILISH</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={{
+                  width: '100%',
+                  paddingVertical: 12,
+                  borderRadius: 14,
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  alignItems: 'center'
+                }}
+                onPress={() => setSkinPurchaseAlertItem(null)}
+              >
+                <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Bekor qilish</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>

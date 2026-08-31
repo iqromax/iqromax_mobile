@@ -73,6 +73,9 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
       modelUrl = `/api/uploads/skins/${files.glbModel[0].filename}`;
     }
 
+    const parsedPrice = price ? parseInt(price, 10) : 0;
+    const shouldBeLocked = parsedPrice > 0;
+
     let skin;
     // @ts-ignore
     if (prisma.inventorySkin) {
@@ -84,11 +87,44 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
           rarity: rarity ? rarity.trim() : 'ODDIY',
           imageUrl,
           modelUrl,
-          price: price ? parseInt(price, 10) : 0,
-          isLocked: isLocked === 'true' || isLocked === true,
+          price: parsedPrice,
+          isLocked: shouldBeLocked,
           isActive: true
         }
       });
+
+      // If price > 0, also automatically add this item to IQROSHOP
+      if (parsedPrice > 0) {
+        try {
+          const categorySubmap: Record<string, string> = {
+            'ustki_kiyim': 'top',
+            'bosh_kiyim': 'top',
+            'shim': 'pants',
+            'oyoq_kiyim': 'shoes',
+            'aksessuar': 'accessories',
+            'ryukzak': 'backpacks'
+          };
+          // @ts-ignore
+          const shopItem = await prisma.shopItem.create({
+            data: {
+              category: 'inventory',
+              subcategory: categorySubmap[category.trim()] || 'top',
+              name: name.trim(),
+              description: `Skin (${rarity || 'ODDIY'})`,
+              imageUrl: imageUrl,
+              value: 1,
+              price: parsedPrice,
+              isActive: true
+            }
+          });
+          const io = req.app.get('io');
+          if (io) {
+            io.emit('shop_item_updated', shopItem);
+          }
+        } catch (shopErr) {
+          console.error('Auto shop item creation error:', shopErr);
+        }
+      }
     } else {
       skin = {
         id: `skin_${Date.now()}`,
@@ -97,8 +133,8 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
         rarity: rarity || 'ODDIY',
         imageUrl,
         modelUrl,
-        price: price ? parseInt(price, 10) : 0,
-        isLocked: isLocked === 'true' || isLocked === true,
+        price: parsedPrice,
+        isLocked: shouldBeLocked,
         isActive: true,
         createdAt: new Date()
       };
