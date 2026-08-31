@@ -3887,81 +3887,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* CUSTOM PREMIUM ALERT MODAL */}
-      <Modal visible={customAlert.visible} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={[
-            styles.modalContent, 
-            { 
-              backgroundColor: '#0D0D1A', 
-              borderWidth: 1.5, 
-              borderColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B', 
-              padding: 24, 
-              alignItems: 'center',
-              borderRadius: 24,
-              shadowColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.35,
-              shadowRadius: 16,
-              elevation: 12
-            }
-          ]}>
-            <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8, marginTop: 4 }}>
-              {customAlert.title}
-            </Text>
-
-            <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
-              {customAlert.message}
-            </Text>
-
-            <View style={{ width: '100%', gap: 10 }}>
-              {customAlert.buttons && customAlert.buttons.length > 0 ? (
-                customAlert.buttons.map((btn, idx) => (
-                  <TouchableOpacity
-                    key={idx}
-                    activeOpacity={0.8}
-                    style={{
-                      width: '100%',
-                      paddingVertical: 14,
-                      borderRadius: 14,
-                      backgroundColor: idx === 0 && customAlert.buttons.length > 1 ? '#1A1A2E' : (customAlert.type === 'success' ? '#10B981' : '#A855F7'),
-                      borderWidth: idx === 0 && customAlert.buttons.length > 1 ? 1 : 0,
-                      borderColor: '#2A2A40',
-                      alignItems: 'center'
-                    }}
-                    onPress={() => {
-                      closeCustomAlert();
-                      if (btn.onPress) btn.onPress();
-                    }}
-                  >
-                    <Text style={{
-                      color: idx === 0 && customAlert.buttons.length > 1 ? '#9CA3AF' : '#FFF',
-                      fontFamily: 'Inter_700Bold',
-                      fontSize: 15
-                    }}>
-                      {btn.text}
-                    </Text>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={{
-                    width: '100%',
-                    paddingVertical: 14,
-                    borderRadius: 14,
-                    backgroundColor: customAlert.type === 'success' ? '#10B981' : '#A855F7',
-                    alignItems: 'center'
-                  }}
-                  onPress={closeCustomAlert}
-                >
-                  <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>OK</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        </View>
-      </Modal>
       {/* REFERRAL & CASHBACK MODAL */}
       <Modal visible={isReferralModalOpen} transparent animationType="slide">
         <View style={styles.modalOverlay}>
@@ -4641,7 +4566,159 @@ export default function StudentDashboardScreen({ navigation, route }) {
               )}
 
             </ScrollView>
+
+            {/* CUSTOM ALERT MODAL INSIDE SHOP */}
+            <Modal visible={customAlert.visible} transparent animationType="fade">
+              <View style={styles.modalOverlay}>
+                <View style={[
+                  styles.modalContent, 
+                  { 
+                    backgroundColor: '#0D0D1A', 
+                    borderWidth: 1.5, 
+                    borderColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B', 
+                    padding: 24, 
+                    alignItems: 'center',
+                    borderRadius: 24,
+                    shadowColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B',
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowOpacity: 0.35,
+                    shadowRadius: 16,
+                    elevation: 12
+                  }
+                ]}>
+                  <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8, marginTop: 4 }}>
+                    {customAlert.title}
+                  </Text>
+
+                  <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+                    {customAlert.message}
+                  </Text>
+
+                  <View style={{ width: '100%', gap: 10 }}>
+                    {customAlert.buttons && customAlert.buttons.length > 0 ? (
+                      customAlert.buttons.map((btn, idx) => (
+                        <TouchableOpacity
+                          key={idx}
+                          activeOpacity={0.8}
+                          style={{
+                            width: '100%',
+                            paddingVertical: 14,
+                            borderRadius: 14,
+                            backgroundColor: idx === 0 && customAlert.buttons.length > 1 ? '#1A1A2E' : (customAlert.type === 'success' ? '#10B981' : '#A855F7'),
+                            borderWidth: idx === 0 && customAlert.buttons.length > 1 ? 1 : 0,
+                            borderColor: '#2A2A40',
+                            alignItems: 'center'
+                          }}
+                          onPress={() => {
+                            closeCustomAlert();
+                            if (btn.onPress) btn.onPress();
+                          }}
+                        >
+                          <Text style={{
+                            color: idx === 0 && customAlert.buttons.length > 1 ? '#9CA3AF' : '#FFF',
+                            fontFamily: 'Inter_700Bold',
+                            fontSize: 15
+                          }}>
+                            {btn.text}
+                          </Text>
+                        </TouchableOpacity>
+                      ))
+                    ) : (
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        style={{
+                          width: '100%',
+                          paddingVertical: 14,
+                          borderRadius: 14,
+                          backgroundColor: customAlert.type === 'success' ? '#10B981' : '#A855F7',
+                          alignItems: 'center'
+                        }}
+                        onPress={closeCustomAlert}
+                      >
+                        <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>OK</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              </View>
+            </Modal>
           </SafeAreaView>
+        </View>
+      </Modal>
+
+      {/* GLOBAL ROOT ALERT MODAL */}
+      <Modal visible={customAlert.visible && !isShopModalOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[
+            styles.modalContent, 
+            { 
+              backgroundColor: '#0D0D1A', 
+              borderWidth: 1.5, 
+              borderColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B', 
+              padding: 24, 
+              alignItems: 'center',
+              borderRadius: 24,
+              shadowColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.35,
+              shadowRadius: 16,
+              elevation: 12
+            }
+          ]}>
+            <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8, marginTop: 4 }}>
+              {customAlert.title}
+            </Text>
+
+            <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
+              {customAlert.message}
+            </Text>
+
+            <View style={{ width: '100%', gap: 10 }}>
+              {customAlert.buttons && customAlert.buttons.length > 0 ? (
+                customAlert.buttons.map((btn, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    activeOpacity={0.8}
+                    style={{
+                      width: '100%',
+                      paddingVertical: 14,
+                      borderRadius: 14,
+                      backgroundColor: idx === 0 && customAlert.buttons.length > 1 ? '#1A1A2E' : (customAlert.type === 'success' ? '#10B981' : '#A855F7'),
+                      borderWidth: idx === 0 && customAlert.buttons.length > 1 ? 1 : 0,
+                      borderColor: '#2A2A40',
+                      alignItems: 'center'
+                    }}
+                    onPress={() => {
+                      closeCustomAlert();
+                      if (btn.onPress) btn.onPress();
+                    }}
+                  >
+                    <Text style={{
+                      color: idx === 0 && customAlert.buttons.length > 1 ? '#9CA3AF' : '#FFF',
+                      fontFamily: 'Inter_700Bold',
+                      fontSize: 15
+                    }}>
+                      {btn.text}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={{
+                    width: '100%',
+                    paddingVertical: 14,
+                    borderRadius: 14,
+                    backgroundColor: customAlert.type === 'success' ? '#10B981' : '#A855F7',
+                    alignItems: 'center'
+                  }}
+                  onPress={closeCustomAlert}
+                >
+                  <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>OK</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
         </View>
       </Modal>
 
