@@ -377,11 +377,10 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         const finalXp = xp + (isCorrect ? calculateQuestionXP() : 0);
         saveXPToBackend(finalXp);
 
-        // Ko'paytirish va bo'lish bo'limida g'olib bo'lsa (aniqlik >= 50%), misollar turi (examplesCount) miqdorida coin beriladi
+        // Ko'paytirish va bo'lish bo'limida har bir to'g'ri javob uchun 1 tadan coin (jami correctCount coin) beriladi
         const totalCorrect = speedResults.filter(r => r.isCorrect).length + (isCorrect ? 1 : 0);
-        if (totalCorrect >= Math.ceil((speedResults.length + 1) / 2)) {
-          const wonCoins = examplesCount;
-          saveCoinToBackend(wonCoins);
+        if (totalCorrect > 0) {
+          saveCoinToBackend(totalCorrect);
         }
         setPhase('summary');
       }
@@ -889,7 +888,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                 </View>
 
                 {/* Coin Badge */}
-                {correctCount >= Math.ceil(totalQuestions / 2) && (
+                {correctCount > 0 && (
                   <View style={{
                     backgroundColor: 'rgba(234, 179, 8, 0.2)',
                     paddingHorizontal: 14,
@@ -901,7 +900,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                     flexDirection: 'row',
                   }}>
                     <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, marginRight: 6 }} contentFit="contain" />
-                    <Text style={{ color: '#F59E0B', fontFamily: 'Inter_900Black', fontSize: 16 }}>+{examplesCount} Coin</Text>
+                    <Text style={{ color: '#F59E0B', fontFamily: 'Inter_900Black', fontSize: 16 }}>+{correctCount} Coin</Text>
                   </View>
                 )}
               </View>
