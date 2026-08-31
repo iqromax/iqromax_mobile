@@ -4155,6 +4155,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           </View>
         </View>
+      </Modal>
+
       {/* SHOP MODAL (Oldi-Sotti Do'kon) */}
       <Modal visible={isShopModalOpen} transparent={true} animationType="slide">
         <View style={{ flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.96)' }}>
