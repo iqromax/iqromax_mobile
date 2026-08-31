@@ -12,9 +12,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { Canvas, useFrame } from '@react-three/fiber/native';
-import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import io from 'socket.io-client';
-import { SOCKET_URL, API_URL } from '../src/config/api';
+import { SOCKET_URL, API_URL, getShopImageUrl } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { useEnergy } from '../src/hooks/useEnergy';
@@ -4323,7 +4322,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       .map(item => {
                         const iconName = activeSkinCategory === 'headwear' ? 'hat-cowboy' : activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'glasses' : 'suitcase';
                         const itemColor = '#F59E0B';
-                        const fullImgUrl = item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `${SOCKET_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`) : null;
+                        const fullImgUrl = getShopImageUrl(item.imageUrl);
 
                         return (
                           <View 
@@ -4422,7 +4421,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {shopItems
                     .filter(item => item.category === 'energy')
                     .map(item => {
-                      const fullImgUrl = item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `${SOCKET_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`) : null;
+                      const fullImgUrl = getShopImageUrl(item.imageUrl);
                       return (
                         <View 
                           key={item.id} 
@@ -4512,7 +4511,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {shopItems
                     .filter(item => item.category === 'mystery')
                     .map(item => {
-                      const fullImgUrl = item.imageUrl ? (item.imageUrl.startsWith('http') ? item.imageUrl : `${SOCKET_URL}${item.imageUrl.startsWith('/') ? '' : '/'}${item.imageUrl}`) : null;
+                      const fullImgUrl = getShopImageUrl(item.imageUrl);
                       return (
                         <View 
                           key={item.id} 
