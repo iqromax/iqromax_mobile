@@ -4167,8 +4167,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
               justifyContent: 'space-between',
               alignItems: 'center',
               paddingHorizontal: 16,
-              paddingTop: Platform.OS === 'ios' ? 45 : 15,
-              paddingBottom: 14,
+              paddingTop: Platform.OS === 'ios' ? 65 : 30,
+              paddingBottom: 16,
               borderBottomWidth: 1,
               borderBottomColor: 'rgba(255, 255, 255, 0.08)'
             }}>
