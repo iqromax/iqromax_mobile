@@ -987,6 +987,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [activeKiyimFilter, setActiveKiyimFilter] = useState('BARCHASI');
 
   const kiyimData = [
+    // BOSH KIYIM
+    { id: 101, category: 'bosh_kiyim', name: 'Golden Crown', rarity: 'LEGENDARY', color: '#EAB308', state: 'KIYILGAN', image: require('../assets/yangi_3.png') },
+    { id: 102, category: 'bosh_kiyim', name: 'Cyber Cap', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/yangi_3.png') },
+    { id: 103, category: 'bosh_kiyim', name: 'Math Beanie', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/yangi_3.png') },
+    { id: 104, category: 'bosh_kiyim', name: 'King Helmet', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '8 000', locked: true, image: require('../assets/yangi_3.png') },
+
     // USTKI KIYIM
     { id: 1, category: 'ustki_kiyim', name: 'IQ Hoodie', rarity: 'EPIC', color: '#A855F7', state: 'KIYILGAN', image: require('../assets/yangi_1.png') },
     { id: 2, category: 'ustki_kiyim', name: 'Champion Jacket', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/yangi_1.png') },
@@ -1187,6 +1193,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const renderKiyimScreen = () => {
     const headerTexts = {
+      'bosh_kiyim': { title: 'BOSH KIYIM', subtitle: 'Personajingiz uchun bosh kiyim tanlang' },
       'ustki_kiyim': { title: 'KIYIM-KECHAK', subtitle: 'Personajingiz uslubini tanlang' },
       'shim': { title: 'SHIM', subtitle: 'O\'zingizga mos shim tanlang' },
       'oyoq_kiyim': { title: 'OYOQ KIYIM', subtitle: 'Qulay poyabzal tanlang' },
@@ -1211,8 +1218,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
           
           <View style={{ flexDirection: 'row', flex: 1, zIndex: 1, paddingVertical: 10 }}>
             {/* Left Column: Vertical Categories */}
-            <View style={{ width: 95, justifyContent: 'flex-start', gap: 10 }}>
+            <View style={{ width: 95, justifyContent: 'flex-start', gap: 6 }}>
               {[
+                { key: 'bosh_kiyim', label: 'BOSH KIYIM', icon: 'crown' },
                 { key: 'ustki_kiyim', label: 'USTKI KIYIM', icon: 'tshirt-crew' },
                 { key: 'shim', label: 'SHIM', icon: 'human-handsdown' },
                 { key: 'oyoq_kiyim', label: 'OYOQ KIYIM', icon: 'shoe-sneaker' },
