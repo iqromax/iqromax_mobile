@@ -4813,8 +4813,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
                             alignItems: 'center'
                           }}
                           onPress={() => {
+                            const action = btn.onPress;
                             closeCustomAlert();
-                            if (btn.onPress) btn.onPress();
+                            if (action) {
+                              setTimeout(() => {
+                                action();
+                              }, 100);
+                            }
                           }}
                         >
                           <Text style={{
@@ -4892,8 +4897,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       alignItems: 'center'
                     }}
                     onPress={() => {
+                      const action = btn.onPress;
                       closeCustomAlert();
-                      if (btn.onPress) btn.onPress();
+                      if (action) {
+                        setTimeout(() => {
+                          action();
+                        }, 100);
+                      }
                     }}
                   >
                     <Text style={{
