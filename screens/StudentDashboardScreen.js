@@ -268,7 +268,7 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null }) {
 
   return (
     <>
-      <primitive object={scene} scale={5.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
+      <primitive object={scene} scale={6.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
       {accessoryPath && <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} />}
       <OrbitControls 
         enableZoom={false} 
