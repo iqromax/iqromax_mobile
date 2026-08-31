@@ -184,6 +184,11 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       const dataStr = await AsyncStorage.getItem('user_data');
       if (dataStr) {
         const userData = JSON.parse(dataStr);
+        // Instantly update local coin state as fallback
+        const updatedLocalCoin = (userData.coin || 0) + coinToAdd;
+        userData.coin = updatedLocalCoin;
+        await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+
         const res = await fetch(`${API_URL}/user/coin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -191,8 +196,10 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         });
         if (res.ok) {
           const resData = await res.json();
-          userData.coin = resData.coin;
-          await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+          if (resData.coin !== undefined) {
+            userData.coin = resData.coin;
+            await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+          }
         }
       }
     } catch (e) {
