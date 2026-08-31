@@ -8,6 +8,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
 import { useEnergy } from '../src/hooks/useEnergy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DeviceEventEmitter } from 'react-native';
 import { API_URL } from '../src/config/api';
 
 const TRANSLATIONS = {
@@ -171,6 +172,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           const resData = await res.json();
           userData.xp = resData.xp;
           await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+          DeviceEventEmitter.emit('user_data_updated');
         }
       }
     } catch (e) {
@@ -188,6 +190,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         const updatedLocalCoin = (userData.coin || 0) + coinToAdd;
         userData.coin = updatedLocalCoin;
         await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+        DeviceEventEmitter.emit('user_data_updated');
 
         const res = await fetch(`${API_URL}/user/coin`, {
           method: 'POST',
@@ -199,6 +202,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           if (resData.coin !== undefined) {
             userData.coin = resData.coin;
             await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+            DeviceEventEmitter.emit('user_data_updated');
           }
         }
       }

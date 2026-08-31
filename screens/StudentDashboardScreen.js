@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator, Share } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator, Share, DeviceEventEmitter } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image, ImageBackground } from 'expo-image';
@@ -469,6 +469,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
           }
         }).catch(e => console.log(e));
 
+        AsyncStorage.getItem(`user_mystery_keys_count_${userIdKey}`).then(kVal => {
+          if (kVal !== null) {
+            setMysteryKeysCount(parseInt(kVal, 10));
+          }
+        }).catch(e => console.log(e));
+
         AsyncStorage.getItem(`user_battle_stats_${userIdKey}`).then(bVal => {
           if (bVal) {
             const parsed = JSON.parse(bVal);
@@ -515,6 +521,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
       setUserCoin(user.coin);
     }
   }, [user?.xp, user?.coin]);
+
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener('user_data_updated', () => {
+      AsyncStorage.getItem('user_data').then(uDataStr => {
+        if (uDataStr) {
+          const parsedUserData = JSON.parse(uDataStr);
+          if (parsedUserData.coin !== undefined) setUserCoin(parsedUserData.coin);
+          if (parsedUserData.xp !== undefined) setUserXp(parsedUserData.xp);
+        }
+      }).catch(e => console.log(e));
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   const userRankInfo = calculateUserRank(userXp);
 
   useEffect(() => {
@@ -4600,7 +4623,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                           uData.coin = newCoin;
                                           await AsyncStorage.setItem('user_data', JSON.stringify(uData));
                                         }
-                                        setMysteryKeysCount(prev => prev + (item.value || 1));
+                                        const kVal = item.value || 1;
+                                        const uKey = user?.customId || user?.id || 'guest';
+                                        const curKStr = await AsyncStorage.getItem(`user_mystery_keys_count_${uKey}`);
+                                        const curK = curKStr !== null ? parseInt(curKStr, 10) : 1;
+                                        const totK = curK + kVal;
+                                        await AsyncStorage.setItem(`user_mystery_keys_count_${uKey}`, totK.toString());
+                                        setMysteryKeysCount(totK);
                                         triggerPurchaseAnimation(item, "Bosh sahifa -> Sirli Sandiq bo'limi");
                                       } catch(e) {}
                                     }
