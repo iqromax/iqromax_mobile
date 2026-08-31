@@ -16,6 +16,13 @@ import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+if (MeshoptDecoder && MeshoptDecoder.ready) {
+  MeshoptDecoder.ready.then(() => {
+    if (GLTFLoader && GLTFLoader.prototype) {
+      GLTFLoader.prototype.setMeshoptDecoder(MeshoptDecoder);
+    }
+  });
+}
 if (GLTFLoader && GLTFLoader.prototype) {
   GLTFLoader.prototype.setMeshoptDecoder(MeshoptDecoder);
 }
