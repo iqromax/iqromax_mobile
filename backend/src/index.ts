@@ -777,6 +777,7 @@ app.get('/api/ranking', async (req, res) => {
       id: u.customId,
       name: u.name,
       xp: u.xp || 0,
+      coin: u.coin || 0,
       avatar: u.character || null,
     }));
     

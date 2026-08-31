@@ -683,7 +683,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
             if (localUser.xp !== undefined) setUserXp(localUser.xp);
             
             // Sync with backend to get latest XP and stats by fetching ranking
-            // This is more robust as it avoids any customId URL encoding issues
             fetch(`${API_URL}/ranking?t=${Date.now()}`)
               .then(res => res.json())
               .then(data => {
@@ -696,9 +695,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   });
                   if (me) {
                     setUserXp(me.xp);
-                    if (me.coin !== undefined) setUserCoin(me.coin);
                     setUser(prev => {
-                      const updated = { ...prev, ...me, xp: me.xp, coin: me.coin !== undefined ? me.coin : prev?.coin, isGuest: false };
+                      const updated = { ...prev, xp: me.xp, isGuest: false };
                       AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
                       return updated;
                     });
