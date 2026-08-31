@@ -4579,43 +4579,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       );
                     })}
 
-                        <TouchableOpacity
-                          style={{
-                            backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255,255,255,0.05)',
-                            borderWidth: 1,
-                            borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
-                            paddingHorizontal: 14,
-                            paddingVertical: 10,
-                            borderRadius: 12,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            gap: 6
-                          }}
-                          onPress={async () => {
-                            if (userCoin < item.price) {
-                              showCustomAlert("Tangalar yetarli emas!", `Ushbu kalitni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
-                              return;
-                            }
-                            try {
-                              const newCoin = userCoin - item.price;
-                              setUserCoin(newCoin);
-                              const uDataStr = await AsyncStorage.getItem('user_data');
-                              if (uDataStr) {
-                                const uData = JSON.parse(uDataStr);
-                                uData.coin = newCoin;
-                                await AsyncStorage.setItem('user_data', JSON.stringify(uData));
-                              }
-                              setMysteryKeysCount(prev => prev + (item.value || 1));
-                              showCustomAlert("Tabriklaymiz! 🎉", `+${item.value || 1} ta oltin kalit Sirli Sandiq bo'limingizga qo'shildi!`, "success");
-                            } catch(e) {}
-                          }}
-                        >
-                          <Image source={require('../assets/s_coin.png')} style={{ width: 14, height: 14 }} />
-                          <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-
                   {shopItems.filter(item => item.category === 'mystery').length === 0 && (
                     <View style={{ width: '100%', paddingVertical: 30, alignItems: 'center' }}>
                       <MaterialCommunityIcons name="key-remove" size={32} color="#666" />
