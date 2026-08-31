@@ -470,6 +470,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
               }
             }).catch(e => console.log(e));
           }
+        }).catch(e => console.log(e));
+
         AsyncStorage.getItem('user_data').then(uDataStr => {
           if (uDataStr) {
             const parsedUserData = JSON.parse(uDataStr);
