@@ -192,11 +192,17 @@ useGLTF.preload(require('../assets/models/ochki_4_optimized.glb'));
 function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false }) {
   if (!modelPath) return null;
   const glbSource = typeof modelPath === 'string' ? (modelPath.startsWith('http') ? modelPath : `${API_URL}${modelPath.replace('/api', '')}`) : modelPath;
-  const gltf = useLoader(GLTFLoader, glbSource, (loader) => {
-    if (loader && loader.setMeshoptDecoder) {
-      loader.setMeshoptDecoder(MeshoptDecoder);
-    }
-  });
+  
+  let gltf = null;
+  try {
+    gltf = useLoader(GLTFLoader, glbSource, (loader) => {
+      if (loader) {
+        try { loader.setMeshoptDecoder(MeshoptDecoder); } catch(e){}
+      }
+    });
+  } catch(err) {
+    return null;
+  }
   const scene = gltf?.scene;
   if (!scene) return null;
   
