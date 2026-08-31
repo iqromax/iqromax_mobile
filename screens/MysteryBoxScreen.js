@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Share, Alert } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Share, Alert, DeviceEventEmitter } from 'react-native';
 import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Clipboard from 'expo-clipboard';
@@ -584,39 +585,46 @@ export default function MysteryBoxScreen({ navigation, route }) {
   const [streakDays, setStreakDays] = useState(0);
   const [streakClaimed, setStreakClaimed] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      async function loadUserData() {
+        try {
+          const storedKeys = await AsyncStorage.getItem(KEYS_STORAGE_KEY);
+          if (storedKeys !== null) {
+            setKeysCount(parseInt(storedKeys, 10));
+          } else {
+            setKeysCount(1);
+            await AsyncStorage.setItem(KEYS_STORAGE_KEY, '1');
+          }
+
+          const storedStreak = await AsyncStorage.getItem('user_daily_streak_days');
+          const lastExerciseDate = await AsyncStorage.getItem('user_last_exercise_date');
+          const todayStr = new Date().toISOString().slice(0, 10);
+          
+          let daysCount = storedStreak ? parseInt(storedStreak, 10) : 0;
+          if (lastExerciseDate === todayStr && daysCount === 0) {
+            daysCount = 1;
+          }
+
+          setStreakDays(Math.min(7, Math.max(0, daysCount)));
+          if (daysCount >= 7) {
+            const claimed = await AsyncStorage.getItem('streak_7_key_claimed');
+            setStreakClaimed(claimed === 'true');
+          }
+        } catch (e) {}
+      }
+      loadUserData();
+    }, [KEYS_STORAGE_KEY])
+  );
+
   React.useEffect(() => {
-    // Load daily streak activity & keys count from AsyncStorage
-    async function loadUserData() {
-      try {
-        const storedKeys = await AsyncStorage.getItem(KEYS_STORAGE_KEY);
-        if (storedKeys !== null) {
-          setKeysCount(parseInt(storedKeys, 10));
-        } else {
-          // Default 1 key for new user
-          setKeysCount(1);
-          await AsyncStorage.setItem(KEYS_STORAGE_KEY, '1');
-        }
-
-        const storedStreak = await AsyncStorage.getItem('user_daily_streak_days');
-        const lastExerciseDate = await AsyncStorage.getItem('user_last_exercise_date');
-        const todayStr = new Date().toISOString().slice(0, 10);
-        
-        let daysCount = storedStreak ? parseInt(storedStreak, 10) : 0;
-        
-        // If user solved exercise today or recently, ensure streak is active
-        if (lastExerciseDate === todayStr && daysCount === 0) {
-          daysCount = 1;
-        }
-
-        setStreakDays(Math.min(7, Math.max(0, daysCount)));
-        if (daysCount >= 7) {
-          const claimed = await AsyncStorage.getItem('streak_7_key_claimed');
-          setStreakClaimed(claimed === 'true');
-        }
-      } catch (e) {}
-    }
-    loadUserData();
-  }, [userIdKey]);
+    const sub = DeviceEventEmitter.addListener('user_keys_updated', () => {
+      AsyncStorage.getItem(KEYS_STORAGE_KEY).then(val => {
+        if (val !== null) setKeysCount(parseInt(val, 10));
+      }).catch(() => {});
+    });
+    return () => sub.remove();
+  }, [KEYS_STORAGE_KEY]);
 
   const handleClaimStreakBonus = async () => {
     if (streakDays >= 7 && !streakClaimed) {

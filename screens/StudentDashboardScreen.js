@@ -4114,7 +4114,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               activeOpacity={0.8}
               onPress={() => {
                 setIsOpeningBox(true);
-                setTimeout(() => {
+                setTimeout(async () => {
                   const rewards = [
                     '3 kunlik BEPUL Premium Status! 👑',
                     '+250 Oltin Coinlar! 🪙',
@@ -4125,7 +4125,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   ];
                   const randomReward = rewards[Math.floor(Math.random() * rewards.length)];
                   setBoxReward(randomReward);
-                  setMysteryKeysCount(prev => Math.max(0, prev - 1));
+                  const nextKeys = Math.max(0, mysteryKeysCount - 1);
+                  setMysteryKeysCount(nextKeys);
+                  try {
+                    const uIdKey = user?.customId || user?.id || 'guest';
+                    await AsyncStorage.setItem(`user_mystery_keys_count_${uIdKey}`, nextKeys.toString());
+                  } catch(e) {}
                   setIsOpeningBox(false);
                 }, 800);
               }}
