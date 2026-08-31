@@ -443,29 +443,31 @@ const ShopAdmin = () => {
                   </div>
                 )}
 
-                {/* 3. Product Image Upload */}
-                <div>
-                  <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
-                    Mahsulot Rasmi (Image Upload)
-                  </label>
-                  <div className="flex items-center gap-4 bg-[#121225] p-3 border border-[#1A1A35] rounded-xl">
-                    {imagePreview ? (
-                      <img src={imagePreview} alt="Preview" className="w-14 h-14 rounded-lg object-cover border border-amber-500/30" />
-                    ) : (
-                      <div className="w-14 h-14 rounded-lg bg-[#181832] flex items-center justify-center text-gray-500 border border-[#252545]">
-                        <ImageIcon className="w-6 h-6" />
+                {/* 3. Product Image Upload (Only for Inventory) */}
+                {category === 'inventory' && (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                      Mahsulot Rasmi (Image Upload)
+                    </label>
+                    <div className="flex items-center gap-4 bg-[#121225] p-3 border border-[#1A1A35] rounded-xl">
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Preview" className="w-14 h-14 rounded-lg object-cover border border-amber-500/30" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-[#181832] flex items-center justify-center text-gray-500 border border-[#252545]">
+                          <ImageIcon className="w-6 h-6" />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-lg cursor-pointer transition-all">
+                          <ImageIcon className="w-4 h-4" />
+                          <span>Rasm Tanlash...</span>
+                          <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                        </label>
+                        <p className="text-[11px] text-gray-400 mt-1">PNG, JPG formatdagi rasmlar</p>
                       </div>
-                    )}
-                    <div className="flex-1">
-                      <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-lg cursor-pointer transition-all">
-                        <ImageIcon className="w-4 h-4" />
-                        <span>Rasm Tanlash...</span>
-                        <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                      </label>
-                      <p className="text-[11px] text-gray-400 mt-1">PNG, JPG formatdagi rasmlar</p>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* 4. Product Name */}
                 <div>
