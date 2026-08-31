@@ -4159,28 +4159,29 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
       {/* SHOP MODAL (Oldi-Sotti Do'kon) */}
       <Modal visible={isShopModalOpen} transparent={true} animationType="slide">
-        <View style={{ flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.96)' }}>
-          <SafeAreaView style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: '#05050C' }}>
+          <SafeAreaView style={{ flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
             {/* Shop Header */}
             <View style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
-              paddingHorizontal: 20,
-              paddingVertical: 14,
+              paddingHorizontal: 16,
+              paddingTop: Platform.OS === 'ios' ? 45 : 15,
+              paddingBottom: 14,
               borderBottomWidth: 1,
               borderBottomColor: 'rgba(255, 255, 255, 0.08)'
             }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                 <LinearGradient
                   colors={['#FFE259', '#FFA751']}
                   style={{ width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}
                 >
-                  <FontAwesome5 name="store" size={18} color="#3B1800" />
+                  <FontAwesome5 name="store" size={16} color="#3B1800" />
                 </LinearGradient>
-                <View>
-                  <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_900Black', letterSpacing: 0.5 }}>IQROSHOP DO'KON</Text>
-                  <Text style={{ color: '#F59E0B', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>Tangalaringizni sarflang va buyumlarga ega bo'ling!</Text>
+                <View style={{ flex: 1, marginRight: 6 }}>
+                  <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_900Black', letterSpacing: 0.5 }} numberOfLines={1}>IQROSHOP DO'KON</Text>
+                  <Text style={{ color: '#F59E0B', fontSize: 10, fontFamily: 'Inter_600SemiBold' }} numberOfLines={1}>Tangalaringizni sarflang va buyumlarga ega bo'ling!</Text>
                 </View>
               </View>
 
