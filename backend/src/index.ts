@@ -30,11 +30,13 @@ app.use(express.json());
 
 import missionRoutes from './missionRoutes.js';
 import shopRoutes from './shopRoutes.js';
+import inventorySkinRoutes from './inventorySkinRoutes.js';
 
 // Mount the ad video routes
 app.use('/api', adVideoRoutes);
 app.use('/api', missionRoutes);
 app.use('/api', shopRoutes);
+app.use('/api', inventorySkinRoutes);
 
 // Serve the uploads directory for files and shop images
 app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));

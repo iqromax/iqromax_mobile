@@ -434,6 +434,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
     setPurchaseSuccessItem(null);
   };
 
+  const [backendSkins, setBackendSkins] = useState([]);
+
   useEffect(() => {
     fetch(`${API_URL}/shop-items`)
       .then(res => res.json())
@@ -441,6 +443,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
         if (Array.isArray(data)) setShopItems(data);
       })
       .catch(err => console.log('Shop items fetch err:', err));
+
+    const fetchInventorySkins = () => {
+      fetch(`${API_URL}/inventory-skins`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setBackendSkins(data);
+        })
+        .catch(err => console.log('Inventory skins fetch err:', err));
+    };
+    fetchInventorySkins();
+
+    const skinSub = DeviceEventEmitter.addListener('inventory_skins_updated', fetchInventorySkins);
+    return () => skinSub.remove();
   }, []);
   const [myPromoCode, setMyPromoCode] = useState(user?.customId ? `IQ-${user.customId}` : 'IQROMAX2026');
   const [promoChangeCount, setPromoChangeCount] = useState(0);
@@ -986,29 +1001,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [kiyimKategoriya, setKiyimKategoriya] = useState('ustki_kiyim'); // 'ustki_kiyim', 'shim', 'oyoq_kiyim', 'aksessuar', 'ryukzak'
   const [activeKiyimFilter, setActiveKiyimFilter] = useState('BARCHASI');
 
-  const kiyimData = [
-    // BOSH KIYIM
-    { id: 101, category: 'bosh_kiyim', name: 'Golden Crown', rarity: 'LEGENDARY', color: '#EAB308', state: 'KIYILGAN', image: require('../assets/yangi_3.png') },
-    { id: 102, category: 'bosh_kiyim', name: 'Cyber Cap', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/yangi_3.png') },
-    { id: 103, category: 'bosh_kiyim', name: 'Math Beanie', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/yangi_3.png') },
-    { id: 104, category: 'bosh_kiyim', name: 'King Helmet', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '8 000', locked: true, image: require('../assets/yangi_3.png') },
-
-    // USTKI KIYIM
-    { id: 1, category: 'ustki_kiyim', name: 'IQ Hoodie', rarity: 'EPIC', color: '#A855F7', state: 'KIYILGAN', image: require('../assets/yangi_1.png') },
-    { id: 2, category: 'ustki_kiyim', name: 'Champion Jacket', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/yangi_1.png') },
-    { id: 3, category: 'ustki_kiyim', name: 'Cyber Suit', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/yangi_1.png') },
-    { id: 4, category: 'ustki_kiyim', name: 'Golden Jacket', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '5 000', locked: true, image: require('../assets/yangi_1.png') },
-    { id: 5, category: 'ustki_kiyim', name: 'Math Master Tee', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/yangi_1.png') },
-    { id: 6, category: 'ustki_kiyim', name: 'Space Hoodie', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/yangi_1.png') },
-    { id: 7, category: 'ustki_kiyim', name: 'Neon Jacket', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/yangi_1.png') },
-    { id: 8, category: 'ustki_kiyim', name: 'Legend Suit', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '10 000', locked: true, image: require('../assets/yangi_1.png') },
-    
-    // AKSESSUAR
-    { id: 9, category: 'aksessuar', name: 'Clear Glasses', rarity: 'ODDIY', color: '#10B981', state: 'KIYISH', image: require('../assets/ochki_4.png') },
-    { id: 10, category: 'aksessuar', name: 'Gold Glasses', rarity: 'RARE', color: '#3B82F6', state: 'KIYISH', image: require('../assets/glasses.png') },
-    { id: 11, category: 'aksessuar', name: 'Neon Shades', rarity: 'EPIC', color: '#A855F7', state: 'KIYISH', image: require('../assets/yangi_4.png') },
-    { id: 12, category: 'aksessuar', name: 'VR Headset', rarity: 'LEGENDARY', color: '#EAB308', state: 'BUY', price: '12 000', locked: true, image: require('../assets/yangi_5.png') },
-  ];
+  const kiyimData = [];
 
   const renderFramesGrid = () => {
     const filteredData = activeRamkaFilter === 'BARCHASI' ? framesData : framesData.filter(item => item.rarity === activeRamkaFilter);
@@ -1122,67 +1115,58 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const renderKiyimGrid = () => {
-    let filteredByCategory = kiyimData.filter(item => item.category === kiyimKategoriya);
-    if (filteredByCategory.length === 0) {
-      filteredByCategory = kiyimData.filter(item => item.category === 'ustki_kiyim');
-    }
+    const combinedSkins = [...backendSkins, ...kiyimData];
+    let filteredByCategory = combinedSkins.filter(item => item.category === kiyimKategoriya);
     const filteredData = activeKiyimFilter === 'BARCHASI' ? filteredByCategory : filteredByCategory.filter(item => item.rarity === activeKiyimFilter);
-    return filteredData.map((item, i) => {
-      let currentItemState = item.state;
-      if (item.category === 'aksessuar') {
-         if (item.id === 10 && equippedAccessory === require('../assets/models/ochki_9_optimized.glb')) {
-            currentItemState = 'KIYILGAN';
-         } else if (item.id === 9 && equippedAccessory === require('../assets/models/ochki_4_optimized.glb')) {
-            currentItemState = 'KIYILGAN';
-         } else if (item.id === 10 || item.id === 9) {
-            currentItemState = 'KIYISH';
-         } else if (item.state === 'KIYILGAN') {
-            if (equippedAccessory) currentItemState = 'KIYISH';
-         }
-      }
 
-      const handleEquip = () => {
-         if (item.category === 'aksessuar' && item.id === 10) {
-            setEquippedAccessories(prev => ({ ...prev, [activeAvatarIndex]: require('../assets/models/ochki_9_optimized.glb') }));
-         } else if (item.category === 'aksessuar' && item.id === 9) {
-            setEquippedAccessories(prev => ({ ...prev, [activeAvatarIndex]: require('../assets/models/ochki_4_optimized.glb') }));
-         }
-      };
+    if (filteredData.length === 0) {
+      return (
+        <View style={{ width: '100%', paddingVertical: 40, alignItems: 'center', justifyContent: 'center' }}>
+          <MaterialCommunityIcons name="tshirt-crew-outline" size={32} color="rgba(255,255,255,0.2)" />
+          <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 11, marginTop: 8 }}>
+            Ushbu bo'limda skinlar yo'q
+          </Text>
+        </View>
+      );
+    }
+
+    return filteredData.map((item, i) => {
+      const rarityColor = item.rarity === 'LEGENDARY' ? '#EAB308' : item.rarity === 'EPIC' ? '#A855F7' : item.rarity === 'RARE' ? '#3B82F6' : '#10B981';
+      let currentItemState = item.state || 'KIYISH';
+      const imgSrc = item.imageUrl ? { uri: item.imageUrl.startsWith('http') ? item.imageUrl : `${API_URL}${item.imageUrl.replace('/api', '')}` } : (item.image || require('../assets/yangi_1.png'));
 
       return (
-        <View key={item.id} style={{ width: '22%', aspectRatio: 0.55, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, borderWidth: 1, borderColor: currentItemState === 'KIYILGAN' ? '#EAB308' : 'rgba(255,255,255,0.08)', marginBottom: 12, padding: 6, alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+        <View key={item.id || i} style={{ width: '22%', aspectRatio: 0.55, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, borderWidth: 1, borderColor: currentItemState === 'KIYILGAN' ? '#EAB308' : 'rgba(255,255,255,0.08)', marginBottom: 12, padding: 6, alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
           {currentItemState === 'KIYILGAN' && (
              <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EAB308', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
                <MaterialCommunityIcons name="check" size={10} color="#000" />
              </View>
           )}
-          {item.locked && (
+          {item.isLocked && (
              <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#1F2937', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
                <MaterialCommunityIcons name="lock" size={8} color="#FFFFFF" />
              </View>
           )}
-          <Image source={item.image} style={{ width: '85%', height: '50%', borderRadius: 6, marginTop: 6, tintColor: item.locked ? 'rgba(255,255,255,0.5)' : undefined }} contentFit="contain" />
+          <Image source={imgSrc} style={{ width: '85%', height: '50%', borderRadius: 6, marginTop: 6 }} contentFit="contain" />
           <View style={{ alignItems: 'center', width: '100%', marginTop: 6, marginBottom: 2 }}>
-            <Text style={{ color: item.locked ? '#9CA3AF' : '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
+            <Text style={{ color: item.isLocked ? '#9CA3AF' : '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{item.name}</Text>
             <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 6 }}>
-              <Text style={{ color: item.color, fontFamily: 'Inter_700Bold', fontSize: 7 }}>{item.rarity}</Text>
+              <Text style={{ color: rarityColor, fontFamily: 'Inter_700Bold', fontSize: 7 }}>{item.rarity || 'ODDIY'}</Text>
             </View>
             
-            {currentItemState === 'KIYILGAN' && (
+            {currentItemState === 'KIYILGAN' ? (
               <View style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                  <MaterialCommunityIcons name="check-circle" size={10} color="#EAB308" style={{ marginRight: 4 }} />
                  <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>KIYILGAN</Text>
               </View>
-            )}
-            {currentItemState === 'KIYISH' && (
-              <TouchableOpacity onPress={handleEquip} style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', alignItems: 'center' }}>
-                 <Text style={{ color: '#3B82F6', fontFamily: 'Inter_700Bold', fontSize: 8 }}>KIYISH</Text>
-              </TouchableOpacity>
-            )}
-            {item.state === 'BUY' && (
+            ) : item.price > 0 ? (
               <TouchableOpacity style={{ backgroundColor: 'rgba(234,179,8,0.15)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                  <Image source={require('../assets/s_coin.png')} style={{ width: 10, height: 10, marginRight: 3 }} />
                  <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 8 }}>{item.price}</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 4, paddingVertical: 4, borderRadius: 4, width: '100%', alignItems: 'center' }}>
+                 <Text style={{ color: '#3B82F6', fontFamily: 'Inter_700Bold', fontSize: 8 }}>KIYISH</Text>
               </TouchableOpacity>
             )}
           </View>

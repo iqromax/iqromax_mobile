@@ -9,6 +9,7 @@ import EnergyCenter from './pages/EnergyCenter';
 import Notifications from './pages/Notifications';
 import MysteryBoxAdmin from './pages/MysteryBoxAdmin';
 import ShopAdmin from './pages/ShopAdmin';
+import InventoryAdmin from './pages/InventoryAdmin';
 import AppDownloadingAdmin from './pages/AppDownloadingAdmin';
 
 import AppDownloadLanding from './pages/AppDownloadLanding';
@@ -24,6 +25,7 @@ function App() {
         <Route path="/app-downloading" element={<AppDownloadingAdmin />} />
         <Route path="/mystery-box" element={<MysteryBoxAdmin />} />
         <Route path="/shop" element={<ShopAdmin />} />
+        <Route path="/inventory-admin" element={<InventoryAdmin />} />
         <Route path="/users" element={<Users />} />
         <Route path="/students" element={<Students />} />
         <Route path="/teachers" element={<Teachers />} />

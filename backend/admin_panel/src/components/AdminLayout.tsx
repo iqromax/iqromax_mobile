@@ -79,6 +79,18 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             </Link>
 
             <Link 
+              to="/inventory-admin" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/inventory-admin' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <Package className={`w-5 h-5 ${location.pathname === '/inventory-admin' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>Inventar (Skinlar)</span>}
+            </Link>
+
+            <Link 
               to="/app-downloading" 
               className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
                 location.pathname === '/app-downloading' 

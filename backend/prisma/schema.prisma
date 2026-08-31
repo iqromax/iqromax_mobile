@@ -97,6 +97,20 @@ model MysteryBoxItem {
   updatedAt   DateTime @updatedAt
 }
 
+model InventorySkin {
+  id          String   @id @default(uuid())
+  category    String   // "bosh_kiyim", "ustki_kiyim", "shim", "oyoq_kiyim", "aksessuar", "ryukzak"
+  name        String
+  rarity      String   @default("ODDIY") // "ODDIY", "RARE", "EPIC", "LEGENDARY"
+  imageUrl    String?  // skin preview image URL
+  modelUrl    String?  // .glb 3D model URL
+  price       Int      @default(0) // Coin price
+  isLocked    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model ShopItem {
   id          String   @id @default(uuid())
   category    String   // "inventory", "energy", "mystery"
