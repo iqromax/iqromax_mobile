@@ -4668,12 +4668,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           }}
                           onPress={() => {
                             const action = btn.onPress;
+                            if (action) action();
                             closeCustomAlert();
-                            if (action) {
-                              setTimeout(() => {
-                                action();
-                              }, 100);
-                            }
                           }}
                         >
                           <Text style={{
@@ -4864,12 +4860,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     }}
                     onPress={() => {
                       const action = btn.onPress;
+                      if (action) action();
                       closeCustomAlert();
-                      if (action) {
-                        setTimeout(() => {
-                          action();
-                        }, 100);
-                      }
                     }}
                   >
                     <Text style={{
