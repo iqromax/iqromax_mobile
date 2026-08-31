@@ -142,6 +142,7 @@ export default function BattleResultScreen({ navigation, route }) {
     oppIncorrect = 0,
     oppAvgTime = "0.0",
     oppMaxCombo = 0,
+    examplesCount = 10,
     language = 'uz'
   } = route.params || {};
 
@@ -167,11 +168,23 @@ export default function BattleResultScreen({ navigation, route }) {
               if (res.ok) {
                 const resData = await res.json();
                 uData.xp = resData.xp;
-                await AsyncStorage.setItem('user_data', JSON.stringify(uData));
-                setUserData({ ...uData });
               }
+
+              // Award coins equal to selected examplesCount (hadlar soni) for winning battle
+              const coinRes = await fetch(`${API_URL}/user/coin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customId: uData.customId || uData.id, coinToAdd: examplesCount })
+              });
+              if (coinRes.ok) {
+                const coinResData = await coinRes.json();
+                uData.coin = coinResData.coin;
+              }
+
+              await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+              setUserData({ ...uData });
             } catch (err) {
-              console.log('Error saving battle win xp', err);
+              console.log('Error saving battle win rewards', err);
             }
           }
         }
@@ -394,6 +407,11 @@ export default function BattleResultScreen({ navigation, route }) {
               </View>
               <Text style={styles.statBoxLabel}>{t.gainedXp}</Text>
               <Text style={styles.statBoxValue}>{isWin ? `+25` : '-'}</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Image source={require('../assets/s_coin.png')} style={{ width: 18, height: 18 }} contentFit="contain" />
+              <Text style={styles.statBoxLabel}>Coin</Text>
+              <Text style={[styles.statBoxValue, { color: isWin ? '#F59E0B' : '#9CA3AF' }]}>{isWin ? `+${examplesCount}` : '-'}</Text>
             </View>
           </View>
         </Animated.View>

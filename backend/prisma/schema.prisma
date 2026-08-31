@@ -21,6 +21,7 @@ model User {
   status    String   @default("Faol")
   energy    Int      @default(10)
   xp               Int       @default(0)
+  coin             Int       @default(0)
   premiumExpiresAt DateTime? // Timestamp when won Premium subscription expires
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

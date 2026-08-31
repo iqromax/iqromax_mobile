@@ -687,6 +687,39 @@ app.post('/api/user/xp', async (req, res) => {
   }
 });
 
+// Add Coin to user
+app.post('/api/user/coin', async (req, res) => {
+  try {
+    const { customId, coinToAdd } = req.body;
+    if (!customId || coinToAdd == null) return res.status(400).json({ error: 'customId and coinToAdd are required' });
+
+    const cleanId = customId.replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId }
+        ]
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { coin: { increment: coinToAdd } }
+    });
+
+    io.emit('user_coin_updated', { customId: updatedUser.customId, coin: updatedUser.coin });
+
+    res.json({ message: 'Coin added successfully', coin: updatedUser.coin });
+  } catch (error) {
+    console.error('Update Coin error:', error);
+    res.status(500).json({ error: 'Failed to update Coin' });
+  }
+});
+
 // Update user character
 app.put('/api/user/character', async (req, res) => {
   try {

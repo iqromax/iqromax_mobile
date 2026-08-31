@@ -305,6 +305,7 @@ export default function BattleGameScreen({ navigation, route }) {
          oppName: t.opponent,
          actualAnswer: currentQ.answer,
          userAnswer: inputValue,
+         examplesCount,
          language
       });
     }

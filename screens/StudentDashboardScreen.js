@@ -354,6 +354,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [leaderboardData, setLeaderboardData] = useState([]);
   
   const [userXp, setUserXp] = useState(user?.xp || 0);
+  const [userCoin, setUserCoin] = useState(user?.coin || 0);
   // Guest user check: True ONLY if user is a guest user (explicitly isGuest: true or no user object exists)
   const isGuestUser = Boolean(!user || user.isGuest === true);
   
@@ -469,6 +470,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
               }
             }).catch(e => console.log(e));
           }
+        AsyncStorage.getItem('user_data').then(uDataStr => {
+          if (uDataStr) {
+            const parsedUserData = JSON.parse(uDataStr);
+            if (parsedUserData.coin !== undefined) setUserCoin(parsedUserData.coin);
+            if (parsedUserData.xp !== undefined) setUserXp(parsedUserData.xp);
+          }
         }).catch(e => console.log(e));
       });
     }, [user?.customId, user?.id, route.params])
@@ -478,7 +485,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (user?.xp !== undefined) {
       setUserXp(user.xp);
     }
-  }, [user?.xp]);
+    if (user?.coin !== undefined) {
+      setUserCoin(user.coin);
+    }
+  }, [user?.xp, user?.coin]);
   const userRankInfo = calculateUserRank(userXp);
 
   useEffect(() => {
@@ -1481,11 +1491,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* Stats Row: Coin and XP */}
+        {/* Stats Row: Energy, Coin and XP */}
         <View style={[styles.statsRow, { zIndex: 999 }]}>
           {/* Energy Card */}
           <TouchableOpacity 
-            style={[styles.statCard, { marginRight: 10 }]} 
+            style={[styles.statCard, { marginRight: 6 }]} 
             activeOpacity={0.8}
             onPress={() => checkGuestAuth(() => navigation.navigate('EnergyCenter'))}
           >
@@ -1497,9 +1507,20 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </View>
             <View style={styles.plusButton}>
-              <Feather name="plus" size={18} color="#F59E0B" />
+              <Feather name="plus" size={14} color="#F59E0B" />
             </View>
           </TouchableOpacity>
+
+          {/* Coin Card */}
+          <View style={[styles.statCard, { marginRight: 6 }]}>
+            <View style={styles.statContent}>
+              <Image source={require('../assets/s_coin.png')} style={styles.statImage} />
+              <View>
+                <Text style={styles.statValue}>{userCoin}</Text>
+                <Text style={styles.statLabel}>{coinText || 'COIN'}</Text>
+              </View>
+            </View>
+          </View>
 
           {/* XP Card */}
           <View style={styles.statCard}>
@@ -3071,7 +3092,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                    <Text style={styles.proTopStatValue}>{userXp}</Text>
                    <Text style={styles.proTopStatLabel}>{t.statXP || 'XP'}</Text>
                 </View>
-                {/* Coin Section Temporarily Removed */}
+                <View style={styles.proTopStatDivider} />
+                <View style={styles.proTopStatItem}>
+                   <Image source={require('../assets/s_coin.png')} style={styles.proTopStatIcon} />
+                   <Text style={styles.proTopStatValue}>{userCoin}</Text>
+                   <Text style={styles.proTopStatLabel}>{coinText || 'COIN'}</Text>
+                </View>
                 <View style={styles.proTopStatDivider} />
                 <View style={styles.proTopStatItem}>
                    <Image source={require('../assets/lightning_energy.png')} style={styles.proTopStatIcon} />
@@ -4175,7 +4201,7 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 6,
   },
   statCard: {
     flex: 1,
@@ -4183,8 +4209,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#0A0A16',
-    borderRadius: 14,
-    padding: 10,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: '#1A1A2E',
   },
@@ -4193,20 +4220,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statImage: {
-    width: 36,
-    height: 36,
-    marginRight: 8,
-    borderRadius: 18,
+    width: 28,
+    height: 28,
+    marginRight: 6,
+    borderRadius: 14,
   },
   statValue: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Inter_700Bold',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   statLabel: {
     color: '#888899',
-    fontSize: 11,
+    fontSize: 9,
     fontFamily: 'Inter_500Medium',
   },
   plusButton: {

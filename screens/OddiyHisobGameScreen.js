@@ -178,6 +178,28 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     }
   };
 
+  const saveCoinToBackend = async (coinToAdd) => {
+    if (coinToAdd <= 0) return;
+    try {
+      const dataStr = await AsyncStorage.getItem('user_data');
+      if (dataStr) {
+        const userData = JSON.parse(dataStr);
+        const res = await fetch(`${API_URL}/user/coin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customId: userData.customId || userData.id, coinToAdd })
+        });
+        if (res.ok) {
+          const resData = await res.json();
+          userData.coin = resData.coin;
+          await AsyncStorage.setItem('user_data', JSON.stringify(userData));
+        }
+      }
+    } catch (e) {
+      console.log('Error saving Coin', e);
+    }
+  };
+
   // Timer starts only after countdown
   useEffect(() => {
     if (phase === 'countdown') return;
@@ -332,6 +354,9 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       
       if (!isSpeedMode) {
         saveXPToBackend(wonXp);
+        // Tasavvur bo'limida har bir to'g'ri javob uchun hadlar soni (examplesCount) miqdorida coin beriladi
+        const wonCoins = examplesCount;
+        saveCoinToBackend(wonCoins);
       }
     } else {
       if (!isSpeedMode) playSound('wrong');
@@ -351,6 +376,13 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       } else {
         const finalXp = xp + (isCorrect ? calculateQuestionXP() : 0);
         saveXPToBackend(finalXp);
+
+        // Ko'paytirish va bo'lish bo'limida g'olib bo'lsa (aniqlik >= 50%), misollar turi (examplesCount) miqdorida coin beriladi
+        const totalCorrect = speedResults.filter(r => r.isCorrect).length + (isCorrect ? 1 : 0);
+        if (totalCorrect >= Math.ceil((speedResults.length + 1) / 2)) {
+          const wonCoins = examplesCount;
+          saveCoinToBackend(wonCoins);
+        }
         setPhase('summary');
       }
     } else {
@@ -531,10 +563,14 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         )}
         
         {isLastAnswerCorrect && !isTeacher && (
-          <Animated.View style={[styles.feedbackRewards, { transform: [{translateY: translateYAnim}] }]}>
+          <Animated.View style={[styles.feedbackRewards, { transform: [{translateY: translateYAnim}], flexDirection: 'row', gap: 10 }]}>
             <View style={styles.rewardBadge}>
                <Image source={require('../assets/xp_icon.jpg')} style={{width: 24, height: 24, borderRadius: 12}} contentFit="cover" />
                <Text style={styles.rewardBadgeText}>+{calculateQuestionXP()} XP</Text>
+            </View>
+            <View style={[styles.rewardBadge, { backgroundColor: 'rgba(234, 179, 8, 0.15)', borderColor: 'rgba(234, 179, 8, 0.4)' }]}>
+               <Image source={require('../assets/s_coin.png')} style={{width: 22, height: 22}} contentFit="contain" />
+               <Text style={[styles.rewardBadgeText, { color: '#F59E0B' }]}>+{examplesCount} Coin</Text>
             </View>
           </Animated.View>
         )}
