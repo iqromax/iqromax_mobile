@@ -196,7 +196,7 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
   
   let gltf = null;
   try {
-    gltf = useLoader(GLTFLoader, glbSource, (loader) => {
+    gltf = useGLTF(glbSource, true, true, (loader) => {
       if (loader) {
         try { loader.setMeshoptDecoder(MeshoptDecoder); } catch(e){}
       }
@@ -209,18 +209,20 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
   
   // Fix for WebGL Shader Error and WEBP texture fallback
   React.useMemo(() => {
-    scene.traverse((child) => {
-      if (child.isMesh && child.material) {
-         const mats = Array.isArray(child.material) ? child.material : [child.material];
-         mats.forEach(mat => {
-           if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-           // Fallback for WebP textures in EXGL
-           if (mat.map && mat.map.image && !mat.map.image.width) {
-             mat.map.needsUpdate = true;
-           }
-         });
-      }
-    });
+    try {
+      scene.traverse((child) => {
+        if (child.isMesh && child.material) {
+           const mats = Array.isArray(child.material) ? child.material : [child.material];
+           mats.forEach(mat => {
+             if (mat.name) mat.name = mat.name.replace(/-/g, '_');
+             // Replace WebP textures or force canvas fallback
+             if (mat.map && mat.map.image && (!mat.map.image.width || mat.map.image.src?.includes('data:image/webp'))) {
+               mat.map.needsUpdate = true;
+             }
+           });
+        }
+      });
+    } catch(e) {}
   }, [scene]);
   
   const accessoryScale = isHeadwear ? 0.65 : 0.50;
@@ -313,8 +315,16 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null, hea
   return (
     <>
       <primitive object={scene} scale={6.3} position={[0, yPos, 0]} rotation={[0, -Math.PI / 2, 0]} />
-      {accessoryPath && <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} isHeadwear={false} />}
-      {headwearPath && <AccessoryModel modelPath={headwearPath} yPos={yPos} characterIndex={characterIndex} isHeadwear={true} />}
+      {accessoryPath && (
+        <Suspense fallback={null}>
+          <AccessoryModel modelPath={accessoryPath} yPos={yPos} characterIndex={characterIndex} isHeadwear={false} />
+        </Suspense>
+      )}
+      {headwearPath && (
+        <Suspense fallback={null}>
+          <AccessoryModel modelPath={headwearPath} yPos={yPos} characterIndex={characterIndex} isHeadwear={true} />
+        </Suspense>
+      )}
       <OrbitControls 
         enableZoom={false} 
         enablePan={false} 
