@@ -232,6 +232,7 @@ export default function AuthScreen({ navigation, route }) {
       }
 
       if (role === 'parent') {
+        // Go to ParentDashboard directly for guest register
         const parentUser = {
           id: 'parent_' + Date.now(),
           name: name.trim(),
