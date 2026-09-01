@@ -1201,7 +1201,10 @@ app.post('/api/admin/download-link', async (req, res) => {
 });
 
 // Serve admin panel static files in production
-app.use(express.static(path.join(__dirname, '../admin_panel/dist')));
+const frontendDistPath = fs.existsSync(path.join(__dirname, '../../iqromax-web-frontend/dist'))
+  ? path.join(__dirname, '../../iqromax-web-frontend/dist')
+  : path.join(__dirname, '../admin_panel/dist');
+app.use(express.static(frontendDistPath));
 
 // --- TEACHER DIRECT MESSAGE & NOTIFICATION API ---
 app.post('/api/teacher/send-message', async (req, res) => {
@@ -1605,7 +1608,10 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
 
 // Fallback to admin panel for unhandled routes
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
+  const indexHtmlPath = fs.existsSync(path.join(__dirname, '../../iqromax-web-frontend/dist/index.html'))
+    ? path.join(__dirname, '../../iqromax-web-frontend/dist/index.html')
+    : path.join(__dirname, '../admin_panel/dist/index.html');
+  res.sendFile(indexHtmlPath);
 });
 
 const PORT = process.env.PORT || 5000;
