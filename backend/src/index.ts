@@ -1317,17 +1317,31 @@ app.post('/api/teacher/send-invite', async (req, res) => {
 
     const cleanStudentCustomId = studentUser.customId;
 
-    // Check if pending invitation already sent
+    const cleanStudentCustomId = studentUser.customId;
+
+    // Parse current teachers list stored as comma-separated string in country field
+    const currentTeachersList = studentUser.country ? studentUser.country.split(',').filter(Boolean) : [];
+    if (currentTeachersList.length >= 5) {
+      return res.status(400).json({ error: 'Ushbu o\'quvchining o\'qituvchilari soni maksimal 5 taga yetgan' });
+    }
+
+    const currentTeacherId = String(teacherCustomId || teacherId);
+    if (currentTeachersList.includes(currentTeacherId)) {
+      return res.status(400).json({ error: 'Ushbu o\'quvchi sizning guruhingizda allaqachon tasdiqlangan' });
+    }
+
+    // Check if pending invitation already sent by this teacher
     const existingNotif = await prisma.notification.findFirst({
       where: {
         userId: cleanStudentCustomId,
+        senderId: currentTeacherId,
         type: 'TEACHER_INVITE',
         status: 'PENDING'
       }
     });
 
     if (existingNotif) {
-      return res.status(400).json({ error: 'Ushbu o\'quvchiga taklifnoma yuborilgan' });
+      return res.status(400).json({ error: 'Ushbu o\'quvchiga allaqachon taklifnoma yuborgansiz' });
     }
 
     // Create TEACHER_INVITE Notification
@@ -1494,19 +1508,27 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
         const teacherId = inviteData.teacherCustomId || inviteData.teacherId || updated.senderId;
 
         if (teacherId && updated.userId) {
-          // Update student user's teacherId field in database (or character tag / role relation)
-          await prisma.user.updateMany({
+          const studentUser = await prisma.user.findFirst({
             where: {
               OR: [
                 { customId: updated.userId },
                 { id: updated.userId }
               ]
-            },
-            data: {
-              // Store assigned teacher ID inside status or extra metadata if needed
-              country: teacherId // Use optional field to bind teacherId
             }
           });
+
+          if (studentUser) {
+            const currentTeachers = studentUser.country ? studentUser.country.split(',').filter(Boolean) : [];
+            if (!currentTeachers.includes(String(teacherId)) && currentTeachers.length < 5) {
+              currentTeachers.push(String(teacherId));
+              const updatedTeachersStr = currentTeachers.join(',');
+
+              await prisma.user.update({
+                where: { id: studentUser.id },
+                data: { country: updatedTeachersStr }
+              });
+            }
+          }
         }
       } catch (err) {
         console.error('Assign teacher error:', err);

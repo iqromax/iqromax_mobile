@@ -602,17 +602,22 @@ export default function TeacherDashboardScreen({ navigation, route }) {
 
           setAllUsersData(processedAllUsers);
 
-          // Filter students assigned specifically to this teacher for statistics
-          const currentTeacherId = user?.customId || user?.id;
+          // Filter students assigned specifically to this teacher for statistics (multi-teacher support up to 5)
+          const currentTeacherId = String(user?.customId || user?.id || '').toUpperCase();
           const assignedStudents = adminUsersList.filter(u => {
             if (u.role === 'teacher' || u.role === 'admin') return false;
-            return u.country === currentTeacherId || String(u.country).toUpperCase() === String(currentTeacherId).toUpperCase();
+            if (!u.country) return false;
+            const teacherList = String(u.country).toUpperCase().split(',').map(s => s.trim());
+            return teacherList.includes(currentTeacherId);
           });
 
-          // Fallback to assigned students or first 2 confirmed students if just approved
           const studentUsers = assignedStudents.length > 0 
             ? assignedStudents 
-            : rankingDataList.filter((u, idx) => u.role !== 'teacher' && (u.country === currentTeacherId || idx < 2));
+            : rankingDataList.filter((u, idx) => {
+                if (u.role === 'teacher') return false;
+                const teacherList = String(u.country || '').toUpperCase().split(',').map(s => s.trim());
+                return teacherList.includes(currentTeacherId) || idx < 2;
+              });
             
           const targetUsers = studentUsers;
 
