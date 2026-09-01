@@ -215,31 +215,36 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
   const scene = gltf?.scene;
   if (!scene) return null;
   
-  // Fix for WebGL Shader Error and WEBP texture fallback
-  React.useMemo(() => {
-    try {
-      scene.traverse((child) => {
-        if (child.isMesh && child.material) {
-           const mats = Array.isArray(child.material) ? child.material : [child.material];
-           mats.forEach(mat => {
-             if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-             if (mat.map) mat.map.needsUpdate = true;
-           });
-        }
-      });
-    } catch(e) {}
+  const clonedScene = React.useMemo(() => {
+    const cloned = scene.clone(true);
+    cloned.traverse((child) => {
+      if (child.isMesh && child.material) {
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        const newMats = mats.map(mat => {
+          return new THREE.MeshLambertMaterial({
+            color: mat.color ? mat.color : 0xffffff,
+            map: mat.map || null,
+            side: THREE.DoubleSide,
+            transparent: true,
+            alphaTest: 0.1
+          });
+        });
+        child.material = Array.isArray(child.material) ? newMats : newMats[0];
+      }
+    });
+    return cloned;
   }, [scene]);
-  
-  const accessoryScale = isHeadwear ? 3.5 : 0.50;
+
+  const accessoryScale = isHeadwear ? 0.35 : 0.50;
   
   let xOffset = 0;
-  let heightOffset = isHeadwear ? 1.80 : 2.10; // Bosh kiyim (hat/cap) head height positioning
+  let heightOffset = isHeadwear ? 0.35 : 2.10; // Bosh kiyim (hat/cap) head height positioning
   let zOffset = isHeadwear ? 0.0 : 0.20;
   
   if (characterIndex === 0 || characterIndex === 1) { // Athletic Man & Adult Male
-    heightOffset = isHeadwear ? 1.80 : 1.50; 
+    heightOffset = isHeadwear ? 0.35 : 1.50; 
   } else if (characterIndex >= 4) { // Qizlar
-    heightOffset = isHeadwear ? 1.85 : 2.05; 
+    heightOffset = isHeadwear ? 0.40 : 2.05; 
     zOffset = isHeadwear ? 0.05 : 0.30; 
   }
   
@@ -249,7 +254,7 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
   
   return (
     <primitive 
-      object={scene.clone()} 
+      object={clonedScene} 
       scale={accessoryScale} 
       position={[posX, posY, posZ]} 
       rotation={[0, 0, 0]}
