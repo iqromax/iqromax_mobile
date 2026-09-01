@@ -1012,161 +1012,102 @@ export default function ParentDashboardScreen({ navigation, route }) {
             <View style={[styles.modalContentCard, { maxHeight: '90%' }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>
-                  {authModalMode === 'login' ? '🔑 Ota-ona Tizimiga Kirish' : '🔒 Autentifikatsiya va Farzand ID'}
-                </Text>
+              <View style={styles.modalHeaderRow}>
+                <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🔒 Autentifikatsiya va Farzand ID</Text>
                 <TouchableOpacity onPress={() => setIsAuthModalOpen(false)}>
                   <Feather name="x" size={24} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
 
-              {/* MODAL MODE TAB SWITCHER */}
-              <View style={{ flexDirection: 'row', backgroundColor: '#121223', borderRadius: 12, padding: 4, marginBottom: 16, borderWidth: 1, borderColor: '#1A1A2F' }}>
-                <TouchableOpacity
-                  style={[{ flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' }, authModalMode === 'login' && { backgroundColor: '#3B0764' }]}
-                  onPress={() => setAuthModalMode('login')}
-                  activeOpacity={0.8}
-                >
-                  <Text style={{ color: authModalMode === 'login' ? '#FFF' : '#9CA3AF', fontSize: 13, fontFamily: 'Inter_700Bold' }}>🔑 Tizimga Kirish</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[{ flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center' }, authModalMode === 'register' && { backgroundColor: '#3B0764' }]}
-                  onPress={() => setAuthModalMode('register')}
-                  activeOpacity={0.8}
-                >
-                  <Text style={{ color: authModalMode === 'register' ? '#FFF' : '#9CA3AF', fontSize: 13, fontFamily: 'Inter_700Bold' }}>📝 Ro'yxatdan O'tish</Text>
-                </TouchableOpacity>
-              </View>
-
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
                 <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>
-                  {authModalMode === 'login' 
-                    ? "Tizimga kirish uchun ro'yxatdan o'tgan telefon raqamingiz (yoki email) va parolingizni kiriting."
-                    : "Farzandingiz natijalarini ko'rish uchun elektron pochtangiz, telefon raqamingiz, parol va Farzandingiz ID sini kiriting."}
+                  Farzandingiz natijalarini ko'rish uchun elektron pochtangiz, telefon raqamingiz, parol va Farzandingiz ID sini kiriting.
                 </Text>
 
-                {/* PHONE OR EMAIL INPUT FOR LOGIN */}
-                {authModalMode === 'login' ? (
-                  <>
-                    <View style={styles.inputContainer}>
-                      <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                      <TextInput
-                        style={styles.modalInput}
-                        placeholder="Telefon raqam yoki email"
-                        placeholderTextColor="#6B7280"
-                        keyboardType="default"
-                        value={authPhone || authEmail}
-                        onChangeText={(txt) => {
-                          setAuthPhone(txt);
-                          setAuthEmail(txt);
-                        }}
-                      />
-                    </View>
+                {/* EMAIL INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="mail" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Elektron pochtangiz (Email)"
+                    placeholderTextColor="#6B7280"
+                    keyboardType="email-address"
+                    value={authEmail}
+                    onChangeText={setAuthEmail}
+                  />
+                </View>
 
-                    <View style={styles.inputContainer}>
-                      <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                      <TextInput
-                        style={styles.modalInput}
-                        placeholder="Parolingiz"
-                        placeholderTextColor="#6B7280"
-                        secureTextEntry={!showPassword}
-                        value={authPassword}
-                        onChangeText={setAuthPassword}
-                      />
-                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                        <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    {/* EMAIL INPUT */}
-                    <View style={styles.inputContainer}>
-                      <Feather name="mail" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                      <TextInput
-                        style={styles.modalInput}
-                        placeholder="Elektron pochtangiz (Email)"
-                        placeholderTextColor="#6B7280"
-                        keyboardType="email-address"
-                        value={authEmail}
-                        onChangeText={setAuthEmail}
-                      />
-                    </View>
+                {/* PHONE INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Telefon raqamingiz"
+                    placeholderTextColor="#6B7280"
+                    keyboardType="phone-pad"
+                    value={authPhone}
+                    onChangeText={setAuthPhone}
+                  />
+                </View>
 
-                    {/* PHONE INPUT */}
-                    <View style={styles.inputContainer}>
-                      <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                      <TextInput
-                        style={styles.modalInput}
-                        placeholder="Telefon raqamingiz"
-                        placeholderTextColor="#6B7280"
-                        keyboardType="phone-pad"
-                        value={authPhone}
-                        onChangeText={setAuthPhone}
-                      />
-                    </View>
+                {/* PASSWORD INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Parol o'ylab toping"
+                    placeholderTextColor="#6B7280"
+                    secureTextEntry={!showPassword}
+                    value={authPassword}
+                    onChangeText={setAuthPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
 
-                    {/* PASSWORD INPUT */}
-                    <View style={styles.inputContainer}>
-                      <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                      <TextInput
-                        style={styles.modalInput}
-                        placeholder="Parol o'ylab toping"
-                        placeholderTextColor="#6B7280"
-                        secureTextEntry={!showPassword}
-                        value={authPassword}
-                        onChangeText={setAuthPassword}
-                      />
-                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                        <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
-                      </TouchableOpacity>
-                    </View>
+                {/* CONFIRM PASSWORD INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="check-circle" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Parolni tasdiqlang"
+                    placeholderTextColor="#6B7280"
+                    secureTextEntry={!showPassword}
+                    value={authConfirmPassword}
+                    onChangeText={setAuthConfirmPassword}
+                  />
+                </View>
 
-                    {/* CONFIRM PASSWORD INPUT */}
-                    <View style={styles.inputContainer}>
-                      <Feather name="check-circle" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                      <TextInput
-                        style={styles.modalInput}
-                        placeholder="Parolni tasdiqlang"
-                        placeholderTextColor="#6B7280"
-                        secureTextEntry={!showPassword}
-                        value={authConfirmPassword}
-                        onChangeText={setAuthConfirmPassword}
-                      />
-                    </View>
-
-                    {/* EYE CATCHING CHILD ID INPUT */}
-                    <View style={styles.eyeCatchingIdBox}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                        <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
-                        <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
-                      </View>
-                      <View style={styles.idInputInner}>
-                        <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
-                        <TextInput
-                          style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
-                          placeholder="#956Z6X"
-                          placeholderTextColor="#6B7280"
-                          value={childIdInput}
-                          onChangeText={setChildIdInput}
-                          autoCapitalize="characters"
-                        />
-                      </View>
-                    </View>
-                  </>
-                )}
+                {/* EYE CATCHING CHILD ID INPUT */}
+                <View style={styles.eyeCatchingIdBox}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                    <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
+                    <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
+                  </View>
+                  <View style={styles.idInputInner}>
+                    <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
+                    <TextInput
+                      style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
+                      placeholder="#956Z6X"
+                      placeholderTextColor="#6B7280"
+                      value={childIdInput}
+                      onChangeText={setChildIdInput}
+                      autoCapitalize="characters"
+                    />
+                  </View>
+                </View>
 
                 <TouchableOpacity
-                  style={[styles.addChildSubmitBtn, (isSendingOtp || isLoggingIn) && { opacity: 0.5 }]}
+                  style={[styles.addChildSubmitBtn, isSendingOtp && { opacity: 0.5 }]}
                   activeOpacity={0.85}
                   onPress={handleAuthAndInviteSubmit}
-                  disabled={isSendingOtp || isLoggingIn}
+                  disabled={isSendingOtp}
                 >
-                  {(isSendingOtp || isLoggingIn) ? (
+                  {isSendingOtp ? (
                     <ActivityIndicator color="#FFF" />
                   ) : (
-                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>
-                      {authModalMode === 'login' ? "Tizimga Kirish" : "Saqlash va Tasdiqlash (OTP)"}
-                    </Text>
+                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Saqlash va Tasdiqlash (OTP)</Text>
                   )}
                 </TouchableOpacity>
               </ScrollView>
