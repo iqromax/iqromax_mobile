@@ -114,8 +114,41 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
   // Handle returning from OTP verification
   useEffect(() => {
-    if (isAuthVerified && childIdInput.trim()) {
-      sendParentInviteToStudent();
+    if (isAuthVerified && (authEmail || user?.email)) {
+      const registerParentAndInvite = async () => {
+        try {
+          // Register parent user in backend DB
+          const pName = user?.name || authEmail.split('@')[0] || 'Ota-ona';
+          const pEmail = authEmail.trim() || user?.email;
+          const pPhone = authPhone.trim() || user?.phone || '+998900000000';
+          const pPass = authPassword.trim() || '123456';
+
+          const regRes = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: pName,
+              email: pEmail,
+              phone: pPhone,
+              password: pPass,
+              role: 'parent',
+              country: childIdInput.trim() || ''
+            })
+          });
+          const regData = await regRes.json();
+          if (regData.user) {
+            await AsyncStorage.setItem('user_data', JSON.stringify(regData.user));
+          }
+        } catch (e) {
+          console.error('Parent registration DB error:', e);
+        }
+
+        if (childIdInput.trim()) {
+          sendParentInviteToStudent();
+        }
+      };
+
+      registerParentAndInvite();
     }
   }, [isAuthVerified]);
 

@@ -1562,6 +1562,43 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
       data: { status }
     });
 
+    if (updated.type === 'PARENT_INVITE' && status === 'ACCEPTED') {
+      try {
+        let inviteData: any = {};
+        if (updated.message) {
+          try { inviteData = JSON.parse(updated.message); } catch (e) {}
+        }
+        const parentEmail = inviteData.parentEmail || updated.senderId;
+        const studentCustomId = inviteData.studentCustomId || updated.userId;
+
+        if (parentEmail && studentCustomId) {
+          const parentUser = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { email: parentEmail },
+                { phone: parentEmail }
+              ]
+            }
+          });
+
+          if (parentUser) {
+            await prisma.user.update({
+              where: { id: parentUser.id },
+              data: { country: studentCustomId }
+            });
+          }
+        }
+
+        io.emit('parent_invite_accepted', {
+          studentCustomId: updated.userId,
+          parentEmail: parentEmail,
+          notif: updated
+        });
+      } catch (err) {
+        console.error('Assign parent error:', err);
+      }
+    }
+
     if (updated.type === 'TEACHER_INVITE' && status === 'ACCEPTED') {
       try {
         let inviteData: any = {};
