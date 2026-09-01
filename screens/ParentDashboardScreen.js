@@ -34,10 +34,10 @@ const MOCK_CHILDREN = [
     ],
     achievements: [
       { id: 'a1', title: '7 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
-      { id: 'a2', title: '100 ta to\'g'ri javob', icon: 'target', color: '#10B981', unlocked: true },
-      { id: 'a3', title: '500 XP to\'plandi', icon: 'lightning-bolt', color: '#F59E0B', unlocked: true },
+      { id: 'a2', title: "100 ta to'g'ri javob", icon: 'target', color: '#10B981', unlocked: true },
+      { id: 'a3', title: "500 XP to'plandi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: true },
       { id: 'a4', title: 'Gold daraja', icon: 'crown', color: '#EAB308', unlocked: true },
-      { id: 'a5', title: '10 ta Battle g\'alabasi', icon: 'sword-cross', color: '#3B82F6', unlocked: true },
+      { id: 'a5', title: "10 ta Battle g'alabasi", icon: 'sword-cross', color: '#3B82F6', unlocked: true },
       { id: 'a6', title: '30 kunlik streak', icon: 'fire', color: '#9CA3AF', unlocked: false },
       { id: 'a7', title: '5 000 XP', icon: 'lightning-bolt', color: '#9CA3AF', unlocked: false },
       { id: 'a8', title: '100 ta Battle', icon: 'sword-cross', color: '#9CA3AF', unlocked: false }
@@ -84,8 +84,8 @@ const MOCK_CHILDREN = [
     ],
     achievements: [
       { id: 'a1', title: '12 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
-      { id: 'a2', title: '500 ta to\'g'ri javob', icon: 'target', color: '#10B981', unlocked: true },
-      { id: 'a3', title: '5000 XP to\'plandi', icon: 'lightning-bolt', color: '#F59E0B', unlocked: true }
+      { id: 'a2', title: "500 ta to'g'ri javob", icon: 'target', color: '#10B981', unlocked: true },
+      { id: 'a3', title: "5000 XP to'plandi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: true }
     ],
     subjectStats: [
       { name: 'Matematika', score: 96, color: '#3B82F6' },
