@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import http from 'http';
 import path from 'path';
+import fs from 'fs';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import adVideoRoutes from './adVideoRoutes.js';
