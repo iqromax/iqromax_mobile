@@ -1,22 +1,23 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Asset } from 'expo-asset';
+import { useAssets } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 
-const CHARACTER_MODELS = {
-  0: require('../assets/models/athletic_man_optimized.glb'),
-  1: require('../assets/models/adult_male_optimized.glb'),
-  2: require('../assets/models/mannequin_clothing_optimized.glb'),
-  3: require('../assets/models/businessman_optimized.glb'),
-  4: require('../assets/models/fashion_model_optimized.glb'),
-  5: require('../assets/models/casual_outfit_optimized.glb'),
-  6: require('../assets/models/beige_trench_coat_optimized.glb'),
-  7: require('../assets/models/stylized_girl_optimized.glb')
-};
+const CHARACTER_MODELS = [
+  require('../assets/models/athletic_man_optimized.glb'),
+  require('../assets/models/adult_male_optimized.glb'),
+  require('../assets/models/mannequin_clothing_optimized.glb'),
+  require('../assets/models/businessman_optimized.glb'),
+  require('../assets/models/fashion_model_optimized.glb'),
+  require('../assets/models/casual_outfit_optimized.glb'),
+  require('../assets/models/beige_trench_coat_optimized.glb'),
+  require('../assets/models/stylized_girl_optimized.glb')
+];
 
 export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
   const webViewRef = useRef(null);
+  const [assets, error] = useAssets(CHARACTER_MODELS);
   const [modelBase64, setModelBase64] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,23 +27,25 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
     setLoading(true);
 
     async function loadModel() {
-      try {
-        const modelReq = CHARACTER_MODELS[characterIndex] || CHARACTER_MODELS[0];
-        const asset = Asset.fromModule(modelReq);
-        if (!asset.localUri) {
-          await asset.downloadAsync();
+      const idx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
+      if (assets && assets[idx]) {
+        try {
+          const currentAsset = assets[idx];
+          if (!currentAsset.localUri) {
+            await currentAsset.downloadAsync();
+          }
+          const uri = currentAsset.localUri || currentAsset.uri;
+          const base64 = await FileSystem.readAsStringAsync(uri, {
+            encoding: 'base64'
+          });
+          if (isMounted) {
+            setModelBase64(base64);
+          }
+        } catch (err) {
+          console.error('Error loading 3D character base64:', err);
+        } finally {
+          if (isMounted) setLoading(false);
         }
-        const uri = asset.localUri || asset.uri;
-        const base64 = await FileSystem.readAsStringAsync(uri, {
-          encoding: 'base64'
-        });
-        if (isMounted) {
-          setModelBase64(base64);
-        }
-      } catch (err) {
-        console.error('Error loading 3D character base64:', err);
-      } finally {
-        if (isMounted) setLoading(false);
       }
     }
 
@@ -50,7 +53,7 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
     return () => {
       isMounted = false;
     };
-  }, [characterIndex]);
+  }, [assets, characterIndex]);
 
   const htmlContent = modelBase64 ? `
     <!DOCTYPE html>
