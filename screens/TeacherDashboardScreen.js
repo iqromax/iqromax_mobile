@@ -333,6 +333,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
   const [teacherMsgText, setTeacherMsgText] = useState('');
   const [isSendingMsg, setIsSendingMsg] = useState(false);
   const [msgFeedback, setMsgFeedback] = useState({ visible: false, title: '', message: '', type: 'success' });
+  const [studentPreviewModal, setStudentPreviewModal] = useState({ visible: false, student: null });
 
   const handleOpenSendMessage = (student) => {
     setSendMessageModal({ visible: true, student });
@@ -1767,7 +1768,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <TouchableOpacity
                           style={styles.alertUserMsgBtn}
                           activeOpacity={0.8}
-                          onPress={() => handleSendTeacherInvite(u)}
+                          onPress={() => setStudentPreviewModal({ visible: true, student: u })}
                         >
                           <Feather name="user-plus" size={13} color="#FFF" style={{ marginRight: 4 }} />
                           <Text style={styles.alertUserMsgBtnText}>Taklif yuborish</Text>
@@ -1832,6 +1833,124 @@ export default function TeacherDashboardScreen({ navigation, route }) {
           <Text style={[styles.navText, activeTab === 'profile' && styles.navTextActive]}>{t.navProfile || "Profil"}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* STUDENT PROFILE & STATS PREVIEW MODAL BEFORE SENDING TEACHER INVITE */}
+      <Modal visible={studentPreviewModal.visible} transparent animationType="slide">
+        <View style={styles.langModalOverlay}>
+          <View style={[styles.langModalContainer, { maxHeight: '90%', padding: 20 }]}>
+            {/* MODAL HEADER */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, borderBottomWidth: 1, borderBottomColor: '#1A1A35', paddingBottom: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#A855F7' }}>
+                  <MaterialCommunityIcons name="account-search" size={22} color="#A855F7" />
+                </View>
+                <View>
+                  <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>O'quvchi Profili</Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium' }}>
+                    {studentPreviewModal.student?.name || "O'quvchi"}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setStudentPreviewModal({ visible: false, student: null })}>
+                <Feather name="x" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 10 }}>
+              {studentPreviewModal.student && (() => {
+                const st = studentPreviewModal.student;
+                return (
+                  <View style={{ gap: 16 }}>
+                    {/* 1. CHARACTER & AVATAR CARD */}
+                    <View style={{ backgroundColor: '#121228', borderRadius: 18, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1A1A35' }}>
+                      <Image source={st.avatar} style={{ width: 90, height: 90, borderRadius: 45, borderWidth: 2, borderColor: '#A855F7', marginBottom: 10 }} />
+                      <Text style={{ color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>{st.name}</Text>
+                      <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium', marginTop: 2 }}>{st.email ? st.email : `ID: ${st.customId}`}</Text>
+                      
+                      <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+                        <View style={{ backgroundColor: 'rgba(234, 179, 8, 0.15)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#EAB308' }}>
+                          <Text style={{ color: '#EAB308', fontSize: 11, fontFamily: 'Inter_700Bold' }}>⭐ {st.xp || 0} XP</Text>
+                        </View>
+                        <View style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#3B82F6' }}>
+                          <Text style={{ color: '#60A5FA', fontSize: 11, fontFamily: 'Inter_700Bold' }}>🎭 Personaj: {st.character || "Maks"}</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* 2. EXERCISE STATISTIKASI */}
+                    <View style={{ backgroundColor: '#121228', borderRadius: 18, padding: 16, borderWidth: 1, borderColor: '#1A1A35' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                        <MaterialCommunityIcons name="chart-box-outline" size={20} color="#A855F7" />
+                        <Text style={{ color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Mashq Statistikasi</Text>
+                      </View>
+
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+                        <View style={{ flex: 1, backgroundColor: '#0D0D1F', padding: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#1A1A35' }}>
+                          <Text style={{ color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' }}>MASHQLAR</Text>
+                          <Text style={{ color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_700Bold', marginTop: 4 }}>{st.exercisesCount || Math.floor((st.xp || 0) / 15) || 12}</Text>
+                          <Text style={{ color: '#6B7280', fontSize: 9, marginTop: 2 }}>ta bajarildi</Text>
+                        </View>
+
+                        <View style={{ flex: 1, backgroundColor: '#0D0D1F', padding: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#1A1A35' }}>
+                          <Text style={{ color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' }}>ANIQLIK</Text>
+                          <Text style={{ color: '#10B981', fontSize: 18, fontFamily: 'Inter_700Bold', marginTop: 4 }}>{st.accuracy || 88}%</Text>
+                          <Text style={{ color: '#6B7280', fontSize: 9, marginTop: 2 }}>to'g'ri ko'rsatkich</Text>
+                        </View>
+
+                        <View style={{ flex: 1, backgroundColor: '#0D0D1F', padding: 12, borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#1A1A35' }}>
+                          <Text style={{ color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' }}>TEZLIK</Text>
+                          <Text style={{ color: '#3B82F6', fontSize: 18, fontFamily: 'Inter_700Bold', marginTop: 4 }}>{st.speed || '1.5'}s</Text>
+                          <Text style={{ color: '#6B7280', fontSize: 9, marginTop: 2 }}>soniya/misol</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* 3. SKINLAR VA AKSSESSUARLAR BO'LIMI */}
+                    <View style={{ backgroundColor: '#121228', borderRadius: 18, padding: 16, borderWidth: 1, borderColor: '#1A1A35' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                        <MaterialCommunityIcons name="tshirt-crew" size={20} color="#A855F7" />
+                        <Text style={{ color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Skinlar va Ekipirovkasi</Text>
+                      </View>
+
+                      <View style={{ flexDirection: 'row', gap: 10 }}>
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#0D0D1F', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#1A1A35' }}>
+                          <Image source={require('../assets/doppi_1.png')} style={{ width: 32, height: 32, marginRight: 8 }} contentFit="contain" />
+                          <View>
+                            <Text style={{ color: '#FFFFFF', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Bosh kiyim</Text>
+                            <Text style={{ color: '#10B981', fontSize: 9, fontFamily: 'Inter_600SemiBold' }}>Do'ppi (Kiyilgan)</Text>
+                          </View>
+                        </View>
+
+                        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#0D0D1F', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#1A1A35' }}>
+                          <Image source={require('../assets/character_bg.png')} style={{ width: 32, height: 32, borderRadius: 6, marginRight: 8 }} contentFit="cover" />
+                          <View>
+                            <Text style={{ color: '#FFFFFF', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Fon / Ramka</Text>
+                            <Text style={{ color: '#EAB308', fontSize: 9, fontFamily: 'Inter_600SemiBold' }}>Gold Frame</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })()}
+            </ScrollView>
+
+            {/* SEND INVITATION SUBMIT BUTTON AT BOTTOM */}
+            <TouchableOpacity
+              style={{ backgroundColor: '#A855F7', paddingVertical: 14, borderRadius: 16, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 14 }}
+              activeOpacity={0.85}
+              onPress={() => {
+                const st = studentPreviewModal.student;
+                setStudentPreviewModal({ visible: false, student: null });
+                if (st) handleSendTeacherInvite(st);
+              }}
+            >
+              <Feather name="user-plus" size={18} color="#FFF" />
+              <Text style={{ color: '#FFFFFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>Taklif Yuborish</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* LANGUAGE SELECTOR MODAL */}
       <Modal visible={isLangModalOpen} transparent animationType="fade">
