@@ -1011,8 +1011,6 @@ export default function ParentDashboardScreen({ navigation, route }) {
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContentCard, { maxHeight: '90%' }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>
-              <View style={styles.modalHeaderRow}>
                 <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🔒 Autentifikatsiya va Farzand ID</Text>
                 <TouchableOpacity onPress={() => setIsAuthModalOpen(false)}>
                   <Feather name="x" size={24} color="#9CA3AF" />
