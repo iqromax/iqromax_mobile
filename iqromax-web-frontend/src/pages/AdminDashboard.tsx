@@ -65,11 +65,15 @@ import { toast } from 'sonner';
 import { FAQManager } from '@/components/FAQManager';
 import { FeedbackManager } from '@/components/FeedbackManager';
 import { CourseApplicationsManager } from '@/components/CourseApplicationsManager';
+import { ParentsManager } from '@/components/ParentsManager';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (window.location.pathname.includes('/parents')) return 'parents';
+    return 'dashboard';
+  });
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   
@@ -251,6 +255,7 @@ const AdminDashboard = () => {
       ]
     },
     { id: 'abacus', label: 'Abakus', icon: Shield },
+    { id: 'parents', label: 'Ota-onalar', icon: Users },
     { id: 'feedback', label: 'Izoh yoki taklif', icon: MessageSquare },
     { id: 'applications', label: 'Kursga arizalar', icon: BookOpen },
   ];
@@ -696,6 +701,9 @@ const AdminDashboard = () => {
   };
 
   const renderContent = () => {
+    if (activeTab === 'parents') {
+      return <ParentsManager />;
+    }
     if (activeTab === 'ads') {
       return (
         <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500">
