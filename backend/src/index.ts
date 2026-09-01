@@ -430,7 +430,13 @@ app.get('/api/teacher/requests', async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
     const teachers = await prisma.user.findMany({
-      where: { role: { equals: 'teacher', mode: 'insensitive' } },
+      where: {
+        OR: [
+          { role: { contains: 'teacher' } },
+          { role: { contains: 'Teacher' } },
+          { role: { contains: 'O\'qituvchi' } }
+        ]
+      },
       orderBy: { createdAt: 'desc' }
     });
     res.json({ requests, teachers });
