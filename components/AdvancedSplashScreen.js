@@ -11,7 +11,7 @@ export default function AdvancedSplashScreen({ isAppReady, onFinish }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinTimePassed(true);
-    }, 1500); // 1.5 soniya
+    }, 300); // Fast 300ms minimal delay
     return () => clearTimeout(timer);
   }, []);
 

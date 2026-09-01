@@ -327,13 +327,16 @@ export default function App() {
         if (userDataStr) {
           const userData = JSON.parse(userDataStr);
           
-          // Verify user still exists in database before allowing access (only for non-guest registered users)
+          // Verify user still exists in database (non-blocking with 1s timeout to ensure instant launch)
           if (userData && userData.isGuest !== true && userData.customId) {
             try {
               let cleanId = String(userData.customId).trim();
               if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
               const encodedId = encodeURIComponent(cleanId);
-              const res = await fetch(`${API_URL}/users/search/${encodedId}`);
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 1200);
+              const res = await fetch(`${API_URL}/users/search/${encodedId}`, { signal: controller.signal });
+              clearTimeout(timeoutId);
               if (res.status === 404) {
                 await AsyncStorage.removeItem('user_data');
                 setInitialRoute('StepOne');
