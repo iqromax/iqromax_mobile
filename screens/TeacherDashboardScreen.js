@@ -490,46 +490,96 @@ export default function TeacherDashboardScreen({ navigation, route }) {
     if (activeTab === 'ranking' || activeTab === 'stats' || activeTab === 'search') {
       const fetchRankingAndStats = async () => {
         try {
-          const res = await fetch(`${API_URL}/ranking?t=${Date.now()}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data)) {
-              // Store all users for Search tab
-              const processedAllUsers = data.map((u, index) => ({
-                id: u.id,
-                customId: u.customId || u.id,
-                name: u.name || (u.role === 'teacher' ? "O'qituvchi" : "O'quvchi"),
-                email: u.email || '',
-                phone: u.phone || '',
-                role: u.role || 'student',
-                xp: u.xp || 0,
-                exercisesCount: u.exercisesCount || Math.floor((u.xp || 0) / 15) || 0,
-                accuracy: u.accuracy || (u.xp > 500 ? 92 : u.xp > 200 ? 84 : 72),
-                avatar: (u.avatar && u.avatar.startsWith('http')) 
-                  ? { uri: u.avatar } 
-                  : getAvatarByName(u.character || u.avatar || u.characterName || u.name)
-              }));
-              setAllUsersData(processedAllUsers);
+          // Fetch both student ranking and full admin users list (to get registered teachers too)
+          const [rankingRes, adminUsersRes, teachersRes] = await Promise.all([
+            fetch(`${API_URL}/ranking?t=${Date.now()}`).catch(() => null),
+            fetch(`${API_URL}/admin/users`).catch(() => null),
+            fetch(`${API_URL}/teacher/requests`).catch(() => null)
+          ]);
 
-              // Filter out teachers/admins if role present, or process all student users for Leaderboard
-              const studentUsers = data.filter(u => u.role !== 'teacher' && u.role !== 'admin');
-              const targetUsers = studentUsers.length > 0 ? studentUsers : data;
+          let rankingDataList = [];
+          if (rankingRes && rankingRes.ok) {
+            rankingDataList = await rankingRes.json();
+          }
 
-              const rankedData = targetUsers.map((u, index) => ({
-                customId: u.id,
-                rank: index + 1,
-                name: u.name || 'O\'quvchi',
-                xp: u.xp || 0,
-                exercisesCount: u.exercisesCount || Math.floor((u.xp || 0) / 15) || 0,
-                accuracy: u.accuracy || (u.xp > 500 ? 92 : u.xp > 200 ? 84 : 72),
-                lastActiveDays: u.lastActiveDays || (index % 3 === 0 ? 5 : 1),
-                speed: u.speed || (1.2 + (index % 5) * 0.2).toFixed(1),
-                avatar: (u.avatar && u.avatar.startsWith('http')) 
-                  ? { uri: u.avatar } 
-                  : getAvatarByName(u.character || u.avatar || u.characterName || u.name)
-              }));
+          let adminUsersList = [];
+          if (adminUsersRes && adminUsersRes.ok) {
+            adminUsersList = await adminUsersRes.json();
+          }
 
-              setLeaderboardData(rankedData);
+          let extraTeachersList = [];
+          if (teachersRes && teachersRes.ok) {
+            const data = await teachersRes.json();
+            if (data && Array.isArray(data.teachers)) {
+              extraTeachersList = data.teachers;
+            }
+          }
+
+          // Merge users to ensure all teachers from database are present
+          const userMap = new Map();
+
+          // 1. Add all admin users (students + teachers)
+          if (Array.isArray(adminUsersList)) {
+            adminUsersList.forEach(u => {
+              userMap.set(u.id || u.customId, u);
+            });
+          }
+
+          // 2. Add extra teachers from teacher/requests
+          if (Array.isArray(extraTeachersList)) {
+            extraTeachersList.forEach(u => {
+              const existing = userMap.get(u.id || u.customId);
+              userMap.set(u.id || u.customId, { ...existing, ...u, role: 'teacher' });
+            });
+          }
+
+          // 3. Add ranking users
+          if (Array.isArray(rankingDataList)) {
+            rankingDataList.forEach(u => {
+              if (!userMap.has(u.id || u.customId)) {
+                userMap.set(u.id || u.customId, u);
+              }
+            });
+          }
+
+          const combinedList = Array.from(userMap.values());
+
+          const processedAllUsers = combinedList.map((u, index) => ({
+            id: u.id || u.customId,
+            customId: u.customId || u.id,
+            name: u.name || (u.role === 'teacher' ? "O'qituvchi" : "O'quvchi"),
+            email: u.email || '',
+            phone: u.phone || '',
+            role: u.role || 'student',
+            xp: u.xp || 0,
+            exercisesCount: u.exercisesCount || Math.floor((u.xp || 0) / 15) || 0,
+            accuracy: u.accuracy || (u.xp > 500 ? 92 : u.xp > 200 ? 84 : 72),
+            avatar: (u.avatar && u.avatar.startsWith('http')) 
+              ? { uri: u.avatar } 
+              : getAvatarByName(u.character || u.avatar || u.characterName || u.name)
+          }));
+
+          setAllUsersData(processedAllUsers);
+
+          // Process student leaderboard data
+          const studentUsers = rankingDataList.filter(u => u.role !== 'teacher' && u.role !== 'admin');
+          const targetUsers = studentUsers.length > 0 ? studentUsers : rankingDataList;
+
+          const rankedData = targetUsers.map((u, index) => ({
+            customId: u.id,
+            rank: index + 1,
+            name: u.name || 'O\'quvchi',
+            xp: u.xp || 0,
+            exercisesCount: u.exercisesCount || Math.floor((u.xp || 0) / 15) || 0,
+            accuracy: u.accuracy || (u.xp > 500 ? 92 : u.xp > 200 ? 84 : 72),
+            lastActiveDays: u.lastActiveDays || (index % 3 === 0 ? 5 : 1),
+            speed: u.speed || (1.2 + (index % 5) * 0.2).toFixed(1),
+            avatar: (u.avatar && u.avatar.startsWith('http')) 
+              ? { uri: u.avatar } 
+              : getAvatarByName(u.character || u.avatar || u.characterName || u.name)
+          }));
+
+          setLeaderboardData(rankedData);
 
               // Calculate real-time statistics
               const count = rankedData.length;
