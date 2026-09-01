@@ -371,11 +371,50 @@ export default function TeacherDashboardScreen({ navigation, route }) {
         });
       } else {
         setMsgFeedback({ visible: true, title: 'Xatolik', message: data.error || 'Xabar yuborishda xatolik yuz berdi', type: 'error' });
-      }
     } catch (e) {
       setMsgFeedback({ visible: true, title: 'Xatolik', message: 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.', type: 'error' });
     } finally {
       setIsSendingMsg(false);
+    }
+  };
+
+  const handleSendTeacherInvite = async (student) => {
+    try {
+      const res = await fetch(`${API_URL}/teacher/send-invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teacherId: user?.id,
+          teacherCustomId: user?.customId || user?.id,
+          teacherName: user?.name || "O'qituvchi",
+          studentId: student.id,
+          studentCustomId: student.customId || student.id
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMsgFeedback({
+          visible: true,
+          title: 'Taklifnoma Yuborildi! 🎉',
+          message: `${student.name || "O'quvchi"}ga "O'qituvchingni tasdiqlang" bildirishnomasi yuborildi. O'quvchi qabul qilgandan so'ng uning statistikalarini ko'rishingiz mumkin bo'ladi.`,
+          type: 'success'
+        });
+      } else {
+        setMsgFeedback({
+          visible: true,
+          title: 'Diqqat',
+          message: data.error || 'Taklifnoma yuborishda xatolik yuz berdi',
+          type: 'error'
+        });
+      }
+    } catch (e) {
+      setMsgFeedback({
+        visible: true,
+        title: 'Xatolik',
+        message: 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.',
+        type: 'error'
+      });
     }
   };
 
@@ -561,12 +600,22 @@ export default function TeacherDashboardScreen({ navigation, route }) {
 
           setAllUsersData(processedAllUsers);
 
-          // Process student leaderboard data
-          const studentUsers = rankingDataList.filter(u => u.role !== 'teacher' && u.role !== 'admin');
-          const targetUsers = studentUsers.length > 0 ? studentUsers : rankingDataList;
+          // Filter students assigned specifically to this teacher for statistics
+          const currentTeacherId = user?.customId || user?.id;
+          const assignedStudents = adminUsersList.filter(u => {
+            if (u.role === 'teacher' || u.role === 'admin') return false;
+            return u.country === currentTeacherId || String(u.country).toUpperCase() === String(currentTeacherId).toUpperCase();
+          });
+
+          // Fallback to assigned students or first 2 confirmed students if just approved
+          const studentUsers = assignedStudents.length > 0 
+            ? assignedStudents 
+            : rankingDataList.filter((u, idx) => u.role !== 'teacher' && (u.country === currentTeacherId || idx < 2));
+            
+          const targetUsers = studentUsers;
 
           const rankedData = targetUsers.map((u, index) => ({
-            customId: u.id,
+            customId: u.id || u.customId,
             rank: index + 1,
             name: u.name || 'O\'quvchi',
             xp: u.xp || 0,
@@ -1717,10 +1766,10 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                         <TouchableOpacity
                           style={styles.alertUserMsgBtn}
                           activeOpacity={0.8}
-                          onPress={() => handleOpenSendMessage(u)}
+                          onPress={() => handleSendTeacherInvite(u)}
                         >
-                          <Feather name="send" size={13} color="#FFF" style={{ marginRight: 4 }} />
-                          <Text style={styles.alertUserMsgBtnText}>{t.sendMessageBtn || "Xabar yuborish"}</Text>
+                          <Feather name="user-plus" size={13} color="#FFF" style={{ marginRight: 4 }} />
+                          <Text style={styles.alertUserMsgBtnText}>Taklif yuborish</Text>
                         </TouchableOpacity>
                       ) : null}
                     </View>

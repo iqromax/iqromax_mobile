@@ -1293,6 +1293,75 @@ app.post('/api/teacher/send-message', async (req, res) => {
   }
 });
 
+// --- TEACHER INVITATION API ---
+app.post('/api/teacher/send-invite', async (req, res) => {
+  try {
+    const { teacherId, teacherName, teacherCustomId, studentId, studentCustomId } = req.body;
+    if (!studentId && !studentCustomId) {
+      return res.status(400).json({ error: 'O\'quvchi IDsi ko\'rsatilmadi' });
+    }
+
+    // Find target student
+    const studentUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          ...(studentId ? [{ id: studentId }] : []),
+          ...(studentCustomId ? [{ customId: studentCustomId }, { customId: `#${studentCustomId.replace(/^#+/, '')}` }] : [])
+        ]
+      }
+    });
+
+    if (!studentUser) {
+      return res.status(404).json({ error: 'O\'quvchi topilmadi' });
+    }
+
+    const cleanStudentCustomId = studentUser.customId;
+
+    // Check if pending invitation already sent
+    const existingNotif = await prisma.notification.findFirst({
+      where: {
+        userId: cleanStudentCustomId,
+        type: 'TEACHER_INVITE',
+        status: 'PENDING'
+      }
+    });
+
+    if (existingNotif) {
+      return res.status(400).json({ error: 'Ushbu o\'quvchiga taklifnoma yuborilgan' });
+    }
+
+    // Create TEACHER_INVITE Notification
+    const inviteData = {
+      teacherId: teacherId || teacherCustomId,
+      teacherName: teacherName || "O'qituvchi",
+      teacherCustomId: teacherCustomId || teacherId
+    };
+
+    const newNotif = await prisma.notification.create({
+      data: {
+        userId: cleanStudentCustomId,
+        senderId: teacherCustomId || teacherId,
+        title: `👨‍🏫 O'qituvchingizni tasdiqlang!`,
+        message: JSON.stringify(inviteData),
+        type: 'TEACHER_INVITE',
+        status: 'PENDING'
+      }
+    });
+
+    // Real-time socket emit
+    io.emit('teacher_invite_sent', {
+      studentCustomId: cleanStudentCustomId,
+      teacherName: teacherName || "O'qituvchi",
+      notif: newNotif
+    });
+
+    res.json({ message: 'Taklifnoma muvaffaqiyatli yuborildi!', notif: newNotif });
+  } catch (error) {
+    console.error('Send teacher invite error:', error);
+    res.status(500).json({ error: 'Taklifnoma yuborishda xatolik yuz berdi' });
+  }
+});
+
 // --- BATTLE INVITE & NOTIFICATION REST API ---
 app.get('/api/notifications/:customId', async (req, res) => {
   try {
@@ -1415,6 +1484,35 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
       where: { id },
       data: { status }
     });
+
+    if (updated.type === 'TEACHER_INVITE' && status === 'ACCEPTED') {
+      try {
+        let inviteData: any = {};
+        if (updated.message) {
+          try { inviteData = JSON.parse(updated.message); } catch (e) {}
+        }
+        const teacherId = inviteData.teacherCustomId || inviteData.teacherId || updated.senderId;
+
+        if (teacherId && updated.userId) {
+          // Update student user's teacherId field in database (or character tag / role relation)
+          await prisma.user.updateMany({
+            where: {
+              OR: [
+                { customId: updated.userId },
+                { id: updated.userId }
+              ]
+            },
+            data: {
+              // Store assigned teacher ID inside status or extra metadata if needed
+              country: teacherId // Use optional field to bind teacherId
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Assign teacher error:', err);
+      }
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: 'Failed to update notification' });
