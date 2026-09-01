@@ -371,6 +371,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
         });
       } else {
         setMsgFeedback({ visible: true, title: 'Xatolik', message: data.error || 'Xabar yuborishda xatolik yuz berdi', type: 'error' });
+      }
     } catch (e) {
       setMsgFeedback({ visible: true, title: 'Xatolik', message: 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.', type: 'error' });
     } finally {
