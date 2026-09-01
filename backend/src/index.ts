@@ -1317,8 +1317,6 @@ app.post('/api/teacher/send-invite', async (req, res) => {
 
     const cleanStudentCustomId = studentUser.customId;
 
-    const cleanStudentCustomId = studentUser.customId;
-
     // Parse current teachers list stored as comma-separated string in country field
     const currentTeachersList = studentUser.country ? studentUser.country.split(',').filter(Boolean) : [];
     if (currentTeachersList.length >= 5) {
