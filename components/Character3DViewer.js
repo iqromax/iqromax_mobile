@@ -114,10 +114,6 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
           domStorageEnabled={true}
           allowFileAccess={true}
           allowUniversalAccessFromFileURLs={true}
-          androidLayerType="hardware"
-          mixedContentMode="always"
-          androidHardwareAccelerationDisabled={false}
-          containerStyle={{ backgroundColor: 'transparent' }}
         />
       ) : (
         <View style={styles.loadingContainer}>
