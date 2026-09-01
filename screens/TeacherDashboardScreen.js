@@ -1536,6 +1536,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   <Text style={{ color: '#6B7280', fontSize: 11, textAlign: 'center', marginTop: 4, fontFamily: 'Inter_500Medium' }}>
                     {t.pdfRefreshHint || "Amal turini refresh qiling va qayta generatsiya qiling (eski PDF yangilanadi)."}
                   </Text>
+                </View>
+              )}
             </View>
 
             <TouchableOpacity style={styles.logoutFullBtn} onPress={handleReturnToHome}>
