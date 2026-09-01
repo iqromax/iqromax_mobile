@@ -231,6 +231,24 @@ export default function AuthScreen({ navigation, route }) {
         return;
       }
 
+      if (role === 'parent') {
+        const parentUser = {
+          id: 'parent_' + Date.now(),
+          name: name.trim(),
+          role: 'parent',
+          language
+        };
+        try {
+          await AsyncStorage.setItem('user_data', JSON.stringify(parentUser));
+        } catch (e) {}
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'ParentDashboard', params: { user: parentUser, language } }]
+        });
+        return;
+      }
+
       // Step 3 -> Name entered -> Go to Step 4 (Country Selection)
       navigation.navigate('StepFour', {
         ...route.params,
@@ -289,6 +307,11 @@ export default function AuthScreen({ navigation, route }) {
             navigation.reset({
               index: 0,
               routes: [{ name: 'TeacherDashboard', params: { user: data.user, language } }]
+            });
+          } else if (role === 'parent' || data.user?.role?.toLowerCase() === 'parent') {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'ParentDashboard', params: { user: data.user, language } }]
             });
           } else {
             navigation.reset({

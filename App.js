@@ -38,6 +38,7 @@ const Stack = createNativeStackNavigator();
 export const navigationRef = createNavigationContainerRef();
 
 import TeacherDashboardScreen from './screens/TeacherDashboardScreen';
+import ParentDashboardScreen from './screens/ParentDashboardScreen';
 
 export default function App() {
   
@@ -374,6 +375,12 @@ export default function App() {
               user: userData,
               language: userData.language || 'uz'
             });
+          } else if (userData && (userData.role?.toLowerCase() === 'parent' || userData.role === "Ota-ona")) {
+            setInitialRoute('ParentDashboard');
+            setInitialParams({
+              user: userData,
+              language: userData.language || 'uz'
+            });
           } else {
             setInitialRoute('StudentDashboard');
             setInitialParams({
@@ -424,6 +431,7 @@ export default function App() {
           <Stack.Screen name="StepFive" component={StepFiveScreen} />
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} initialParams={initialRoute === 'StudentDashboard' ? initialParams : undefined} />
           <Stack.Screen name="TeacherDashboard" component={TeacherDashboardScreen} initialParams={initialRoute === 'TeacherDashboard' ? initialParams : undefined} />
+          <Stack.Screen name="ParentDashboard" component={ParentDashboardScreen} initialParams={initialRoute === 'ParentDashboard' ? initialParams : undefined} />
           <Stack.Screen name="EnergyCenter" component={EnergyCenterScreen} />
         <Stack.Screen name="ReferralScreen" component={ReferralScreen} />
           <Stack.Screen name="OddiyHisobGame" component={OddiyHisobGameScreen} />
