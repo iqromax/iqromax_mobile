@@ -81,14 +81,24 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
       if (!headwearPath) return;
       try {
         let uri = headwearPath;
-        if (typeof headwearPath === 'string') {
+        if (typeof headwearPath === 'number') {
+          const asset = Asset.fromModule(headwearPath);
+          await asset.downloadAsync();
+          uri = asset.localUri || asset.uri;
+        } else if (typeof headwearPath === 'string') {
           if (!headwearPath.startsWith('http://') && !headwearPath.startsWith('https://')) {
             const cleanPath = headwearPath.startsWith('/') ? headwearPath : `/${headwearPath}`;
             uri = `https://iqromax.net${cleanPath}`;
           }
         }
-        const downloaded = await FileSystem.downloadAsync(uri, FileSystem.cacheDirectory + 'temp_headwear.glb');
-        const b64 = await FileSystem.readAsStringAsync(downloaded.uri, { encoding: 'base64' });
+        
+        let downloadedUri = uri;
+        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
+          const downloaded = await FileSystem.downloadAsync(uri, FileSystem.cacheDirectory + 'temp_headwear.glb');
+          downloadedUri = downloaded.uri;
+        }
+        
+        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
         if (isMounted) setHeadwearBase64(b64);
       } catch (err) {
         console.log('Error downloading headwear for WebView:', err);

@@ -205,11 +205,15 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
   
   let gltf = null;
   try {
-    gltf = useGLTF(glbSource, true, true, (loader) => {
-      if (loader) {
-        try { loader.setMeshoptDecoder(MeshoptDecoder); } catch(e){}
-      }
-    });
+    if (typeof glbSource === 'number') {
+      gltf = useGLTF(glbSource);
+    } else {
+      gltf = useGLTF(glbSource, true, true, (loader) => {
+        if (loader) {
+          try { loader.setMeshoptDecoder(MeshoptDecoder); } catch(e){}
+        }
+      });
+    }
   } catch(err) {
     return null;
   }
