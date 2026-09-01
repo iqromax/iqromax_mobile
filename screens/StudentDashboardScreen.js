@@ -269,20 +269,33 @@ function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null, hea
     }
   });
 
-  // Fix Android GL materials: Convert materials to MeshLambertMaterial so textures render clearly with lighting instead of black silhouette
+  // Fix Android GL materials: Convert materials to MeshBasicMaterial on Android so textures render clearly without WebGL shader lighting bugs, and MeshLambertMaterial on iOS
   React.useMemo(() => {
     scene.traverse((child) => {
       if (child.isMesh && child.material) {
         const mats = Array.isArray(child.material) ? child.material : [child.material];
         const newMats = mats.map(mat => {
           if (mat.map) {
-            const lambert = new THREE.MeshLambertMaterial({
+            if (Platform.OS === 'android') {
+              return new THREE.MeshBasicMaterial({
+                map: mat.map,
+                side: THREE.DoubleSide,
+                transparent: mat.transparent || false,
+                alphaTest: mat.alphaTest || 0,
+              });
+            }
+            return new THREE.MeshLambertMaterial({
               map: mat.map,
               side: THREE.DoubleSide,
               transparent: mat.transparent || false,
               alphaTest: mat.alphaTest || 0,
             });
-            return lambert;
+          }
+          if (Platform.OS === 'android') {
+            return new THREE.MeshBasicMaterial({
+              color: mat.color ? mat.color : 0xcccccc,
+              side: THREE.DoubleSide,
+            });
           }
           return new THREE.MeshLambertMaterial({
             color: mat.color ? mat.color : 0xcccccc,
@@ -1361,19 +1374,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Center Column: Showcase */}
             <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
               <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                {Platform.OS === 'android' ? (
-                  <Character3DViewer characterIndex={activeAvatarIndex} />
-                ) : (
-                  <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                    <ambientLight intensity={2} color="#ffffff" />
-                    <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                    <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                    <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
-                    <Suspense fallback={null}>
-                      <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={0.5} />
-                    </Suspense>
-                  </Canvas>
-                )}
+                <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
+                  <ambientLight intensity={2} color="#ffffff" />
+                  <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                  <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                  <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
+                  <Suspense fallback={null}>
+                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={0.5} />
+                  </Suspense>
+                </Canvas>
               </View>
               <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
                 <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1487,19 +1496,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
             />
             {/* 3D Model */}
             <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              {Platform.OS === 'android' ? (
-                <Character3DViewer characterIndex={activeAvatarIndex} />
-              ) : (
-                <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                  <ambientLight intensity={2} color="#ffffff" />
-                  <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                  <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                  <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
-                  <Suspense fallback={null}>
-                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={1.1} />
-                  </Suspense>
-                </Canvas>
-              )}
+              <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
+                <ambientLight intensity={2} color="#ffffff" />
+                <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
+                <Suspense fallback={null}>
+                  <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={1.1} />
+                </Suspense>
+              </Canvas>
             </View>
             <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
               <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1722,20 +1727,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* 3D Model Container */}
             <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="auto">
-              {Platform.OS === 'android' ? (
-                <Character3DViewer characterIndex={activeAvatarIndex} />
-              ) : (
-                <Canvas frameloop="demand" style={{ flex: 1, width: '100%', backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                  <ambientLight intensity={2.5} color="#ffffff" />
-                  <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#444444" />
-                  <Environment preset="city" />
-                  <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                  <directionalLight position={[-10, 10, -5]} intensity={1.5} color="#ffffff" />
-                  <Suspense fallback={null}>
-                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
-                  </Suspense>
-                </Canvas>
-              )}
+              <Canvas style={{ flex: 1, width: '100%', backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
+                <ambientLight intensity={2.5} color="#ffffff" />
+                <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#444444" />
+                <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                <directionalLight position={[-10, 10, -5]} intensity={1.5} color="#ffffff" />
+                <Suspense fallback={null}>
+                  <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
+                </Suspense>
+              </Canvas>
             </View>
             
 
@@ -2720,20 +2720,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* 3D Model Render */}
                 <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                  {Platform.OS === 'android' ? (
-                    <Character3DViewer characterIndex={activeAvatarIndex} />
-                  ) : (
-                    <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                      <ambientLight intensity={2} color="#ffffff" />
-                      <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                      <Environment preset="city" />
-                      <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                      <directionalLight position={[-10, 10, -5]} intensity={1.5} color="#ffffff" />
-                      <Suspense fallback={null}>
-                        <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={0.5} />
-                      </Suspense>
-                    </Canvas>
-                  )}
+                  <Canvas style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
+                    <ambientLight intensity={2} color="#ffffff" />
+                    <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                    <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                    <directionalLight position={[-10, 10, -5]} intensity={1.5} color="#ffffff" />
+                    <Suspense fallback={null}>
+                      <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={0.5} />
+                    </Suspense>
+                  </Canvas>
                 </View>
 
                 {/* Left Absolute Overlay: Active Character Details */}
