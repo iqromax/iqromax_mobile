@@ -255,7 +255,7 @@ const AdminDashboard = () => {
       ]
     },
     { id: 'abacus', label: 'Abakus', icon: Shield },
-    { id: 'parents', label: 'Ota-onalar', icon: Users },
+    { id: 'parents', label: 'Ota-onalar', icon: Users, path: '/parents' },
     { id: 'feedback', label: 'Izoh yoki taklif', icon: MessageSquare },
     { id: 'applications', label: 'Kursga arizalar', icon: BookOpen },
   ];
