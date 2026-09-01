@@ -5,12 +5,45 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
+import { NodeIO } from '@gltf-transform/core';
+import sharp from 'sharp';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 // @ts-ignore
 const prisma = new PrismaClient();
+
+// Helper function to inspect GLB and convert WebP textures to PNG
+async function convertGlbTexturesToPng(filePath: string) {
+  if (!fs.existsSync(filePath)) return;
+  const io = new NodeIO();
+  const doc = await io.read(filePath);
+  const textures = doc.getRoot().listTextures();
+  let modified = false;
+
+  for (const texture of textures) {
+    const mime = texture.getMimeType();
+    const imageBuffer = texture.getImage();
+    if (imageBuffer && (mime === 'image/webp' || mime === 'image/x-png')) {
+      try {
+        const pngBuffer = await sharp(imageBuffer).png().toBuffer();
+        texture.setImage(pngBuffer);
+        texture.setMimeType('image/png');
+        modified = true;
+      } catch (err) {
+        console.error('Error converting texture in GLB:', err);
+      }
+    }
+  }
+
+  if (modified) {
+    const glbBuffer = await io.writeBinary(doc);
+    fs.writeFileSync(filePath, Buffer.from(glbBuffer));
+    console.log(`Successfully converted WebP textures to PNG for GLB: ${path.basename(filePath)}`);
+  }
+}
 
 // Storage setup for skin preview image and .glb 3D model
 const storage = multer.diskStorage({
@@ -70,7 +103,16 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
       imageUrl = `/api/uploads/skins/${files.image[0].filename}`;
     }
     if (files?.glbModel && files.glbModel.length > 0) {
-      modelUrl = `/api/uploads/skins/${files.glbModel[0].filename}`;
+      const glbFile = files.glbModel[0];
+      modelUrl = `/api/uploads/skins/${glbFile.filename}`;
+
+      // Convert any embedded WebP textures inside the GLB model to PNG for mobile compatibility
+      try {
+        const fullGlbPath = path.join(__dirname, '../../public/uploads/skins', glbFile.filename);
+        await convertGlbTexturesToPng(fullGlbPath);
+      } catch (convErr) {
+        console.error('Error optimizing GLB textures to PNG:', convErr);
+      }
     }
 
     const parsedPrice = price ? parseInt(price, 10) : 0;
