@@ -189,6 +189,7 @@ useGLTF.preload(require('../assets/models/stylized_girl_optimized.glb'));
 useGLTF.preload(require('../assets/models/beige_trench_coat_optimized.glb'));
 useGLTF.preload(require('../assets/models/ochki_9_optimized.glb'));
 useGLTF.preload(require('../assets/models/ochki_4_optimized.glb'));
+useGLTF.preload(require('../assets/models/doppi_1.glb'));
 
 function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false }) {
   if (!modelPath) return null;
@@ -1091,7 +1092,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [kiyimKategoriya, setKiyimKategoriya] = useState('bosh_kiyim');
   const [activeKiyimFilter, setActiveKiyimFilter] = useState('BARCHASI');
 
-  const kiyimData = [];
+  const kiyimData = [
+    {
+      id: 'local_doppi_1',
+      category: 'bosh_kiyim',
+      name: "Do'ppi",
+      rarity: 'ODDIY',
+      image: require('../assets/doppi_1.png'),
+      model: require('../assets/models/doppi_1.glb'),
+      isLocked: false,
+      price: 0,
+      state: 'KIYISH'
+    }
+  ];
 
   const renderFramesGrid = () => {
     const filteredData = activeRamkaFilter === 'BARCHASI' ? framesData : framesData.filter(item => item.rarity === activeRamkaFilter);
