@@ -15,7 +15,7 @@ const CHARACTER_MODELS = [
   require('../assets/models/stylized_girl_optimized.glb')
 ];
 
-export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
+export function Character3DViewer({ characterIndex = 0, accessoryPath = null, headwearPath = null, yOffset = 0, style }) {
   const webViewRef = useRef(null);
   const [assets, error] = useAssets(CHARACTER_MODELS);
   const [modelBase64, setModelBase64] = useState(null);
@@ -71,6 +71,33 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
     };
   }, [assets, characterIndex]);
 
+  const [headwearBase64, setHeadwearBase64] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    setHeadwearBase64(null);
+
+    async function loadHeadwear() {
+      if (!headwearPath) return;
+      try {
+        let uri = headwearPath;
+        if (typeof headwearPath === 'string') {
+          if (!headwearPath.startsWith('http://') && !headwearPath.startsWith('https://')) {
+            const cleanPath = headwearPath.startsWith('/') ? headwearPath : `/${headwearPath}`;
+            uri = `https://iqromax.net${cleanPath}`;
+          }
+        }
+        const downloaded = await FileSystem.downloadAsync(uri, FileSystem.cacheDirectory + 'temp_headwear.glb');
+        const b64 = await FileSystem.readAsStringAsync(downloaded.uri, { encoding: 'base64' });
+        if (isMounted) setHeadwearBase64(b64);
+      } catch (err) {
+        console.log('Error downloading headwear for WebView:', err);
+      }
+    }
+    loadHeadwear();
+    return () => { isMounted = false; };
+  }, [headwearPath]);
+
   const htmlContent = modelBase64 ? `
     <!DOCTYPE html>
     <html>
@@ -109,10 +136,26 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
         <script>
           const viewer = document.getElementById('viewer');
           if (viewer) {
-            viewer.addEventListener('load', () => {
+            viewer.addEventListener('load', async () => {
               if (window.ReactNativeWebView) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'LOADED' }));
               }
+              ${headwearBase64 ? `
+                try {
+                  const headwearB64 = "${headwearBase64}";
+                  const res = await fetch("data:model/gltf-binary;base64," + headwearB64);
+                  const blob = await res.blob();
+                  const url = URL.createObjectURL(blob);
+                  const gltf = await viewer.loadGltf(url);
+                  if (gltf && gltf.scene) {
+                    gltf.scene.scale.set(4.5, 4.5, 4.5);
+                    gltf.scene.position.set(0, 0.95, 0);
+                    viewer.model.scene.add(gltf.scene);
+                  }
+                } catch(e) {
+                  console.error("Error attaching headwear in WebView:", e);
+                }
+              ` : ''}
             });
             viewer.addEventListener('error', (event) => {
               if (window.ReactNativeWebView) {
