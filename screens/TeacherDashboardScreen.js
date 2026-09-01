@@ -65,7 +65,16 @@ const TEACHER_TRANSLATIONS = {
     pdfSectionSub: "A4 shaklidagi topshiriq jadvallarini generatsiya qilish",
     generatePdfBtnText: "GENERATE PDF",
     noActivityText: "Faoliyat tarixi mavjud emas",
-    noActivityDesc: "Mashqlarni bajarib tugatganingizdan so'ng natijalaringiz shu yerda ko'rinadi."
+    noActivityDesc: "Mashqlarni bajarib tugatganingizdan so'ng natijalaringiz shu yerda ko'rinadi.",
+    navSearch: "Qidiruv",
+    searchPlaceholder: "Ism, email yoki ID bo'yicha qidiruv...",
+    filterAll: "Barchasi",
+    filterStudents: "O'quvchilar",
+    filterTeachers: "O'qituvchilar",
+    roleStudent: "O'quvchi",
+    roleTeacher: "O'qituvchi",
+    sendMessageBtn: "Xabar yuborish",
+    noUsersFound: "Foydalanuvchilar topilmadi"
   },
   ru: {
     teacherLabel: "УЧИТЕЛЬ",
@@ -472,16 +481,37 @@ export default function TeacherDashboardScreen({ navigation, route }) {
     trendIncrease: 39
   });
 
-  // Fetch ranking & stats when activeTab is 'ranking' or 'stats'
+  // User list state for global search & ranking
+  const [allUsersData, setAllUsersData] = useState([]);
+  const [searchRoleFilter, setSearchRoleFilter] = useState('ALL'); // 'ALL' | 'STUDENT' | 'TEACHER'
+
+  // Fetch ranking, stats & user search data
   useEffect(() => {
-    if (activeTab === 'ranking' || activeTab === 'stats') {
+    if (activeTab === 'ranking' || activeTab === 'stats' || activeTab === 'search') {
       const fetchRankingAndStats = async () => {
         try {
           const res = await fetch(`${API_URL}/ranking?t=${Date.now()}`);
           if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data)) {
-              // Filter out teachers/admins if role present, or process all student users
+              // Store all users for Search tab
+              const processedAllUsers = data.map((u, index) => ({
+                id: u.id,
+                customId: u.customId || u.id,
+                name: u.name || (u.role === 'teacher' ? "O'qituvchi" : "O'quvchi"),
+                email: u.email || '',
+                phone: u.phone || '',
+                role: u.role || 'student',
+                xp: u.xp || 0,
+                exercisesCount: u.exercisesCount || Math.floor((u.xp || 0) / 15) || 0,
+                accuracy: u.accuracy || (u.xp > 500 ? 92 : u.xp > 200 ? 84 : 72),
+                avatar: (u.avatar && u.avatar.startsWith('http')) 
+                  ? { uri: u.avatar } 
+                  : getAvatarByName(u.character || u.avatar || u.characterName || u.name)
+              }));
+              setAllUsersData(processedAllUsers);
+
+              // Filter out teachers/admins if role present, or process all student users for Leaderboard
               const studentUsers = data.filter(u => u.role !== 'teacher' && u.role !== 'admin');
               const targetUsers = studentUsers.length > 0 ? studentUsers : data;
 
@@ -1510,11 +1540,140 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               )}
             </View>
 
-            <TouchableOpacity style={styles.logoutFullBtn} onPress={handleReturnToHome}>
-              <Feather name="log-out" size={20} color="#EF4444" style={{ marginRight: 8 }} />
-              <Text style={{ color: '#EF4444', fontFamily: 'Inter_700Bold', fontSize: 16 }}>{t.logout || "Tizimdan chiqish"}</Text>
-            </TouchableOpacity>
-          </ScrollView>
+        {/* 6. QIDIRUV SAHIFA (SEARCH) */}
+        {activeTab === 'search' && (
+          <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 14 }}>
+            {/* SEARCH INPUT BAR */}
+            <View style={styles.searchBar}>
+              <Feather name="search" size={20} color="#9CA3AF" style={{ marginRight: 10 }} />
+              <TextInput
+                style={{ flex: 1, color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_500Medium' }}
+                placeholder={t.searchPlaceholder || "Ism, email yoki ID bo'yicha qidiruv..."}
+                placeholderTextColor="#6B7280"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery ? (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Feather name="x-circle" size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+
+            {/* ROLE FILTER CHIPS (Barchasi / O'quvchilar / O'qituvchilar) */}
+            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+              <TouchableOpacity
+                style={[
+                  styles.pdfOpBtn,
+                  searchRoleFilter === 'ALL' && styles.pdfOpBtnActive
+                ]}
+                onPress={() => setSearchRoleFilter('ALL')}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.pdfOpBtnText, searchRoleFilter === 'ALL' && styles.pdfOpBtnTextActive]}>
+                  {t.filterAll || "Barchasi"}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.pdfOpBtn,
+                  searchRoleFilter === 'STUDENT' && styles.pdfOpBtnActive
+                ]}
+                onPress={() => setSearchRoleFilter('STUDENT')}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.pdfOpBtnText, searchRoleFilter === 'STUDENT' && styles.pdfOpBtnTextActive]}>
+                  🎓 {t.filterStudents || "O'quvchilar"}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.pdfOpBtn,
+                  searchRoleFilter === 'TEACHER' && styles.pdfOpBtnActive
+                ]}
+                onPress={() => setSearchRoleFilter('TEACHER')}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.pdfOpBtnText, searchRoleFilter === 'TEACHER' && styles.pdfOpBtnTextActive]}>
+                  👨‍🏫 {t.filterTeachers || "O'qituvchilar"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* SEARCH RESULTS LIST */}
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+              {(() => {
+                const query = searchQuery.trim().toLowerCase();
+                const filtered = allUsersData.filter(u => {
+                  const matchQuery = !query || (
+                    u.name.toLowerCase().includes(query) ||
+                    u.email.toLowerCase().includes(query) ||
+                    String(u.customId).toLowerCase().includes(query)
+                  );
+
+                  if (searchRoleFilter === 'STUDENT') {
+                    return matchQuery && u.role !== 'teacher' && u.role !== 'admin';
+                  } else if (searchRoleFilter === 'TEACHER') {
+                    return matchQuery && (u.role === 'teacher' || u.role === 'admin');
+                  }
+                  return matchQuery;
+                });
+
+                if (filtered.length === 0) {
+                  return (
+                    <View style={styles.emptyHistoryBox}>
+                      <MaterialCommunityIcons name="account-search-outline" size={40} color="rgba(255,255,255,0.2)" />
+                      <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', marginTop: 10 }}>
+                        {t.noUsersFound || "Foydalanuvchilar topilmadi"}
+                      </Text>
+                    </View>
+                  );
+                }
+
+                return filtered.map((u) => {
+                  const isTeacher = u.role === 'teacher' || u.role === 'admin';
+                  return (
+                    <View key={u.id || u.customId} style={styles.alertUserCard}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 10 }}>
+                        <Image source={u.avatar} style={{ width: 44, height: 44, borderRadius: 22, marginRight: 12, borderWidth: 1.5, borderColor: isTeacher ? '#A855F7' : '#3B82F6' }} />
+                        <View style={{ flex: 1 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            <Text style={{ color: '#FFFFFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>{u.name}</Text>
+                            <View style={{ backgroundColor: isTeacher ? 'rgba(168, 85, 247, 0.2)' : 'rgba(59, 130, 246, 0.2)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, borderWidth: 1, borderColor: isTeacher ? '#A855F7' : '#3B82F6' }}>
+                              <Text style={{ color: isTeacher ? '#A855F7' : '#3B82F6', fontSize: 9, fontFamily: 'Inter_700Bold' }}>
+                                {isTeacher ? (t.roleTeacher || "O'qituvchi") : (t.roleStudent || "O'quvchi")}
+                              </Text>
+                            </View>
+                          </View>
+                          <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_500Medium', marginTop: 2 }}>
+                            {u.email ? u.email : `ID: ${u.customId}`}
+                          </Text>
+                          {!isTeacher ? (
+                            <Text style={{ color: '#EAB308', fontSize: 11, fontFamily: 'Inter_700Bold', marginTop: 2 }}>
+                              ⭐ {u.xp} XP
+                            </Text>
+                          ) : null}
+                        </View>
+                      </View>
+
+                      {!isTeacher ? (
+                        <TouchableOpacity
+                          style={styles.alertUserMsgBtn}
+                          activeOpacity={0.8}
+                          onPress={() => handleOpenSendMessage(u)}
+                        >
+                          <Feather name="send" size={13} color="#FFF" style={{ marginRight: 4 }} />
+                          <Text style={styles.alertUserMsgBtnText}>{t.sendMessageBtn || "Xabar yuborish"}</Text>
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  );
+                });
+              })()}
+            </ScrollView>
+          </View>
         )}
       </View>
 
@@ -1534,6 +1693,14 @@ export default function TeacherDashboardScreen({ navigation, route }) {
         >
           <MaterialCommunityIcons name="brain" size={24} color={activeTab === 'exercise' ? '#A855F7' : '#6B7280'} />
           <Text style={[styles.navText, activeTab === 'exercise' && styles.navTextActive]}>{t.navExercise || "Mashq"}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.navItem} 
+          onPress={() => setActiveTab('search')}
+        >
+          <Feather name="search" size={22} color={activeTab === 'search' ? '#A855F7' : '#6B7280'} />
+          <Text style={[styles.navText, activeTab === 'search' && styles.navTextActive]}>{t.navSearch || "Qidiruv"}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
