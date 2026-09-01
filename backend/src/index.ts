@@ -842,14 +842,13 @@ app.get('/api/admin/users', async (req, res) => {
       if (roleStr === 'student') {
         filter = {
           OR: [
-            { role: { contains: 'student' } },
-            { role: { contains: 'Student' } },
-            { role: { contains: 'O\'quvchi' } }
+            { role: { equals: 'student', mode: 'insensitive' } },
+            { role: { contains: 'Student', mode: 'insensitive' } }
           ]
         };
       } else {
         filter = {
-          role: { contains: String(role) }
+          role: { contains: String(role), mode: 'insensitive' }
         };
       }
     }
