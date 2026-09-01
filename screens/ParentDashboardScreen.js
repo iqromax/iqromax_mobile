@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, ScrollView, Modal, TextInput, Image, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, ScrollView, Modal, TextInput, Image, Dimensions, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -154,11 +154,6 @@ export default function ParentDashboardScreen({ navigation, route }) {
   };
 
   const handleTabClick = (tabName) => {
-    if (childrenList.length === 0 && tabName !== 'home' && tabName !== 'profile') {
-      // Require Authentication & Child Binding
-      setIsAuthModalOpen(true);
-      return;
-    }
     setActiveTab(tabName);
   };
 
@@ -452,25 +447,48 @@ export default function ParentDashboardScreen({ navigation, route }) {
                     end={{ x: 1, y: 1 }}
                     style={styles.introHeroGradientCompact}
                   >
-                    <View style={styles.introHeaderRow}>
-                      <View style={styles.introBadgeIcon}>
-                        <MaterialCommunityIcons name="shield-account-outline" size={24} color="#C084FC" />
+                    {isWaitingChildAccept ? (
+                      <View style={{ paddingVertical: 4 }}>
+                        <View style={styles.introHeaderRow}>
+                          <View style={[styles.introBadgeIcon, { backgroundColor: 'rgba(245, 158, 11, 0.2)', borderColor: '#F59E0B' }]}>
+                            <MaterialCommunityIcons name="clock-outline" size={26} color="#F59E0B" />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.introHeroTitleCompact}>So'rov Yuborildi! ⏳</Text>
+                            <Text style={styles.introHeroSubCompact}>
+                              Farzandingiz ilovada "Tasdiqlash" tugmasini bosishi kutilmoqda.
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.3)', marginTop: 6 }}>
+                          <Text style={{ color: '#FDE047', fontSize: 12, fontFamily: 'Inter_600SemiBold', textAlign: 'center' }}>
+                            🔔 Farzandingiz IQROMAX mobil ilovasiga kirganida uning notification bo'limiga "O'qituvchingni/Ota-onangni tasdiqla" xabari boradi.
+                          </Text>
+                        </View>
                       </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.introHeroTitleCompact}>IQROMAX Ota-ona Tizimi 👨‍👩‍👧‍👦</Text>
-                        <Text style={styles.introHeroSubCompact}>Farzandingizning bilim va kunlik rivojlanishini kuzating.</Text>
-                      </View>
-                    </View>
+                    ) : (
+                      <>
+                        <View style={styles.introHeaderRow}>
+                          <View style={styles.introBadgeIcon}>
+                            <MaterialCommunityIcons name="shield-account-outline" size={24} color="#C084FC" />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.introHeroTitleCompact}>IQROMAX Ota-ona Tizimi 👨‍👩‍👧‍👦</Text>
+                            <Text style={styles.introHeroSubCompact}>Farzandingizning bilim va kunlik rivojlanishini kuzating.</Text>
+                          </View>
+                        </View>
 
-                    <TouchableOpacity
-                      style={styles.introBindBtnCompact}
-                      activeOpacity={0.85}
-                      onPress={() => setIsAuthModalOpen(true)}
-                    >
-                      <MaterialCommunityIcons name="account-plus-outline" size={18} color="#FFF" style={{ marginRight: 6 }} />
-                      <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandni Biriktirish</Text>
-                      <Feather name="arrow-right" size={16} color="#FFF" style={{ marginLeft: 'auto' }} />
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.introBindBtnCompact}
+                          activeOpacity={0.85}
+                          onPress={() => setIsAuthModalOpen(true)}
+                        >
+                          <MaterialCommunityIcons name="account-plus-outline" size={18} color="#FFF" style={{ marginRight: 6 }} />
+                          <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandni Biriktirish</Text>
+                          <Feather name="arrow-right" size={16} color="#FFF" style={{ marginLeft: 'auto' }} />
+                        </TouchableOpacity>
+                      </>
+                    )}
                   </LinearGradient>
                 </View>
 
@@ -513,68 +531,105 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
         {/* 2. 🏆 REYTING SAHIFA */}
         {activeTab === 'ranking' && (
-          <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 16 }}>
-            <Text style={styles.sectionTitle}>🏆 Reyting (Leaderboard)</Text>
+          <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {childrenList.length > 0 && activeChild ? (
+              <>
+                <Text style={styles.sectionTitle}>🏆 Reyting (Leaderboard)</Text>
 
-            <View style={styles.filterChipsRow}>
-              {[
-                { id: 'global', label: '🌍 Global' },
-                { id: 'country', label: '🇺🇿 Mamlakat' },
-                { id: 'school', label: '🏫 Maktab' },
-                { id: 'class', label: '👥 Sinf' }
-              ].map((f) => (
-                <TouchableOpacity
-                  key={f.id}
-                  style={[styles.filterChip, rankingFilter === f.id && styles.filterChipActive]}
-                  onPress={() => setRankingFilter(f.id)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.filterChipText, rankingFilter === f.id && styles.filterChipTextActive]}>{f.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                <View style={styles.filterChipsRow}>
+                  {[
+                    { id: 'global', label: '🌍 Global' },
+                    { id: 'country', label: '🇺🇿 Mamlakat' },
+                    { id: 'school', label: '🏫 Maktab' },
+                    { id: 'class', label: '👥 Sinf' }
+                  ].map((f) => (
+                    <TouchableOpacity
+                      key={f.id}
+                      style={[styles.filterChip, rankingFilter === f.id && styles.filterChipActive]}
+                      onPress={() => setRankingFilter(f.id)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={[styles.filterChipText, rankingFilter === f.id && styles.filterChipTextActive]}>{f.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
 
-            {childrenList.length > 0 && activeChild && (
-              <View style={styles.myChildRankCard}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🏆</Text>
+                <View style={styles.myChildRankCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center' }}>
+                      <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🏆</Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>SIZNING FARZANDINGIZ</Text>
+                      <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>SIZNING FARZANDINGIZ</Text>
-                    <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
+
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={{ color: '#F59E0B', fontSize: 18, fontFamily: 'Inter_900Black' }}>#24</Text>
+                    <Text style={{ color: '#10B981', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Top 8%</Text>
                   </View>
                 </View>
 
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ color: '#F59E0B', fontSize: 18, fontFamily: 'Inter_900Black' }}>#24</Text>
-                  <Text style={{ color: '#10B981', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Top 8%</Text>
+                <View style={{ paddingBottom: 100 }}>
+                  {leaderboardData.map((item) => (
+                    <View key={item.customId} style={styles.rankRow}>
+                      <Text style={[
+                        styles.rankNum,
+                        item.rank === 1 && { color: '#F59E0B' },
+                        item.rank === 2 && { color: '#9CA3AF' },
+                        item.rank === 3 && { color: '#B45309' },
+                      ]}>
+                        {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
+                      </Text>
+                      <View style={styles.rankAvatarBox}>
+                        <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
+                      </View>
+                      <View style={{ flex: 1, marginLeft: 12 }}>
+                        <Text style={styles.rankName}>{item.name}</Text>
+                      </View>
+                      <Text style={styles.rankXp}>{item.xp.toLocaleString()} XP</Text>
+                    </View>
+                  ))}
+                </View>
+              </>
+            ) : (
+              /* INTRO RANKING SCREEN FOR UNLINKED PARENT */
+              <View style={{ paddingBottom: 100 }}>
+                <Text style={styles.sectionTitle}>🏆 Reyting Tizimi Nima?</Text>
+                
+                <View style={styles.introHeroCardCompact}>
+                  <LinearGradient colors={['#1E1B4B', '#0F172A']} style={{ padding: 18 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                      <View style={[styles.introBadgeIcon, { backgroundColor: 'rgba(245, 158, 11, 0.2)', borderColor: '#F59E0B' }]}>
+                        <FontAwesome5 name="trophy" size={22} color="#F59E0B" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.introHeroTitleCompact}>Musobaqa va O'rinlar</Text>
+                        <Text style={styles.introHeroSubCompact}>Farzandingiz do'stlari va tengdoshlari orasida nechanchi o'rinda ekanini kuzatasiz.</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)', padding: 12, borderRadius: 14, borderWidth: 1, borderColor: '#334155' }}>
+                      <Text style={{ color: '#94A3B8', fontSize: 12, lineHeight: 18 }}>
+                        💡 Farzandingiz har bir to'g'ri bajarilgan mashq uchun <Text style={{ color: '#F59E0B', fontWeight: 'bold' }}>XP ballar</Text> to'playdi. Reyting sahifasida uning sinfdagilar, maktabdagi va umumiy mamlakatdagi o'rnini jonli tahlil qilishingiz mumkin bo'ladi.
+                      </Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[styles.introBindBtnCompact, { marginTop: 14, backgroundColor: '#F59E0B' }]}
+                      activeOpacity={0.85}
+                      onPress={() => setIsAuthModalOpen(true)}
+                    >
+                      <MaterialCommunityIcons name="account-plus-outline" size={18} color="#FFF" style={{ marginRight: 6 }} />
+                      <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandni Biriktirish</Text>
+                      <Feather name="arrow-right" size={16} color="#FFF" style={{ marginLeft: 'auto' }} />
+                    </TouchableOpacity>
+                  </LinearGradient>
                 </View>
               </View>
             )}
-
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-              {leaderboardData.map((item) => (
-                <View key={item.customId} style={styles.rankRow}>
-                  <Text style={[
-                    styles.rankNum,
-                    item.rank === 1 && { color: '#F59E0B' },
-                    item.rank === 2 && { color: '#9CA3AF' },
-                    item.rank === 3 && { color: '#B45309' },
-                  ]}>
-                    {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
-                  </Text>
-                  <View style={styles.rankAvatarBox}>
-                    <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
-                  </View>
-                  <View style={{ flex: 1, marginLeft: 12 }}>
-                    <Text style={styles.rankName}>{item.name}</Text>
-                  </View>
-                  <Text style={styles.rankXp}>{item.xp.toLocaleString()} XP</Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
+          </ScrollView>
         )}
 
         {/* 3. 👦 FARZANDIM SAHIFA */}
@@ -676,14 +731,49 @@ export default function ParentDashboardScreen({ navigation, route }) {
                         <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
                           <MaterialCommunityIcons name={ach.unlocked ? ach.icon : 'lock'} size={20} color={ach.color} />
                         </View>
-                        <Text style={styles.achieveTitle}>{ach.title}</Text>
+                        <Text style={styles.achieveTitle}>{ach.title}</title>
                         {!ach.unlocked && <Text style={{ color: '#6B7280', fontSize: 11, marginLeft: 'auto' }}>Qulflangan</Text>}
                       </View>
                     ))}
                   </View>
                 </View>
               </>
-            ) : null}
+            ) : (
+              /* INTRO CHILD STATS SCREEN FOR UNLINKED PARENT */
+              <View style={{ paddingBottom: 100 }}>
+                <Text style={styles.sectionTitle}>👦 Farzandim Bo'limi Nima?</Text>
+
+                <View style={styles.introHeroCardCompact}>
+                  <LinearGradient colors={['#0F291E', '#061710']} style={{ padding: 18 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                      <View style={[styles.introBadgeIcon, { backgroundColor: 'rgba(16, 185, 129, 0.2)', borderColor: '#10B981' }]}>
+                        <MaterialCommunityIcons name="chart-bell-curve-cumulative" size={24} color="#10B981" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.introHeroTitleCompact}>Chuqurlashtirilgan Statistika</Text>
+                        <Text style={styles.introHeroSubCompact}>Farzandingizning bilim darajasi va kunlik faolligini batafsil kuzatasiz.</Text>
+                      </View>
+                    </View>
+
+                    <View style={{ backgroundColor: 'rgba(6, 23, 16, 0.7)', padding: 12, borderRadius: 14, borderWidth: 1, borderColor: '#134E3A' }}>
+                      <Text style={{ color: '#A7F3D0', fontSize: 12, lineHeight: 18 }}>
+                        📈 Farzandingizni biriktirgandan so'ng bu sahifada uning <Text style={{ color: '#10B981', fontWeight: 'bold' }}>bajarilgan mashqlar soni, to'g'ri javoblar aniqlik foizi, har bir fandan erishgan darajasi va yutuqlari (medal & badges)</Text> namoyon bo'ladi.
+                      </Text>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[styles.introBindBtnCompact, { marginTop: 14, backgroundColor: '#10B981' }]}
+                      activeOpacity={0.85}
+                      onPress={() => setIsAuthModalOpen(true)}
+                    >
+                      <MaterialCommunityIcons name="account-plus-outline" size={18} color="#FFF" style={{ marginRight: 6 }} />
+                      <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandni Biriktirish</Text>
+                      <Feather name="arrow-right" size={16} color="#FFF" style={{ marginLeft: 'auto' }} />
+                    </TouchableOpacity>
+                  </LinearGradient>
+                </View>
+              </View>
+            )}
           </ScrollView>
         )}
 
@@ -798,7 +888,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
         <TouchableOpacity style={styles.navItem} onPress={() => handleTabClick('child')}>
           <MaterialCommunityIcons name="account-child" size={24} color={activeTab === 'child' ? '#A855F7' : '#6B7280'} />
-          <Text style={[styles.navText, activeTab === 'child' && styles.navTextActive]}>Farzandim</Text>
+                  <Text style={[styles.navText, activeTab === 'child' && styles.navTextActive]}>Farzandim</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => handleTabClick('profile')}>
@@ -809,109 +899,114 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
       {/* AUTHENTICATION & CHILD ID BINDING MODAL */}
       <Modal visible={isAuthModalOpen} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContentCard, { maxHeight: '90%' }]}>
-            <View style={styles.modalHeaderRow}>
-              <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🔒 Autentifikatsiya va Farzand ID</Text>
-              <TouchableOpacity onPress={() => setIsAuthModalOpen(false)}>
-                <Feather name="x" size={24} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
-              <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>
-                Farzandingiz natijalarini ko'rish uchun elektron pochtangiz, telefon raqamingiz, parol va Farzandingiz ID sini kiriting.
-              </Text>
-
-              {/* EMAIL INPUT */}
-              <View style={styles.inputContainer}>
-                <Feather name="mail" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Elektron pochtangiz (Email)"
-                  placeholderTextColor="#6B7280"
-                  keyboardType="email-address"
-                  value={authEmail}
-                  onChangeText={setAuthEmail}
-                />
-              </View>
-
-              {/* PHONE INPUT */}
-              <View style={styles.inputContainer}>
-                <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Telefon raqamingiz"
-                  placeholderTextColor="#6B7280"
-                  keyboardType="phone-pad"
-                  value={authPhone}
-                  onChangeText={setAuthPhone}
-                />
-              </View>
-
-              {/* PASSWORD INPUT */}
-              <View style={styles.inputContainer}>
-                <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Parol o'ylab toping"
-                  placeholderTextColor="#6B7280"
-                  secureTextEntry={!showPassword}
-                  value={authPassword}
-                  onChangeText={setAuthPassword}
-                />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContentCard, { maxHeight: '90%' }]}>
+              <View style={styles.modalHeaderRow}>
+                <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🔒 Autentifikatsiya va Farzand ID</Text>
+                <TouchableOpacity onPress={() => setIsAuthModalOpen(false)}>
+                  <Feather name="x" size={24} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
 
-              {/* CONFIRM PASSWORD INPUT */}
-              <View style={styles.inputContainer}>
-                <Feather name="check-circle" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                <TextInput
-                  style={styles.modalInput}
-                  placeholder="Parolni tasdiqlang"
-                  placeholderTextColor="#6B7280"
-                  secureTextEntry={!showPassword}
-                  value={authConfirmPassword}
-                  onChangeText={setAuthConfirmPassword}
-                />
-              </View>
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
+                <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>
+                  Farzandingiz natijalarini ko'rish uchun elektron pochtangiz, telefon raqamingiz, parol va Farzandingiz ID sini kiriting.
+                </Text>
 
-              {/* EYE CATCHING CHILD ID INPUT */}
-              <View style={styles.eyeCatchingIdBox}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                  <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
-                  <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
-                </View>
-                <View style={styles.idInputInner}>
-                  <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
+                {/* EMAIL INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="mail" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
                   <TextInput
-                    style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
-                    placeholder="#956Z6X"
+                    style={styles.modalInput}
+                    placeholder="Elektron pochtangiz (Email)"
                     placeholderTextColor="#6B7280"
-                    value={childIdInput}
-                    onChangeText={setChildIdInput}
-                    autoCapitalize="characters"
+                    keyboardType="email-address"
+                    value={authEmail}
+                    onChangeText={setAuthEmail}
                   />
                 </View>
-              </View>
 
-              <TouchableOpacity
-                style={[styles.addChildSubmitBtn, isSendingOtp && { opacity: 0.5 }]}
-                activeOpacity={0.85}
-                onPress={handleAuthAndInviteSubmit}
-                disabled={isSendingOtp}
-              >
-                {isSendingOtp ? (
-                  <ActivityIndicator color="#FFF" />
-                ) : (
-                  <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Saqlash va Tasdiqlash (OTP)</Text>
-                )}
-              </TouchableOpacity>
-            </ScrollView>
+                {/* PHONE INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Telefon raqamingiz"
+                    placeholderTextColor="#6B7280"
+                    keyboardType="phone-pad"
+                    value={authPhone}
+                    onChangeText={setAuthPhone}
+                  />
+                </View>
+
+                {/* PASSWORD INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Parol o'ylab toping"
+                    placeholderTextColor="#6B7280"
+                    secureTextEntry={!showPassword}
+                    value={authPassword}
+                    onChangeText={setAuthPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* CONFIRM PASSWORD INPUT */}
+                <View style={styles.inputContainer}>
+                  <Feather name="check-circle" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={styles.modalInput}
+                    placeholder="Parolni tasdiqlang"
+                    placeholderTextColor="#6B7280"
+                    secureTextEntry={!showPassword}
+                    value={authConfirmPassword}
+                    onChangeText={setAuthConfirmPassword}
+                  />
+                </View>
+
+                {/* EYE CATCHING CHILD ID INPUT */}
+                <View style={styles.eyeCatchingIdBox}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                    <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
+                    <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
+                  </View>
+                  <View style={styles.idInputInner}>
+                    <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
+                    <TextInput
+                      style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
+                      placeholder="#956Z6X"
+                      placeholderTextColor="#6B7280"
+                      value={childIdInput}
+                      onChangeText={setChildIdInput}
+                      autoCapitalize="characters"
+                    />
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={[styles.addChildSubmitBtn, isSendingOtp && { opacity: 0.5 }]}
+                  activeOpacity={0.85}
+                  onPress={handleAuthAndInviteSubmit}
+                  disabled={isSendingOtp}
+                >
+                  {isSendingOtp ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Saqlash va Tasdiqlash (OTP)</Text>
+                  )}
+                </TouchableOpacity>
+              </ScrollView>
+            </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* FEEDBACK ALERT MODAL */}
