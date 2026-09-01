@@ -240,19 +240,19 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
     return cloned;
   }, [scene]);
 
-  const accessoryScale = isHeadwear ? 4.5 : 0.50;
+  const accessoryScale = isHeadwear ? 25.0 : 0.50;
   
   let xOffset = 0;
-  let heightOffset = isHeadwear ? 2.45 : 2.10; // Bosh kiyim (hat/cap) head height positioning
-  let zOffset = isHeadwear ? 0.0 : 0.20;
+  let heightOffset = isHeadwear ? 1.0 : 2.10; // Position right in middle of chest/head area
+  let zOffset = isHeadwear ? 0.5 : 0.20;
   
-  if (characterIndex === 0) { // Athletic Man (Bosh sahifadagi birinchi personaj)
-    heightOffset = isHeadwear ? 2.45 : 1.50; 
-  } else if (characterIndex === 1) { // Adult Male (Maks)
-    heightOffset = isHeadwear ? 1.85 : 1.50;
+  if (characterIndex === 0) { // Athletic Man
+    heightOffset = isHeadwear ? 1.2 : 1.50; 
+  } else if (characterIndex === 1) { // Adult Male
+    heightOffset = isHeadwear ? 1.0 : 1.50;
   } else if (characterIndex >= 4) { // Qizlar
-    heightOffset = isHeadwear ? 2.40 : 2.05; 
-    zOffset = isHeadwear ? 0.05 : 0.30; 
+    heightOffset = isHeadwear ? 1.2 : 2.05; 
+    zOffset = isHeadwear ? 0.5 : 0.30; 
   }
   
   const posX = xOffset;

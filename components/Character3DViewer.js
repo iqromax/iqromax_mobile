@@ -158,8 +158,8 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                   const url = URL.createObjectURL(blob);
                   const gltf = await viewer.loadGltf(url);
                   if (gltf && gltf.scene) {
-                    gltf.scene.scale.set(4.5, 4.5, 4.5);
-                    gltf.scene.position.set(0, 0.95, 0);
+                    gltf.scene.scale.set(25.0, 25.0, 25.0);
+                    gltf.scene.position.set(0, 0.5, 0);
                     viewer.model.scene.add(gltf.scene);
                   }
                 } catch(e) {
