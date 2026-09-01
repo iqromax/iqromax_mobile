@@ -445,21 +445,31 @@ export default function ParentDashboardScreen({ navigation, route }) {
             ) : (
               /* INTRO INTRODUCTORY SCREEN FOR FIRST TIME PARENTS */
               <View style={styles.introContainer}>
-                <View style={styles.introHeroCard}>
-                  <LinearGradient colors={['rgba(168, 85, 247, 0.25)', 'rgba(168, 85, 247, 0.05)']} style={styles.introHeroGradient}>
-                    <MaterialCommunityIcons name="shield-star-outline" size={54} color="#A855F7" style={{ marginBottom: 12 }} />
-                    <Text style={styles.introHeroTitle}>IQROMAX Ota-ona Tizimiga Xush Kelibsiz! 👨‍👩‍👧‍👦</Text>
-                    <Text style={styles.introHeroSub}>
-                      Farzandingizning bilim olishdagi har bir yutug'i, kunlik rivojlanishi va qiziqishlarini bir joyda kuzatib boring.
-                    </Text>
+                <View style={styles.introHeroCardCompact}>
+                  <LinearGradient
+                    colors={['#2D1454', '#120926']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.introHeroGradientCompact}
+                  >
+                    <View style={styles.introHeaderRow}>
+                      <View style={styles.introBadgeIcon}>
+                        <MaterialCommunityIcons name="shield-account-outline" size={24} color="#C084FC" />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.introHeroTitleCompact}>IQROMAX Ota-ona Tizimi 👨‍👩‍👧‍👦</Text>
+                        <Text style={styles.introHeroSubCompact}>Farzandingizning bilim va kunlik rivojlanishini kuzating.</Text>
+                      </View>
+                    </View>
 
                     <TouchableOpacity
-                      style={styles.introBindBtn}
+                      style={styles.introBindBtnCompact}
                       activeOpacity={0.85}
                       onPress={() => setIsAuthModalOpen(true)}
                     >
-                      <MaterialCommunityIcons name="account-plus-outline" size={20} color="#FFF" style={{ marginRight: 8 }} />
-                      <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Farzandni Biriktirish & Autentifikatsiya</Text>
+                      <MaterialCommunityIcons name="account-plus-outline" size={18} color="#FFF" style={{ marginRight: 6 }} />
+                      <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandni Biriktirish</Text>
+                      <Feather name="arrow-right" size={16} color="#FFF" style={{ marginLeft: 'auto' }} />
                     </TouchableOpacity>
                   </LinearGradient>
                 </View>
@@ -941,11 +951,61 @@ const styles = StyleSheet.create({
   insightText: { color: '#D1D5DB', fontSize: 12, fontFamily: 'Inter_500Medium' },
 
   introContainer: { paddingBottom: 20 },
-  introHeroCard: { borderRadius: 24, overflow: 'hidden', marginBottom: 24, borderWidth: 1.5, borderColor: '#A855F7' },
-  introHeroGradient: { padding: 24, alignItems: 'center', textAlign: 'center' },
-  introHeroTitle: { color: '#FFFFFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8 },
-  introHeroSub: { color: '#D1D5DB', fontSize: 13, textAlign: 'center', lineHeight: 19, marginBottom: 20 },
-  introBindBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#A855F7', paddingVertical: 14, paddingHorizontal: 20, borderRadius: 16 },
+  introHeroCardCompact: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.3)',
+    shadowColor: '#A855F7',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8
+  },
+  introHeroGradientCompact: {
+    padding: 16
+  },
+  introHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 14
+  },
+  introBadgeIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.4)'
+  },
+  introHeroTitleCompact: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold'
+  },
+  introHeroSubCompact: {
+    color: '#D1D5DB',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    marginTop: 2,
+    lineHeight: 16
+  },
+  introBindBtnCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#9333EA',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+    shadowColor: '#9333EA',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8
+  },
 
   introFeatureCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#0D0D1F', padding: 16, borderRadius: 18, marginBottom: 12, borderWidth: 1, borderColor: '#1A1A35' },
   introIconBox: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5 },
