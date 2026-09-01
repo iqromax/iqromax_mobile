@@ -422,7 +422,22 @@ export default function StepFiveScreen({ navigation, route }) {
 
           <View style={styles.canvasContainer}>
             {isFocused && (
-              <Character3DViewer characterIndex={selectedChar} />
+              Platform.OS === 'android' ? (
+                <Character3DViewer characterIndex={selectedChar} />
+              ) : (
+                <Canvas 
+                  style={{ flex: 1, backgroundColor: 'transparent' }}
+                  gl={{ preserveDrawingBuffer: true, alpha: true, antialias: true }}
+                >
+                  <ambientLight intensity={2} color="#ffffff" />
+                  <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
+                  <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
+                  <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
+                  <Suspense fallback={null}>
+                    <CharacterModel onLoad={() => setModelLoaded(true)} characterIndex={selectedChar} />
+                  </Suspense>
+                </Canvas>
+              )
             )}
           </View>
 
