@@ -1376,6 +1376,63 @@ app.post('/api/teacher/send-invite', async (req, res) => {
   }
 });
 
+// --- PARENT INVITATION API ---
+app.post('/api/parent/send-invite', async (req, res) => {
+  try {
+    const { parentName, parentEmail, parentPhone, studentCustomId } = req.body;
+    if (!studentCustomId) {
+      return res.status(400).json({ error: 'Farzandingiz IDsi ko\'rsatilmadi' });
+    }
+
+    const cleanStudentCustomId = studentCustomId.trim().toUpperCase().startsWith('#')
+      ? studentCustomId.trim().toUpperCase()
+      : '#' + studentCustomId.trim().toUpperCase();
+
+    // Find student in DB
+    const studentUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: cleanStudentCustomId },
+          { customId: cleanStudentCustomId.replace(/^#+/, '') }
+        ]
+      }
+    });
+
+    if (!studentUser) {
+      return res.status(404).json({ error: 'Ushbu ID raqamli o\'quvchi topilmadi' });
+    }
+
+    const inviteData = {
+      parentName: parentName || "Ota-onangiz",
+      parentEmail: parentEmail || '',
+      parentPhone: parentPhone || '',
+      studentCustomId: studentUser.customId
+    };
+
+    const newNotif = await prisma.notification.create({
+      data: {
+        userId: studentUser.customId,
+        senderId: parentEmail || parentName,
+        title: `👨‍👩‍👦 Ota-onangiz siz bilan bog'lanmoqchi`,
+        message: JSON.stringify(inviteData),
+        type: 'PARENT_INVITE',
+        status: 'PENDING'
+      }
+    });
+
+    io.emit('parent_invite_sent', {
+      studentCustomId: studentUser.customId,
+      parentName: parentName || "Ota-onangiz",
+      notif: newNotif
+    });
+
+    res.json({ message: 'Farzandingizga ulashish so\'rovi muvaffaqiyatli yuborildi!', student: studentUser, notif: newNotif });
+  } catch (error) {
+    console.error('Send parent invite error:', error);
+    res.status(500).json({ error: 'Farzandga so\'rov yuborishda xatolik yuz berdi' });
+  }
+});
+
 // --- BATTLE INVITE & NOTIFICATION REST API ---
 app.get('/api/notifications/:customId', async (req, res) => {
   try {

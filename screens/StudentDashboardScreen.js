@@ -3746,6 +3746,45 @@ export default function StudentDashboardScreen({ navigation, route }) {
                           </View>
                         </View>
                       );
+                    } else if (notif.type === 'PARENT_INVITE') {
+                      let inviteData = {};
+                      try { inviteData = JSON.parse(notif.message); } catch (e) {}
+                      const parentName = inviteData.parentName || "Ota-onangiz";
+                      return (
+                        <View key={notif.id || idx} style={styles.notifItemCard}>
+                          <View style={styles.notifItemHeader}>
+                            <View style={[styles.notifItemAvatar, { backgroundColor: 'rgba(59, 130, 246, 0.2)', justifyContent: 'center', alignItems: 'center' }]}>
+                              <MaterialCommunityIcons name="account-child-circle" size={26} color="#3B82F6" />
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.notifItemSender}>👨‍👩‍👦 Ota-onangiz siz bilan bog'lanmoqchi</Text>
+                              <Text style={styles.notifItemStats}>👤 {parentName}</Text>
+                            </View>
+                            <View style={[styles.notifBadge, { backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3B82F6' }]}>
+                              <Text style={[styles.notifBadgeText, { color: '#3B82F6' }]}>Ota-ona</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.notifItemMsg}>
+                            <Text style={{ fontWeight: 'bold', color: '#60A5FA' }}>{parentName}</Text> sizning o'quv faoliyatingizni kuzatish uchun ota-ona hisobiga ulanishni so'radi.
+                          </Text>
+                          <View style={styles.notifItemActions}>
+                            <TouchableOpacity 
+                              style={styles.notifRejectBtn} 
+                              onPress={() => handleNotifRespond(notif, 'REJECTED')}
+                            >
+                              <MaterialCommunityIcons name="close" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                              <Text style={styles.notifRejectText}>Rad etish</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity 
+                              style={[styles.notifAcceptBtn, { backgroundColor: '#10B981' }]} 
+                              onPress={() => handleNotifRespond(notif, 'ACCEPTED')}
+                            >
+                              <MaterialCommunityIcons name="check-bold" size={16} color="#FFF" style={{ marginRight: 4 }} />
+                              <Text style={styles.notifAcceptText}>Qabul qilish</Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      );
                     } else {
                       return (
                         <View key={notif.id || idx} style={styles.notifItemCard}>

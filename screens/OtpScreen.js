@@ -158,6 +158,18 @@ export default function OtpScreen({ navigation, route }) {
         setTimeout(() => {
           if (route.params?.isResetPassword) {
             navigation.navigate('ResetPasswordScreen', { email, language });
+          } else if (route.params?.parentAuthRedirect) {
+            navigation.navigate('ParentDashboard', {
+              user: {
+                name: route.params.name,
+                email: route.params.email,
+                phone: route.params.phone,
+                role: 'parent'
+              },
+              studentCustomId: route.params.studentCustomId,
+              isAuthVerified: true,
+              language: route.params.language || 'uz'
+            });
           } else {
             navigation.navigate('StepFour', {
               ...route.params,

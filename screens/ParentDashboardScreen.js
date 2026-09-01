@@ -1,128 +1,123 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, ScrollView, Modal, TextInput, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, ScrollView, Modal, TextInput, Image, Dimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import { API_URL } from '../src/config/api';
+import { io } from 'socket.io-client';
+import { SOCKET_URL, API_URL } from '../src/config/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const MOCK_CHILDREN = [
-  {
-    id: 'c1',
-    customId: '#956Z6X',
-    name: 'Abdulloh Karimov',
-    level: 12,
-    xp: 4580,
-    streak: 7,
-    dailyActivity: 82,
-    todayExercises: '18 / 20',
-    todayAccuracy: '87%',
-    todayTime: '42 daqiqa',
-    goalPercent: 75,
-    goalProgress: '15 / 20 mashq bajarildi',
-    goalRemaining: 'Yana 5 ta mashq qoldi',
-    weeklyData: [
-      { day: 'Dush', xp: 520, exercises: 14, time: 35 },
-      { day: 'Sesh', xp: 680, exercises: 18, time: 42 },
-      { day: 'Chor', xp: 450, exercises: 12, time: 30 },
-      { day: 'Pay', xp: 720, exercises: 19, time: 45 },
-      { day: 'Jum', xp: 810, exercises: 22, time: 50 },
-      { day: 'Shan', xp: 600, exercises: 15, time: 38 },
-      { day: 'Yak', xp: 800, exercises: 20, time: 48 },
-    ],
-    achievements: [
-      { id: 'a1', title: '7 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
-      { id: 'a2', title: "100 ta to'g'ri javob", icon: 'target', color: '#10B981', unlocked: true },
-      { id: 'a3', title: "500 XP to'plandi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: true },
-      { id: 'a4', title: 'Gold daraja', icon: 'crown', color: '#EAB308', unlocked: true },
-      { id: 'a5', title: "10 ta Battle g'alabasi", icon: 'sword-cross', color: '#3B82F6', unlocked: true },
-      { id: 'a6', title: '30 kunlik streak', icon: 'fire', color: '#9CA3AF', unlocked: false },
-      { id: 'a7', title: '5 000 XP', icon: 'lightning-bolt', color: '#9CA3AF', unlocked: false },
-      { id: 'a8', title: '100 ta Battle', icon: 'sword-cross', color: '#9CA3AF', unlocked: false }
-    ],
-    subjectStats: [
-      { name: 'Matematika', score: 84, color: '#3B82F6' },
-      { name: 'Fizika', score: 76, color: '#EAB308' },
-      { name: 'Ingliz tili', score: 91, color: '#10B981' },
-      { name: 'Mantiq', score: 95, color: '#A855F7' }
-    ],
-    detailedStats: {
-      todayTime: '42 min',
-      weekTime: '4 soat 12 min',
-      monthTime: '17 soat 45 min',
-      totalEx: 428,
-      correctEx: 382,
-      wrongEx: 46,
-      accuracy: '89.3%',
-      progressHistory: ['75%', '79%', '82%', '86%', '89%']
-    }
-  },
-  {
-    id: 'c2',
-    customId: '#VFWZ24',
-    name: 'Muhammad Ali',
-    level: 15,
-    xp: 6840,
-    streak: 12,
-    dailyActivity: 94,
-    todayExercises: '20 / 20',
-    todayAccuracy: '95%',
-    todayTime: '55 daqiqa',
-    goalPercent: 100,
-    goalProgress: '20 / 20 mashq bajarildi',
-    goalRemaining: 'Bugungi maqsad yakunlandi! 🎉',
-    weeklyData: [
-      { day: 'Dush', xp: 700, exercises: 18, time: 45 },
-      { day: 'Sesh', xp: 850, exercises: 22, time: 55 },
-      { day: 'Chor', xp: 900, exercises: 25, time: 60 },
-      { day: 'Pay', xp: 950, exercises: 24, time: 58 },
-      { day: 'Jum', xp: 880, exercises: 20, time: 50 },
-      { day: 'Shan', xp: 920, exercises: 23, time: 56 },
-      { day: 'Yak', xp: 940, exercises: 24, time: 58 },
-    ],
-    achievements: [
-      { id: 'a1', title: '12 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
-      { id: 'a2', title: "500 ta to'g'ri javob", icon: 'target', color: '#10B981', unlocked: true },
-      { id: 'a3', title: "5000 XP to'plandi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: true }
-    ],
-    subjectStats: [
-      { name: 'Matematika', score: 96, color: '#3B82F6' },
-      { name: 'Fizika', score: 88, color: '#EAB308' },
-      { name: 'Ingliz tili', score: 94, color: '#10B981' },
-      { name: 'Mantiq', score: 98, color: '#A855F7' }
-    ],
-    detailedStats: {
-      todayTime: '55 min',
-      weekTime: '6 soat 10 min',
-      monthTime: '24 soat 15 min',
-      totalEx: 620,
-      correctEx: 585,
-      wrongEx: 35,
-      accuracy: '94.3%',
-      progressHistory: ['82%', '85%', '89%', '92%', '95%']
-    }
-  }
-];
-
 export default function ParentDashboardScreen({ navigation, route }) {
-  const { user, language = 'uz' } = route.params || {};
+  const { user, language = 'uz', isAuthVerified = false } = route.params || {};
 
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'ranking' | 'child' | 'profile'
-  const [childrenList, setChildrenList] = useState(MOCK_CHILDREN);
+  const [childrenList, setChildrenList] = useState([]); // Empty by default for new guest parent
   const [selectedChildIndex, setSelectedChildIndex] = useState(0);
   const [weeklyMetric, setWeeklyMetric] = useState('xp'); // 'xp' | 'exercises' | 'time'
   const [rankingFilter, setRankingFilter] = useState('global'); // 'global' | 'country' | 'school' | 'class'
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [isDetailedStatsOpen, setIsDetailedStatsOpen] = useState(false);
-  
-  // Add Child Modal State
-  const [isAddChildModalOpen, setIsAddChildModalOpen] = useState(false);
-  const [childIdInput, setChildIdInput] = useState('');
-  const [addChildFeedback, setAddChildFeedback] = useState({ visible: false, title: '', message: '', type: 'success' });
 
-  const activeChild = childrenList[selectedChildIndex] || childrenList[0];
+  // Authentication & Child Binding Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authEmail, setAuthEmail] = useState(user?.email || '');
+  const [authPhone, setAuthPhone] = useState(user?.phone || '');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('');
+  const [childIdInput, setChildIdInput] = useState(route.params?.studentCustomId || '');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+
+  // Feedback Alert Modal
+  const [feedbackAlert, setFeedbackAlert] = useState({ visible: false, title: '', message: '', type: 'error' });
+
+  // Waiting for child acceptance status
+  const [isWaitingChildAccept, setIsWaitingChildAccept] = useState(false);
+
+  const activeChild = childrenList[selectedChildIndex] || null;
+
+  // Real-time socket listener for parent invite acceptance by student
+  useEffect(() => {
+    const socket = io(SOCKET_URL, {
+      path: '/api/socket.io',
+      transports: ['websocket']
+    });
+
+    socket.on('parent_invite_accepted', (data) => {
+      if (data && data.student) {
+        const studentObj = data.student;
+        const newChild = {
+          id: studentObj.uuid || studentObj.id || 'c_' + Date.now(),
+          customId: studentObj.customId || '#' + studentObj.id,
+          name: studentObj.name || 'Farzand',
+          level: studentObj.level || 1,
+          xp: studentObj.xp || 0,
+          streak: 1,
+          dailyActivity: 80,
+          todayExercises: '15 / 20',
+          todayAccuracy: '85%',
+          todayTime: '35 daqiqa',
+          goalPercent: 75,
+          goalProgress: '15 / 20 mashq bajarildi',
+          goalRemaining: 'Yana 5 ta mashq qoldi',
+          weeklyData: [
+            { day: 'Dush', xp: 400, exercises: 10, time: 25 },
+            { day: 'Sesh', xp: 550, exercises: 14, time: 32 },
+            { day: 'Chor', xp: 350, exercises: 8, time: 20 },
+            { day: 'Pay', xp: 600, exercises: 15, time: 35 },
+            { day: 'Jum', xp: 750, exercises: 18, time: 42 },
+            { day: 'Shan', xp: 500, exercises: 12, time: 30 },
+            { day: 'Yak', xp: 650, exercises: 16, time: 38 },
+          ],
+          achievements: [
+            { id: 'a1', title: '7 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
+            { id: 'a2', title: "100 ta to'g'ri javob", icon: 'target', color: '#10B981', unlocked: true },
+            { id: 'a3', title: "500 XP to'plandi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: true }
+          ],
+          subjectStats: [
+            { name: 'Matematika', score: 85, color: '#3B82F6' },
+            { name: 'Fizika', score: 78, color: '#EAB308' },
+            { name: 'Ingliz tili', score: 90, color: '#10B981' },
+            { name: 'Mantiq', score: 94, color: '#A855F7' }
+          ],
+          detailedStats: {
+            todayTime: '35 min',
+            weekTime: '3 soat 45 min',
+            monthTime: '15 soat 20 min',
+            totalEx: 310,
+            correctEx: 275,
+            wrongEx: 35,
+            accuracy: '88.7%',
+            progressHistory: ['72%', '76%', '80%', '84%', '88%']
+          }
+        };
+
+        setChildrenList(prev => {
+          const exists = prev.some(c => c.customId === newChild.customId);
+          if (exists) return prev;
+          return [...prev, newChild];
+        });
+        setIsWaitingChildAccept(false);
+        setFeedbackAlert({
+          visible: true,
+          title: 'Farzand tasdiqladi! 🎉',
+          message: `${studentObj.name} bog'lanish so'rovini qabul qildi. Endi uning barcha natijalarini ko'rishingiz mumkin!`,
+          type: 'success'
+        });
+      }
+    });
+
+    return () => socket.disconnect();
+  }, []);
+
+  // Handle returning from OTP verification
+  useEffect(() => {
+    if (isAuthVerified && childIdInput.trim()) {
+      sendParentInviteToStudent();
+    }
+  }, [isAuthVerified]);
 
   // Fetch Leaderboard for Ranking tab
   useEffect(() => {
@@ -158,86 +153,117 @@ export default function ParentDashboardScreen({ navigation, route }) {
     });
   };
 
-  const handleAddChildSubmit = async () => {
-    if (!childIdInput.trim()) {
-      setAddChildFeedback({ visible: true, title: 'Diqqat', message: 'Iltimos, farzandingizning IQROMAX ID raqamini kiriting!', type: 'error' });
+  const handleTabClick = (tabName) => {
+    if (childrenList.length === 0 && tabName !== 'home' && tabName !== 'profile') {
+      // Require Authentication & Child Binding
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setActiveTab(tabName);
+  };
+
+  // Submit Parent Auth & Invite Form
+  const handleAuthAndInviteSubmit = async () => {
+    if (!authEmail.trim() || !authPhone.trim() || !authPassword.trim() || !authConfirmPassword.trim() || !childIdInput.trim()) {
+      setFeedbackAlert({
+        visible: true,
+        title: 'Diqqat',
+        message: 'Iltimos, barcha maydonlarni to\'ldiring (Email, Telefon, Parol va Farzand ID raqami)!',
+        type: 'error'
+      });
       return;
     }
 
-    const cleanId = childIdInput.trim().toUpperCase();
-    const searchId = cleanId.startsWith('#') ? cleanId : '#' + cleanId;
+    if (authPassword !== authConfirmPassword) {
+      setFeedbackAlert({
+        visible: true,
+        title: 'Xatolik',
+        message: 'Parollar bir-biriga mos kelmadi!',
+        type: 'error'
+      });
+      return;
+    }
 
+    setIsSendingOtp(true);
     try {
-      const res = await fetch(`${API_URL}/users/search/${encodeURIComponent(searchId)}`);
-      if (res.ok) {
-        const data = await res.json();
-        const newChild = {
-          id: data.uuid || 'c_' + Date.now(),
-          customId: data.id || searchId,
-          name: data.name || 'Farzand',
-          level: data.level || 5,
-          xp: data.xp || 1200,
-          streak: 3,
-          dailyActivity: 75,
-          todayExercises: '10 / 15',
-          todayAccuracy: '85%',
-          todayTime: '25 daqiqa',
-          goalPercent: 65,
-          goalProgress: '10 / 15 mashq bajarildi',
-          goalRemaining: 'Yana 5 ta mashq qoldi',
-          weeklyData: [
-            { day: 'Dush', xp: 300, exercises: 8, time: 20 },
-            { day: 'Sesh', xp: 400, exercises: 10, time: 25 },
-            { day: 'Chor', xp: 350, exercises: 9, time: 22 },
-            { day: 'Pay', xp: 450, exercises: 12, time: 28 },
-            { day: 'Jum', xp: 500, exercises: 14, time: 30 },
-            { day: 'Shan', xp: 480, exercises: 11, time: 26 },
-            { day: 'Yak', xp: 520, exercises: 13, time: 29 },
-          ],
-          achievements: [
-            { id: 'a1', title: '3 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
-            { id: 'a2', title: '50 ta to\'g\'ri javob', icon: 'target', color: '#10B981', unlocked: true }
-          ],
-          subjectStats: [
-            { name: 'Matematika', score: 80, color: '#3B82F6' },
-            { name: 'Mantiq', score: 88, color: '#A855F7' }
-          ],
-          detailedStats: {
-            todayTime: '25 min',
-            weekTime: '3 soat 10 min',
-            monthTime: '12 soat 30 min',
-            totalEx: 210,
-            correctEx: 180,
-            wrongEx: 30,
-            accuracy: '85.7%',
-            progressHistory: ['70%', '75%', '78%', '82%', '85%']
-          }
-        };
+      // Send OTP to parent email
+      const res = await fetch(`${API_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: authEmail.trim(),
+          name: user?.name || 'Ota-ona',
+          language
+        })
+      });
 
-        setChildrenList(prev => [...prev, newChild]);
-        setIsAddChildModalOpen(false);
-        setChildIdInput('');
-        setAddChildFeedback({
+      if (res.ok) {
+        setIsAuthModalOpen(false);
+        setIsSendingOtp(false);
+        // Navigate to OtpScreen for verification
+        navigation.navigate('OtpScreen', {
+          email: authEmail.trim(),
+          phone: authPhone.trim(),
+          password: authPassword.trim(),
+          name: user?.name || 'Ota-ona',
+          role: 'parent',
+          studentCustomId: childIdInput.trim(),
+          parentAuthRedirect: true,
+          language
+        });
+      } else {
+        const errData = await res.json();
+        setFeedbackAlert({
           visible: true,
-          title: 'Muvaffaqiyatli! 🎉',
-          message: `${data.name} muvaffaqiyatli ulindi va Farzandlarim ro'yxatiga qo'shildi!`,
+          title: 'Xatolik',
+          message: errData.error || 'OTP kodini yuborishda xatolik yuz berdi.',
+          type: 'error'
+        });
+        setIsSendingOtp(false);
+      }
+    } catch (e) {
+      setFeedbackAlert({
+        visible: true,
+        title: 'Tarmoq Xatosi',
+        message: 'Internet aloqasini tekshiring.',
+        type: 'error'
+      });
+      setIsSendingOtp(false);
+    }
+  };
+
+  const sendParentInviteToStudent = async () => {
+    try {
+      const res = await fetch(`${API_URL}/parent/send-invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parentName: user?.name || 'Ota-onangiz',
+          parentEmail: authEmail || user?.email,
+          parentPhone: authPhone || user?.phone,
+          studentCustomId: childIdInput.trim()
+        })
+      });
+
+      if (res.ok) {
+        setIsWaitingChildAccept(true);
+        setFeedbackAlert({
+          visible: true,
+          title: 'So\'rov Yuborildi! 📩',
+          message: `Farzandingizning ilovasiga bog'lanish so'rovi yuborildi. Farzandingiz ilovasida "Qabul qilish" tugmasini bosishi bilanoq ma'lumotlar ko'rinadi.`,
           type: 'success'
         });
       } else {
-        setAddChildFeedback({
+        const errData = await res.json();
+        setFeedbackAlert({
           visible: true,
           title: 'Topilmadi',
-          message: 'Ushbu ID raqamli o\'quvchi topilmadi. Qayta tekshirib kiriting.',
+          message: errData.error || 'Ushbu ID raqamli o\'quvchi topilmadi.',
           type: 'error'
         });
       }
     } catch (e) {
-      setAddChildFeedback({
-        visible: true,
-        title: 'Xatolik',
-        message: 'Tarmoqqa ulanib bo\'lmadi. Internetni tekshiring.',
-        type: 'error'
-      });
+      console.error('Send parent invite error:', e);
     }
   };
 
@@ -255,7 +281,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
           </View>
           <View>
             <Text style={styles.roleBadgeText}>OTA-ONA TIZIMI</Text>
-            <Text style={styles.userName}>{user?.name || "Ergashboy Masharipov"}</Text>
+            <Text style={styles.userName}>{user?.name || "Ota-ona"}</Text>
           </View>
         </View>
 
@@ -269,151 +295,209 @@ export default function ParentDashboardScreen({ navigation, route }) {
         {/* 1. 🏠 BOSH SAHIFA */}
         {activeTab === 'home' && (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            {/* GREETING */}
-            <View style={{ marginBottom: 16 }}>
-              <Text style={styles.greetingTitle}>Assalomu alaykum! 👋</Text>
-              <Text style={styles.greetingSub}>Farzandingizning bugungi natijalari bilan tanishing.</Text>
-            </View>
+            {childrenList.length > 0 && activeChild ? (
+              <>
+                {/* GREETING */}
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={styles.greetingTitle}>Assalomu alaykum! 👋</Text>
+                  <Text style={styles.greetingSub}>Farzandingizning bugungi natijalari bilan tanishing.</Text>
+                </View>
 
-            {/* FARZAND QUICK CARD */}
-            <View style={styles.childCard}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                  <View style={styles.childAvatarBox}>
-                    <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>{activeChild.name.charAt(0)}</Text>
+                {/* FARZAND QUICK CARD */}
+                <View style={styles.childCard}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                      <View style={styles.childAvatarBox}>
+                        <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>{activeChild.name.charAt(0)}</Text>
+                      </View>
+                      <View>
+                        <Text style={{ color: '#FFFFFF', fontSize: 17, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
+                        <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium', marginTop: 2 }}>
+                          Level {activeChild.level} · ⭐ {activeChild.xp.toLocaleString()} XP
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.streakBadge}>
+                      <MaterialCommunityIcons name="fire" size={16} color="#EF4444" />
+                      <Text style={styles.streakText}>{activeChild.streak} kun</Text>
+                    </View>
                   </View>
-                  <View>
-                    <Text style={{ color: '#FFFFFF', fontSize: 17, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
-                    <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium', marginTop: 2 }}>
-                      Level {activeChild.level} · ⭐ {activeChild.xp.toLocaleString()} XP
+
+                  <View style={styles.activityProgressBox}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <Text style={{ color: '#D1D5DB', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>Bugungi faollik</Text>
+                      <Text style={{ color: '#10B981', fontSize: 12, fontFamily: 'Inter_700Bold' }}>{activeChild.dailyActivity}%</Text>
+                    </View>
+                    <View style={styles.progressBarBg}>
+                      <View style={[styles.progressBarFill, { width: `${activeChild.dailyActivity}%`, backgroundColor: '#10B981' }]} />
+                    </View>
+                  </View>
+                </View>
+
+                {/* 📊 BUGUNGI NATIJA */}
+                <Text style={styles.sectionTitle}>📊 Bugungi natija</Text>
+                <View style={styles.threeStatsRow}>
+                  <View style={styles.statBox}>
+                    <MaterialCommunityIcons name="target" size={24} color="#3B82F6" />
+                    <Text style={styles.statBoxNum}>{activeChild.todayExercises}</Text>
+                    <Text style={styles.statBoxLabel}>🎯 Mashqlar</Text>
+                  </View>
+
+                  <View style={styles.statBox}>
+                    <MaterialCommunityIcons name="flash-outline" size={24} color="#10B981" />
+                    <Text style={styles.statBoxNum}>{activeChild.todayAccuracy}</Text>
+                    <Text style={styles.statBoxLabel}>⚡ To'g'ri javob</Text>
+                  </View>
+
+                  <View style={styles.statBox}>
+                    <MaterialCommunityIcons name="clock-outline" size={24} color="#A855F7" />
+                    <Text style={styles.statBoxNum}>{activeChild.todayTime}</Text>
+                    <Text style={styles.statBoxLabel}>⏱️ O'qish vaqti</Text>
+                  </View>
+                </View>
+
+                {/* 📈 HAFATALIK PROGRESS GRAFIK */}
+                <View style={styles.cardBox}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <Text style={styles.cardTitle}>📈 Haftalik progress</Text>
+                    <View style={{ flexDirection: 'row', gap: 4, backgroundColor: '#0A0A16', padding: 3, borderRadius: 10, borderWidth: 1, borderColor: '#1A1A35' }}>
+                      <TouchableOpacity
+                        style={[styles.metricFilterBtn, weeklyMetric === 'xp' && styles.metricFilterBtnActive]}
+                        onPress={() => setWeeklyMetric('xp')}
+                      >
+                        <Text style={[styles.metricFilterText, weeklyMetric === 'xp' && styles.metricFilterTextActive]}>XP</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.metricFilterBtn, weeklyMetric === 'exercises' && styles.metricFilterBtnActive]}
+                        onPress={() => setWeeklyMetric('exercises')}
+                      >
+                        <Text style={[styles.metricFilterText, weeklyMetric === 'exercises' && styles.metricFilterTextActive]}>Mashq</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.metricFilterBtn, weeklyMetric === 'time' && styles.metricFilterBtnActive]}
+                        onPress={() => setWeeklyMetric('time')}
+                      >
+                        <Text style={[styles.metricFilterText, weeklyMetric === 'time' && styles.metricFilterTextActive]}>Vaqt</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  <View style={styles.chartRow}>
+                    {activeChild.weeklyData.map((item, idx) => {
+                      const val = weeklyMetric === 'xp' ? item.xp : (weeklyMetric === 'exercises' ? item.exercises : item.time);
+                      const maxVal = weeklyMetric === 'xp' ? 1000 : (weeklyMetric === 'exercises' ? 30 : 60);
+                      const barHeight = Math.min(100, Math.max(15, (val / maxVal) * 90));
+
+                      return (
+                        <View key={idx} style={styles.chartCol}>
+                          <Text style={styles.chartValText}>{val}</Text>
+                          <View style={styles.chartBarBg}>
+                            <LinearGradient
+                              colors={['#A855F7', '#6D28D9']}
+                              style={[styles.chartBarFill, { height: `${barHeight}%` }]}
+                            />
+                          </View>
+                          <Text style={styles.chartDayText}>{item.day}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+
+                  <View style={styles.insightBox}>
+                    <Feather name="trending-up" size={16} color="#10B981" style={{ marginRight: 8 }} />
+                    <Text style={styles.insightText}>
+                      Farzandingiz o'tgan haftaga nisbatan <Text style={{ color: '#10B981', fontWeight: 'bold' }}>+18% rivojlanmoqda!</Text>
                     </Text>
                   </View>
                 </View>
 
-                <View style={styles.streakBadge}>
-                  <MaterialCommunityIcons name="fire" size={16} color="#EF4444" />
-                  <Text style={styles.streakText}>{activeChild.streak} kun</Text>
-                </View>
-              </View>
-
-              <View style={styles.activityProgressBox}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <Text style={{ color: '#D1D5DB', fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>Bugungi faollik</Text>
-                  <Text style={{ color: '#10B981', fontSize: 12, fontFamily: 'Inter_700Bold' }}>{activeChild.dailyActivity}%</Text>
-                </View>
-                <View style={styles.progressBarBg}>
-                  <View style={[styles.progressBarFill, { width: `${activeChild.dailyActivity}%`, backgroundColor: '#10B981' }]} />
-                </View>
-              </View>
-            </View>
-
-            {/* 📊 BUGUNGI NATIJA (3 KATTA KO'RSATKICH) */}
-            <Text style={styles.sectionTitle}>📊 Bugungi natija</Text>
-            <View style={styles.threeStatsRow}>
-              <View style={styles.statBox}>
-                <MaterialCommunityIcons name="target" size={24} color="#3B82F6" />
-                <Text style={styles.statBoxNum}>{activeChild.todayExercises}</Text>
-                <Text style={styles.statBoxLabel}>🎯 Mashqlar</Text>
-              </View>
-
-              <View style={styles.statBox}>
-                <MaterialCommunityIcons name="flash-outline" size={24} color="#10B981" />
-                <Text style={styles.statBoxNum}>{activeChild.todayAccuracy}</Text>
-                <Text style={styles.statBoxLabel}>⚡ To'g'ri javob</Text>
-              </View>
-
-              <View style={styles.statBox}>
-                <MaterialCommunityIcons name="clock-outline" size={24} color="#A855F7" />
-                <Text style={styles.statBoxNum}>{activeChild.todayTime}</Text>
-                <Text style={styles.statBoxLabel}>⏱️ O'qish vaqti</Text>
-              </View>
-            </View>
-
-            {/* 📈 HAFATALIK PROGRESS GRAFIK */}
-            <View style={styles.cardBox}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <Text style={styles.cardTitle}>📈 Haftalik progress</Text>
-                <View style={{ flexDirection: 'row', gap: 4, backgroundColor: '#0A0A16', padding: 3, borderRadius: 10, borderWidth: 1, borderColor: '#1A1A35' }}>
-                  <TouchableOpacity
-                    style={[styles.metricFilterBtn, weeklyMetric === 'xp' && styles.metricFilterBtnActive]}
-                    onPress={() => setWeeklyMetric('xp')}
-                  >
-                    <Text style={[styles.metricFilterText, weeklyMetric === 'xp' && styles.metricFilterTextActive]}>XP</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.metricFilterBtn, weeklyMetric === 'exercises' && styles.metricFilterBtnActive]}
-                    onPress={() => setWeeklyMetric('exercises')}
-                  >
-                    <Text style={[styles.metricFilterText, weeklyMetric === 'exercises' && styles.metricFilterTextActive]}>Mashq</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.metricFilterBtn, weeklyMetric === 'time' && styles.metricFilterBtnActive]}
-                    onPress={() => setWeeklyMetric('time')}
-                  >
-                    <Text style={[styles.metricFilterText, weeklyMetric === 'time' && styles.metricFilterTextActive]}>Vaqt</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* BAR CHART */}
-              <View style={styles.chartRow}>
-                {activeChild.weeklyData.map((item, idx) => {
-                  const val = weeklyMetric === 'xp' ? item.xp : (weeklyMetric === 'exercises' ? item.exercises : item.time);
-                  const maxVal = weeklyMetric === 'xp' ? 1000 : (weeklyMetric === 'exercises' ? 30 : 60);
-                  const barHeight = Math.min(100, Math.max(15, (val / maxVal) * 90));
-
-                  return (
-                    <View key={idx} style={styles.chartCol}>
-                      <Text style={styles.chartValText}>{val}</Text>
-                      <View style={styles.chartBarBg}>
-                        <LinearGradient
-                          colors={['#A855F7', '#6D28D9']}
-                          style={[styles.chartBarFill, { height: `${barHeight}%` }]}
-                        />
-                      </View>
-                      <Text style={styles.chartDayText}>{item.day}</Text>
+                {/* 🎯 BUGUNGI MAQSAD */}
+                <View style={styles.cardBox}>
+                  <Text style={styles.cardTitle}>🎯 Bugungi maqsad</Text>
+                  <View style={{ marginTop: 10 }}>
+                    <View style={styles.progressBarBgLarge}>
+                      <View style={[styles.progressBarFill, { width: `${activeChild.goalPercent}%`, backgroundColor: '#A855F7' }]} />
                     </View>
-                  );
-                })}
-              </View>
-
-              <View style={styles.insightBox}>
-                <Feather name="trending-up" size={16} color="#10B981" style={{ marginRight: 8 }} />
-                <Text style={styles.insightText}>
-                  Farzandingiz o'tgan haftaga nisbatan <Text style={{ color: '#10B981', fontWeight: 'bold' }}>+18% rivojlanmoqda!</Text>
-                </Text>
-              </View>
-            </View>
-
-            {/* 🎯 BUGUNGI MAQSAD */}
-            <View style={styles.cardBox}>
-              <Text style={styles.cardTitle}>🎯 Bugungi maqsad</Text>
-              <View style={{ marginTop: 10 }}>
-                <View style={styles.progressBarBgLarge}>
-                  <View style={[styles.progressBarFill, { width: `${activeChild.goalPercent}%`, backgroundColor: '#A855F7' }]} />
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
-                  <Text style={{ color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_700Bold' }}>{activeChild.goalProgress}</Text>
-                  <Text style={{ color: '#A855F7', fontSize: 13, fontFamily: 'Inter_700Bold' }}>{activeChild.goalPercent}%</Text>
-                </View>
-                <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium', marginTop: 4 }}>{activeChild.goalRemaining}</Text>
-              </View>
-            </View>
-
-            {/* 🏆 SO'NGGI YUTUQLAR */}
-            <View style={[styles.cardBox, { marginBottom: 100 }]}>
-              <Text style={styles.cardTitle}>🏆 So'nggi yutuqlar</Text>
-              <View style={{ gap: 10, marginTop: 10 }}>
-                {activeChild.achievements.filter(a => a.unlocked).slice(0, 3).map((ach) => (
-                  <View key={ach.id} style={styles.achieveItem}>
-                    <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
-                      <MaterialCommunityIcons name={ach.icon} size={20} color={ach.color} />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+                      <Text style={{ color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_700Bold' }}>{activeChild.goalProgress}</Text>
+                      <Text style={{ color: '#A855F7', fontSize: 13, fontFamily: 'Inter_700Bold' }}>{activeChild.goalPercent}%</Text>
                     </View>
-                    <Text style={styles.achieveTitle}>{ach.title}</Text>
+                    <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium', marginTop: 4 }}>{activeChild.goalRemaining}</Text>
                   </View>
-                ))}
+                </View>
+
+                {/* 🏆 SO'NGGI YUTUQLAR */}
+                <View style={[styles.cardBox, { marginBottom: 100 }]}>
+                  <Text style={styles.cardTitle}>🏆 So'nggi yutuqlar</Text>
+                  <View style={{ gap: 10, marginTop: 10 }}>
+                    {activeChild.achievements.filter(a => a.unlocked).slice(0, 3).map((ach) => (
+                      <View key={ach.id} style={styles.achieveItem}>
+                        <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
+                          <MaterialCommunityIcons name={ach.icon} size={20} color={ach.color} />
+                        </View>
+                        <Text style={styles.achieveTitle}>{ach.title}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </>
+            ) : (
+              /* INTRO INTRODUCTORY SCREEN FOR FIRST TIME PARENTS */
+              <View style={styles.introContainer}>
+                <View style={styles.introHeroCard}>
+                  <LinearGradient colors={['rgba(168, 85, 247, 0.25)', 'rgba(168, 85, 247, 0.05)']} style={styles.introHeroGradient}>
+                    <MaterialCommunityIcons name="shield-star-outline" size={54} color="#A855F7" style={{ marginBottom: 12 }} />
+                    <Text style={styles.introHeroTitle}>IQROMAX Ota-ona Tizimiga Xush Kelibsiz! 👨‍👩‍👧‍👦</Text>
+                    <Text style={styles.introHeroSub}>
+                      Farzandingizning bilim olishdagi har bir yutug'i, kunlik rivojlanishi va qiziqishlarini bir joyda kuzatib boring.
+                    </Text>
+
+                    <TouchableOpacity
+                      style={styles.introBindBtn}
+                      activeOpacity={0.85}
+                      onPress={() => setIsAuthModalOpen(true)}
+                    >
+                      <MaterialCommunityIcons name="account-plus-outline" size={20} color="#FFF" style={{ marginRight: 8 }} />
+                      <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Farzandni Biriktirish & Autentifikatsiya</Text>
+                    </TouchableOpacity>
+                  </LinearGradient>
+                </View>
+
+                {/* FEATURE CARDS LIST */}
+                <Text style={styles.sectionTitle}>Nimalarni Kuzatishingiz Mumkin?</Text>
+                
+                <View style={styles.introFeatureCard}>
+                  <View style={[styles.introIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.15)', borderColor: '#3B82F6' }]}>
+                    <MaterialCommunityIcons name="chart-line" size={26} color="#3B82F6" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.introFeatureTitle}>Kunlik Progress va Aniqlik</Text>
+                    <Text style={styles.introFeatureSub}>Farzandingiz nechtadan mashq bajarayotgani va to'g'ri javoblar foizini jonli kuzatasiz.</Text>
+                  </View>
+                </View>
+
+                <View style={styles.introFeatureCard}>
+                  <View style={[styles.introIconBox, { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderColor: '#10B981' }]}>
+                    <MaterialCommunityIcons name="medal-outline" size={26} color="#10B981" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.introFeatureTitle}>Reyting va O'rinlar</Text>
+                    <Text style={styles.introFeatureSub}>Farzandingiz mamlakat va maktab bo'yicha nechanchi o'rinda borayotganini ko'rib borasiz.</Text>
+                  </View>
+                </View>
+
+                <View style={[styles.introFeatureCard, { marginBottom: 100 }]}>
+                  <View style={[styles.introIconBox, { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderColor: '#F59E0B' }]}>
+                    <MaterialCommunityIcons name="lightbulb-on-outline" size={26} color="#F59E0B" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.introFeatureTitle}>Fanlar Kuchli/Bosh Tomonlari</Text>
+                    <Text style={styles.introFeatureSub}>Matematika, Mantiq va ingliz tili kabi fanlardan farzandingiz qay darajada ekanligini anglaysiz.</Text>
+                  </View>
+                </View>
               </View>
-            </View>
+            )}
           </ScrollView>
         )}
 
@@ -422,7 +506,6 @@ export default function ParentDashboardScreen({ navigation, route }) {
           <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 16 }}>
             <Text style={styles.sectionTitle}>🏆 Reyting (Leaderboard)</Text>
 
-            {/* FILTERS */}
             <View style={styles.filterChipsRow}>
               {[
                 { id: 'global', label: '🌍 Global' },
@@ -441,51 +524,45 @@ export default function ParentDashboardScreen({ navigation, route }) {
               ))}
             </View>
 
-            {/* SIZNING FARZANDINGIZ CARD */}
-            <View style={styles.myChildRankCard}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center' }}>
-                  <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🏆</Text>
-                </View>
-                <View>
-                  <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>SIZNING FARZANDINGIZ</Text>
-                  <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
-                </View>
-              </View>
-
-              <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ color: '#F59E0B', fontSize: 18, fontFamily: 'Inter_900Black' }}>#24</Text>
-                <Text style={{ color: '#10B981', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Top 8%</Text>
-              </View>
-            </View>
-
-            {/* GLOBAL REYTING RO'YXATI */}
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-              {leaderboardData.length === 0 ? (
-                <View style={styles.cardBox}>
-                  <Text style={{ color: '#9CA3AF', textAlign: 'center' }}>Reyting ma'lumotlari yuklanmoqda...</Text>
-                </View>
-              ) : (
-                leaderboardData.map((item) => (
-                  <View key={item.customId} style={styles.rankRow}>
-                    <Text style={[
-                      styles.rankNum,
-                      item.rank === 1 && { color: '#F59E0B' },
-                      item.rank === 2 && { color: '#9CA3AF' },
-                      item.rank === 3 && { color: '#B45309' },
-                    ]}>
-                      {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
-                    </Text>
-                    <View style={styles.rankAvatarBox}>
-                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
-                    </View>
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text style={styles.rankName}>{item.name}</Text>
-                    </View>
-                    <Text style={styles.rankXp}>{item.xp.toLocaleString()} XP</Text>
+            {childrenList.length > 0 && activeChild && (
+              <View style={styles.myChildRankCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🏆</Text>
                   </View>
-                ))
-              )}
+                  <View>
+                    <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>SIZNING FARZANDINGIZ</Text>
+                    <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
+                  </View>
+                </View>
+
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ color: '#F59E0B', fontSize: 18, fontFamily: 'Inter_900Black' }}>#24</Text>
+                  <Text style={{ color: '#10B981', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Top 8%</Text>
+                </View>
+              </View>
+            )}
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+              {leaderboardData.map((item) => (
+                <View key={item.customId} style={styles.rankRow}>
+                  <Text style={[
+                    styles.rankNum,
+                    item.rank === 1 && { color: '#F59E0B' },
+                    item.rank === 2 && { color: '#9CA3AF' },
+                    item.rank === 3 && { color: '#B45309' },
+                  ]}>
+                    {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
+                  </Text>
+                  <View style={styles.rankAvatarBox}>
+                    <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={styles.rankName}>{item.name}</Text>
+                  </View>
+                  <Text style={styles.rankXp}>{item.xp.toLocaleString()} XP</Text>
+                </View>
+              ))}
             </ScrollView>
           </View>
         )}
@@ -493,132 +570,127 @@ export default function ParentDashboardScreen({ navigation, route }) {
         {/* 3. 👦 FARZANDIM SAHIFA */}
         {activeTab === 'child' && (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            {/* FARZANDLAR TANLASH TABS */}
-            <Text style={styles.sectionTitle}>Farzandlarim</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, marginBottom: 16 }}>
-              {childrenList.map((ch, idx) => (
+            {childrenList.length > 0 && activeChild ? (
+              <>
+                <Text style={styles.sectionTitle}>Farzandlarim</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, marginBottom: 16 }}>
+                  {childrenList.map((ch, idx) => (
+                    <TouchableOpacity
+                      key={ch.id}
+                      style={[styles.childSelectTab, selectedChildIndex === idx && styles.childSelectTabActive]}
+                      onPress={() => setSelectedChildIndex(idx)}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={[styles.childSelectTabText, selectedChildIndex === idx && styles.childSelectTabTextActive]}>
+                        [ {ch.name.split(' ')[0]} ]
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+
+                <View style={styles.childProfileCard}>
+                  <View style={styles.childProfileAvatar}>
+                    <Text style={{ color: '#FFF', fontSize: 32, fontFamily: 'Inter_900Black' }}>{activeChild.name.charAt(0)}</Text>
+                  </View>
+                  <Text style={{ color: '#FFFFFF', fontSize: 20, fontFamily: 'Inter_700Bold', marginTop: 10 }}>{activeChild.name}</Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', marginTop: 2 }}>ID: {activeChild.customId}</Text>
+
+                  <View style={{ flexDirection: 'row', gap: 12, marginTop: 14 }}>
+                    <View style={styles.badgeChip}>
+                      <Text style={{ color: '#A855F7', fontSize: 12, fontFamily: 'Inter_700Bold' }}>Level {activeChild.level}</Text>
+                    </View>
+                    <View style={styles.badgeChip}>
+                      <Text style={{ color: '#F59E0B', fontSize: 12, fontFamily: 'Inter_700Bold' }}>⭐ {activeChild.xp.toLocaleString()} XP</Text>
+                    </View>
+                    <View style={styles.badgeChip}>
+                      <Text style={{ color: '#EF4444', fontSize: 12, fontFamily: 'Inter_700Bold' }}>🔥 {activeChild.streak} kun</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* 📚 O'QISH STATISTIKASI */}
+                <View style={styles.cardBox}>
+                  <Text style={styles.cardTitle}>📚 O'qish statistikasi</Text>
+                  <View style={styles.statsList}>
+                    <View style={styles.statsItemRow}>
+                      <Text style={styles.statsItemLabel}>Jami mashqlar:</Text>
+                      <Text style={styles.statsItemVal}>{activeChild.detailedStats.totalEx}</Text>
+                    </View>
+                    <View style={styles.statsItemRow}>
+                      <Text style={styles.statsItemLabel}>To'g'ri javoblar:</Text>
+                      <Text style={styles.statsItemVal}>{activeChild.detailedStats.correctEx}</Text>
+                    </View>
+                    <View style={styles.statsItemRow}>
+                      <Text style={styles.statsItemLabel}>Aniqlik:</Text>
+                      <Text style={[styles.statsItemVal, { color: '#10B981' }]}>{activeChild.detailedStats.accuracy}</Text>
+                    </View>
+                    <View style={styles.statsItemRow}>
+                      <Text style={styles.statsItemLabel}>Jami vaqt:</Text>
+                      <Text style={styles.statsItemVal}>{activeChild.detailedStats.monthTime}</Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* 🧠 FANLAR BO'YICHA NATIJA */}
+                <View style={styles.cardBox}>
+                  <Text style={styles.cardTitle}>🧠 Fanlar bo'yicha natija</Text>
+                  <View style={{ gap: 14, marginTop: 12 }}>
+                    {activeChild.subjectStats.map((subj, idx) => (
+                      <View key={idx}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <Text style={{ color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>{subj.name}</Text>
+                          <Text style={{ color: subj.color, fontSize: 13, fontFamily: 'Inter_700Bold' }}>{subj.score}%</Text>
+                        </View>
+                        <View style={styles.progressBarBg}>
+                          <View style={[styles.progressBarFill, { width: `${subj.score}%`, backgroundColor: subj.color }]} />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
                 <TouchableOpacity
-                  key={ch.id}
-                  style={[styles.childSelectTab, selectedChildIndex === idx && styles.childSelectTabActive]}
-                  onPress={() => setSelectedChildIndex(idx)}
-                  activeOpacity={0.8}
+                  style={styles.detailedStatsBtn}
+                  activeOpacity={0.85}
+                  onPress={() => setIsDetailedStatsOpen(true)}
                 >
-                  <Text style={[styles.childSelectTabText, selectedChildIndex === idx && styles.childSelectTabTextActive]}>
-                    [ {ch.name.split(' ')[0]} ]
-                  </Text>
+                  <MaterialCommunityIcons name="chart-box-outline" size={22} color="#FFF" style={{ marginRight: 8 }} />
+                  <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>📊 Batafsil statistika</Text>
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
 
-            {/* FARZAND PROFIL KARTASI */}
-            <View style={styles.childProfileCard}>
-              <View style={styles.childProfileAvatar}>
-                <Text style={{ color: '#FFF', fontSize: 32, fontFamily: 'Inter_900Black' }}>{activeChild.name.charAt(0)}</Text>
-              </View>
-              <Text style={{ color: '#FFFFFF', fontSize: 20, fontFamily: 'Inter_700Bold', marginTop: 10 }}>{activeChild.name}</Text>
-              <Text style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', marginTop: 2 }}>ID: {activeChild.customId}</Text>
-
-              <View style={{ flexDirection: 'row', gap: 12, marginTop: 14 }}>
-                <View style={styles.badgeChip}>
-                  <Text style={{ color: '#A855F7', fontSize: 12, fontFamily: 'Inter_700Bold' }}>Level {activeChild.level}</Text>
-                </View>
-                <View style={styles.badgeChip}>
-                  <Text style={{ color: '#F59E0B', fontSize: 12, fontFamily: 'Inter_700Bold' }}>⭐ {activeChild.xp.toLocaleString()} XP</Text>
-                </View>
-                <View style={styles.badgeChip}>
-                  <Text style={{ color: '#EF4444', fontSize: 12, fontFamily: 'Inter_700Bold' }}>🔥 {activeChild.streak} kun</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* 📚 O'QISH STATISTIKASI */}
-            <View style={styles.cardBox}>
-              <Text style={styles.cardTitle}>📚 O'qish statistikasi</Text>
-              <View style={styles.statsList}>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>Jami mashqlar:</Text>
-                  <Text style={styles.statsItemVal}>{activeChild.detailedStats.totalEx}</Text>
-                </View>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>To'g'ri javoblar:</Text>
-                  <Text style={styles.statsItemVal}>{activeChild.detailedStats.correctEx}</Text>
-                </View>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>Aniqlik:</Text>
-                  <Text style={[styles.statsItemVal, { color: '#10B981' }]}>{activeChild.detailedStats.accuracy}</Text>
-                </View>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>Jami vaqt:</Text>
-                  <Text style={styles.statsItemVal}>{activeChild.detailedStats.monthTime}</Text>
-                </View>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>Battle g'alabalar:</Text>
-                  <Text style={[styles.statsItemVal, { color: '#3B82F6' }]}>22 / 34</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* 🧠 FANLAR BO'YICHA NATIJA */}
-            <View style={styles.cardBox}>
-              <Text style={styles.cardTitle}>🧠 Fanlar bo'yicha natija</Text>
-              <View style={{ gap: 14, marginTop: 12 }}>
-                {activeChild.subjectStats.map((subj, idx) => (
-                  <View key={idx}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <Text style={{ color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>{subj.name}</Text>
-                      <Text style={{ color: subj.color, fontSize: 13, fontFamily: 'Inter_700Bold' }}>{subj.score}%</Text>
-                    </View>
-                    <View style={styles.progressBarBg}>
-                      <View style={[styles.progressBarFill, { width: `${subj.score}%`, backgroundColor: subj.color }]} />
-                    </View>
+                <View style={[styles.cardBox, { marginBottom: 100 }]}>
+                  <Text style={styles.cardTitle}>🏅 Yutuqlar (Achievements)</Text>
+                  <View style={{ gap: 10, marginTop: 12 }}>
+                    {activeChild.achievements.map((ach) => (
+                      <View key={ach.id} style={[styles.achieveItem, !ach.unlocked && { opacity: 0.5 }]}>
+                        <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
+                          <MaterialCommunityIcons name={ach.unlocked ? ach.icon : 'lock'} size={20} color={ach.color} />
+                        </View>
+                        <Text style={styles.achieveTitle}>{ach.title}</Text>
+                        {!ach.unlocked && <Text style={{ color: '#6B7280', fontSize: 11, marginLeft: 'auto' }}>Qulflangan</Text>}
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
-            </View>
-
-            {/* 4. 📊 BATAFSIL STATISTIKA BUTTON */}
-            <TouchableOpacity
-              style={styles.detailedStatsBtn}
-              activeOpacity={0.85}
-              onPress={() => setIsDetailedStatsOpen(true)}
-            >
-              <MaterialCommunityIcons name="chart-box-outline" size={22} color="#FFF" style={{ marginRight: 8 }} />
-              <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>📊 Batafsil statistika</Text>
-            </TouchableOpacity>
-
-            {/* 5. 🏅 YUTUQLAR (ACHIEVEMENTS) */}
-            <View style={[styles.cardBox, { marginBottom: 100 }]}>
-              <Text style={styles.cardTitle}>🏅 Yutuqlar (Achievements)</Text>
-              <View style={{ gap: 10, marginTop: 12 }}>
-                {activeChild.achievements.map((ach) => (
-                  <View key={ach.id} style={[styles.achieveItem, !ach.unlocked && { opacity: 0.5 }]}>
-                    <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
-                      <MaterialCommunityIcons name={ach.unlocked ? ach.icon : 'lock'} size={20} color={ach.color} />
-                    </View>
-                    <Text style={styles.achieveTitle}>{ach.title}</Text>
-                    {!ach.unlocked && <Text style={{ color: '#6B7280', fontSize: 11, marginLeft: 'auto' }}>Qulflangan</Text>}
-                  </View>
-                ))}
-              </View>
-            </View>
+                </View>
+              </>
+            ) : null}
           </ScrollView>
         )}
 
-        {/* 6. 👤 PROFIL SAHIFA */}
+        {/* 4. 👤 PROFIL SAHIFA */}
         {activeTab === 'profile' && (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
             <View style={styles.profileCard}>
               <View style={styles.profileAvatarBox}>
                 <MaterialCommunityIcons name="account" size={44} color="#A855F7" />
               </View>
-              <Text style={styles.profileName}>{user?.name || "Ergashboy Masharipov"}</Text>
-              <Text style={styles.profileTag}>{user?.email || "ergashboy@gmail.com"}</Text>
+              <Text style={styles.profileName}>{user?.name || "Ota-ona"}</Text>
+              <Text style={styles.profileTag}>{user?.email || "Email kiritilmagan"}</Text>
               <View style={styles.roleBadge}>
                 <Text style={styles.roleBadgeText}>OTA-ONA AKKAUNTI</Text>
               </View>
             </View>
 
-            {/* SETTINGS MENU */}
             <View style={styles.cardBox}>
               <Text style={styles.cardTitle}>Hisob Sozlamalari</Text>
 
@@ -641,17 +713,12 @@ export default function ParentDashboardScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
 
-            {/* 👨‍👩‍👧 FARZANDLARNI BOSHGARISH & FARZAND QO'SHISH */}
             <View style={styles.cardBox}>
               <Text style={styles.cardTitle}>👨‍👩‍👧 Farzandlarni boshqarish</Text>
-              <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 2, marginBottom: 12 }}>
-                Yangi farzandingizni IQROMAX ID raqami orqali ushbu hisobingizga biriktiring.
-              </Text>
-
               <TouchableOpacity
                 style={styles.addChildBtn}
                 activeOpacity={0.85}
-                onPress={() => setIsAddChildModalOpen(true)}
+                onPress={() => setIsAuthModalOpen(true)}
               >
                 <Feather name="plus-circle" size={20} color="#FFF" style={{ marginRight: 8 }} />
                 <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>+ Farzand qo'shish</Text>
@@ -668,152 +735,149 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
       {/* BOTTOM NAVIGATION BAR */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('home')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabClick('home')}>
           <Feather name="home" size={22} color={activeTab === 'home' ? '#A855F7' : '#6B7280'} />
           <Text style={[styles.navText, activeTab === 'home' && styles.navTextActive]}>Bosh sahifa</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('ranking')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabClick('ranking')}>
           <Feather name="award" size={22} color={activeTab === 'ranking' ? '#A855F7' : '#6B7280'} />
           <Text style={[styles.navText, activeTab === 'ranking' && styles.navTextActive]}>Reyting</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('child')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabClick('child')}>
           <MaterialCommunityIcons name="account-child" size={24} color={activeTab === 'child' ? '#A855F7' : '#6B7280'} />
           <Text style={[styles.navText, activeTab === 'child' && styles.navTextActive]}>Farzandim</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('profile')}>
+        <TouchableOpacity style={styles.navItem} onPress={() => handleTabClick('profile')}>
           <Feather name="user" size={22} color={activeTab === 'profile' ? '#A855F7' : '#6B7280'} />
           <Text style={[styles.navText, activeTab === 'profile' && styles.navTextActive]}>Profil</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 4. 📊 BATAFSIL STATISTIKA MODAL */}
-      <Modal visible={isDetailedStatsOpen} transparent animationType="slide">
+      {/* AUTHENTICATION & CHILD ID BINDING MODAL */}
+      <Modal visible={isAuthModalOpen} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContentCard}>
+          <View style={[styles.modalContentCard, { maxHeight: '90%' }]}>
             <View style={styles.modalHeaderRow}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <MaterialCommunityIcons name="chart-timeline-variant" size={24} color="#A855F7" />
-                <Text style={{ color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold' }}>📊 Batafsil statistika</Text>
-              </View>
-              <TouchableOpacity onPress={() => setIsDetailedStatsOpen(false)}>
+              <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🔒 Autentifikatsiya va Farzand ID</Text>
+              <TouchableOpacity onPress={() => setIsAuthModalOpen(false)}>
                 <Feather name="x" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
-              {/* FAOLLIK VAQT LINIYASI */}
-              <Text style={styles.modalSectionTitle}>📅 Faollik Vaqti</Text>
-              <View style={styles.modalStatsRow}>
-                <View style={styles.miniStatBox}>
-                  <Text style={styles.miniStatLabel}>Bugun</Text>
-                  <Text style={styles.miniStatVal}>{activeChild.detailedStats.todayTime}</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>
+                Farzandingiz natijalarini ko'rish uchun elektron pochtangiz, telefon raqamingiz, parol va Farzandingiz ID sini kiriting.
+              </Text>
+
+              {/* EMAIL INPUT */}
+              <View style={styles.inputContainer}>
+                <Feather name="mail" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Elektron pochtangiz (Email)"
+                  placeholderTextColor="#6B7280"
+                  keyboardType="email-address"
+                  value={authEmail}
+                  onChangeText={setAuthEmail}
+                />
+              </View>
+
+              {/* PHONE INPUT */}
+              <View style={styles.inputContainer}>
+                <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Telefon raqamingiz"
+                  placeholderTextColor="#6B7280"
+                  keyboardType="phone-pad"
+                  value={authPhone}
+                  onChangeText={setAuthPhone}
+                />
+              </View>
+
+              {/* PASSWORD INPUT */}
+              <View style={styles.inputContainer}>
+                <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Parol o'ylab toping"
+                  placeholderTextColor="#6B7280"
+                  secureTextEntry={!showPassword}
+                  value={authPassword}
+                  onChangeText={setAuthPassword}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* CONFIRM PASSWORD INPUT */}
+              <View style={styles.inputContainer}>
+                <Feather name="check-circle" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="Parolni tasdiqlang"
+                  placeholderTextColor="#6B7280"
+                  secureTextEntry={!showPassword}
+                  value={authConfirmPassword}
+                  onChangeText={setAuthConfirmPassword}
+                />
+              </View>
+
+              {/* EYE CATCHING CHILD ID INPUT */}
+              <View style={styles.eyeCatchingIdBox}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
+                  <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
                 </View>
-                <View style={styles.miniStatBox}>
-                  <Text style={styles.miniStatLabel}>Bu hafta</Text>
-                  <Text style={styles.miniStatVal}>{activeChild.detailedStats.weekTime}</Text>
-                </View>
-                <View style={styles.miniStatBox}>
-                  <Text style={styles.miniStatLabel}>Bu oy</Text>
-                  <Text style={styles.miniStatVal}>{activeChild.detailedStats.monthTime}</Text>
+                <View style={styles.idInputInner}>
+                  <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
+                  <TextInput
+                    style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
+                    placeholder="#956Z6X"
+                    placeholderTextColor="#6B7280"
+                    value={childIdInput}
+                    onChangeText={setChildIdInput}
+                    autoCapitalize="characters"
+                  />
                 </View>
               </View>
 
-              {/* MASHQLAR XULOSASI */}
-              <Text style={styles.modalSectionTitle}>🎯 Mashqlar Xulosasi</Text>
-              <View style={styles.cardBox}>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>Jami mashqlar:</Text>
-                  <Text style={styles.statsItemVal}>{activeChild.detailedStats.totalEx}</Text>
-                </View>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>To'g'ri javoblar:</Text>
-                  <Text style={[styles.statsItemVal, { color: '#10B981' }]}>{activeChild.detailedStats.correctEx}</Text>
-                </View>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>Noto'g'ri javoblar:</Text>
-                  <Text style={[styles.statsItemVal, { color: '#EF4444' }]}>{activeChild.detailedStats.wrongEx}</Text>
-                </View>
-                <View style={styles.statsItemRow}>
-                  <Text style={styles.statsItemLabel}>O'rtacha aniqlik:</Text>
-                  <Text style={[styles.statsItemVal, { color: '#A855F7' }]}>{activeChild.detailedStats.accuracy}</Text>
-                </View>
-              </View>
-
-              {/* 📈 RIVOJLANISH TENDENSIYASI (PROGRESS HISTORY) */}
-              <Text style={styles.modalSectionTitle}>📈 Rivojlanish Tendensiyasi</Text>
-              <View style={styles.progressChainRow}>
-                {activeChild.detailedStats.progressHistory.map((p, i) => (
-                  <React.Fragment key={i}>
-                    <View style={styles.progressChainChip}>
-                      <Text style={styles.progressChainText}>{p}</Text>
-                    </View>
-                    {i < activeChild.detailedStats.progressHistory.length - 1 && (
-                      <Feather name="arrow-right" size={14} color="#6B7280" />
-                    )}
-                  </React.Fragment>
-                ))}
-              </View>
+              <TouchableOpacity
+                style={[styles.addChildSubmitBtn, isSendingOtp && { opacity: 0.5 }]}
+                activeOpacity={0.85}
+                onPress={handleAuthAndInviteSubmit}
+                disabled={isSendingOtp}
+              >
+                {isSendingOtp ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Saqlash va Tasdiqlash (OTP)</Text>
+                )}
+              </TouchableOpacity>
             </ScrollView>
           </View>
         </View>
       </Modal>
 
-      {/* FARZAND QO'SHISH MODAL */}
-      <Modal visible={isAddChildModalOpen} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContentCard}>
-            <View style={styles.modalHeaderRow}>
-              <Text style={{ color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold' }}>➕ Farzand qo'shish</Text>
-              <TouchableOpacity onPress={() => setIsAddChildModalOpen(false)}>
-                <Feather name="x" size={24} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>
-              Farzandingizning IQROMAX ilovasidagi maxsus ID raqamini (masalan: #956Z6X) kiriting.
-            </Text>
-
-            <View style={styles.inputContainer}>
-              <MaterialCommunityIcons name="pound" size={20} color="#9CA3AF" style={{ marginRight: 10 }} />
-              <TextInput
-                style={{ flex: 1, color: '#FFF', fontSize: 15, fontFamily: 'Inter_600SemiBold' }}
-                placeholder="#000000"
-                placeholderTextColor="#6B7280"
-                value={childIdInput}
-                onChangeText={setChildIdInput}
-                autoCapitalize="characters"
-              />
-            </View>
-
-            <TouchableOpacity
-              style={styles.addChildSubmitBtn}
-              activeOpacity={0.85}
-              onPress={handleAddChildSubmit}
-            >
-              <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>Ulash va Qo'shish</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* FEEDBACK MODAL */}
-      <Modal visible={addChildFeedback.visible} transparent animationType="fade">
+      {/* FEEDBACK ALERT MODAL */}
+      <Modal visible={feedbackAlert.visible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContentCard, { alignItems: 'center', padding: 24 }]}>
             <MaterialCommunityIcons
-              name={addChildFeedback.type === 'success' ? 'check-circle' : 'alert-circle'}
+              name={feedbackAlert.type === 'success' ? 'check-circle' : 'alert-circle'}
               size={48}
-              color={addChildFeedback.type === 'success' ? '#10B981' : '#EF4444'}
+              color={feedbackAlert.type === 'success' ? '#10B981' : '#EF4444'}
               style={{ marginBottom: 12 }}
             />
-            <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold', marginBottom: 6 }}>{addChildFeedback.title}</Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 20 }}>{addChildFeedback.message}</Text>
+            <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold', marginBottom: 6 }}>{feedbackAlert.title}</Text>
+            <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 20, lineHeight: 18 }}>{feedbackAlert.message}</Text>
             <TouchableOpacity
-              style={[styles.addChildSubmitBtn, { backgroundColor: addChildFeedback.type === 'success' ? '#10B981' : '#EF4444', width: '100%' }]}
-              onPress={() => setAddChildFeedback({ visible: false, title: '', message: '', type: 'success' })}
+              style={[styles.addChildSubmitBtn, { backgroundColor: feedbackAlert.type === 'success' ? '#10B981' : '#EF4444', width: '100%' }]}
+              onPress={() => setFeedbackAlert({ visible: false, title: '', message: '', type: 'success' })}
             >
               <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>Tushundim</Text>
             </TouchableOpacity>
@@ -876,6 +940,18 @@ const styles = StyleSheet.create({
   insightBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: 10, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: '#10B981' },
   insightText: { color: '#D1D5DB', fontSize: 12, fontFamily: 'Inter_500Medium' },
 
+  introContainer: { paddingBottom: 20 },
+  introHeroCard: { borderRadius: 24, overflow: 'hidden', marginBottom: 24, borderWidth: 1.5, borderColor: '#A855F7' },
+  introHeroGradient: { padding: 24, alignItems: 'center', textAlign: 'center' },
+  introHeroTitle: { color: '#FFFFFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8 },
+  introHeroSub: { color: '#D1D5DB', fontSize: 13, textAlign: 'center', lineHeight: 19, marginBottom: 20 },
+  introBindBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#A855F7', paddingVertical: 14, paddingHorizontal: 20, borderRadius: 16 },
+
+  introFeatureCard: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: '#0D0D1F', padding: 16, borderRadius: 18, marginBottom: 12, borderWidth: 1, borderColor: '#1A1A35' },
+  introIconBox: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5 },
+  introFeatureTitle: { color: '#FFFFFF', fontSize: 15, fontFamily: 'Inter_700Bold', marginBottom: 4 },
+  introFeatureSub: { color: '#9CA3AF', fontSize: 12, lineHeight: 17 },
+
   achieveItem: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#121228', padding: 12, borderRadius: 14 },
   achieveIconBox: { width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
   achieveTitle: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_600SemiBold' },
@@ -933,16 +1009,11 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(5, 5, 12, 0.85)', justifyContent: 'center', alignItems: 'center', padding: 20 },
   modalContentCard: { width: '100%', backgroundColor: '#0D0D1F', borderRadius: 24, padding: 20, borderWidth: 1.5, borderColor: '#A855F7', maxHeight: '85%' },
   modalHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  modalSectionTitle: { color: '#A855F7', fontSize: 14, fontFamily: 'Inter_700Bold', marginTop: 14, marginBottom: 10 },
-  modalStatsRow: { flexDirection: 'row', gap: 10 },
-  miniStatBox: { flex: 1, backgroundColor: '#121228', padding: 12, borderRadius: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1A1A35' },
-  miniStatLabel: { color: '#9CA3AF', fontSize: 10, fontFamily: 'Inter_600SemiBold' },
-  miniStatVal: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold', marginTop: 4 },
 
-  progressChainRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#121228', padding: 14, borderRadius: 14, flexWrap: 'wrap' },
-  progressChainChip: { backgroundColor: 'rgba(168, 85, 247, 0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#A855F7' },
-  progressChainText: { color: '#A855F7', fontSize: 12, fontFamily: 'Inter_700Bold' },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#121228', borderRadius: 14, borderWidth: 1, borderColor: '#1A1A35', paddingHorizontal: 14, height: 50, marginBottom: 14 },
+  modalInput: { flex: 1, color: '#FFF', fontSize: 14, fontFamily: 'Inter_500Medium' },
 
-  inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#121228', borderRadius: 14, borderWidth: 1, borderColor: '#1A1A35', paddingHorizontal: 14, height: 50, marginBottom: 16 },
-  addChildSubmitBtn: { backgroundColor: '#A855F7', paddingVertical: 14, borderRadius: 14, alignItems: 'center' }
+  eyeCatchingIdBox: { backgroundColor: 'rgba(245, 158, 11, 0.1)', padding: 14, borderRadius: 16, borderWidth: 1.5, borderColor: '#F59E0B', marginBottom: 20 },
+  idInputInner: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#0D0D1F', borderRadius: 12, paddingHorizontal: 14, height: 50, borderWidth: 1, borderColor: '#A855F7' },
+  addChildSubmitBtn: { backgroundColor: '#A855F7', paddingVertical: 16, borderRadius: 16, alignItems: 'center' }
 });
