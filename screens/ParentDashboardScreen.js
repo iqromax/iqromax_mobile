@@ -690,52 +690,93 @@ export default function ParentDashboardScreen({ navigation, route }) {
         {/* 4. 👤 PROFIL SAHIFA */}
         {activeTab === 'profile' && (
           <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            <View style={styles.profileCard}>
-              <View style={styles.profileAvatarBox}>
-                <MaterialCommunityIcons name="account" size={44} color="#A855F7" />
-              </View>
-              <Text style={styles.profileName}>{user?.name || "Ota-ona"}</Text>
-              <Text style={styles.profileTag}>{user?.email || "Email kiritilmagan"}</Text>
-              <View style={styles.roleBadge}>
-                <Text style={styles.roleBadgeText}>OTA-ONA AKKAUNTI</Text>
-              </View>
+            {/* SLEEK GLASSMORPHIC PARENT PROFILE HEADER */}
+            <View style={styles.profileCardModern}>
+              <LinearGradient colors={['rgba(168, 85, 247, 0.15)', 'rgba(31, 16, 53, 0.6)']} style={styles.profileCardGradient}>
+                <View style={styles.profileAvatarBoxModern}>
+                  <Text style={{ color: '#FFF', fontSize: 32, fontFamily: 'Inter_900Black' }}>
+                    {(user?.name || "Ota-ona").charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <Text style={styles.profileNameModern}>{user?.name || "Ota-ona"}</Text>
+                <Text style={styles.profileTagModern}>{user?.email || "Email tasdiqlanmagan"}</Text>
+                <View style={styles.roleBadgeModern}>
+                  <MaterialCommunityIcons name="shield-check" size={14} color="#A855F7" style={{ marginRight: 4 }} />
+                  <Text style={styles.roleBadgeTextModern}>OTA-ONA TIZIMI</Text>
+                </View>
+              </LinearGradient>
             </View>
 
+            {/* PARENT QUICK STATUS & CHILD SUMMARY CARD */}
             <View style={styles.cardBox}>
-              <Text style={styles.cardTitle}>Hisob Sozlamalari</Text>
+              <Text style={styles.cardTitle}>👨‍👩‍👧 Farzandlar Holati</Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 12, marginTop: 2, marginBottom: 14 }}>
+                Biriktirilgan farzandlaringiz va ularning ilovaga ulanish darajasi.
+              </Text>
 
-              <TouchableOpacity style={styles.menuRow}>
-                <Feather name="bell" size={18} color="#9CA3AF" />
-                <Text style={styles.menuText}>🔔 Bildirishnomalar</Text>
-                <Feather name="chevron-right" size={18} color="#6B7280" style={{ marginLeft: 'auto' }} />
-              </TouchableOpacity>
+              {childrenList.length > 0 ? (
+                childrenList.map((ch) => (
+                  <View key={ch.id} style={styles.linkedChildRow}>
+                    <View style={styles.linkedChildAvatar}>
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{ch.name.charAt(0)}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>{ch.name}</Text>
+                      <Text style={{ color: '#9CA3AF', fontSize: 12 }}>ID: {ch.customId} • Level {ch.level}</Text>
+                    </View>
+                    <View style={styles.connectedBadge}>
+                      <View style={styles.greenDot} />
+                      <Text style={{ color: '#10B981', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Ulangan</Text>
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.noChildRow}>
+                  <MaterialCommunityIcons name="account-search-outline" size={24} color="#9CA3AF" style={{ marginRight: 10 }} />
+                  <Text style={{ color: '#9CA3AF', fontSize: 13, flex: 1 }}>Hozircha farzand biriktirilmagan</Text>
+                </View>
+              )}
 
-              <TouchableOpacity style={styles.menuRow}>
-                <Feather name="globe" size={18} color="#9CA3AF" />
-                <Text style={styles.menuText}>🌐 Til (Language)</Text>
-                <Feather name="chevron-right" size={18} color="#6B7280" style={{ marginLeft: 'auto' }} />
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.menuRow}>
-                <Feather name="shield" size={18} color="#9CA3AF" />
-                <Text style={styles.menuText}>🔐 Xavfsizlik</Text>
-                <Feather name="chevron-right" size={18} color="#6B7280" style={{ marginLeft: 'auto' }} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.cardBox}>
-              <Text style={styles.cardTitle}>👨‍👩‍👧 Farzandlarni boshqarish</Text>
+              {/* FARZAND QO'SHISH SLEEK BUTTON */}
               <TouchableOpacity
-                style={styles.addChildBtn}
+                style={styles.addChildBtnModern}
                 activeOpacity={0.85}
                 onPress={() => setIsAuthModalOpen(true)}
               >
-                <Feather name="plus-circle" size={20} color="#FFF" style={{ marginRight: 8 }} />
+                <Feather name="plus-circle" size={18} color="#FFF" style={{ marginRight: 8 }} />
                 <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>+ Farzand qo'shish</Text>
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.logoutFullBtn} onPress={handleReturnToHome}>
+            {/* QUICK ACTIONS & NOTIFICATIONS INFO */}
+            <View style={styles.cardBox}>
+              <Text style={styles.cardTitle}>⚡ Tezkor Amallar</Text>
+              
+              <TouchableOpacity style={styles.quickActionRow} onPress={() => setIsAuthModalOpen(true)}>
+                <View style={[styles.actionIconBox, { backgroundColor: 'rgba(168, 85, 247, 0.15)', borderColor: '#A855F7' }]}>
+                  <MaterialCommunityIcons name="shield-key-outline" size={20} color="#A855F7" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_600SemiBold' }}>Akkaunt Autentifikatsiyasi</Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 11 }}>Pochta va parolni yangilash</Text>
+                </View>
+                <Feather name="chevron-right" size={18} color="#6B7280" />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.quickActionRow} onPress={() => setActiveTab('home')}>
+                <View style={[styles.actionIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.15)', borderColor: '#3B82F6' }]}>
+                  <MaterialCommunityIcons name="chart-box-outline" size={20} color="#3B82F6" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_600SemiBold' }}>Farzand Natijalari Monitoringi</Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 11 }}>Bugungi va haftalik progress</Text>
+                </View>
+                <Feather name="chevron-right" size={18} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+
+            {/* TIZIMDAN CHIQISH BUTTON */}
+            <TouchableOpacity style={styles.logoutFullBtnModern} onPress={handleReturnToHome}>
               <Feather name="log-out" size={20} color="#EF4444" style={{ marginRight: 8 }} />
               <Text style={{ color: '#EF4444', fontFamily: 'Inter_700Bold', fontSize: 16 }}>Tizimdan chiqish</Text>
             </TouchableOpacity>
@@ -1045,17 +1086,24 @@ const styles = StyleSheet.create({
 
   detailedStatsBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#A855F7', paddingVertical: 14, borderRadius: 16, marginBottom: 20 },
 
-  profileCard: { backgroundColor: '#121228', borderRadius: 20, padding: 20, alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: '#1A1A35' },
-  profileAvatarBox: { width: 70, height: 70, borderRadius: 35, backgroundColor: 'rgba(168, 85, 247, 0.2)', justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: '#A855F7' },
-  profileName: { color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_700Bold', marginTop: 10 },
-  profileTag: { color: '#9CA3AF', fontSize: 13, marginTop: 2 },
-  roleBadge: { backgroundColor: 'rgba(168, 85, 247, 0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8, marginTop: 10, borderWidth: 1, borderColor: '#A855F7' },
+  profileCardModern: { borderRadius: 24, overflow: 'hidden', marginBottom: 20, borderWidth: 1.5, borderColor: '#A855F7' },
+  profileCardGradient: { padding: 22, alignItems: 'center' },
+  profileAvatarBoxModern: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFF', marginBottom: 10 },
+  profileNameModern: { color: '#FFFFFF', fontSize: 20, fontFamily: 'Inter_700Bold' },
+  profileTagModern: { color: '#9CA3AF', fontSize: 13, marginTop: 2 },
+  roleBadgeModern: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(168, 85, 247, 0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10, marginTop: 10, borderWidth: 1, borderColor: '#A855F7' },
+  roleBadgeTextModern: { color: '#A855F7', fontSize: 11, fontFamily: 'Inter_700Bold', letterSpacing: 0.8 },
 
-  menuRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1A1A35' },
-  menuText: { color: '#D1D5DB', fontSize: 14, fontFamily: 'Inter_600SemiBold' },
+  linkedChildRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#121228', padding: 12, borderRadius: 16, marginBottom: 10, borderWidth: 1, borderColor: '#1A1A35' },
+  linkedChildAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center' },
+  connectedBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#10B981' },
+  greenDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' },
+  noChildRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#121228', padding: 14, borderRadius: 14, marginBottom: 14 },
+  addChildBtnModern: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#10B981', paddingVertical: 14, borderRadius: 16, marginTop: 4 },
 
-  addChildBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#10B981', paddingVertical: 14, borderRadius: 16 },
-  logoutFullBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(239, 68, 68, 0.12)', paddingVertical: 16, borderRadius: 16, marginBottom: 100, borderWidth: 1, borderColor: '#EF4444' },
+  quickActionRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1A1A35' },
+  actionIconBox: { width: 38, height: 38, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+  logoutFullBtnModern: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(239, 68, 68, 0.12)', paddingVertical: 16, borderRadius: 16, marginBottom: 100, borderWidth: 1, borderColor: '#EF4444' },
 
   bottomNav: {
     flexDirection: 'row', position: 'absolute', bottom: 0, left: 0, right: 0,
