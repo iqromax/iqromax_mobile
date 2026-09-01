@@ -26,13 +26,8 @@ jobs:
             npx prisma generate
             npx prisma db push
             
-            # Build Admin Panel / Web Frontend
-            if [ -d "iqromax-web-frontend" ]; then
-              cd iqromax-web-frontend
-              npm install
-              npm run build
-              cd ..
-            elif [ -d "admin_panel" ]; then
+            # Build Admin Panel
+            if [ -d "admin_panel" ]; then
               cd admin_panel
               npm install
               npm run build
