@@ -230,16 +230,16 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
     } catch(e) {}
   }, [scene]);
   
-  const accessoryScale = isHeadwear ? 1.05 : 0.50;
+  const accessoryScale = isHeadwear ? 4.5 : 0.50;
   
   let xOffset = 0;
-  let heightOffset = isHeadwear ? 0.95 : 2.10; // Bosh kiyim (hat/cap) head height positioning
+  let heightOffset = isHeadwear ? 2.50 : 2.10; // Bosh kiyim (hat/cap) head height positioning
   let zOffset = isHeadwear ? 0.0 : 0.20;
   
-  if (characterIndex === 1) { // Maks
-    heightOffset = isHeadwear ? 0.35 : 1.50; 
+  if (characterIndex === 1) { // Maks (characterIndex === 1)
+    heightOffset = isHeadwear ? 0.45 : 1.50; 
   } else if (characterIndex >= 4) { // Qizlar
-    heightOffset = isHeadwear ? 0.90 : 2.05; 
+    heightOffset = isHeadwear ? 2.45 : 2.05; 
     zOffset = isHeadwear ? 0.05 : 0.30; 
   }
   
@@ -252,7 +252,7 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
       object={scene.clone()} 
       scale={accessoryScale} 
       position={[posX, posY, posZ]} 
-      rotation={[0, -Math.PI / 2, 0]}
+      rotation={[0, 0, 0]}
     />
   );
 }
