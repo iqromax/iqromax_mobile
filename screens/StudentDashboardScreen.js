@@ -1696,8 +1696,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
             
 
 
-            {/* Canvas Container */}
-            <View style={{ position: 'absolute', top: -30, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
+            {/* 3D Model Container */}
+            <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="auto">
               <Character3DViewer characterIndex={activeAvatarIndex} />
             </View>
             

@@ -58,16 +58,15 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-        <script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          html, body { width: 100%; height: 100%; overflow: hidden; background: transparent !important; }
+          html, body { width: 100%; height: 100%; overflow: hidden; background-color: transparent; }
           model-viewer {
             width: 100%;
             height: 100%;
-            background-color: transparent;
             --poster-color: transparent;
-            --progress-bar-color: #A855F7;
+            --progress-bar-color: #6366f1;
+            --progress-bar-height: 4px;
           }
         </style>
       </head>
@@ -96,11 +95,6 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'LOADED' }));
               }
             });
-            viewer.addEventListener('error', (err) => {
-              if (window.ReactNativeWebView) {
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ERROR', error: err }));
-              }
-            });
           }
         </script>
       </body>
@@ -114,25 +108,12 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
           key={`char_${characterIndex}`}
           ref={webViewRef}
           originWhitelist={['*']}
-          source={{ html: htmlContent, baseUrl: 'https://localhost' }}
+          source={{ html: htmlContent }}
           style={styles.webview}
           javaScriptEnabled={true}
           domStorageEnabled={true}
           allowFileAccess={true}
           allowUniversalAccessFromFileURLs={true}
-          allowFileAccessFromFileURLs={true}
-          mixedContentMode="always"
-          androidHardwareAccelerationDisabled={false}
-          transparent={true}
-          backgroundColor="transparent"
-          onMessage={(event) => {
-            try {
-              const data = JSON.parse(event.nativeEvent.data);
-              if (data.type === 'LOADED') {
-                setLoading(false);
-              }
-            } catch (e) {}
-          }}
         />
       ) : (
         <View style={styles.loadingContainer}>
