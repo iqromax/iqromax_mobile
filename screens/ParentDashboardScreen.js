@@ -114,6 +114,80 @@ export default function ParentDashboardScreen({ navigation, route }) {
     return () => socket.disconnect();
   }, []);
 
+  // Fetch linked child for logged-in parent
+  useEffect(() => {
+    const fetchLinkedChild = async () => {
+      if (user && user.country && user.country.trim()) {
+        try {
+          const res = await fetch(`${API_URL}/admin/users?role=student`);
+          if (res.ok) {
+            const allStudents = await res.json();
+            const childCustomId = user.country.trim().toUpperCase();
+            const matched = allStudents.find(s => 
+              (s.customId && s.customId.toUpperCase() === childCustomId) ||
+              (s.customId && s.customId.toUpperCase() === '#' + childCustomId) ||
+              (s.id === user.country.trim())
+            );
+
+            if (matched) {
+              const formattedChild = {
+                id: matched.id || 'c_' + Date.now(),
+                customId: matched.customId || '#' + matched.id,
+                name: matched.name || 'Farzand',
+                level: matched.level || 1,
+                xp: matched.xp || 0,
+                streak: 1,
+                dailyActivity: 80,
+                todayExercises: '15 / 20',
+                todayAccuracy: '85%',
+                todayTime: '35 daqiqa',
+                goalPercent: 75,
+                goalProgress: '15 / 20 mashq bajarildi',
+                goalRemaining: 'Yana 5 ta mashq qoldi',
+                weeklyData: [
+                  { day: 'Dush', xp: 400, exercises: 10, time: 25 },
+                  { day: 'Sesh', xp: 550, exercises: 14, time: 32 },
+                  { day: 'Chor', xp: 350, exercises: 8, time: 20 },
+                  { day: 'Pay', xp: 600, exercises: 15, time: 35 },
+                  { day: 'Jum', xp: 750, exercises: 18, time: 42 },
+                  { day: 'Shan', xp: 500, exercises: 12, time: 30 },
+                  { day: 'Yak', xp: 650, exercises: 16, time: 38 },
+                ],
+                achievements: [
+                  { id: 'a1', title: '7 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
+                  { id: 'a2', title: "100 ta to'g'ri javob", icon: 'target', color: '#10B981', unlocked: true },
+                  { id: 'a3', title: "500 XP to'plandi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: true }
+                ],
+                subjectStats: [
+                  { name: 'Matematika', score: 85, color: '#3B82F6' },
+                  { name: 'Fizika', score: 78, color: '#EAB308' },
+                  { name: 'Ingliz tili', score: 90, color: '#10B981' },
+                  { name: 'Mantiq', score: 94, color: '#A855F7' }
+                ],
+                detailedStats: {
+                  todayTime: '35 min',
+                  weekTime: '3 soat 45 min',
+                  monthTime: '15 soat 20 min',
+                  totalEx: 310,
+                  correctEx: 275,
+                  wrongEx: 35,
+                  accuracy: '88.7%',
+                  progressHistory: ['72%', '76%', '80%', '84%', '88%']
+                }
+              };
+
+              setChildrenList([formattedChild]);
+            }
+          }
+        } catch (e) {
+          console.error('Fetch linked child error:', e);
+        }
+      }
+    };
+
+    fetchLinkedChild();
+  }, [user]);
+
   // Handle returning from OTP verification
   useEffect(() => {
     if (isAuthVerified && (authEmail || user?.email)) {
