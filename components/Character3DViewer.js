@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useAssets } from 'expo-asset';
+import { Asset, useAssets } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 
 const CHARACTER_MODELS = [
@@ -20,32 +20,48 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
   const [assets, error] = useAssets(CHARACTER_MODELS);
   const [modelBase64, setModelBase64] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
     setModelBase64(null);
     setLoading(true);
+    setErrorMessage(null);
 
     async function loadModel() {
       const idx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
-      if (assets && assets[idx]) {
-        try {
+      try {
+        let uri = null;
+        if (assets && assets[idx]) {
           const currentAsset = assets[idx];
           if (!currentAsset.localUri) {
             await currentAsset.downloadAsync();
           }
-          const uri = currentAsset.localUri || currentAsset.uri;
+          uri = currentAsset.localUri || currentAsset.uri;
+        } else {
+          // Fallback if useAssets hook is still resolving
+          const mod = CHARACTER_MODELS[idx];
+          const asset = Asset.fromModule(mod);
+          await asset.downloadAsync();
+          uri = asset.localUri || asset.uri;
+        }
+
+        if (uri) {
           const base64 = await FileSystem.readAsStringAsync(uri, {
             encoding: 'base64'
           });
-          if (isMounted) {
+          if (isMounted && base64) {
             setModelBase64(base64);
           }
-        } catch (err) {
-          console.error('Error loading 3D character base64:', err);
-        } finally {
-          if (isMounted) setLoading(false);
         }
+      } catch (err) {
+        console.error('Error loading 3D character base64:', err);
+        if (isMounted) {
+          setErrorMessage(err.message || String(err));
+          Alert.alert("3D Model Error", `Model yuklanishida xatolik: ${err.message || String(err)}`);
+        }
+      } finally {
+        if (isMounted) setLoading(false);
       }
     }
 
@@ -98,7 +114,17 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'LOADED' }));
               }
             });
+            viewer.addEventListener('error', (event) => {
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ERROR', message: event.detail ? JSON.stringify(event.detail) : 'Model loading error in model-viewer' }));
+              }
+            });
           }
+          window.addEventListener('error', (event) => {
+            if (window.ReactNativeWebView) {
+              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ERROR', message: event.message }));
+            }
+          });
         </script>
       </body>
     </html>
@@ -117,6 +143,24 @@ export function Character3DViewer({ characterIndex = 0, yOffset = 0, style }) {
           domStorageEnabled={true}
           allowFileAccess={true}
           allowUniversalAccessFromFileURLs={true}
+          onError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('WebView error: ', nativeEvent);
+            Alert.alert("WebView Rendering Error", `WebView yuklashda xatolik: ${nativeEvent.description || 'Nomaʼlum WebView xatosi'}`);
+          }}
+          onRenderProcessGone={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent;
+            console.warn('WebView render process gone: ', nativeEvent);
+            Alert.alert("WebView Crash", "WebView render jarayoni to'xtab qoldi (Out of Memory).");
+          }}
+          onMessage={(event) => {
+            try {
+              const data = JSON.parse(event.nativeEvent.data);
+              if (data.type === 'ERROR') {
+                Alert.alert("3D Viewer Model Error", `Model HTML ichida xatolikka uchradi: ${data.message}`);
+              }
+            } catch(e) {}
+          }}
         />
       ) : (
         <View style={styles.loadingContainer}>
