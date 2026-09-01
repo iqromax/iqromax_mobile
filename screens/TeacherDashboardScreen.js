@@ -1536,9 +1536,14 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   <Text style={{ color: '#6B7280', fontSize: 11, textAlign: 'center', marginTop: 4, fontFamily: 'Inter_500Medium' }}>
                     {t.pdfRefreshHint || "Amal turini refresh qiling va qayta generatsiya qiling (eski PDF yangilanadi)."}
                   </Text>
-                </View>
-              )}
             </View>
+
+            <TouchableOpacity style={styles.logoutFullBtn} onPress={handleReturnToHome}>
+              <Feather name="log-out" size={20} color="#EF4444" style={{ marginRight: 8 }} />
+              <Text style={{ color: '#EF4444', fontFamily: 'Inter_700Bold', fontSize: 16 }}>{t.logout || "Tizimdan chiqish"}</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
 
         {/* 6. QIDIRUV SAHIFA (SEARCH) */}
         {activeTab === 'search' && (
