@@ -31,6 +31,7 @@ if (useGLTF.setMeshoptDecoder) {
 }
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL, getShopImageUrl } from '../src/config/api';
+import { Character3DViewer } from '../components/Character3DViewer';
 import { LinearGradient } from 'expo-linear-gradient';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { useEnergy } from '../src/hooks/useEnergy';
@@ -1360,15 +1361,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Center Column: Showcase */}
             <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
               <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                  <ambientLight intensity={2} color="#ffffff" />
-                  <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                  <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                  <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
-                  <Suspense fallback={null}>
-                    <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} yOffset={0.5} />
-                  </Suspense>
-                </Canvas>
+                <Character3DViewer characterIndex={activeAvatarIndex} />
               </View>
               <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
                 <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1482,15 +1475,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             />
             {/* 3D Model */}
             <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                <ambientLight intensity={2} color="#ffffff" />
-                <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
-                <Suspense fallback={null}>
-                  <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={1.1} />
-                </Suspense>
-              </Canvas>
+              <Character3DViewer characterIndex={activeAvatarIndex} />
             </View>
             <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
               <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1713,16 +1698,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Canvas Container */}
             <View style={{ position: 'absolute', top: -30, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }] }} pointerEvents="box-none">
-              <Canvas frameloop="demand" style={{ flex: 1, width: '100%', backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                <ambientLight intensity={2.5} color="#ffffff" />
-                <hemisphereLight intensity={1.8} color="#ffffff" groundColor="#444444" />
-                <Environment preset="city" />
-                <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                <directionalLight position={[-10, 10, -5]} intensity={1.5} color="#ffffff" />
-                <Suspense fallback={null}>
-                  <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} />
-                </Suspense>
-              </Canvas>
+              <Character3DViewer characterIndex={activeAvatarIndex} />
             </View>
             
 
@@ -2707,16 +2683,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* 3D Model Render */}
                 <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                  <Canvas frameloop="demand" style={{ flex: 1, backgroundColor: 'transparent' }} pointerEvents="auto" gl={{ alpha: true }}>
-                    <ambientLight intensity={2} color="#ffffff" />
-                    <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                    <Environment preset="city" />
-                    <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                    <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
-                    <Suspense fallback={null}>
-                      <CharacterModel characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} yOffset={0.5} />
-                    </Suspense>
-                  </Canvas>
+                  <Character3DViewer characterIndex={activeAvatarIndex} />
                 </View>
 
                 {/* Left Absolute Overlay: Active Character Details */}

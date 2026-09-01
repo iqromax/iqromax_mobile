@@ -7,8 +7,8 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { Canvas, useFrame } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
-import * as THREE from 'three';
 import { API_URL } from '../src/config/api';
+import { Character3DViewer } from '../components/Character3DViewer';
 
 // Preload 3D models for much faster rendering
 useGLTF.preload(require('../assets/models/adult_male_optimized.glb'));
@@ -422,18 +422,7 @@ export default function StepFiveScreen({ navigation, route }) {
 
           <View style={styles.canvasContainer}>
             {isFocused && (
-              <Canvas 
-                style={{ flex: 1, backgroundColor: 'transparent' }}
-                gl={{ preserveDrawingBuffer: true, alpha: true, antialias: true }}
-              >
-                <ambientLight intensity={2} color="#ffffff" />
-                <hemisphereLight intensity={1.5} color="#ffffff" groundColor="#000000" />
-                <directionalLight position={[10, 10, 5]} intensity={2.5} color="#ffffff" />
-                <directionalLight position={[-10, 10, -5]} intensity={1} color="#ffffff" />
-                <Suspense fallback={null}>
-                  <CharacterModel onLoad={() => setModelLoaded(true)} characterIndex={selectedChar} />
-                </Suspense>
-              </Canvas>
+              <Character3DViewer characterIndex={selectedChar} />
             )}
           </View>
 
