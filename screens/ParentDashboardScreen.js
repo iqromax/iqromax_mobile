@@ -731,7 +731,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                         <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
                           <MaterialCommunityIcons name={ach.unlocked ? ach.icon : 'lock'} size={20} color={ach.color} />
                         </View>
-                        <Text style={styles.achieveTitle}>{ach.title}</title>
+                        <Text style={styles.achieveTitle}>{ach.title}</Text>
                         {!ach.unlocked && <Text style={{ color: '#6B7280', fontSize: 11, marginLeft: 'auto' }}>Qulflangan</Text>}
                       </View>
                     ))}
