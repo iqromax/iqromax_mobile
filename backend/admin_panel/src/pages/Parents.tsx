@@ -32,7 +32,7 @@ const Parents = () => {
       }
     } catch (error) {
       console.error('Error fetching parents:', error);
-    } fontally {
+    } finally {
       if (showLoading) setIsLoading(false);
     }
   };
