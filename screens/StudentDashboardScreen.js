@@ -192,7 +192,15 @@ useGLTF.preload(require('../assets/models/ochki_4_optimized.glb'));
 
 function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false }) {
   if (!modelPath) return null;
-  const glbSource = typeof modelPath === 'string' ? (modelPath.startsWith('http') ? modelPath : `${API_URL}${modelPath.replace('/api', '')}`) : modelPath;
+  let glbSource = modelPath;
+  if (typeof modelPath === 'string') {
+    if (modelPath.startsWith('http://') || modelPath.startsWith('https://')) {
+      glbSource = modelPath;
+    } else {
+      const cleanPath = modelPath.startsWith('/') ? modelPath : `/${modelPath}`;
+      glbSource = `${API_URL}${cleanPath}`;
+    }
+  }
   
   let gltf = null;
   try {
@@ -215,27 +223,24 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
            const mats = Array.isArray(child.material) ? child.material : [child.material];
            mats.forEach(mat => {
              if (mat.name) mat.name = mat.name.replace(/-/g, '_');
-             // Replace WebP textures or force canvas fallback
-             if (mat.map && mat.map.image && (!mat.map.image.width || mat.map.image.src?.includes('data:image/webp'))) {
-               mat.map.needsUpdate = true;
-             }
+             if (mat.map) mat.map.needsUpdate = true;
            });
         }
       });
     } catch(e) {}
   }, [scene]);
   
-  const accessoryScale = isHeadwear ? 0.65 : 0.50;
+  const accessoryScale = isHeadwear ? 1.05 : 0.50;
   
-  let xOffset = -0.02;
-  let heightOffset = isHeadwear ? 2.35 : 2.10; // Bosh kiyim (hat/cap) head height positioning
-  let zOffset = isHeadwear ? 0.05 : 0.20;
+  let xOffset = 0;
+  let heightOffset = isHeadwear ? 0.95 : 2.10; // Bosh kiyim (hat/cap) head height positioning
+  let zOffset = isHeadwear ? 0.0 : 0.20;
   
   if (characterIndex === 1) { // Maks
-    heightOffset = isHeadwear ? 1.75 : 1.50; 
+    heightOffset = isHeadwear ? 0.35 : 1.50; 
   } else if (characterIndex >= 4) { // Qizlar
-    heightOffset = isHeadwear ? 2.30 : 2.05; 
-    zOffset = isHeadwear ? 0.10 : 0.30; 
+    heightOffset = isHeadwear ? 0.90 : 2.05; 
+    zOffset = isHeadwear ? 0.05 : 0.30; 
   }
   
   const posX = xOffset;
