@@ -9,6 +9,7 @@ import { Canvas, useFrame } from '@react-three/fiber/native';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
 import { API_URL } from '../src/config/api';
 import { Character3DViewer } from '../components/Character3DViewer';
+import * as THREE from 'three';
 
 // Preload 3D models for much faster rendering
 useGLTF.preload(require('../assets/models/adult_male_optimized.glb'));
