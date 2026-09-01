@@ -42,22 +42,26 @@ export const ParentsManager = () => {
   useEffect(() => {
     fetchParents();
 
-    // Socket.io for real-time parent registration and invites
-    const socket = io(window.location.origin.replace('http', 'ws'), {
-      path: '/api/socket.io',
-      transports: ['websocket', 'polling']
-    });
+    let socket: any = null;
+    try {
+      socket = io(window.location.origin, {
+        path: '/api/socket.io',
+        transports: ['websocket', 'polling']
+      });
 
-    socket.on('parent_invite_sent', () => {
-      fetchParents();
-    });
+      socket.on('parent_invite_sent', () => {
+        fetchParents();
+      });
 
-    socket.on('parent_invite_accepted', () => {
-      fetchParents();
-    });
+      socket.on('parent_invite_accepted', () => {
+        fetchParents();
+      });
+    } catch (e) {
+      console.error('Socket connection error:', e);
+    }
 
     return () => {
-      socket.disconnect();
+      if (socket) socket.disconnect();
     };
   }, []);
 
