@@ -617,30 +617,28 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               const w4 = meanAcc;
               const trendDiff = Math.max(10, w4 - w1);
 
-              setRealStatsData({
-                studentCount: count,
-                totalExercises: totalEx,
-                avgAccuracy: meanAcc,
-                avgSpeed: meanSpeed,
-                highPerfPercent: highP,
-                midPerfPercent: midP,
-                lowPerfPercent: lowP,
-                improvedCount: Math.round(count * 0.65),
-                calcExercises: calcEx,
-                calcAccuracy: calcAcc,
-                speedExercises: speedEx,
-                speedAccuracy: speedAcc,
-                topStudents: top3,
-                attentionUsers: needsAttention.length > 0 ? needsAttention : [
-                  { name: "Azizbek", reason: "5 kundan beri mashq bajarmadi", color: "#EF4444" },
-                  { name: "Madina", reason: "O'rtacha natija: 54%", color: "#F59E0B" },
-                  { name: "Jasur", reason: "So'nggi 10 ta mashqdan 6 tasida xato", color: "#F59E0B" }
-                ],
-                weeklyTrend: [w1, w2, w3, w4],
-                trendIncrease: trendDiff
-              });
-            }
-          }
+          setRealStatsData({
+            studentCount: count,
+            totalExercises: totalEx,
+            avgAccuracy: meanAcc,
+            avgSpeed: meanSpeed,
+            highPerfPercent: highP,
+            midPerfPercent: midP,
+            lowPerfPercent: lowP,
+            improvedCount: Math.round(count * 0.65),
+            calcExercises: calcEx,
+            calcAccuracy: calcAcc,
+            speedExercises: speedEx,
+            speedAccuracy: speedAcc,
+            topStudents: top3,
+            attentionUsers: needsAttention.length > 0 ? needsAttention : [
+              { name: "Azizbek", reason: "5 kundan beri mashq bajarmadi", color: "#EF4444" },
+              { name: "Madina", reason: "O'rtacha natija: 54%", color: "#F59E0B" },
+              { name: "Jasur", reason: "So'nggi 10 ta mashqdan 6 tasida xato", color: "#F59E0B" }
+            ],
+            weeklyTrend: [w1, w2, w3, w4],
+            trendIncrease: trendDiff
+          });
         } catch (e) {
           console.error('Fetch ranking error:', e);
         }
