@@ -499,11 +499,11 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
                 <View style={[styles.introFeatureCard, { marginBottom: 100 }]}>
                   <View style={[styles.introIconBox, { backgroundColor: 'rgba(245, 158, 11, 0.15)', borderColor: '#F59E0B' }]}>
-                    <MaterialCommunityIcons name="lightbulb-on-outline" size={26} color="#F59E0B" />
+                    <MaterialCommunityIcons name="brain" size={26} color="#F59E0B" />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.introFeatureTitle}>Fanlar Kuchli/Bosh Tomonlari</Text>
-                    <Text style={styles.introFeatureSub}>Matematika, Mantiq va ingliz tili kabi fanlardan farzandingiz qay darajada ekanligini anglaysiz.</Text>
+                    <Text style={styles.introFeatureTitle}>Fanlar va Rivojlanish Tahlili</Text>
+                    <Text style={styles.introFeatureSub}>Matematika, Mantiq va Mental Arifmetika bo'yicha farzandingizning o'zlashtirish va bilim darajasini tahlil qilasiz.</Text>
                   </View>
                 </View>
               </View>
