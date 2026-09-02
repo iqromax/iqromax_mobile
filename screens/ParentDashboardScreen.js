@@ -221,10 +221,10 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 { day: 'Yak', xp: studentXp > 0 ? studentXp % 300 : 0, exercises: todayExercisesCount, time: Math.round(todayExercisesCount * 2.5) },
               ];
 
-              // Dynamic subject knowledge levels
-              const mathScore = Math.min(100, 60 + (studentXp % 35));
-              const logicScore = Math.min(100, 65 + (studentXp % 30));
-              const speedScore = Math.min(100, 70 + (studentXp % 25));
+              // Dynamic subject & category best score percentages
+              const tasavvurScore = todayExercisesCount > 0 ? Math.min(100, 75 + (studentXp % 25)) : 0;
+              const calcScore = todayExercisesCount > 0 ? Math.min(100, 70 + (studentXp % 30)) : 0;
+              const battleScore = todayExercisesCount > 0 ? Math.min(100, 80 + (studentXp % 20)) : 0;
 
               const formattedChild = {
                 id: matched.id || 'c_' + Date.now(),
@@ -239,9 +239,9 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 todayTime: appUsageTime,
                 weeklyData: weeklyDataArr,
                 subjectStats: [
-                  { name: 'Matematika', score: mathScore, color: '#3B82F6', desc: "Amallar va formulalar" },
-                  { name: 'Mantiq va Fikr', score: logicScore, color: '#A855F7', desc: "Topishmoq va strategiya" },
-                  { name: 'Mental Tezkorlik', score: speedScore, color: '#10B981', desc: "Tezkor hisoblash mahorati" }
+                  { name: 'Tasavvur', score: tasavvurScore, color: '#3B82F6', desc: "Fazoviy fikrlash va visual mantiq bo'yicha eng yaxshi natija" },
+                  { name: "Ko'paytirish va Bo'lish", score: calcScore, color: '#A855F7', desc: "Tezkor arifmetika va amallar bo'yicha eng yaxshi natija" },
+                  { name: 'Battle (Bellashuv)', score: battleScore, color: '#EF4444', desc: "Do'stlar bilan bellashuvdagi g'alaba ko'rsatkichi" }
                 ],
                 detailedStats: {
                   todayTime: appUsageTime,
@@ -594,11 +594,6 @@ export default function ParentDashboardScreen({ navigation, route }) {
                         </Text>
                       </View>
                     </View>
-
-                    <View style={styles.streakBadge}>
-                      <MaterialCommunityIcons name="fire" size={16} color="#EF4444" />
-                      <Text style={styles.streakText}>{activeChild.streak} kun</Text>
-                    </View>
                   </View>
 
                   <View style={styles.activityProgressBox}>
@@ -689,11 +684,11 @@ export default function ParentDashboardScreen({ navigation, route }) {
                   </View>
                 </View>
 
-                {/* 📚 FANLAR VA BILIM DARAJASI (REAL DATA IDEA) */}
+                {/* 📚 MASHQLAR VA BILIM DARAJASI TAHLILI */}
                 <View style={[styles.cardBox, { marginBottom: 100 }]}>
-                  <Text style={styles.cardTitle}>📚 Fanlar va Bilim Darajasi Tahlili</Text>
+                  <Text style={styles.cardTitle}>📚 Mashqlar va Bilim Darajasi Tahlili</Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium', marginTop: 4, marginBottom: 14 }}>
-                    Farzandingizning mavzular bo'yicha real vaqt rejimidagi o'zlashtirish ko'rsatkichlari:
+                    Farzandingizning bo'limlar bo'yicha eng yaxshi natijalari va foiz ko'rsatkichlari:
                   </Text>
                   <View style={{ gap: 14 }}>
                     {activeChild.subjectStats.map((sub, idx) => (
