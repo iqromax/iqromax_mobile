@@ -167,6 +167,7 @@ export default function OtpScreen({ navigation, route }) {
                 role: 'parent'
               },
               studentCustomId: route.params.studentCustomId,
+              password: route.params.password,
               isAuthVerified: true,
               language: route.params.language || 'uz'
             });

@@ -197,7 +197,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
           const pName = user?.name || authEmail.split('@')[0] || 'Ota-ona';
           const pEmail = authEmail.trim() || user?.email;
           const pPhone = authPhone.trim() || user?.phone || '+998900000000';
-          const pPass = authPassword.trim() || '123456';
+          const pPass = route.params?.password || authPassword.trim() || '123456';
 
           const regRes = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
