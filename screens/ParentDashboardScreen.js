@@ -334,21 +334,17 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
   // Submit Parent Auth & Invite Form
   const handleAuthAndInviteSubmit = async () => {
-    if (authModalMode === 'login') {
-      return handleParentLogin();
-    }
-
-    if (!authEmail.trim() || !authPhone.trim() || !authPassword.trim() || !authConfirmPassword.trim() || !childIdInput.trim()) {
+    if (!authEmail.trim() || !authPhone.trim() || !childIdInput.trim()) {
       setFeedbackAlert({
         visible: true,
         title: 'Diqqat',
-        message: 'Iltimos, barcha maydonlarni to\'ldiring (Email, Telefon, Parol va Farzand ID raqami)!',
+        message: 'Iltimos, Email, Telefon raqam va Farzand ID sini kiriting!',
         type: 'error'
       });
       return;
     }
 
-    if (authPassword !== authConfirmPassword) {
+    if (authPassword && authConfirmPassword && authPassword !== authConfirmPassword) {
       setFeedbackAlert({
         visible: true,
         title: 'Xatolik',
@@ -378,7 +374,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
         navigation.navigate('OtpScreen', {
           email: authEmail.trim(),
           phone: authPhone.trim(),
-          password: authPassword.trim(),
+          password: authPassword.trim() || '123456',
           name: user?.name || 'Ota-ona',
           role: 'parent',
           studentCustomId: childIdInput.trim(),
