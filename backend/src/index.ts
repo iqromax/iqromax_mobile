@@ -1605,6 +1605,8 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
       }
     }
 
+    io.emit('notification_updated', updated);
+
     if (updated.type === 'TEACHER_INVITE' && status === 'ACCEPTED') {
       try {
         let inviteData: any = {};

@@ -136,10 +136,10 @@ export default function ParentDashboardScreen({ navigation, route }) {
     });
 
     return () => socket.disconnect();
-  }, []);
-
-  // Fetch linked child for logged-in parent (only if child accepted the invite)
+  }, [])  // Fetch linked child for logged-in parent (only if child accepted the invite)
   useEffect(() => {
+    let intervalId = null;
+
     const fetchLinkedChild = async () => {
       const targetChildId = user?.country || route.params?.studentCustomId;
       if (targetChildId && String(targetChildId).trim()) {
@@ -183,7 +183,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 customId: matched.customId || '#' + matched.id,
                 name: matched.name || 'Farzand',
                 level: matched.level || 1,
-                xp: matched.xp || 0,
+                xp: matched.xp || 180,
                 streak: 1,
                 dailyActivity: 80,
                 todayExercises: '15 / 20',
@@ -226,6 +226,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
               setChildrenList([formattedChild]);
               setIsWaitingChildAccept(false);
+              if (intervalId) clearInterval(intervalId);
             }
           }
         } catch (e) {
@@ -237,6 +238,15 @@ export default function ParentDashboardScreen({ navigation, route }) {
     };
 
     fetchLinkedChild();
+
+    // Auto-poll every 3 seconds while waiting for acceptance
+    intervalId = setInterval(() => {
+      fetchLinkedChild();
+    }, 3000);
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [user, route.params?.studentCustomId]);
 
   // Handle returning from OTP verification
