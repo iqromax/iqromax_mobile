@@ -1278,7 +1278,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
             <View style={[styles.modalContentCard, { maxHeight: '90%' }]}>
               <View style={styles.modalHeaderRow}>
                 <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>
-                  {user?.id ? "➕ Farzand Biriktirish" : "🔒 Autentifikatsiya va Farzand ID"}
+                  {(user?.id && isAuthVerified) ? "➕ Farzand Biriktirish" : "🔒 Autentifikatsiya va Farzand ID"}
                 </Text>
                 <TouchableOpacity onPress={() => setIsAuthModalOpen(false)}>
                   <Feather name="x" size={24} color="#9CA3AF" />
@@ -1286,7 +1286,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
               </View>
 
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
-                {user?.id ? (
+                {(user?.id && isAuthVerified) ? (
                   /* LOGGED IN PARENT ONLY SEES CHILD ID INPUT & DIRECT SUBMIT */
                   <>
                     <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16, lineHeight: 18 }}>
