@@ -518,30 +518,25 @@ export default function ParentDashboardScreen({ navigation, route }) {
     setIsSendingOtp(true);
     try {
       const cleanChildId = childIdInput.trim().toUpperCase();
-      const parentIdentifier = user?.email || user?.phone || authEmail || authPhone;
-      const parentName = user?.name || 'Ota-ona';
+      const parentName = user?.name || 'Ota-onangiz';
+      const parentEmail = user?.email || authEmail || '';
+      const parentPhone = user?.phone || authPhone || '';
 
-      const notifRes = await fetch(`${API_URL}/notifications/send`, {
+      const res = await fetch(`${API_URL}/parent/send-invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: cleanChildId,
-          senderId: parentIdentifier,
-          type: 'PARENT_INVITE',
-          title: "👨‍👩‍👧 Ota-ona biriktirish so'rovi",
-          message: JSON.stringify({
-            parentName: parentName,
-            parentEmail: user?.email || authEmail,
-            parentPhone: user?.phone || authPhone,
-            text: `${parentName} sizni ota-ona sifatida biriktirmoqchi. Tasdiqlaysizmi?`
-          })
+          parentName,
+          parentEmail,
+          parentPhone,
+          studentCustomId: cleanChildId
         })
       });
 
       setIsSendingOtp(false);
       setIsAuthModalOpen(false);
 
-      if (notifRes.ok) {
+      if (res.ok) {
         setFeedbackAlert({
           visible: true,
           title: 'So\'rov Yuborildi! ⏳',
@@ -550,11 +545,12 @@ export default function ParentDashboardScreen({ navigation, route }) {
         });
         setChildIdInput('');
       } else {
+        const errData = await res.json().catch(() => ({}));
         setFeedbackAlert({
           visible: true,
-          title: 'Ogohlantirish',
-          message: 'Farzand ID si bo\'yicha so\'rov yuborildi. Farzand ilovadan tasdiqlashi kutilmoqda.',
-          type: 'success'
+          title: 'Xatolik',
+          message: errData.error || 'Farzand ID si topilmadi yoki so\'rov yuborishda xatolik yuz berdi.',
+          type: 'error'
         });
       }
     } catch (e) {
