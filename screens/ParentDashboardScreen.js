@@ -7,7 +7,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { io } from 'socket.io-client';
 import { SOCKET_URL, API_URL } from '../src/config/api';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const getAvatarByName = (avatarVal, studentName = '') => {
+  if (avatarVal && typeof avatarVal === 'string' && (avatarVal.startsWith('http://') || avatarVal.startsWith('https://') || avatarVal.startsWith('file://'))) {
+    return { uri: avatarVal };
+  }
+  const str = (avatarVal || studentName || '').toLowerCase();
+  if (str.includes('alex')) return require('../assets/avatar_alex.jpg');
+  if (str.includes('maks') || str.includes('tech')) return require('../assets/avatar_maks.png');
+  if (str.includes('david') || str.includes('creative')) return require('../assets/avatar_david.jpg');
+  if (str.includes('kevin') || str.includes('mental')) return require('../assets/avatar_kevin.png');
+  if (str.includes('lily')) return require('../assets/avatar_lily.jpg');
+  if (str.includes('maya')) return require('../assets/avatar_maya.jpg');
+  if (str.includes('sophia')) return require('../assets/avatar_sophia.png');
+  if (str.includes('emma')) return require('../assets/avatar_emma.jpg');
+  return require('../assets/avatar_maks.png');
+};
 
 export default function ParentDashboardScreen({ navigation, route }) {
   const { user, language = 'uz', isAuthVerified = false } = route.params || {};
@@ -595,11 +609,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                       <View style={styles.childAvatarBox}>
-                        {activeChild.avatar ? (
-                          <Image source={{ uri: activeChild.avatar }} style={{ width: 44, height: 44, borderRadius: 22 }} />
-                        ) : (
-                          <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>{activeChild.name.charAt(0)}</Text>
-                        )}
+                        <Image source={getAvatarByName(activeChild.avatar, activeChild.name)} style={{ width: 44, height: 44, borderRadius: 22 }} />
                       </View>
                       <View>
                         <Text style={{ color: '#FFFFFF', fontSize: 17, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
@@ -864,11 +874,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                     <View style={styles.myChildRankCard}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                         <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
-                          {activeChild.avatar ? (
-                            <Image source={{ uri: activeChild.avatar }} style={{ width: 44, height: 44, borderRadius: 22 }} />
-                          ) : (
-                            <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🏆</Text>
-                          )}
+                          <Image source={getAvatarByName(activeChild.avatar, activeChild.name)} style={{ width: 44, height: 44, borderRadius: 22 }} />
                         </View>
                         <View>
                           <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>SIZNING FARZANDINGIZ</Text>
@@ -904,11 +910,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                           {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
                         </Text>
                         <View style={styles.rankAvatarBox}>
-                          {item.avatar ? (
-                            <Image source={{ uri: item.avatar }} style={{ width: 40, height: 40, borderRadius: 20 }} />
-                          ) : (
-                            <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
-                          )}
+                          <Image source={getAvatarByName(item.avatar, item.name)} style={{ width: 40, height: 40, borderRadius: 20 }} />
                         </View>
                         <View style={{ flex: 1, marginLeft: 12 }}>
                           <Text style={styles.rankName}>{item.name}</Text>
@@ -981,11 +983,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
                 <View style={styles.childProfileCard}>
                   <View style={styles.childProfileAvatar}>
-                    {activeChild.avatar ? (
-                      <Image source={{ uri: activeChild.avatar }} style={{ width: 64, height: 64, borderRadius: 32 }} />
-                    ) : (
-                      <Text style={{ color: '#FFF', fontSize: 32, fontFamily: 'Inter_900Black' }}>{activeChild.name.charAt(0)}</Text>
-                    )}
+                    <Image source={getAvatarByName(activeChild.avatar, activeChild.name)} style={{ width: 64, height: 64, borderRadius: 32 }} />
                   </View>
                   <Text style={{ color: '#FFFFFF', fontSize: 20, fontFamily: 'Inter_700Bold', marginTop: 10 }}>{activeChild.name}</Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', marginTop: 2 }}>ID: {activeChild.customId}</Text>
@@ -1138,11 +1136,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 childrenList.map((ch) => (
                   <View key={ch.id} style={styles.linkedChildRow}>
                     <View style={styles.linkedChildAvatar}>
-                      {ch.avatar ? (
-                        <Image source={{ uri: ch.avatar }} style={{ width: 40, height: 40, borderRadius: 20 }} />
-                      ) : (
-                        <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{ch.name.charAt(0)}</Text>
-                      )}
+                      <Image source={getAvatarByName(ch.avatar, ch.name)} style={{ width: 40, height: 40, borderRadius: 20 }} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>{ch.name}</Text>
