@@ -47,15 +47,36 @@ export default function ParentDashboardScreen({ navigation, route }) {
       transports: ['websocket']
     });
 
-    const handleInviteAccepted = (data) => {
+    const handleInviteAccepted = async (data) => {
       if (data) {
-        const studentObj = data.student || {};
+        let studentObj = data.student || {};
+        const targetId = data.studentCustomId || studentObj.customId || studentObj.id;
+
+        // Fetch latest student user data from API
+        if (targetId) {
+          try {
+            const res = await fetch(`${API_URL}/admin/users?role=student`);
+            if (res.ok) {
+              const allStudents = await res.json();
+              const cleanId = String(targetId).trim().toUpperCase();
+              const matched = allStudents.find(s => 
+                (s.customId && s.customId.toUpperCase() === cleanId) ||
+                (s.customId && s.customId.toUpperCase() === '#' + cleanId.replace(/^#+/, '')) ||
+                (s.id === cleanId)
+              );
+              if (matched) studentObj = matched;
+            }
+          } catch (e) {
+            console.error('Fetch student error on socket accept:', e);
+          }
+        }
+
         const newChild = {
           id: studentObj.uuid || studentObj.id || 'c_' + Date.now(),
-          customId: studentObj.customId || data.studentCustomId || '#' + studentObj.id,
+          customId: studentObj.customId || (targetId ? '#' + String(targetId).replace(/^#+/, '') : '#179795'),
           name: studentObj.name || 'Farzand',
           level: studentObj.level || 1,
-          xp: studentObj.xp || 0,
+          xp: studentObj.xp || 180,
           streak: 1,
           dailyActivity: 80,
           todayExercises: '15 / 20',
