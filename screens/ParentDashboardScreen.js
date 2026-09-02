@@ -657,7 +657,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                   </View>
 
                   <View style={styles.chartRow}>
-                    {activeChild.weeklyData.map((item, idx) => {
+                    {(activeChild.weeklyData || []).map((item, idx) => {
                       const val = weeklyMetric === 'xp' ? item.xp : (weeklyMetric === 'exercises' ? item.exercises : item.time);
                       const maxVal = weeklyMetric === 'xp' ? 1000 : (weeklyMetric === 'exercises' ? 30 : 60);
                       const barHeight = Math.min(100, Math.max(15, (val / maxVal) * 90));
@@ -692,7 +692,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                     Farzandingizning bo'limlar bo'yicha eng yaxshi natijalari va foiz ko'rsatkichlari:
                   </Text>
                   <View style={{ gap: 14 }}>
-                    {activeChild.subjectStats.map((sub, idx) => (
+                    {(activeChild.subjectStats || []).map((sub, idx) => (
                       <View key={idx} style={{ backgroundColor: '#090915', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: '#1E1B38' }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -854,7 +854,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 </View>
 
                 <View style={{ paddingBottom: 100 }}>
-                  {leaderboardData
+                  {(leaderboardData || [])
                     .filter(item => {
                       if (!rankingSearchQuery.trim()) return true;
                       const q = rankingSearchQuery.trim().toLowerCase();
