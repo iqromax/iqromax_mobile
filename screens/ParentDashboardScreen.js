@@ -138,7 +138,14 @@ export default function ParentDashboardScreen({ navigation, route }) {
           }
         };
 
-        setChildrenList([newChild]);
+        setChildrenList(prev => {
+          const cleanNewId = String(newChild.customId).replace(/^#+/, '').trim().toUpperCase();
+          const exists = prev.some(c => String(c.customId).replace(/^#+/, '').trim().toUpperCase() === cleanNewId);
+          if (exists) {
+            return prev.map(c => String(c.customId).replace(/^#+/, '').trim().toUpperCase() === cleanNewId ? newChild : c);
+          }
+          return [...prev, newChild];
+        });
         setIsWaitingChildAccept(false);
         setFeedbackAlert({
           visible: true,
