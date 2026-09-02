@@ -114,11 +114,29 @@ export default function ParentDashboardScreen({ navigation, route }) {
     return () => socket.disconnect();
   }, []);
 
-  // Fetch linked child for logged-in parent
+  // Fetch linked child for logged-in parent (only if child accepted the invite)
   useEffect(() => {
     const fetchLinkedChild = async () => {
       if (user && user.country && user.country.trim()) {
         try {
+          // Check if student has ACCEPTED the invitation in notifications table
+          const notifRes = await fetch(`${API_URL}/notifications/user/${user.country.trim().toUpperCase()}`);
+          if (notifRes.ok) {
+            const notifs = await notifRes.json();
+            const acceptedNotif = Array.isArray(notifs) && notifs.some(n => 
+              n.type === 'PARENT_INVITE' && 
+              n.status === 'ACCEPTED' && 
+              (n.senderId === user.email || n.senderId === user.phone || n.senderId === user.name)
+            );
+
+            if (!acceptedNotif) {
+              // Student hasn't accepted yet -> keep in waiting state, do not set childrenList
+              setIsWaitingChildAccept(true);
+              setChildrenList([]);
+              return;
+            }
+          }
+
           const res = await fetch(`${API_URL}/admin/users?role=student`);
           if (res.ok) {
             const allStudents = await res.json();
@@ -177,6 +195,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
               };
 
               setChildrenList([formattedChild]);
+              setIsWaitingChildAccept(false);
             }
           }
         } catch (e) {
