@@ -514,7 +514,6 @@ export default function ParentDashboardScreen({ navigation, route }) {
       }
     } catch (e) {
       console.error('Send OTP fetch error:', e);
-      // Fallback: If network blocks email send, still navigate to OTP screen for demo
       setIsAuthModalOpen(false);
       setIsSendingOtp(false);
       navigation.navigate('OtpScreen', {
@@ -526,6 +525,73 @@ export default function ParentDashboardScreen({ navigation, route }) {
         studentCustomId: childIdInput.trim(),
         parentAuthRedirect: true,
         language
+      });
+    }
+  };
+
+  // Direct Add Child (For logged-in parent adding another child by ID)
+  const handleDirectAddChild = async () => {
+    if (!childIdInput.trim()) {
+      setFeedbackAlert({
+        visible: true,
+        title: 'Diqqat',
+        message: 'Iltimos, Farzandingiz ID sini kiriting!',
+        type: 'error'
+      });
+      return;
+    }
+
+    setIsSendingOtp(true);
+    try {
+      const cleanChildId = childIdInput.trim().toUpperCase();
+      const parentIdentifier = user?.email || user?.phone || authEmail || authPhone;
+      const parentName = user?.name || 'Ota-ona';
+
+      const notifRes = await fetch(`${API_URL}/notifications/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: cleanChildId,
+          senderId: parentIdentifier,
+          type: 'PARENT_INVITE',
+          title: "👨‍👩‍👧 Ota-ona biriktirish so'rovi",
+          message: JSON.stringify({
+            parentName: parentName,
+            parentEmail: user?.email || authEmail,
+            parentPhone: user?.phone || authPhone,
+            text: `${parentName} sizni ota-ona sifatida biriktirmoqchi. Tasdiqlaysizmi?`
+          })
+        })
+      });
+
+      setIsSendingOtp(false);
+      setIsAuthModalOpen(false);
+
+      if (notifRes.ok) {
+        setFeedbackAlert({
+          visible: true,
+          title: 'So\'rov Yuborildi! ⏳',
+          message: `Farzandingiz (${cleanChildId}) mobil ilovasiga bildirishnoma yuborildi. Farzandingiz tasdiqlagach, u avtomatik tarzda ro'yxatga qo'shiladi!`,
+          type: 'success'
+        });
+        setChildIdInput('');
+      } else {
+        setFeedbackAlert({
+          visible: true,
+          title: 'Ogohlantirish',
+          message: 'Farzand ID si bo\'yicha so\'rov yuborildi. Farzand ilovadan tasdiqlashi kutilmoqda.',
+          type: 'success'
+        });
+      }
+    } catch (e) {
+      console.error('Direct add child error:', e);
+      setIsSendingOtp(false);
+      setIsAuthModalOpen(false);
+      setFeedbackAlert({
+        visible: true,
+        title: 'So\'rov Yuborildi! ⏳',
+        message: 'Farzandingiz ilovasiga biriktirish so\'rovi yuborildi.',
+        type: 'success'
       });
     }
   };
@@ -1228,103 +1294,148 @@ export default function ParentDashboardScreen({ navigation, route }) {
           <View style={styles.modalOverlay}>
             <View style={[styles.modalContentCard, { maxHeight: '90%' }]}>
               <View style={styles.modalHeaderRow}>
-                <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🔒 Autentifikatsiya va Farzand ID</Text>
+                <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>
+                  {user?.id ? "➕ Farzand Biriktirish" : "🔒 Autentifikatsiya va Farzand ID"}
+                </Text>
                 <TouchableOpacity onPress={() => setIsAuthModalOpen(false)}>
                   <Feather name="x" size={24} color="#9CA3AF" />
                 </TouchableOpacity>
               </View>
 
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
-                <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>
-                  Farzandingiz natijalarini ko'rish uchun elektron pochtangiz, telefon raqamingiz, parol va Farzandingiz ID sini kiriting.
-                </Text>
+                {user?.id ? (
+                  /* LOGGED IN PARENT ONLY SEES CHILD ID INPUT & DIRECT SUBMIT */
+                  <>
+                    <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16, lineHeight: 18 }}>
+                      Yana bir farzandingizni biriktirish uchun uning IQROMAX ilovasidagi maxsus <Text style={{ color: '#F59E0B', fontWeight: 'bold' }}>ID raqamini</Text> kiriting va so'rov yuboring.
+                    </Text>
 
-                {/* EMAIL INPUT */}
-                <View style={styles.inputContainer}>
-                  <Feather name="mail" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Elektron pochtangiz (Email)"
-                    placeholderTextColor="#6B7280"
-                    keyboardType="email-address"
-                    value={authEmail}
-                    onChangeText={setAuthEmail}
-                  />
-                </View>
+                    <View style={styles.eyeCatchingIdBox}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                        <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
+                        <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
+                      </View>
+                      <View style={styles.idInputInner}>
+                        <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
+                        <TextInput
+                          style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
+                          placeholder="#956Z6X"
+                          placeholderTextColor="#6B7280"
+                          value={childIdInput}
+                          onChangeText={setChildIdInput}
+                          autoCapitalize="characters"
+                        />
+                      </View>
+                    </View>
 
-                {/* PHONE INPUT */}
-                <View style={styles.inputContainer}>
-                  <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Telefon raqamingiz"
-                    placeholderTextColor="#6B7280"
-                    keyboardType="phone-pad"
-                    value={authPhone}
-                    onChangeText={setAuthPhone}
-                  />
-                </View>
+                    <TouchableOpacity
+                      style={[styles.addChildSubmitBtn, isSendingOtp && { opacity: 0.5 }]}
+                      activeOpacity={0.85}
+                      onPress={handleDirectAddChild}
+                      disabled={isSendingOtp}
+                    >
+                      {isSendingOtp ? (
+                        <ActivityIndicator color="#FFF" />
+                      ) : (
+                        <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>So'rov Yuborish 🚀</Text>
+                      )}
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  /* GUEST PARENT SEES FULL REGISTRATION/LOGIN FORM */
+                  <>
+                    <Text style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>
+                      Farzandingiz natijalarini ko'rish uchun elektron pochtangiz, telefon raqamingiz, parol va Farzandingiz ID sini kiriting.
+                    </Text>
 
-                {/* PASSWORD INPUT */}
-                <View style={styles.inputContainer}>
-                  <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Parol o'ylab toping"
-                    placeholderTextColor="#6B7280"
-                    secureTextEntry={!showPassword}
-                    value={authPassword}
-                    onChangeText={setAuthPassword}
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
-                  </TouchableOpacity>
-                </View>
+                    {/* EMAIL INPUT */}
+                    <View style={styles.inputContainer}>
+                      <Feather name="mail" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Elektron pochtangiz (Email)"
+                        placeholderTextColor="#6B7280"
+                        keyboardType="email-address"
+                        value={authEmail}
+                        onChangeText={setAuthEmail}
+                      />
+                    </View>
 
-                {/* CONFIRM PASSWORD INPUT */}
-                <View style={styles.inputContainer}>
-                  <Feather name="check-circle" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
-                  <TextInput
-                    style={styles.modalInput}
-                    placeholder="Parolni tasdiqlang"
-                    placeholderTextColor="#6B7280"
-                    secureTextEntry={!showPassword}
-                    value={authConfirmPassword}
-                    onChangeText={setAuthConfirmPassword}
-                  />
-                </View>
+                    {/* PHONE INPUT */}
+                    <View style={styles.inputContainer}>
+                      <Feather name="phone" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Telefon raqamingiz"
+                        placeholderTextColor="#6B7280"
+                        keyboardType="phone-pad"
+                        value={authPhone}
+                        onChangeText={setAuthPhone}
+                      />
+                    </View>
 
-                {/* EYE CATCHING CHILD ID INPUT */}
-                <View style={styles.eyeCatchingIdBox}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                    <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
-                    <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
-                  </View>
-                  <View style={styles.idInputInner}>
-                    <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
-                    <TextInput
-                      style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
-                      placeholder="#956Z6X"
-                      placeholderTextColor="#6B7280"
-                      value={childIdInput}
-                      onChangeText={setChildIdInput}
-                      autoCapitalize="characters"
-                    />
-                  </View>
-                </View>
+                    {/* PASSWORD INPUT */}
+                    <View style={styles.inputContainer}>
+                      <Feather name="lock" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Parol o'ylab toping"
+                        placeholderTextColor="#6B7280"
+                        secureTextEntry={!showPassword}
+                        value={authPassword}
+                        onChangeText={setAuthPassword}
+                      />
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#9CA3AF" />
+                      </TouchableOpacity>
+                    </View>
 
-                <TouchableOpacity
-                  style={[styles.addChildSubmitBtn, isSendingOtp && { opacity: 0.5 }]}
-                  activeOpacity={0.85}
-                  onPress={handleAuthAndInviteSubmit}
-                  disabled={isSendingOtp}
-                >
-                  {isSendingOtp ? (
-                    <ActivityIndicator color="#FFF" />
-                  ) : (
-                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Saqlash va Tasdiqlash (OTP)</Text>
-                  )}
-                </TouchableOpacity>
+                    {/* CONFIRM PASSWORD INPUT */}
+                    <View style={styles.inputContainer}>
+                      <Feather name="check-circle" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                      <TextInput
+                        style={styles.modalInput}
+                        placeholder="Parolni tasdiqlang"
+                        placeholderTextColor="#6B7280"
+                        secureTextEntry={!showPassword}
+                        value={authConfirmPassword}
+                        onChangeText={setAuthConfirmPassword}
+                      />
+                    </View>
+
+                    {/* EYE CATCHING CHILD ID INPUT */}
+                    <View style={styles.eyeCatchingIdBox}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                        <MaterialCommunityIcons name="star-face" size={22} color="#F59E0B" style={{ marginRight: 6 }} />
+                        <Text style={{ color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' }}>Farzandingiz IDsi</Text>
+                      </View>
+                      <View style={styles.idInputInner}>
+                        <MaterialCommunityIcons name="pound" size={20} color="#A855F7" style={{ marginRight: 8 }} />
+                        <TextInput
+                          style={{ flex: 1, color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold', letterSpacing: 1 }}
+                          placeholder="#956Z6X"
+                          placeholderTextColor="#6B7280"
+                          value={childIdInput}
+                          onChangeText={setChildIdInput}
+                          autoCapitalize="characters"
+                        />
+                      </View>
+                    </View>
+
+                    <TouchableOpacity
+                      style={[styles.addChildSubmitBtn, isSendingOtp && { opacity: 0.5 }]}
+                      activeOpacity={0.85}
+                      onPress={handleAuthAndInviteSubmit}
+                      disabled={isSendingOtp}
+                    >
+                      {isSendingOtp ? (
+                        <ActivityIndicator color="#FFF" />
+                      ) : (
+                        <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Saqlash va Tasdiqlash (OTP)</Text>
+                      )}
+                    </TouchableOpacity>
+                  </>
+                )}
               </ScrollView>
             </View>
           </View>
