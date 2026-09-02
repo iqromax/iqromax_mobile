@@ -208,7 +208,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
             if (matched) {
               const studentXp = matched.xp || 0;
-              const studentLevel = matched.level || Math.max(1, Math.floor(studentXp / 100) + 1);
+              const studentLevel = (matched.level !== undefined && matched.level !== null && matched.level > 0) ? matched.level : 1;
 
               // Real-time calculations based on student activity & XP
               const todayExercisesCount = Math.floor((studentXp % 500) / 25);
@@ -342,6 +342,8 @@ export default function ParentDashboardScreen({ navigation, route }) {
               rank: index + 1,
               name: u.name || "O'quvchi",
               xp: u.xp || 0,
+              level: u.level || 1,
+              avatar: u.avatar || null,
               customId: u.id || u.customId
             }));
             setLeaderboardData(formatted);
@@ -847,22 +849,40 @@ export default function ParentDashboardScreen({ navigation, route }) {
                   )}
                 </View>
 
-                <View style={styles.myChildRankCard}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center' }}>
-                      <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🏆</Text>
-                    </View>
-                    <View>
-                      <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>SIZNING FARZANDINGIZ</Text>
-                      <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
-                    </View>
-                  </View>
+                {(() => {
+                  const cleanMyId = activeChild?.customId ? String(activeChild.customId).replace(/^#+/, '').trim().toUpperCase() : '';
+                  const foundChildRankItem = (leaderboardData || []).find(item => {
+                    if (!item.customId || !cleanMyId) return false;
+                    return String(item.customId).replace(/^#+/, '').trim().toUpperCase() === cleanMyId;
+                  });
 
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={{ color: '#F59E0B', fontSize: 18, fontFamily: 'Inter_900Black' }}>#24</Text>
-                    <Text style={{ color: '#10B981', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Top 8%</Text>
-                  </View>
-                </View>
+                  const myRealRank = foundChildRankItem ? foundChildRankItem.rank : 1;
+                  const totalStudentsCount = Math.max(1, (leaderboardData || []).length);
+                  const topPercentile = Math.max(1, Math.round((myRealRank / totalStudentsCount) * 100));
+
+                  return (
+                    <View style={styles.myChildRankCard}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                          {activeChild.avatar ? (
+                            <Image source={{ uri: activeChild.avatar }} style={{ width: 44, height: 44, borderRadius: 22 }} />
+                          ) : (
+                            <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>🏆</Text>
+                          )}
+                        </View>
+                        <View>
+                          <Text style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Inter_600SemiBold' }}>SIZNING FARZANDINGIZ</Text>
+                          <Text style={{ color: '#FFFFFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
+                        </View>
+                      </View>
+
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ color: '#F59E0B', fontSize: 18, fontFamily: 'Inter_900Black' }}>#{myRealRank}</Text>
+                        <Text style={{ color: '#10B981', fontSize: 11, fontFamily: 'Inter_700Bold' }}>Top {topPercentile}%</Text>
+                      </View>
+                    </View>
+                  );
+                })()}
 
                 <View style={{ paddingBottom: 100 }}>
                   {(leaderboardData || [])
@@ -884,7 +904,11 @@ export default function ParentDashboardScreen({ navigation, route }) {
                           {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
                         </Text>
                         <View style={styles.rankAvatarBox}>
-                          <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
+                          {item.avatar ? (
+                            <Image source={{ uri: item.avatar }} style={{ width: 40, height: 40, borderRadius: 20 }} />
+                          ) : (
+                            <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
+                          )}
                         </View>
                         <View style={{ flex: 1, marginLeft: 12 }}>
                           <Text style={styles.rankName}>{item.name}</Text>

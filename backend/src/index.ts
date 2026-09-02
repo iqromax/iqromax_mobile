@@ -788,6 +788,7 @@ app.get('/api/ranking', async (req, res) => {
       name: u.name,
       xp: u.xp || 0,
       coin: u.coin || 0,
+      level: (u as any).level || 1,
       avatar: u.character || null,
     }));
     
