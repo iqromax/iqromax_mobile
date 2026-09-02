@@ -281,6 +281,8 @@ export default function ParentDashboardScreen({ navigation, route }) {
         }
 
         if (childIdInput.trim()) {
+          setIsWaitingChildAccept(true);
+          setChildrenList([]);
           sendParentInviteToStudent();
         }
       };
@@ -474,6 +476,8 @@ export default function ParentDashboardScreen({ navigation, route }) {
   };
 
   const sendParentInviteToStudent = async () => {
+    setIsWaitingChildAccept(true);
+    setChildrenList([]);
     try {
       const res = await fetch(`${API_URL}/parent/send-invite`, {
         method: 'POST',
@@ -488,6 +492,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
       if (res.ok) {
         setIsWaitingChildAccept(true);
+        setChildrenList([]);
         setFeedbackAlert({
           visible: true,
           title: 'So\'rov Yuborildi! 📩',
