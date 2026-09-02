@@ -966,17 +966,25 @@ export default function ParentDashboardScreen({ navigation, route }) {
             {childrenList.length > 0 && activeChild ? (
               <>
                 <Text style={styles.sectionTitle}>Farzandlarim</Text>
+                
+                {/* SLEEK CHILD CHIP SELECTOR */}
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, marginBottom: 16 }}>
                   {childrenList.map((ch, idx) => (
                     <TouchableOpacity
                       key={ch.id}
-                      style={[styles.childSelectTab, selectedChildIndex === idx && styles.childSelectTabActive]}
+                      style={[styles.childSelectChip, selectedChildIndex === idx && styles.childSelectChipActive]}
                       onPress={() => setSelectedChildIndex(idx)}
-                      activeOpacity={0.8}
+                      activeOpacity={0.85}
                     >
-                      <Text style={[styles.childSelectTabText, selectedChildIndex === idx && styles.childSelectTabTextActive]}>
-                        [ {ch.name.split(' ')[0]} ]
+                      <View style={styles.chipAvatarBox}>
+                        <Image source={getAvatarByName(ch.avatar, ch.name)} style={{ width: 24, height: 24, borderRadius: 12 }} />
+                      </View>
+                      <Text style={[styles.childSelectChipText, selectedChildIndex === idx && styles.childSelectChipTextActive]}>
+                        {ch.name}
                       </Text>
+                      {selectedChildIndex === idx && (
+                        <View style={styles.activeChipBadge} />
+                      )}
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -995,44 +1003,44 @@ export default function ParentDashboardScreen({ navigation, route }) {
                     <View style={styles.badgeChip}>
                       <Text style={{ color: '#F59E0B', fontSize: 12, fontFamily: 'Inter_700Bold' }}>⭐ {activeChild.xp.toLocaleString()} XP</Text>
                     </View>
-                    <View style={styles.badgeChip}>
-                      <Text style={{ color: '#EF4444', fontSize: 12, fontFamily: 'Inter_700Bold' }}>🔥 {activeChild.streak} kun</Text>
-                    </View>
                   </View>
                 </View>
 
-                {/* 📚 O'QISH STATISTIKASI */}
+                {/* 📚 O'QISH STATISTIKASI (REAL DATA) */}
                 <View style={styles.cardBox}>
                   <Text style={styles.cardTitle}>📚 O'qish statistikasi</Text>
                   <View style={styles.statsList}>
                     <View style={styles.statsItemRow}>
-                      <Text style={styles.statsItemLabel}>Jami mashqlar:</Text>
-                      <Text style={styles.statsItemVal}>{activeChild.detailedStats?.totalEx || 0}</Text>
+                      <Text style={styles.statsItemLabel}>🎯 Bugun bajarilgan mashqlar:</Text>
+                      <Text style={styles.statsItemVal}>{activeChild.todayExercises}</Text>
                     </View>
                     <View style={styles.statsItemRow}>
-                      <Text style={styles.statsItemLabel}>To'g'ri javoblar:</Text>
-                      <Text style={styles.statsItemVal}>{activeChild.detailedStats?.correctEx || 0}</Text>
+                      <Text style={styles.statsItemLabel}>⚡ Aniqlik ko'rsatkichi:</Text>
+                      <Text style={[styles.statsItemVal, { color: '#10B981' }]}>{activeChild.todayAccuracy}</Text>
                     </View>
                     <View style={styles.statsItemRow}>
-                      <Text style={styles.statsItemLabel}>Aniqlik:</Text>
-                      <Text style={[styles.statsItemVal, { color: '#10B981' }]}>{activeChild.detailedStats?.accuracy || '0%'}</Text>
+                      <Text style={styles.statsItemLabel}>📱 Bugungi sarflangan vaqt:</Text>
+                      <Text style={[styles.statsItemVal, { color: '#A855F7' }]}>{activeChild.todayTime}</Text>
                     </View>
                     <View style={styles.statsItemRow}>
-                      <Text style={styles.statsItemLabel}>Jami vaqt:</Text>
-                      <Text style={styles.statsItemVal}>{activeChild.detailedStats?.monthTime || '0 min'}</Text>
+                      <Text style={styles.statsItemLabel}>🏆 Umumi to'plangan XP:</Text>
+                      <Text style={[styles.statsItemVal, { color: '#F59E0B' }]}>{activeChild.xp.toLocaleString()} XP</Text>
                     </View>
                   </View>
                 </View>
 
-                {/* 🧠 FANLAR BO'YICHA NATIJA */}
+                {/* 🧠 MASHQLAR BO'YICHA NATIJA (REAL DATA) */}
                 <View style={styles.cardBox}>
                   <Text style={styles.cardTitle}>🧠 Mashqlar bo'yicha natija</Text>
-                  <View style={{ gap: 14, marginTop: 12 }}>
+                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Inter_500Medium', marginTop: 4, marginBottom: 12 }}>
+                    Farzandingizning bo'limlar bo'yicha real vaqt rejimidagi natijalari:
+                  </Text>
+                  <View style={{ gap: 14 }}>
                     {(activeChild.subjectStats || []).map((subj, idx) => (
-                      <View key={idx}>
+                      <View key={idx} style={{ backgroundColor: '#090915', padding: 12, borderRadius: 14, borderWidth: 1, borderColor: '#1E1B38' }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                          <Text style={{ color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>{subj.name}</Text>
-                          <Text style={{ color: subj.color, fontSize: 13, fontFamily: 'Inter_700Bold' }}>{subj.score}%</Text>
+                          <Text style={{ color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_600SemiBold' }}>{subj.name}</Text>
+                          <Text style={{ color: subj.color, fontSize: 14, fontFamily: 'Inter_700Bold' }}>{subj.score}%</Text>
                         </View>
                         <View style={styles.progressBarBg}>
                           <View style={[styles.progressBarFill, { width: `${subj.score}%`, backgroundColor: subj.color }]} />
@@ -1042,29 +1050,15 @@ export default function ParentDashboardScreen({ navigation, route }) {
                   </View>
                 </View>
 
+                {/* 📊 BATAFSIL STATISTIKA BUTTON */}
                 <TouchableOpacity
-                  style={styles.detailedStatsBtn}
+                  style={[styles.detailedStatsBtn, { marginBottom: 100 }]}
                   activeOpacity={0.85}
                   onPress={() => setIsDetailedStatsOpen(true)}
                 >
                   <MaterialCommunityIcons name="chart-box-outline" size={22} color="#FFF" style={{ marginRight: 8 }} />
                   <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>📊 Batafsil statistika</Text>
                 </TouchableOpacity>
-
-                <View style={[styles.cardBox, { marginBottom: 100 }]}>
-                  <Text style={styles.cardTitle}>🏅 Yutuqlar (Achievements)</Text>
-                  <View style={{ gap: 10, marginTop: 12 }}>
-                    {(activeChild.achievements || []).map((ach) => (
-                      <View key={ach.id} style={[styles.achieveItem, !ach.unlocked && { opacity: 0.5 }]}>
-                        <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
-                          <MaterialCommunityIcons name={ach.unlocked ? ach.icon : 'lock'} size={20} color={ach.color} />
-                        </View>
-                        <Text style={styles.achieveTitle}>{ach.title}</Text>
-                        {!ach.unlocked && <Text style={{ color: '#6B7280', fontSize: 11, marginLeft: 'auto' }}>Qulflangan</Text>}
-                      </View>
-                    ))}
-                  </View>
-                </View>
               </>
             ) : (
               /* INTRO CHILD STATS SCREEN FOR UNLINKED PARENT */
@@ -1337,6 +1331,78 @@ export default function ParentDashboardScreen({ navigation, route }) {
         </KeyboardAvoidingView>
       </Modal>
 
+      {/* 📊 BATAFSIL STATISTIKA MODAL */}
+      <Modal visible={isDetailedStatsOpen} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContentCard, { maxHeight: '85%' }]}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={{ color: '#FFF', fontSize: 18, fontFamily: 'Inter_700Bold' }}>📊 Batafsil Statistika Tahlili</Text>
+              <TouchableOpacity onPress={() => setIsDetailedStatsOpen(false)}>
+                <Feather name="x" size={24} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 20 }}>
+              {activeChild && (
+                <>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#090915', padding: 14, borderRadius: 16, marginBottom: 16, borderWidth: 1, borderColor: '#1E1B38' }}>
+                    <Image source={getAvatarByName(activeChild.avatar, activeChild.name)} style={{ width: 50, height: 50, borderRadius: 25 }} />
+                    <View>
+                      <Text style={{ color: '#FFF', fontSize: 17, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
+                      <Text style={{ color: '#A855F7', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 2 }}>
+                        Level {activeChild.level} • ⭐ {activeChild.xp.toLocaleString()} XP
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold', marginBottom: 10 }}>⚡ Mashqlar va Aniqlik</Text>
+                  <View style={{ backgroundColor: '#090915', borderRadius: 14, padding: 14, gap: 10, marginBottom: 16, borderWidth: 1, borderColor: '#1E1B38' }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ color: '#9CA3AF', fontSize: 13 }}>🎯 Today's Exercises:</Text>
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{activeChild.todayExercises}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ color: '#9CA3AF', fontSize: 13 }}>⚡ Accuracy Rate:</Text>
+                      <Text style={{ color: '#10B981', fontFamily: 'Inter_700Bold' }}>{activeChild.todayAccuracy}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ color: '#9CA3AF', fontSize: 13 }}>⏱️ App Usage Time:</Text>
+                      <Text style={{ color: '#A855F7', fontFamily: 'Inter_700Bold' }}>{activeChild.todayTime}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <Text style={{ color: '#9CA3AF', fontSize: 13 }}>📅 Estimated Month Time:</Text>
+                      <Text style={{ color: '#F59E0B', fontFamily: 'Inter_700Bold' }}>{activeChild.detailedStats?.monthTime || '1 soat'}</Text>
+                    </View>
+                  </View>
+
+                  <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold', marginBottom: 10 }}>🧠 Bo'limlar Bo'yicha Natija</Text>
+                  <View style={{ gap: 10, marginBottom: 20 }}>
+                    {(activeChild.subjectStats || []).map((sub, i) => (
+                      <View key={i} style={{ backgroundColor: '#090915', padding: 12, borderRadius: 14, borderWidth: 1, borderColor: '#1E1B38' }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
+                          <Text style={{ color: '#FFF', fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>{sub.name}</Text>
+                          <Text style={{ color: sub.color, fontFamily: 'Inter_700Bold' }}>{sub.score}%</Text>
+                        </View>
+                        <View style={styles.progressBarBg}>
+                          <View style={[styles.progressBarFill, { width: `${sub.score}%`, backgroundColor: sub.color }]} />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </>
+              )}
+
+              <TouchableOpacity
+                style={[styles.addChildSubmitBtn, { backgroundColor: '#A855F7' }]}
+                onPress={() => setIsDetailedStatsOpen(false)}
+              >
+                <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>Yopish</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       {/* FEEDBACK ALERT MODAL */}
       <Modal visible={feedbackAlert.visible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -1493,10 +1559,12 @@ const styles = StyleSheet.create({
   rankName: { color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_700Bold' },
   rankXp: { color: '#F59E0B', fontSize: 14, fontFamily: 'Inter_700Bold' },
 
-  childSelectTab: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12, backgroundColor: '#0D0D1F', borderWidth: 1, borderColor: '#1A1A35' },
-  childSelectTabActive: { backgroundColor: '#A855F7', borderColor: '#A855F7' },
-  childSelectTabText: { color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_700Bold' },
-  childSelectTabTextActive: { color: '#FFFFFF' },
+  childSelectChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, backgroundColor: '#0D0D1F', borderWidth: 1, borderColor: '#1A1A35' },
+  childSelectChipActive: { backgroundColor: '#1F1035', borderColor: '#A855F7' },
+  childSelectChipText: { color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_600SemiBold' },
+  childSelectChipTextActive: { color: '#FFFFFF', fontFamily: 'Inter_700Bold' },
+  chipAvatarBox: { width: 24, height: 24, borderRadius: 12, overflow: 'hidden' },
+  activeChipBadge: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#A855F7', marginLeft: 2 },
 
   childProfileCard: { backgroundColor: '#121228', borderRadius: 20, padding: 20, alignItems: 'center', marginBottom: 20, borderWidth: 1, borderColor: '#1A1A35' },
   childProfileAvatar: { width: 70, height: 70, borderRadius: 35, backgroundColor: '#A855F7', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FFF' },
