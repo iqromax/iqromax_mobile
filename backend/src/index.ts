@@ -1478,6 +1478,54 @@ app.get('/api/notifications/user/:customId', async (req, res) => {
   }
 });
 
+// Get pending notifications for student
+app.get('/api/notifications/:customId', async (req, res) => {
+  try {
+    const { customId } = req.params;
+    const rawId = customId.trim();
+    const cleanId = rawId.toUpperCase();
+    const idWithoutHash = cleanId.replace(/^#+/, '');
+
+    // Find student user first to get exact customId/id
+    const studentUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: cleanId },
+          { customId: '#' + idWithoutHash },
+          { customId: idWithoutHash },
+          { id: rawId }
+        ]
+      }
+    });
+
+    const targetUserIds = new Set([cleanId, '#' + idWithoutHash, idWithoutHash, rawId]);
+    if (studentUser) {
+      if (studentUser.customId) targetUserIds.add(studentUser.customId.toUpperCase());
+      if (studentUser.id) targetUserIds.add(studentUser.id);
+    }
+
+    const userNotifs = await prisma.notification.findMany({
+      where: {
+        userId: { in: Array.from(targetUserIds) },
+        status: 'PENDING'
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    const formatted = userNotifs.map(n => {
+      let extra = {};
+      if (n.message) {
+        try { extra = JSON.parse(n.message); } catch (e) {}
+      }
+      return { ...n, ...extra };
+    });
+    res.json(formatted);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
 app.get('/api/admin/notifications/history', async (req, res) => {
   try {
     const rawNotifications = await prisma.notification.findMany({
