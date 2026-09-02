@@ -35,8 +35,8 @@ export default function ParentDashboardScreen({ navigation, route }) {
   // Feedback Alert Modal
   const [feedbackAlert, setFeedbackAlert] = useState({ visible: false, title: '', message: '', type: 'error' });
 
-  // Waiting for child acceptance status
-  const [isWaitingChildAccept, setIsWaitingChildAccept] = useState(false);
+  // Waiting for child acceptance status (True by default if parent has submitted child ID)
+  const [isWaitingChildAccept, setIsWaitingChildAccept] = useState(Boolean(user?.country || route.params?.studentCustomId));
 
   const activeChild = childrenList[selectedChildIndex] || null;
 
