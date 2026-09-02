@@ -153,6 +153,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
             if (contentType && contentType.includes('application/json')) {
               const notifs = await notifRes.json();
               if (Array.isArray(notifs)) {
+                // Must have at least one ACCEPTED PARENT_INVITE for this parent
                 isAccepted = notifs.some(n => 
                   n.type === 'PARENT_INVITE' && 
                   n.status === 'ACCEPTED'
@@ -162,7 +163,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
           }
 
           if (!isAccepted) {
-            // Student hasn't accepted yet -> keep in waiting state, do not set childrenList
+            // Student hasn't accepted yet -> keep strictly in waiting state
             setIsWaitingChildAccept(true);
             setChildrenList([]);
             return;

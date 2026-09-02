@@ -1443,14 +1443,31 @@ app.post('/api/parent/send-invite', async (req, res) => {
 app.get('/api/notifications/user/:customId', async (req, res) => {
   try {
     const { customId } = req.params;
-    const cleanId = customId.trim().toUpperCase();
-    const userNotifs = await prisma.notification.findMany({
+    const rawId = customId.trim();
+    const cleanId = rawId.toUpperCase();
+    const idWithoutHash = cleanId.replace(/^#+/, '');
+
+    // Find student user first to get their exact customId/id/email
+    const studentUser = await prisma.user.findFirst({
       where: {
         OR: [
-          { userId: cleanId },
-          { userId: '#' + cleanId.replace(/^#+/, '') },
-          { userId: cleanId.replace(/^#+/, '') }
+          { customId: cleanId },
+          { customId: '#' + idWithoutHash },
+          { customId: idWithoutHash },
+          { id: rawId }
         ]
+      }
+    });
+
+    const targetUserIds = new Set([cleanId, '#' + idWithoutHash, idWithoutHash, rawId]);
+    if (studentUser) {
+      if (studentUser.customId) targetUserIds.add(studentUser.customId.toUpperCase());
+      if (studentUser.id) targetUserIds.add(studentUser.id);
+    }
+
+    const userNotifs = await prisma.notification.findMany({
+      where: {
+        userId: { in: Array.from(targetUserIds) }
       },
       orderBy: { createdAt: 'desc' }
     });
