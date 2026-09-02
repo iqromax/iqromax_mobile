@@ -18,6 +18,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
   const [weeklyMetric, setWeeklyMetric] = useState('xp'); // 'xp' | 'exercises' | 'time'
   const [rankingFilter, setRankingFilter] = useState('global'); // 'global' | 'country' | 'school' | 'class'
   const [leaderboardData, setLeaderboardData] = useState([]);
+  const [rankingSearchQuery, setRankingSearchQuery] = useState('');
   const [isDetailedStatsOpen, setIsDetailedStatsOpen] = useState(false);
 
   // Authentication & Child Binding Modal State
@@ -808,22 +809,31 @@ export default function ParentDashboardScreen({ navigation, route }) {
               <>
                 <Text style={styles.sectionTitle}>🏆 Reyting (Leaderboard)</Text>
 
-                <View style={styles.filterChipsRow}>
-                  {[
-                    { id: 'global', label: '🌍 Global' },
-                    { id: 'country', label: '🇺🇿 Mamlakat' },
-                    { id: 'school', label: '🏫 Maktab' },
-                    { id: 'class', label: '👥 Sinf' }
-                  ].map((f) => (
-                    <TouchableOpacity
-                      key={f.id}
-                      style={[styles.filterChip, rankingFilter === f.id && styles.filterChipActive]}
-                      onPress={() => setRankingFilter(f.id)}
-                      activeOpacity={0.8}
-                    >
-                      <Text style={[styles.filterChipText, rankingFilter === f.id && styles.filterChipTextActive]}>{f.label}</Text>
+                {/* 🔍 SEARCH INPUT FIELD FOR LEADERBOARD */}
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: '#0F0E1E',
+                  borderRadius: 14,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  borderWidth: 1,
+                  borderColor: '#26244C',
+                  marginBottom: 16
+                }}>
+                  <Feather name="search" size={20} color="#8B5CF6" style={{ marginRight: 10 }} />
+                  <TextInput
+                    style={{ flex: 1, color: '#FFFFFF', fontSize: 14, fontFamily: 'Inter_500Medium', paddingVertical: 0 }}
+                    placeholder="Ism yoki ID bo'yicha qidirish..."
+                    placeholderTextColor="#6B7280"
+                    value={rankingSearchQuery}
+                    onChangeText={setRankingSearchQuery}
+                  />
+                  {rankingSearchQuery.length > 0 && (
+                    <TouchableOpacity onPress={() => setRankingSearchQuery('')}>
+                      <Feather name="x" size={18} color="#9CA3AF" />
                     </TouchableOpacity>
-                  ))}
+                  )}
                 </View>
 
                 <View style={styles.myChildRankCard}>
@@ -844,25 +854,34 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 </View>
 
                 <View style={{ paddingBottom: 100 }}>
-                  {leaderboardData.map((item) => (
-                    <View key={item.customId} style={styles.rankRow}>
-                      <Text style={[
-                        styles.rankNum,
-                        item.rank === 1 && { color: '#F59E0B' },
-                        item.rank === 2 && { color: '#9CA3AF' },
-                        item.rank === 3 && { color: '#B45309' },
-                      ]}>
-                        {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
-                      </Text>
-                      <View style={styles.rankAvatarBox}>
-                        <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
+                  {leaderboardData
+                    .filter(item => {
+                      if (!rankingSearchQuery.trim()) return true;
+                      const q = rankingSearchQuery.trim().toLowerCase();
+                      const nameMatch = item.name && item.name.toLowerCase().includes(q);
+                      const idMatch = item.customId && item.customId.toLowerCase().includes(q);
+                      return nameMatch || idMatch;
+                    })
+                    .map((item) => (
+                      <View key={item.customId} style={styles.rankRow}>
+                        <Text style={[
+                          styles.rankNum,
+                          item.rank === 1 && { color: '#F59E0B' },
+                          item.rank === 2 && { color: '#9CA3AF' },
+                          item.rank === 3 && { color: '#B45309' },
+                        ]}>
+                          {item.rank === 1 ? '🥇 1' : item.rank === 2 ? '🥈 2' : item.rank === 3 ? '🥉 3' : `#${item.rank}`}
+                        </Text>
+                        <View style={styles.rankAvatarBox}>
+                          <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{item.name.charAt(0)}</Text>
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 12 }}>
+                          <Text style={styles.rankName}>{item.name}</Text>
+                          <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium' }}>{item.customId}</Text>
+                        </View>
+                        <Text style={styles.rankXp}>{item.xp.toLocaleString()} XP</Text>
                       </View>
-                      <View style={{ flex: 1, marginLeft: 12 }}>
-                        <Text style={styles.rankName}>{item.name}</Text>
-                      </View>
-                      <Text style={styles.rankXp}>{item.xp.toLocaleString()} XP</Text>
-                    </View>
-                  ))}
+                    ))}
                 </View>
               </>
             ) : (
