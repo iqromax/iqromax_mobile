@@ -117,37 +117,40 @@ export default function ParentDashboardScreen({ navigation, route }) {
   // Fetch linked child for logged-in parent (only if child accepted the invite)
   useEffect(() => {
     const fetchLinkedChild = async () => {
-      if (user && user.country && user.country.trim()) {
+      const targetChildId = user?.country || route.params?.studentCustomId;
+      if (targetChildId && String(targetChildId).trim()) {
+        const cleanChildCustomId = String(targetChildId).trim().toUpperCase();
         try {
           // Check if student has ACCEPTED the invitation in notifications table
-          const notifRes = await fetch(`${API_URL}/notifications/user/${user.country.trim().toUpperCase()}`);
+          const notifRes = await fetch(`${API_URL}/notifications/user/${cleanChildCustomId}`);
+          let isAccepted = false;
           if (notifRes.ok) {
             const contentType = notifRes.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
               const notifs = await notifRes.json();
-              const acceptedNotif = Array.isArray(notifs) && notifs.some(n => 
-                n.type === 'PARENT_INVITE' && 
-                n.status === 'ACCEPTED' && 
-                (n.senderId === user.email || n.senderId === user.phone || n.senderId === user.name)
-              );
-
-              if (!acceptedNotif) {
-                // Student hasn't accepted yet -> keep in waiting state, do not set childrenList
-                setIsWaitingChildAccept(true);
-                setChildrenList([]);
-                return;
+              if (Array.isArray(notifs)) {
+                isAccepted = notifs.some(n => 
+                  n.type === 'PARENT_INVITE' && 
+                  n.status === 'ACCEPTED'
+                );
               }
             }
+          }
+
+          if (!isAccepted) {
+            // Student hasn't accepted yet -> keep in waiting state, do not set childrenList
+            setIsWaitingChildAccept(true);
+            setChildrenList([]);
+            return;
           }
 
           const res = await fetch(`${API_URL}/admin/users?role=student`);
           if (res.ok) {
             const allStudents = await res.json();
-            const childCustomId = user.country.trim().toUpperCase();
             const matched = allStudents.find(s => 
-              (s.customId && s.customId.toUpperCase() === childCustomId) ||
-              (s.customId && s.customId.toUpperCase() === '#' + childCustomId) ||
-              (s.id === user.country.trim())
+              (s.customId && s.customId.toUpperCase() === cleanChildCustomId) ||
+              (s.customId && s.customId.toUpperCase() === '#' + cleanChildCustomId) ||
+              (s.id === cleanChildCustomId)
             );
 
             if (matched) {
@@ -204,11 +207,13 @@ export default function ParentDashboardScreen({ navigation, route }) {
         } catch (e) {
           console.error('Fetch linked child error:', e);
         }
+      } else {
+        setChildrenList([]);
       }
     };
 
     fetchLinkedChild();
-  }, [user]);
+  }, [user, route.params?.studentCustomId]);
 
   // Handle returning from OTP verification
   useEffect(() => {
