@@ -122,18 +122,21 @@ export default function ParentDashboardScreen({ navigation, route }) {
           // Check if student has ACCEPTED the invitation in notifications table
           const notifRes = await fetch(`${API_URL}/notifications/user/${user.country.trim().toUpperCase()}`);
           if (notifRes.ok) {
-            const notifs = await notifRes.json();
-            const acceptedNotif = Array.isArray(notifs) && notifs.some(n => 
-              n.type === 'PARENT_INVITE' && 
-              n.status === 'ACCEPTED' && 
-              (n.senderId === user.email || n.senderId === user.phone || n.senderId === user.name)
-            );
+            const contentType = notifRes.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              const notifs = await notifRes.json();
+              const acceptedNotif = Array.isArray(notifs) && notifs.some(n => 
+                n.type === 'PARENT_INVITE' && 
+                n.status === 'ACCEPTED' && 
+                (n.senderId === user.email || n.senderId === user.phone || n.senderId === user.name)
+              );
 
-            if (!acceptedNotif) {
-              // Student hasn't accepted yet -> keep in waiting state, do not set childrenList
-              setIsWaitingChildAccept(true);
-              setChildrenList([]);
-              return;
+              if (!acceptedNotif) {
+                // Student hasn't accepted yet -> keep in waiting state, do not set childrenList
+                setIsWaitingChildAccept(true);
+                setChildrenList([]);
+                return;
+              }
             }
           }
 

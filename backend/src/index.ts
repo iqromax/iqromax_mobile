@@ -1439,29 +1439,25 @@ app.post('/api/parent/send-invite', async (req, res) => {
   }
 });
 
-// --- BATTLE INVITE & NOTIFICATION REST API ---
-app.get('/api/notifications/:customId', async (req, res) => {
+// Get all notifications for user (regardless of status)
+app.get('/api/notifications/user/:customId', async (req, res) => {
   try {
     const { customId } = req.params;
+    const cleanId = customId.trim().toUpperCase();
     const userNotifs = await prisma.notification.findMany({
       where: {
-        userId: customId.toUpperCase(),
-        status: 'PENDING'
+        OR: [
+          { userId: cleanId },
+          { userId: '#' + cleanId.replace(/^#+/, '') },
+          { userId: cleanId.replace(/^#+/, '') }
+        ]
       },
       orderBy: { createdAt: 'desc' }
     });
-    
-    const formatted = userNotifs.map(n => {
-      let extra = {};
-      if (n.type === 'BATTLE_INVITE' && n.message) {
-        try { extra = JSON.parse(n.message); } catch (e) {}
-      }
-      return { ...n, ...extra };
-    });
-    res.json(formatted);
+    res.json(userNotifs);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch notifications' });
+    res.status(500).json({ error: 'Failed to fetch user notifications' });
   }
 });
 
