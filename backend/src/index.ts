@@ -1630,24 +1630,24 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
           try { inviteData = JSON.parse(updated.message); } catch (e) {}
         }
         const parentEmail = inviteData.parentEmail || updated.senderId;
+        const parentPhone = inviteData.parentPhone || '';
         const studentCustomId = inviteData.studentCustomId || updated.userId;
 
-        if (parentEmail && studentCustomId) {
-          const parentUser = await prisma.user.findFirst({
-            where: {
-              OR: [
-                { email: parentEmail },
-                { phone: parentEmail }
-              ]
-            }
-          });
-
-          if (parentUser) {
-            await prisma.user.update({
-              where: { id: parentUser.id },
-              data: { country: studentCustomId }
-            });
+        const parentUser = await prisma.user.findFirst({
+          where: {
+            OR: [
+              ...(parentEmail ? [{ email: parentEmail }, { phone: parentEmail }] : []),
+              ...(parentPhone ? [{ phone: parentPhone }] : []),
+              ...(updated.senderId ? [{ email: updated.senderId }, { phone: updated.senderId }, { name: updated.senderId }] : [])
+            ]
           }
+        });
+
+        if (parentUser && studentCustomId) {
+          await prisma.user.update({
+            where: { id: parentUser.id },
+            data: { country: studentCustomId }
+          });
         }
 
         const studentUser = await prisma.user.findFirst({

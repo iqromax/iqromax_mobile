@@ -141,7 +141,23 @@ export default function ParentDashboardScreen({ navigation, route }) {
     let intervalId = null;
 
     const fetchLinkedChild = async () => {
-      const targetChildId = user?.country || route.params?.studentCustomId;
+      let targetChildId = user?.country || route.params?.studentCustomId;
+
+      // If user.country is missing, fetch fresh user data from DB by email/phone
+      if (!targetChildId && (user?.email || user?.phone)) {
+        try {
+          const ident = user?.email || user?.phone;
+          const uRes = await fetch(`${API_URL}/admin/users`);
+          if (uRes.ok) {
+            const allUsers = await uRes.json();
+            const meInDb = allUsers.find(u => u.email === ident || u.phone === ident);
+            if (meInDb && meInDb.country) {
+              targetChildId = meInDb.country;
+            }
+          }
+        } catch (e) {}
+      }
+
       if (targetChildId && String(targetChildId).trim()) {
         const cleanChildCustomId = String(targetChildId).trim().toUpperCase();
         try {
@@ -153,7 +169,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
             if (contentType && contentType.includes('application/json')) {
               const notifs = await notifRes.json();
               if (Array.isArray(notifs)) {
-                // Must have at least one ACCEPTED PARENT_INVITE for this parent
+                // Must have at least one ACCEPTED PARENT_INVITE
                 isAccepted = notifs.some(n => 
                   n.type === 'PARENT_INVITE' && 
                   n.status === 'ACCEPTED'
