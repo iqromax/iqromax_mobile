@@ -1585,9 +1585,19 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
           }
         }
 
+        const studentUser = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { customId: updated.userId },
+              { id: updated.userId }
+            ]
+          }
+        });
+
         io.emit('parent_invite_accepted', {
           studentCustomId: updated.userId,
           parentEmail: parentEmail,
+          student: studentUser || { name: 'Farzand', customId: updated.userId },
           notif: updated
         });
       } catch (err) {

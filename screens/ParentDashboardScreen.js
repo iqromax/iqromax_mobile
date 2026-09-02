@@ -47,12 +47,12 @@ export default function ParentDashboardScreen({ navigation, route }) {
       transports: ['websocket']
     });
 
-    socket.on('parent_invite_accepted', (data) => {
-      if (data && data.student) {
-        const studentObj = data.student;
+    const handleInviteAccepted = (data) => {
+      if (data) {
+        const studentObj = data.student || {};
         const newChild = {
           id: studentObj.uuid || studentObj.id || 'c_' + Date.now(),
-          customId: studentObj.customId || '#' + studentObj.id,
+          customId: studentObj.customId || data.studentCustomId || '#' + studentObj.id,
           name: studentObj.name || 'Farzand',
           level: studentObj.level || 1,
           xp: studentObj.xp || 0,
@@ -96,18 +96,21 @@ export default function ParentDashboardScreen({ navigation, route }) {
           }
         };
 
-        setChildrenList(prev => {
-          const exists = prev.some(c => c.customId === newChild.customId);
-          if (exists) return prev;
-          return [...prev, newChild];
-        });
+        setChildrenList([newChild]);
         setIsWaitingChildAccept(false);
         setFeedbackAlert({
           visible: true,
           title: 'Farzand tasdiqladi! 🎉',
-          message: `${studentObj.name} bog'lanish so'rovini qabul qildi. Endi uning barcha natijalarini ko'rishingiz mumkin!`,
+          message: `${newChild.name} bog'lanish so'rovini qabul qildi. Endi uning barcha natijalarini ko'rishingiz mumkin!`,
           type: 'success'
         });
+      }
+    };
+
+    socket.on('parent_invite_accepted', handleInviteAccepted);
+    socket.on('notification_updated', (notif) => {
+      if (notif && notif.type === 'PARENT_INVITE' && notif.status === 'ACCEPTED') {
+        handleInviteAccepted({ studentCustomId: notif.userId, student: { name: 'Farzand', customId: notif.userId } });
       }
     });
 
