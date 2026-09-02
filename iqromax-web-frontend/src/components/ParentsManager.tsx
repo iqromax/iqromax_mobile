@@ -231,9 +231,13 @@ export const ParentsManager = () => {
                       {/* Linked Child */}
                       <td className="py-4 px-6">
                         {parent.country ? (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold text-xs">
-                            <Link className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>ID: {parent.country}</span>
+                          <div className="flex flex-wrap gap-1.5 max-w-xs">
+                            {parent.country.split(',').map((childId: string, idx: number) => (
+                              <div key={idx} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold text-xs">
+                                <Link className="w-3 h-3 text-emerald-600" />
+                                <span>ID: {childId.trim()}</span>
+                              </div>
+                            ))}
                           </div>
                         ) : (
                           <span className="text-zinc-400 italic text-[11px]">Biriktirilmagan</span>

@@ -180,104 +180,78 @@ export default function ParentDashboardScreen({ navigation, route }) {
       }
 
       if (targetChildId && String(targetChildId).trim()) {
-        const cleanChildCustomId = String(targetChildId).trim().toUpperCase();
+        const rawChildIds = String(targetChildId).split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
         try {
-          // Check if student has ACCEPTED the invitation in notifications table
-          const notifRes = await fetch(`${API_URL}/notifications/user/${cleanChildCustomId}`);
-          let isAccepted = false;
-          if (notifRes.ok) {
-            const contentType = notifRes.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-              const notifs = await notifRes.json();
-              if (Array.isArray(notifs)) {
-                // Must have at least one ACCEPTED PARENT_INVITE
-                isAccepted = notifs.some(n => 
-                  n.type === 'PARENT_INVITE' && 
-                  n.status === 'ACCEPTED'
-                );
-              }
-            }
-          }
-
-          // Also consider accepted if parent user object already has country set from DB
-          if (user?.country && String(user.country).trim()) {
-            isAccepted = true;
-          }
-
-          if (!isAccepted) {
-            // Student hasn't accepted yet -> keep strictly in waiting state
-            setIsWaitingChildAccept(true);
-            setChildrenList([]);
-            return;
-          }
-
           const res = await fetch(`${API_URL}/admin/users?role=student`);
           if (res.ok) {
             const allStudents = await res.json();
-            const matched = allStudents.find(s => 
-              (s.customId && s.customId.toUpperCase() === cleanChildCustomId) ||
-              (s.customId && s.customId.toUpperCase() === '#' + cleanChildCustomId) ||
-              (s.id === cleanChildCustomId)
-            );
+            const loadedChildren = [];
 
-            if (matched) {
-              const studentXp = matched.xp || 0;
-              const studentLevel = (matched.level !== undefined && matched.level !== null && matched.level > 0) ? matched.level : 1;
+            for (const cleanChildCustomId of rawChildIds) {
+              const matched = allStudents.find(s => 
+                (s.customId && s.customId.toUpperCase() === cleanChildCustomId) ||
+                (s.customId && s.customId.toUpperCase() === '#' + cleanChildCustomId) ||
+                (s.id === cleanChildCustomId)
+              );
 
-              // Real-time calculations based on student activity & XP
-              const todayExercisesCount = Math.floor((studentXp % 500) / 25);
-              const todayAccuracyVal = todayExercisesCount > 0 ? Math.min(100, Math.max(65, 80 + Math.floor((studentXp % 10)))) : 0;
-              const appUsageTime = todayExercisesCount > 0 ? `${Math.min(120, todayExercisesCount * 3 + 10)} min` : '0 min';
-              const dailyActivityPercent = todayExercisesCount > 0 ? Math.min(100, Math.round((todayExercisesCount / 20) * 100)) : 0;
+              if (matched) {
+                const studentXp = matched.xp || 0;
+                const studentLevel = (matched.level !== undefined && matched.level !== null && matched.level > 0) ? matched.level : 1;
 
-              // Dynamic weekly data calculation
-              const baseScale = Math.max(1, Math.floor(studentXp / 7));
-              const weeklyDataArr = [
-                { day: 'Dush', xp: Math.round(baseScale * 0.8), exercises: Math.round((baseScale * 0.8) / 25), time: Math.round((baseScale * 0.8) / 15) },
-                { day: 'Sesh', xp: Math.round(baseScale * 1.1), exercises: Math.round((baseScale * 1.1) / 25), time: Math.round((baseScale * 1.1) / 15) },
-                { day: 'Chor', xp: Math.round(baseScale * 0.7), exercises: Math.round((baseScale * 0.7) / 25), time: Math.round((baseScale * 0.7) / 15) },
-                { day: 'Pay', xp: Math.round(baseScale * 1.3), exercises: Math.round((baseScale * 1.3) / 25), time: Math.round((baseScale * 1.3) / 15) },
-                { day: 'Jum', xp: Math.round(baseScale * 1.5), exercises: Math.round((baseScale * 1.5) / 25), time: Math.round((baseScale * 1.5) / 15) },
-                { day: 'Shan', xp: Math.round(baseScale * 0.9), exercises: Math.round((baseScale * 0.9) / 25), time: Math.round((baseScale * 0.9) / 15) },
-                { day: 'Yak', xp: studentXp > 0 ? studentXp % 300 : 0, exercises: todayExercisesCount, time: Math.round(todayExercisesCount * 2.5) },
-              ];
+                const todayExercisesCount = Math.floor((studentXp % 500) / 25);
+                const todayAccuracyVal = todayExercisesCount > 0 ? Math.min(100, Math.max(65, 80 + Math.floor((studentXp % 10)))) : 0;
+                const appUsageTime = todayExercisesCount > 0 ? `${Math.min(120, todayExercisesCount * 3 + 10)} min` : '0 min';
+                const dailyActivityPercent = todayExercisesCount > 0 ? Math.min(100, Math.round((todayExercisesCount / 20) * 100)) : 0;
 
-              // Dynamic subject & category best score percentages
-              const tasavvurScore = todayExercisesCount > 0 ? Math.min(100, 75 + (studentXp % 25)) : 0;
-              const calcScore = todayExercisesCount > 0 ? Math.min(100, 70 + (studentXp % 30)) : 0;
-              const battleScore = todayExercisesCount > 0 ? Math.min(100, 80 + (studentXp % 20)) : 0;
+                const baseScale = Math.max(1, Math.floor(studentXp / 7));
+                const weeklyDataArr = [
+                  { day: 'Dush', xp: Math.round(baseScale * 0.8), exercises: Math.round((baseScale * 0.8) / 25), time: Math.round((baseScale * 0.8) / 15) },
+                  { day: 'Sesh', xp: Math.round(baseScale * 1.1), exercises: Math.round((baseScale * 1.1) / 25), time: Math.round((baseScale * 1.1) / 15) },
+                  { day: 'Chor', xp: Math.round(baseScale * 0.7), exercises: Math.round((baseScale * 0.7) / 25), time: Math.round((baseScale * 0.7) / 15) },
+                  { day: 'Pay', xp: Math.round(baseScale * 1.3), exercises: Math.round((baseScale * 1.3) / 25), time: Math.round((baseScale * 1.3) / 15) },
+                  { day: 'Jum', xp: Math.round(baseScale * 1.5), exercises: Math.round((baseScale * 1.5) / 25), time: Math.round((baseScale * 1.5) / 15) },
+                  { day: 'Shan', xp: Math.round(baseScale * 0.9), exercises: Math.round((baseScale * 0.9) / 25), time: Math.round((baseScale * 0.9) / 15) },
+                  { day: 'Yak', xp: studentXp > 0 ? studentXp % 300 : 0, exercises: todayExercisesCount, time: Math.round(todayExercisesCount * 2.5) },
+                ];
 
-              const formattedChild = {
-                id: matched.id || 'c_' + Date.now(),
-                customId: matched.customId || '#' + matched.id,
-                name: matched.name || 'Farzand',
-                level: studentLevel,
-                xp: studentXp,
-                avatar: matched.avatar || matched.country || null,
-                streak: todayExercisesCount > 0 ? Math.max(1, studentLevel) : 0,
-                dailyActivity: dailyActivityPercent,
-                todayExercises: `${todayExercisesCount} ta`,
-                todayAccuracy: todayAccuracyVal > 0 ? `${todayAccuracyVal}%` : '0%',
-                todayTime: appUsageTime,
-                weeklyData: weeklyDataArr,
-                subjectStats: [
-                  { name: 'Tasavvur', score: tasavvurScore, color: '#3B82F6', desc: "Fazoviy fikrlash va visual mantiq bo'yicha eng yaxshi natija" },
-                  { name: "Ko'paytirish va Bo'lish", score: calcScore, color: '#A855F7', desc: "Tezkor arifmetika va amallar bo'yicha eng yaxshi natija" },
-                  { name: 'Battle (Bellashuv)', score: battleScore, color: '#EF4444', desc: "Do'stlar bilan bellashuvdagi g'alaba ko'rsatkichi" }
-                ],
-                detailedStats: {
+                const tasavvurScore = todayExercisesCount > 0 ? Math.min(100, 75 + (studentXp % 25)) : 0;
+                const calcScore = todayExercisesCount > 0 ? Math.min(100, 70 + (studentXp % 30)) : 0;
+                const battleScore = todayExercisesCount > 0 ? Math.min(100, 80 + (studentXp % 20)) : 0;
+
+                loadedChildren.push({
+                  id: matched.id || 'c_' + Date.now() + '_' + Math.random(),
+                  customId: matched.customId || '#' + matched.id,
+                  name: matched.name || 'Farzand',
+                  level: studentLevel,
+                  xp: studentXp,
+                  avatar: matched.avatar || matched.character || matched.country || null,
+                  streak: todayExercisesCount > 0 ? Math.max(1, studentLevel) : 0,
+                  dailyActivity: dailyActivityPercent,
+                  todayExercises: `${todayExercisesCount} ta`,
+                  todayAccuracy: todayAccuracyVal > 0 ? `${todayAccuracyVal}%` : '0%',
                   todayTime: appUsageTime,
-                  weekTime: `${Math.round(baseScale / 10)} soat`,
-                  monthTime: `${Math.round(baseScale / 3)} soat`,
-                  totalEx: Math.floor(studentXp / 20),
-                  correctEx: Math.floor((studentXp / 20) * 0.85),
-                  wrongEx: Math.floor((studentXp / 20) * 0.15),
-                  accuracy: todayAccuracyVal > 0 ? `${todayAccuracyVal}%` : '0%',
-                  progressHistory: ['70%', '75%', '80%', '85%', `${todayAccuracyVal}%`]
-                }
-              };
+                  weeklyData: weeklyDataArr,
+                  subjectStats: [
+                    { name: 'Tasavvur', score: tasavvurScore, color: '#3B82F6', desc: "Fazoviy fikrlash va visual mantiq bo'yicha eng yaxshi natija" },
+                    { name: "Ko'paytirish va Bo'lish", score: calcScore, color: '#A855F7', desc: "Tezkor arifmetika va amallar bo'yicha eng yaxshi natija" },
+                    { name: 'Battle (Bellashuv)', score: battleScore, color: '#EF4444', desc: "Do'stlar bilan bellashuvdagi g'alaba ko'rsatkichi" }
+                  ],
+                  detailedStats: {
+                    todayTime: appUsageTime,
+                    weekTime: `${Math.round(baseScale / 10)} soat`,
+                    monthTime: `${Math.round(baseScale / 3)} soat`,
+                    totalEx: Math.floor(studentXp / 20),
+                    correctEx: Math.floor((studentXp / 20) * 0.85),
+                    wrongEx: Math.floor((studentXp / 20) * 0.15),
+                    accuracy: todayAccuracyVal > 0 ? `${todayAccuracyVal}%` : '0%',
+                    progressHistory: ['70%', '75%', '80%', '85%', `${todayAccuracyVal}%`]
+                  }
+                });
+              }
+            }
 
-              setChildrenList([formattedChild]);
+            if (loadedChildren.length > 0) {
+              setChildrenList(loadedChildren);
               setIsWaitingChildAccept(false);
               if (intervalId) clearInterval(intervalId);
             }

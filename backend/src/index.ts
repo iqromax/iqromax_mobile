@@ -1647,10 +1647,24 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
         });
 
         if (parentUsers.length > 0 && studentCustomId) {
+          const cleanNewChildId = studentCustomId.trim().toUpperCase();
           for (const p of parentUsers) {
+            const currentChildren = (p.country || '')
+              .split(',')
+              .map((s: string) => s.trim().toUpperCase())
+              .filter(Boolean);
+
+            if (!currentChildren.includes(cleanNewChildId)) {
+              if (currentChildren.length >= 5) {
+                currentChildren.shift(); // keep max 5 children, remove oldest if exceeds
+              }
+              currentChildren.push(cleanNewChildId);
+            }
+            const updatedChildrenStr = currentChildren.join(',');
+
             await prisma.user.update({
               where: { id: p.id },
-              data: { country: studentCustomId }
+              data: { country: updatedChildrenStr }
             });
           }
         }
