@@ -970,28 +970,28 @@ export default function ParentDashboardScreen({ navigation, route }) {
                   <View style={styles.statsList}>
                     <View style={styles.statsItemRow}>
                       <Text style={styles.statsItemLabel}>Jami mashqlar:</Text>
-                      <Text style={styles.statsItemVal}>{activeChild.detailedStats.totalEx}</Text>
+                      <Text style={styles.statsItemVal}>{activeChild.detailedStats?.totalEx || 0}</Text>
                     </View>
                     <View style={styles.statsItemRow}>
                       <Text style={styles.statsItemLabel}>To'g'ri javoblar:</Text>
-                      <Text style={styles.statsItemVal}>{activeChild.detailedStats.correctEx}</Text>
+                      <Text style={styles.statsItemVal}>{activeChild.detailedStats?.correctEx || 0}</Text>
                     </View>
                     <View style={styles.statsItemRow}>
                       <Text style={styles.statsItemLabel}>Aniqlik:</Text>
-                      <Text style={[styles.statsItemVal, { color: '#10B981' }]}>{activeChild.detailedStats.accuracy}</Text>
+                      <Text style={[styles.statsItemVal, { color: '#10B981' }]}>{activeChild.detailedStats?.accuracy || '0%'}</Text>
                     </View>
                     <View style={styles.statsItemRow}>
                       <Text style={styles.statsItemLabel}>Jami vaqt:</Text>
-                      <Text style={styles.statsItemVal}>{activeChild.detailedStats.monthTime}</Text>
+                      <Text style={styles.statsItemVal}>{activeChild.detailedStats?.monthTime || '0 min'}</Text>
                     </View>
                   </View>
                 </View>
 
                 {/* 🧠 FANLAR BO'YICHA NATIJA */}
                 <View style={styles.cardBox}>
-                  <Text style={styles.cardTitle}>🧠 Fanlar bo'yicha natija</Text>
+                  <Text style={styles.cardTitle}>🧠 Mashqlar bo'yicha natija</Text>
                   <View style={{ gap: 14, marginTop: 12 }}>
-                    {activeChild.subjectStats.map((subj, idx) => (
+                    {(activeChild.subjectStats || []).map((subj, idx) => (
                       <View key={idx}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
                           <Text style={{ color: '#FFFFFF', fontSize: 13, fontFamily: 'Inter_600SemiBold' }}>{subj.name}</Text>
@@ -1017,7 +1017,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 <View style={[styles.cardBox, { marginBottom: 100 }]}>
                   <Text style={styles.cardTitle}>🏅 Yutuqlar (Achievements)</Text>
                   <View style={{ gap: 10, marginTop: 12 }}>
-                    {activeChild.achievements.map((ach) => (
+                    {(activeChild.achievements || []).map((ach) => (
                       <View key={ach.id} style={[styles.achieveItem, !ach.unlocked && { opacity: 0.5 }]}>
                         <View style={[styles.achieveIconBox, { backgroundColor: `${ach.color}20`, borderColor: ach.color }]}>
                           <MaterialCommunityIcons name={ach.unlocked ? ach.icon : 'lock'} size={20} color={ach.color} />
