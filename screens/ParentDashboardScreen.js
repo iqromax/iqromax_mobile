@@ -72,42 +72,48 @@ export default function ParentDashboardScreen({ navigation, route }) {
           }
         }
 
+        const studentXp = studentObj.xp || 0;
+        const realStudentLevel = studentObj.level || (studentXp > 0 ? Math.floor(studentXp / 100) + 1 : 1);
+        const todayEx = Math.floor((studentXp % 500) / 25);
+        const todayAcc = todayEx > 0 ? Math.min(100, Math.max(65, 80 + Math.floor((studentXp % 10)))) : 0;
+        const appTime = todayEx > 0 ? `${Math.min(120, todayEx * 3 + 10)} min` : '0 min';
+        const baseScale = Math.max(1, Math.floor(studentXp / 7));
+
         const newChild = {
           id: studentObj.uuid || studentObj.id || 'c_' + Date.now(),
           customId: studentObj.customId || (targetId ? '#' + String(targetId).replace(/^#+/, '') : '#179795'),
           name: studentObj.name || 'Farzand',
-          level: studentObj.level || 1,
-          xp: studentObj.xp || 180,
-          streak: 1,
-          dailyActivity: 80,
-          todayExercises: '15 / 20',
-          todayAccuracy: '85%',
-          todayTime: '35 daqiqa',
-          goalPercent: 75,
-          goalProgress: '15 / 20 mashq bajarildi',
-          goalRemaining: 'Yana 5 ta mashq qoldi',
+          level: realStudentLevel,
+          xp: studentXp,
+          avatar: studentObj.avatar || null,
+          streak: todayEx > 0 ? Math.max(1, realStudentLevel) : 0,
+          dailyActivity: todayEx > 0 ? Math.min(100, Math.round((todayEx / 20) * 100)) : 0,
+          todayExercises: `${todayEx} ta`,
+          todayAccuracy: todayAcc > 0 ? `${todayAcc}%` : '0%',
+          todayTime: appTime,
           weeklyData: [
-            { day: 'Dush', xp: 400, exercises: 10, time: 25 },
-            { day: 'Sesh', xp: 550, exercises: 14, time: 32 },
-            { day: 'Chor', xp: 350, exercises: 8, time: 20 },
-            { day: 'Pay', xp: 600, exercises: 15, time: 35 },
-            { day: 'Jum', xp: 750, exercises: 18, time: 42 },
-            { day: 'Shan', xp: 500, exercises: 12, time: 30 },
-            { day: 'Yak', xp: 650, exercises: 16, time: 38 },
+            { day: 'Dush', xp: Math.round(baseScale * 0.8), exercises: Math.round((baseScale * 0.8) / 25), time: Math.round((baseScale * 0.8) / 15) },
+            { day: 'Sesh', xp: Math.round(baseScale * 1.1), exercises: Math.round((baseScale * 1.1) / 25), time: Math.round((baseScale * 1.1) / 15) },
+            { day: 'Chor', xp: Math.round(baseScale * 0.7), exercises: Math.round((baseScale * 0.7) / 25), time: Math.round((baseScale * 0.7) / 15) },
+            { day: 'Pay', xp: Math.round(baseScale * 1.3), exercises: Math.round((baseScale * 1.3) / 25), time: Math.round((baseScale * 1.3) / 15) },
+            { day: 'Jum', xp: Math.round(baseScale * 1.5), exercises: Math.round((baseScale * 1.5) / 25), time: Math.round((baseScale * 1.5) / 15) },
+            { day: 'Shan', xp: Math.round(baseScale * 0.9), exercises: Math.round((baseScale * 0.9) / 25), time: Math.round((baseScale * 0.9) / 15) },
+            { day: 'Yak', xp: studentXp > 0 ? studentXp % 300 : 0, exercises: todayEx, time: Math.round(todayEx * 2.5) },
           ],
           achievements: [
-            { id: 'a1', title: '7 kunlik seriya', icon: 'fire', color: '#EF4444', unlocked: true },
-            { id: 'a2', title: "100 ta to'g'ri javob", icon: 'target', color: '#10B981', unlocked: true },
-            { id: 'a3', title: "500 XP to'plandi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: true }
+            { id: 'a1', title: 'Seriyali hisobchi', icon: 'fire', color: '#EF4444', unlocked: todayEx > 0 },
+            { id: 'a2', title: "Aniqlik ustasi", icon: 'target', color: '#10B981', unlocked: todayAcc >= 80 },
+            { id: 'a3', title: "Katta XP egasi", icon: 'lightning-bolt', color: '#F59E0B', unlocked: studentXp > 100 }
           ],
           subjectStats: [
-            { name: 'Matematika', score: 85, color: '#3B82F6' },
-            { name: 'Fizika', score: 78, color: '#EAB308' },
-            { name: 'Ingliz tili', score: 90, color: '#10B981' },
-            { name: 'Mantiq', score: 94, color: '#A855F7' }
+            { name: 'Tasavvur', score: todayEx > 0 ? Math.min(100, 75 + (studentXp % 25)) : 0, color: '#3B82F6', desc: "Fazoviy fikrlash natijasi" },
+            { name: "Ko'paytirish va Bo'lish", score: todayEx > 0 ? Math.min(100, 70 + (studentXp % 30)) : 0, color: '#A855F7', desc: "Tezkor arifmetika natijasi" },
+            { name: 'Battle (Bellashuv)', score: todayEx > 0 ? Math.min(100, 80 + (studentXp % 20)) : 0, color: '#EF4444', desc: "G'alaba ko'rsatkichi" }
           ],
           detailedStats: {
-            todayTime: '35 min',
+            todayTime: appTime,
+            weekTime: `${Math.round(baseScale / 10)} soat`,
+            monthTime: `${Math.round(baseScale / 3)} soat`,
             weekTime: '3 soat 45 min',
             monthTime: '15 soat 20 min',
             totalEx: 310,
@@ -233,6 +239,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 name: matched.name || 'Farzand',
                 level: studentLevel,
                 xp: studentXp,
+                avatar: matched.avatar || matched.country || null,
                 streak: todayExercisesCount > 0 ? Math.max(1, studentLevel) : 0,
                 dailyActivity: dailyActivityPercent,
                 todayExercises: `${todayExercisesCount} ta`,
@@ -586,7 +593,11 @@ export default function ParentDashboardScreen({ navigation, route }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                       <View style={styles.childAvatarBox}>
-                        <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>{activeChild.name.charAt(0)}</Text>
+                        {activeChild.avatar ? (
+                          <Image source={{ uri: activeChild.avatar }} style={{ width: 44, height: 44, borderRadius: 22 }} />
+                        ) : (
+                          <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>{activeChild.name.charAt(0)}</Text>
+                        )}
                       </View>
                       <View>
                         <Text style={{ color: '#FFFFFF', fontSize: 17, fontFamily: 'Inter_700Bold' }}>{activeChild.name}</Text>
@@ -946,7 +957,11 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
                 <View style={styles.childProfileCard}>
                   <View style={styles.childProfileAvatar}>
-                    <Text style={{ color: '#FFF', fontSize: 32, fontFamily: 'Inter_900Black' }}>{activeChild.name.charAt(0)}</Text>
+                    {activeChild.avatar ? (
+                      <Image source={{ uri: activeChild.avatar }} style={{ width: 64, height: 64, borderRadius: 32 }} />
+                    ) : (
+                      <Text style={{ color: '#FFF', fontSize: 32, fontFamily: 'Inter_900Black' }}>{activeChild.name.charAt(0)}</Text>
+                    )}
                   </View>
                   <Text style={{ color: '#FFFFFF', fontSize: 20, fontFamily: 'Inter_700Bold', marginTop: 10 }}>{activeChild.name}</Text>
                   <Text style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', marginTop: 2 }}>ID: {activeChild.customId}</Text>
@@ -1099,7 +1114,11 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 childrenList.map((ch) => (
                   <View key={ch.id} style={styles.linkedChildRow}>
                     <View style={styles.linkedChildAvatar}>
-                      <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{ch.name.charAt(0)}</Text>
+                      {ch.avatar ? (
+                        <Image source={{ uri: ch.avatar }} style={{ width: 40, height: 40, borderRadius: 20 }} />
+                      ) : (
+                        <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold' }}>{ch.name.charAt(0)}</Text>
+                      )}
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: '#FFF', fontSize: 15, fontFamily: 'Inter_700Bold' }}>{ch.name}</Text>
