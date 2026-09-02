@@ -178,6 +178,11 @@ export default function ParentDashboardScreen({ navigation, route }) {
             }
           }
 
+          // Also consider accepted if parent user object already has country set from DB
+          if (user?.country && String(user.country).trim()) {
+            isAccepted = true;
+          }
+
           if (!isAccepted) {
             // Student hasn't accepted yet -> keep strictly in waiting state
             setIsWaitingChildAccept(true);
