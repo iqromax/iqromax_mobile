@@ -169,21 +169,27 @@ export default function ParentDashboardScreen({ navigation, route }) {
     let intervalId = null;
 
     const fetchLinkedChild = async () => {
-      let targetChildId = user?.country || route.params?.studentCustomId;
+      let targetChildId = null;
 
-      // If user.country is missing, fetch fresh user data from DB by email/phone
-      if (!targetChildId && (user?.email || user?.phone)) {
+      if (user?.email || user?.phone || user?.id) {
         try {
           const ident = user?.email || user?.phone;
-          const uRes = await fetch(`${API_URL}/admin/users`);
+          const uRes = await fetch(`${API_URL}/admin/users?t=${Date.now()}`);
           if (uRes.ok) {
             const allUsers = await uRes.json();
-            const meInDb = allUsers.find(u => u.email === ident || u.phone === ident);
+            const meInDb = allUsers.find(u => 
+              (ident && (u.email === ident || u.phone === ident)) ||
+              (user?.id && u.id === user.id)
+            );
             if (meInDb && meInDb.country) {
               targetChildId = meInDb.country;
             }
           }
         } catch (e) {}
+      }
+
+      if (!targetChildId) {
+        targetChildId = user?.country || route.params?.studentCustomId;
       }
 
       if (targetChildId && String(targetChildId).trim()) {
