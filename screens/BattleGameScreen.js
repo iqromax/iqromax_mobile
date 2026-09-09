@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform, Modal, StatusBar, Animated } from 'react-native';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
+import { Audio } from '../src/utils/safeAudio';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

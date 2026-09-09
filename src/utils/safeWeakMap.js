@@ -1,6 +1,18 @@
-// Global safeguard for WeakMap to prevent React Native / Expo / Three.js / React Navigation
-// from throwing "TypeError: WeakMap key must be an Object" when primitives (null, undefined, string, number)
-// are passed into weakMap.get(), .set(), .has(), or .delete().
+// Global safeguard for WeakMap & Image polyfill for Three.js / Expo / React Native
+if (typeof global !== 'undefined') {
+  if (typeof global.Image === 'undefined') {
+    global.Image = class Image {
+      constructor() {
+        this.src = '';
+        this.onload = null;
+        this.onerror = null;
+      }
+    };
+  }
+  if (typeof global.HTMLImageElement === 'undefined') {
+    global.HTMLImageElement = global.Image;
+  }
+}
 
 const originalWeakMapSet = WeakMap.prototype.set;
 const originalWeakMapGet = WeakMap.prototype.get;

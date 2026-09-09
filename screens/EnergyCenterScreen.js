@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Video, Audio } from 'expo-av';
+import { Video, Audio } from '../src/utils/safeAudio';
 import { API_URL, SOCKET_URL } from '../src/config/api';
 import { io } from 'socket.io-client';
 import { Image } from 'expo-image';

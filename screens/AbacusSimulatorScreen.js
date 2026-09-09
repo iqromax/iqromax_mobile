@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Platform, StatusBar, SafeAreaView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Audio } from 'expo-av';
+import { Audio } from '../src/utils/safeAudio';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const TRANSLATIONS = {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Animated, Easing, Platform, StatusBar } from 'react-native';
 import { ImageBackground, Image } from 'expo-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Audio } from 'expo-av';
+import { Audio } from '../src/utils/safeAudio';
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { MentalMathGenerator } from '../src/lib/mathGenerator';
