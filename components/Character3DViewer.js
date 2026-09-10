@@ -95,6 +95,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <script src="https://unpkg.com/meshoptimizer@0.19.0/meshopt_decoder.js"></script>
         <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
