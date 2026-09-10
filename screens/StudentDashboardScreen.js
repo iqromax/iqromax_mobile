@@ -3395,20 +3395,45 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.navItem, activeTab === 'profile' && styles.navItemActive]} 
-            onPress={() => checkGuestAuth(() => setActiveTab('profile'))}
-            activeOpacity={0.8}
-          >
-            <MaterialCommunityIcons 
-              name="account-outline" 
-              size={26} 
-              color={activeTab === 'profile' ? '#A855F7' : '#9CA3AF'} 
-            />
-            <Text style={[styles.navText, activeTab === 'profile' && styles.navTextActive]}>
-              {t.navProfile}
-            </Text>
-          </TouchableOpacity>
+          {isGuestUser ? (
+            <TouchableOpacity 
+              style={styles.navItem} 
+              onPress={async () => {
+                try {
+                  await AsyncStorage.removeItem('user_data');
+                } catch (e) {}
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'AuthChoice' }]
+                });
+              }}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons 
+                name="logout" 
+                size={26} 
+                color="#EF4444" 
+              />
+              <Text style={[styles.navText, { color: '#EF4444' }]}>
+                {t.logout || "Chiqish"}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity 
+              style={[styles.navItem, activeTab === 'profile' && styles.navItemActive]} 
+              onPress={() => checkGuestAuth(() => setActiveTab('profile'))}
+              activeOpacity={0.8}
+            >
+              <MaterialCommunityIcons 
+                name="account-outline" 
+                size={26} 
+                color={activeTab === 'profile' ? '#A855F7' : '#9CA3AF'} 
+              />
+              <Text style={[styles.navText, activeTab === 'profile' && styles.navTextActive]}>
+                {t.navProfile}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* NOTIFICATION SECTION MODAL */}
