@@ -27,19 +27,12 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     async function loadModel() {
       const idx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
       try {
-        let uri = null;
-        if (assets && assets[idx]) {
-          const currentAsset = assets[idx];
-          if (!currentAsset.localUri) {
-            await currentAsset.downloadAsync();
-          }
-          uri = currentAsset.localUri || currentAsset.uri;
-        } else {
-          const mod = CHARACTER_MODELS[idx];
-          const asset = Asset.fromModule(mod);
+        const mod = CHARACTER_MODELS[idx];
+        const asset = Asset.fromModule(mod);
+        if (!asset.localUri) {
           await asset.downloadAsync();
-          uri = asset.localUri || asset.uri;
         }
+        const uri = asset.localUri || asset.uri;
 
         if (uri) {
           const base64 = await FileSystem.readAsStringAsync(uri, {
@@ -122,14 +115,16 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           camera-controls
           shadow-intensity="1.2"
           shadow-softness="0.8"
-          exposure="1.0"
+          exposure="1.2"
           interaction-prompt="none"
           auto-rotate
           auto-rotate-delay="0"
           rotation-per-second="20deg"
           environment-image="neutral"
           bounds="tight"
-          camera-orbit="0deg 75deg 105%"
+          camera-orbit="0deg 75deg auto"
+          min-camera-orbit="auto auto auto"
+          max-camera-orbit="auto auto auto"
         >
         </model-viewer>
         <script>
