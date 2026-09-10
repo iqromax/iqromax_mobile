@@ -11,24 +11,8 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber/native';
-import { useGLTF, OrbitControls, Environment } from '@react-three/drei/native';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-if (MeshoptDecoder && MeshoptDecoder.ready) {
-  MeshoptDecoder.ready.then(() => {
-    if (GLTFLoader && GLTFLoader.prototype) {
-      GLTFLoader.prototype.setMeshoptDecoder(MeshoptDecoder);
-    }
-  });
-}
-if (GLTFLoader && GLTFLoader.prototype) {
-  GLTFLoader.prototype.setMeshoptDecoder(MeshoptDecoder);
-}
-if (useGLTF.setMeshoptDecoder) {
-  useGLTF.setMeshoptDecoder(MeshoptDecoder);
-}
+
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL, getShopImageUrl } from '../src/config/api';
 import { Character3DViewer } from '../components/Character3DViewer';
