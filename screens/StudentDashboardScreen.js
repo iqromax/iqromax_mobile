@@ -3404,7 +3404,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 } catch (e) {}
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'AuthChoice' }]
+                  routes: [{ name: 'StepOne' }]
                 });
               }}
               activeOpacity={0.8}
