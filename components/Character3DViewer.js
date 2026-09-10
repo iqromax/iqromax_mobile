@@ -6,7 +6,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 const CHARACTER_MODELS = [
   require('../assets/models/athletic_man_optimized.glb'),
-  require('../assets/models/adult_male_optimized.glb'),
+  require('../assets/models/adultmale3dmodel-v2.glb'),
   require('../assets/models/mannequin_clothing_optimized.glb'),
   require('../assets/models/businessman_optimized.glb'),
   require('../assets/models/fashion_model_optimized.glb'),

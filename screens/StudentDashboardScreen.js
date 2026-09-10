@@ -179,7 +179,7 @@ const EXERCISE_TYPES_TRANSLATIONS = {
 };
 
 // Preload models for quick dashboard rendering
-useGLTF.preload(require('../assets/models/adult_male_optimized.glb'));
+useGLTF.preload(require('../assets/models/adultmale3dmodel-v2.glb'));
 useGLTF.preload(require('../assets/models/athletic_man_optimized.glb'));
 useGLTF.preload(require('../assets/models/mannequin_clothing_optimized.glb'));
 useGLTF.preload(require('../assets/models/businessman_optimized.glb'));
@@ -272,7 +272,7 @@ function AccessoryModel({ modelPath, yPos, characterIndex, isHeadwear = false })
 function CharacterModel({ characterIndex, yOffset = 0, accessoryPath = null, headwearPath = null, isHeadwear = false }) {
   const models = {
     0: require('../assets/models/athletic_man_optimized.glb'),
-    1: require('../assets/models/adult_male_optimized.glb'),
+    1: require('../assets/models/adultmale3dmodel-v2.glb'),
     2: require('../assets/models/mannequin_clothing_optimized.glb'),
     3: require('../assets/models/businessman_optimized.glb'),
     4: require('../assets/models/fashion_model_optimized.glb'),
