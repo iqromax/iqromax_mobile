@@ -341,7 +341,6 @@ export default function App() {
               if (res.status === 404) {
                 await AsyncStorage.removeItem('user_data');
                 setInitialRoute('StepOne');
-                return;
               } else if (res.ok) {
                 const text = await res.text();
                 if (text && text.trim().startsWith('{')) {

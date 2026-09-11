@@ -1,3 +1,14 @@
+// Global safeguard for Uncaught Exceptions and Promise Rejections in Standalone Builds
+if (typeof ErrorUtils !== 'undefined' && ErrorUtils.setGlobalHandler) {
+  const defaultHandler = ErrorUtils.getGlobalHandler && ErrorUtils.getGlobalHandler();
+  ErrorUtils.setGlobalHandler((error, isFatal) => {
+    console.warn('Caught global JS error gracefully:', error);
+    if (defaultHandler && isFatal) {
+      defaultHandler(error, false);
+    }
+  });
+}
+
 // Global safeguard for WeakMap & Image polyfill for Three.js / Expo / React Native
 if (typeof global !== 'undefined') {
   if (typeof global.Image === 'undefined') {

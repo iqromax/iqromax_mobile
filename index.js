@@ -1,9 +1,15 @@
 import './src/utils/safeWeakMap';
+import React from 'react';
 import { registerRootComponent } from 'expo';
-
+import ErrorBoundary from './components/ErrorBoundary';
 import App from './App';
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
-registerRootComponent(App);
+function RootComponent() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}
+
+registerRootComponent(RootComponent);
