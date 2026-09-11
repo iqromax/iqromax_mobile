@@ -867,6 +867,98 @@ app.get('/api/admin/users', async (req, res) => {
   }
 });
 
+// Admin: Real-time Dashboard Statistics
+app.get('/api/admin/dashboard-stats', async (req, res) => {
+  try {
+    const totalUsers = await prisma.user.count();
+    const activeUsers = await prisma.user.count({ where: { status: 'Faol' } });
+    const totalTeachers = await prisma.user.count({
+      where: { role: { contains: 'teacher', mode: 'insensitive' } }
+    });
+    const totalStudents = await prisma.user.count({
+      where: {
+        OR: [
+          { role: { contains: 'student', mode: 'insensitive' } },
+          { role: { equals: 'O\'quvchi', mode: 'insensitive' } }
+        ]
+      }
+    });
+
+    const xpSumResult = await prisma.user.aggregate({ _sum: { xp: true } });
+    const totalXp = xpSumResult._sum.xp || 0;
+
+    const coinSumResult = await prisma.user.aggregate({ _sum: { coin: true } });
+    const totalCoins = coinSumResult._sum.coin || 0;
+
+    // Top 5 Users by XP
+    const topUsersRaw = await prisma.user.findMany({
+      orderBy: { xp: 'desc' },
+      take: 5
+    });
+
+    const topUsers = topUsersRaw.map((u, i) => ({
+      id: i + 1,
+      name: u.name,
+      level: Math.floor((u.xp || 0) / 1000) + 1,
+      xp: `${(u.xp || 0).toLocaleString()} XP`,
+      customId: u.customId,
+      avatar: u.character || '/admin-logo.png'
+    }));
+
+    // Recent 5 Registered Users for Activities
+    const recentUsersRaw = await prisma.user.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 5
+    });
+
+    const recentActivities = recentUsersRaw.map(u => ({
+      id: u.id,
+      title: "Yangi foydalanuvchi ro'yxatdan o'tdi",
+      desc: `${u.name} (${u.role === 'teacher' ? 'O\'qituvchi' : 'O\'quvchi'}) - ID: ${u.customId}`,
+      time: new Date(u.createdAt).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }),
+      iconName: 'Users',
+      color: 'text-purple-400',
+      bg: 'bg-purple-500/10'
+    }));
+
+    // 7 Days Registration Chart Data
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+
+      const count = await prisma.user.count({
+        where: {
+          createdAt: {
+            gte: startOfDay,
+            lte: endOfDay
+          }
+        }
+      });
+
+      const dayLabel = startOfDay.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' });
+      last7Days.push({ name: dayLabel, value: count });
+    }
+
+    res.json({
+      totalUsers,
+      activeUsers,
+      totalTeachers,
+      totalStudents,
+      totalXp,
+      totalCoins,
+      topUsers,
+      recentActivities,
+      activeUsersData: last7Days
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard statistics' });
+  }
+});
+
 // Update a user
 app.put('/api/admin/users/:id', async (req, res) => {
   try {
