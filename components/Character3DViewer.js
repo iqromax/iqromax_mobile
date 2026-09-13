@@ -142,7 +142,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           interaction-prompt="none"
           environment-image="neutral"
           bounds="tight"
-          camera-orbit="-90deg 75deg auto"
+          camera-orbit="90deg 75deg auto"
           min-camera-orbit="-infinity 75deg auto"
           max-camera-orbit="infinity 75deg auto"
         >
