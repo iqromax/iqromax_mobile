@@ -2398,7 +2398,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         <View style={{ height: 100 }} />
         </ScrollView>
-        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 75 : 79, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
+        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 65 : 79, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
           {/* START EXERCISE BUTTON */}
           {activeExerciseType === 'battle' ? (
             <TouchableOpacity 
