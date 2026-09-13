@@ -114,18 +114,16 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           id="viewer"
           src="data:model/gltf-binary;base64,${modelBase64}"
           camera-controls
+          disable-zoom
           shadow-intensity="1.2"
           shadow-softness="0.8"
           exposure="1.2"
           interaction-prompt="none"
-          auto-rotate
-          auto-rotate-delay="0"
-          rotation-per-second="20deg"
           environment-image="neutral"
           bounds="tight"
           camera-orbit="0deg 75deg auto"
-          min-camera-orbit="auto auto auto"
-          max-camera-orbit="auto auto auto"
+          min-camera-orbit="-infinity 75deg auto"
+          max-camera-orbit="infinity 75deg auto"
         >
         </model-viewer>
         <script>
