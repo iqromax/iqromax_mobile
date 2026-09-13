@@ -1634,7 +1634,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
         {/* Level Progress Bar Section */}
-        <View style={[styles.levelBarContainer, { marginTop: -40 }]} pointerEvents="box-none">
+        <View style={[styles.levelBarContainer, Platform.OS === 'ios' ? { marginTop: 10 } : { marginTop: -40 }]} pointerEvents="box-none">
           <View style={styles.levelCardWrapper}>
             <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
               
