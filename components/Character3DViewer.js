@@ -15,6 +15,17 @@ const CHARACTER_MODELS = [
   require('../assets/models/stylized_girl_optimized.glb')
 ];
 
+const MODEL_ORIENTATIONS = [
+  '0deg 0deg 0deg',     // 0: Alex
+  '0deg 0deg 0deg',     // 1: Maks
+  '0deg 0deg 0deg',     // 2: David
+  '0deg 0deg 0deg',     // 3: Kevin
+  '0deg 0deg 0deg',     // 4: Lily
+  '0deg 0deg 0deg',     // 5: Maya
+  '0deg 0deg -90deg',   // 6: Emma (beige_trench_coat_optimized)
+  '0deg 0deg 0deg'      // 7: Sophia
+];
+
 export function Character3DViewer({ characterIndex = 0, accessoryPath = null, headwearPath = null, style }) {
   const webViewRef = useRef(null);
   const [assets] = useAssets(CHARACTER_MODELS);
@@ -90,6 +101,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     return () => { isMounted = false; };
   }, [headwearPath]);
 
+  const currentIdx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
+  const currentOrientation = MODEL_ORIENTATIONS[currentIdx] || '0deg 0deg 0deg';
+
   const htmlContent = modelBase64 ? `
     <!DOCTYPE html>
     <html>
@@ -128,6 +142,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           interaction-prompt="none"
           environment-image="neutral"
           bounds="tight"
+          orientation="${currentOrientation}"
           camera-orbit="0deg 75deg auto"
           min-camera-orbit="-infinity 75deg auto"
           max-camera-orbit="infinity 75deg auto"
