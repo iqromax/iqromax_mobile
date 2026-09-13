@@ -157,9 +157,13 @@ export default function AuthScreen({ navigation, route }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const [usernameInput, setUsernameInput] = useState('');
-  const [requestModal, setRequestModal] = useState({ visible: false, title: '', message: '' });
-  const [customAlert, setCustomAlert] = useState({ visible: false, title: '', message: '', type: 'error' });
+  const scrollViewRef = useRef(null);
+
+  const handleInputFocus = () => {
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+  };
 
   useEffect(() => {
     async function loadSavedPromo() {
@@ -354,7 +358,7 @@ export default function AuthScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+        <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {/* Hero Image with Text */}
           <View style={styles.heroContainer}>
             <Image 
@@ -404,6 +408,7 @@ export default function AuthScreen({ navigation, route }) {
                 placeholderTextColor="#555566"
                 value={name}
                 onChangeText={setName}
+                onFocus={handleInputFocus}
               />
 
               {role === 'teacher' && (
@@ -415,6 +420,7 @@ export default function AuthScreen({ navigation, route }) {
                     keyboardType="phone-pad"
                     value={phone}
                     onChangeText={setPhone}
+                    onFocus={handleInputFocus}
                   />
 
                   <CustomAnimatedInput
@@ -424,6 +430,7 @@ export default function AuthScreen({ navigation, route }) {
                     keyboardType="email-address"
                     value={email}
                     onChangeText={setEmail}
+                    onFocus={handleInputFocus}
                   />
                 </>
               )}
@@ -437,6 +444,7 @@ export default function AuthScreen({ navigation, route }) {
                   placeholderTextColor="#555566"
                   value={usernameInput}
                   onChangeText={setUsernameInput}
+                  onFocus={handleInputFocus}
                 />
               ) : (
                 <CustomAnimatedInput
@@ -446,6 +454,7 @@ export default function AuthScreen({ navigation, route }) {
                   keyboardType="phone-pad"
                   value={phone}
                   onChangeText={setPhone}
+                  onFocus={handleInputFocus}
                 />
               )}
 
@@ -456,6 +465,7 @@ export default function AuthScreen({ navigation, route }) {
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
+                onFocus={handleInputFocus}
                 rightIcon={
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
                     <Feather name={showPassword ? "eye" : "eye-off"} size={18} color="#888899" />
