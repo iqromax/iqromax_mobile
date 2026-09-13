@@ -1837,26 +1837,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {/* CALC ONLY CONFIGURATION */}
         {activeExerciseType === 'calc' && (
           <>
-        {/* INFO CARD SECTION */}
-        <View style={[styles.infoCardContainer, { marginTop: 20, marginBottom: 15 }]}>
-          <ImageBackground source={require('../assets/info_card_bg.png')} style={styles.infoCardBg} imageStyle={{ borderRadius: 16 }} contentFit="contain">
-            <View style={styles.infoCardContent}>
-              <View style={styles.infoTextContainer}>
-                <Text style={styles.infoTitle}>{t.infoTitle}</Text>
-                <Text style={styles.infoDesc}>{t.infoDesc}</Text>
-                
-                <View style={styles.infoOpsRow}>
-                  <Text style={styles.infoOpsLabel}>{t.infoOpsLabel}</Text>
-                  <Text style={styles.infoOpAdd}> {t.infoOps[0]},</Text>
-                  <Text style={styles.infoOpSub}> {t.infoOps[1]},</Text>
-                  <Text style={styles.infoOpMul}> {t.infoOps[2]},</Text>
-                  <Text style={styles.infoOpDiv}> {t.infoOps[3]}</Text>
-                </View>
-              </View>
-            </View>
-          </ImageBackground>
-        </View>
-
             {/* NUMBER OF EXAMPLES SECTION */}
             <View style={styles.examplesContainer}>
               <View style={styles.examplesHeader}>
@@ -2130,39 +2110,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {/* SPEED CONFIGURATION */}
         {activeExerciseType === 'speed' && (
           <View style={{ marginTop: 10 }}>
-            {/* SPEED INFO CARD */}
-            <View style={[styles.infoCardContainer, { marginTop: 10, backgroundColor: '#06130A', padding: 20, aspectRatio: 'auto', borderWidth: 1.5, borderColor: 'rgba(34, 197, 94, 0.3)', borderRadius: 16 }]}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={[styles.infoTitle, { marginBottom: 0, color: '#F8FAFC' }]}>{t.speedInfoTitle || 'TEZKOR HISOBLASH HAQIDA'}</Text>
-              </View>
-              
-              <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 120 }}>
-                <View style={{ flex: 1, paddingRight: 110 }}>
-                  <Text style={[styles.infoDesc, { fontSize: 13, lineHeight: 20, color: '#D1D5DB', marginBottom: 15 }]}>
-                    {t.speedInfoDesc || "Vaqt bilan hisoblash orqali tezlik va aniqligingizni sinab ko'ring!"}
-                  </Text>
-                  
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                    <Text style={{ fontSize: 16, marginRight: 8 }}>⏱️</Text>
-                    <Text style={{ color: '#E2E8F0', fontSize: 12, flexShrink: 1 }}>{t.speedListItem1 || 'Vaqt cheklovi bilan misollar'}</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                    <Text style={{ fontSize: 16, marginRight: 8 }}>⚡</Text>
-                    <Text style={{ color: '#E2E8F0', fontSize: 12, flexShrink: 1 }}>{t.speedListItem2 || "Tez javob – ko'proq ball"}</Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 16, marginRight: 8 }}>🎯</Text>
-                    <Text style={{ color: '#E2E8F0', fontSize: 12, flexShrink: 1 }}>{t.speedListItem3 || 'Aniqlik muhim!'}</Text>
-                  </View>
-                </View>
-
-                {/* ABSOLUTE POSITIONED IMAGE SO CARD HEIGHT IS NOT AFFECTED */}
-                <View style={{ position: 'absolute', right: -30, top: -70, width: 220, height: 320 }}>
-                   <Image source={require('../assets/speed_info.png')} style={{ width: '100%', height: '100%' }} contentFit="contain" />
-                </View>
-              </View>
-            </View>
-
             {/* SPEED DIGITS SECTION */}
             <View style={[styles.examplesContainer, { backgroundColor: '#0A0A16', marginTop: 15, borderWidth: 1, borderColor: 'rgba(255, 255, 255, 0.05)' }]}>
               <View style={styles.examplesHeader}>
