@@ -6195,7 +6195,7 @@ const styles = StyleSheet.create({
   podiumSecond: {
     position: 'absolute',
     top: '34%', 
-    left: '7.5%',
+    left: '4.5%',
     width: 50,
     height: 50,
     borderRadius: 25,
