@@ -182,7 +182,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const { energy: currentEnergy, addEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
   const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
-  const [requiredEnergyAlert, setRequiredEnergyAlert] = useState(1);
+  const { language = 'uz', selectedChar = 0 } = route.params || {};
+  const [activeTab, setActiveTab] = useState('home');
   const getCharIndexFromUser = (u, defaultIdx = 0) => {
     if (u && u.character) {
       const charMap = { alex: 0, maks: 1, david: 2, kevin: 3, lily: 4, maya: 5, emma: 6, sophia: 7 };
