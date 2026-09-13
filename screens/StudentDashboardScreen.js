@@ -1852,19 +1852,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Text style={styles.infoOpMul}> {t.infoOps[2]},</Text>
                   <Text style={styles.infoOpDiv}> {t.infoOps[3]}</Text>
                 </View>
-
-                <Text style={styles.infoExampleLabel}>{t.infoExampleLabel}</Text>
-                
-                <View style={styles.infoExamplesGrid}>
-                  <View style={styles.infoExampleCol}>
-                    <Text style={styles.infoExAdd}>24 + 15 = 39</Text>
-                    <Text style={styles.infoExMul}>7 × 8 = 56</Text>
-                  </View>
-                  <View style={styles.infoExampleCol}>
-                    <Text style={styles.infoExSub}>36 - 12 = 24</Text>
-                    <Text style={styles.infoExDiv}>64 ÷ 8 = 8</Text>
-                  </View>
-                </View>
               </View>
             </View>
           </ImageBackground>
@@ -5917,8 +5904,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingLeft: '44%', // Shifted further to the right
     paddingRight: 15,
-    paddingVertical: 20,
-    justifyContent: 'center',
+    paddingTop: 32,
+    paddingBottom: 15,
+    justifyContent: 'flex-start',
   },
   infoTitle: {
     color: '#FFF',
