@@ -2849,7 +2849,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <ImageBackground source={require('../assets/ranking_podium.png')} style={styles.podiumImage} contentFit="contain">
           
           {/* 2nd Place (Left) */}
-          <View style={[styles.podiumSecond, { left: '-3%' }]}>
+          <View style={[styles.podiumSecond, Platform.OS === 'android' ? { left: -10 } : { left: '-3%' }]}>
               <Image source={top2.avatar} style={styles.podiumAvatar} />
           </View>
 
