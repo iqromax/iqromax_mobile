@@ -183,9 +183,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
   const [requiredEnergyAlert, setRequiredEnergyAlert] = useState(1);
-  const { language = 'uz', selectedChar = 0 } = route.params || {};
-  const [activeTab, setActiveTab] = useState('home');
-  const [activeAvatarIndex, setActiveAvatarIndex] = useState(selectedChar);
+  const getCharIndexFromUser = (u, defaultIdx = 0) => {
+    if (u && u.character) {
+      const charMap = { alex: 0, maks: 1, david: 2, kevin: 3, lily: 4, maya: 5, emma: 6, sophia: 7 };
+      const cName = String(u.character).toLowerCase();
+      if (charMap[cName] !== undefined) return charMap[cName];
+    }
+    return defaultIdx;
+  };
+  const [activeAvatarIndex, setActiveAvatarIndex] = useState(() => getCharIndexFromUser(user, selectedChar));
   const [equippedAccessories, setEquippedAccessories] = useState({});
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
   const [equippedHeadwears, setEquippedHeadwears] = useState({});
@@ -574,6 +580,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
             setUser(localUser);
             if (localUser.coin !== undefined) setUserCoin(localUser.coin);
             if (localUser.xp !== undefined) setUserXp(localUser.xp);
+            if (localUser.character) {
+              const charMap = { alex: 0, maks: 1, david: 2, kevin: 3, lily: 4, maya: 5, emma: 6, sophia: 7 };
+              const cName = String(localUser.character).toLowerCase();
+              if (charMap[cName] !== undefined) {
+                setActiveAvatarIndex(charMap[cName]);
+              }
+            }
             
             // Sync with backend to get latest XP and stats by fetching ranking
             fetch(`${API_URL}/ranking?t=${Date.now()}`)
