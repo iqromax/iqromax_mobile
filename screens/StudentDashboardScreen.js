@@ -2490,7 +2490,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 />
 
                 {/* 3D Model Render */}
-                <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
+                <View style={{ position: 'absolute', top: -25, bottom: 15, left: -25, right: 25, zIndex: 2 }} pointerEvents="box-none">
                   <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
                 </View>
 
