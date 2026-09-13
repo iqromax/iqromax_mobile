@@ -1729,7 +1729,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'abacus' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#3B82F6', shadowColor: '#3B82F6', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, borderWidth: 2, borderColor: '#3B82F6', borderRadius: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
@@ -1751,7 +1751,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'calc' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#22C55E', shadowColor: '#22C55E', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, borderWidth: 2, borderColor: '#22C55E', borderRadius: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
@@ -1773,7 +1773,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'speed' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', shadowColor: '#A855F7', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, borderWidth: 2, borderColor: '#A855F7', borderRadius: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
 
@@ -1795,7 +1795,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </ImageBackground>
             {activeExerciseType === 'battle' && (
-              <View style={{ position: 'absolute', top: 2, bottom: 2, left: 0, right: 0, borderWidth: 2, borderColor: '#D97706', shadowColor: '#D97706', shadowOpacity: 0.8, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 10 }} pointerEvents="none" />
+              <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, borderWidth: 2, borderColor: '#D97706', borderRadius: 10 }} pointerEvents="none" />
             )}
           </TouchableOpacity>
         </View>
