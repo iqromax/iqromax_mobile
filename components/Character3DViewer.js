@@ -26,6 +26,17 @@ const MODEL_ORIENTATIONS = [
   '0deg 0deg 0deg'      // 7: Sophia
 ];
 
+const MODEL_ORBITS = [
+  '90deg 75deg auto',  // 0: Alex
+  '0deg 75deg auto',   // 1: Maks (adultmale3dmodel-v2)
+  '90deg 75deg auto',  // 2: David
+  '90deg 75deg auto',  // 3: Kevin
+  '0deg 75deg auto',   // 4: Lily (fashion_model_optimized)
+  '90deg 75deg auto',  // 5: Maya
+  '90deg 75deg auto',  // 6: Emma
+  '90deg 75deg auto'   // 7: Sophia
+];
+
 export function Character3DViewer({ characterIndex = 0, accessoryPath = null, headwearPath = null, style }) {
   const webViewRef = useRef(null);
   const [assets] = useAssets(CHARACTER_MODELS);
@@ -103,6 +114,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
 
   const currentIdx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
   const currentOrientation = MODEL_ORIENTATIONS[currentIdx] || '0deg 0deg 0deg';
+  const currentOrbit = MODEL_ORBITS[currentIdx] || '90deg 75deg auto';
 
   const htmlContent = modelBase64 ? `
     <!DOCTYPE html>
@@ -142,7 +154,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           interaction-prompt="none"
           environment-image="neutral"
           bounds="tight"
-          camera-orbit="90deg 75deg auto"
+          camera-orbit="${currentOrbit}"
           min-camera-orbit="-infinity 75deg auto"
           max-camera-orbit="infinity 75deg auto"
         >
