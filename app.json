@@ -19,26 +19,10 @@
         "backgroundColor": "#05050C",
         "foregroundImage": "./assets/icon.png"
       },
-      "navigationBar": {
-        "visible": "sticky-immersive",
-        "backgroundColor": "#05050C"
-      },
       "package": "com.iqromax.iqromax_mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "8da23491-15a9-4db5-8e6a-fc56f33e7d1c"
-      }
-    },
-    "owner": "iqromax",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/8da23491-15a9-4db5-8e6a-fc56f33e7d1c"
     },
     "plugins": [
       "expo-font",
