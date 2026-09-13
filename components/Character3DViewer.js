@@ -104,8 +104,15 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
             width: 100%;
             height: 100%;
             --poster-color: transparent;
-            --progress-bar-color: #6366f1;
-            --progress-bar-height: 4px;
+            --progress-bar-color: transparent;
+            --progress-bar-height: 0px;
+          }
+          model-viewer::part(default-progress-bar),
+          model-viewer::part(progress-bar) {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0px !important;
           }
         </style>
       </head>
