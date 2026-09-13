@@ -159,6 +159,10 @@ export default function AuthScreen({ navigation, route }) {
 
   const scrollViewRef = useRef(null);
 
+  const [usernameInput, setUsernameInput] = useState('');
+  const [requestModal, setRequestModal] = useState({ visible: false, title: '', message: '' });
+  const [customAlert, setCustomAlert] = useState({ visible: false, title: '', message: '', type: 'error' });
+
   const handleInputFocus = () => {
     setTimeout(() => {
       scrollViewRef.current?.scrollToEnd({ animated: true });
