@@ -6195,7 +6195,7 @@ const styles = StyleSheet.create({
   podiumSecond: {
     position: 'absolute',
     top: '34%', 
-    left: '11%',
+    left: '9.5%',
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -6206,7 +6206,7 @@ const styles = StyleSheet.create({
   podiumThird: {
     position: 'absolute',
     top: '32%', 
-    right: '11%',
+    right: '8.5%',
     width: 54,
     height: 54,
     borderRadius: 27,
@@ -6779,7 +6779,7 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 26,
     marginTop: -22, 
-    marginLeft: 36,
+    marginLeft: 24,
   },
   rankingFrameMiddle: {
     flex: 1.1,
