@@ -1,8 +1,14 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Asset, useAssets } from 'expo-asset';
-import * as FileSystem from 'expo-file-system/legacy';
+let Asset, useAssets;
+try {
+  const expoAsset = require('expo-asset');
+  Asset = expoAsset.Asset;
+  useAssets = expoAsset.useAssets;
+} catch (e) {
+  console.warn('ExpoAsset module warning:', e);
+}
 
 const CHARACTER_MODELS = [
   require('../assets/models/athletic_man_optimized.glb'),
@@ -39,7 +45,7 @@ const MODEL_ORBITS = [
 
 export function Character3DViewer({ characterIndex = 0, accessoryPath = null, headwearPath = null, style }) {
   const webViewRef = useRef(null);
-  const [assets] = useAssets(CHARACTER_MODELS);
+  const [assets] = useAssets ? useAssets(CHARACTER_MODELS) : [null];
   const [modelBase64, setModelBase64] = useState(null);
 
   useEffect(() => {
@@ -50,8 +56,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
       const idx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
       try {
         const mod = CHARACTER_MODELS[idx];
+        if (!Asset) return;
         const asset = Asset.fromModule(mod);
-        if (!asset.localUri) {
+        if (!asset.localUri && asset.downloadAsync) {
           await asset.downloadAsync();
         }
         const uri = asset.localUri || asset.uri;
