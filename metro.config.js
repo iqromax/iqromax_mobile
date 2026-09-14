@@ -13,4 +13,7 @@ config.resolver.assetExts.push(
   'jpg'
 );
 
+config.maxWorkers = 2;
+
 module.exports = config;
+
