@@ -4520,7 +4520,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     {shopItems
                       .filter(item => {
                         if (item.category !== 'inventory') return false;
-                        if ((item.subcategory || 'top') !== activeSkinCategory) return false;
+                        
+                        const sub = item.subcategory || 'headwear';
+                        const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                        if (normalizedSub !== activeSkinCategory) return false;
                         
                         const charName = user?.character ? String(user.character).toLowerCase() : '';
                         const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
@@ -4638,7 +4641,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                     {shopItems.filter(item => {
                       if (item.category !== 'inventory') return false;
-                      if ((item.subcategory || 'top') !== activeSkinCategory) return false;
+                      const sub = item.subcategory || 'headwear';
+                      const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                      if (normalizedSub !== activeSkinCategory) return false;
                       const charName = user?.character ? String(user.character).toLowerCase() : '';
                       const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
                       const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
