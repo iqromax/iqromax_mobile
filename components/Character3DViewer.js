@@ -229,20 +229,17 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                   const headBox = new THREE.Box3().setFromObject(gltf.scene);
                   const headSize = headBox.getSize(new THREE.Vector3());
 
-                  // Scale relative to head bone size (approx 1.2x head bone width)
-                  const targetWidth = (headBoneSize.x > 0 ? headBoneSize.x : 0.25) * 1.25;
+                  const targetWidth = (headBoneSize.x > 0 ? headBoneSize.x : 0.4) * 1.5;
                   const currentWidth = headSize.x > 0 ? headSize.x : 1;
                   const scaleFactor = targetWidth / currentWidth;
                   
                   if (isFinite(scaleFactor) && scaleFactor > 0) {
                     gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                  } else {
+                    gltf.scene.scale.set(1.5, 1.5, 1.5);
                   }
 
-                  // Position at top of head bone
-                  const scaledHeadBox = new THREE.Box3().setFromObject(gltf.scene);
-                  const scaledHeadSize = scaledHeadBox.getSize(new THREE.Vector3());
-                  
-                  gltf.scene.position.set(0, (headBoneSize.y || 0.2) * 0.5, 0);
+                  gltf.scene.position.set(0, (headBoneSize.y || 0.2) * 0.4, 0);
                   headBone.add(gltf.scene);
                 } else if (THREE && THREE.Box3 && THREE.Vector3) {
                   const charBox = new THREE.Box3().setFromObject(viewer.model.scene);
@@ -251,28 +248,27 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                   const headBox = new THREE.Box3().setFromObject(gltf.scene);
                   const headSize = headBox.getSize(new THREE.Vector3());
 
-                  // Proper proportional scale for headwear (approx 15-20% of character height)
-                  const targetWidth = charSize.x * 0.4;
+                  // Proper proportional scale for headwear
+                  const targetWidth = (charSize.x > 0 ? charSize.x : 1) * 0.55;
                   const currentWidth = headSize.x > 0 ? headSize.x : 1;
-                  const scaleFactor = targetWidth / currentWidth;
-                  
-                  if (isFinite(scaleFactor) && scaleFactor > 0) {
-                    gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                  }
+                  let scaleFactor = targetWidth / currentWidth;
+                  if (!isFinite(scaleFactor) || scaleFactor <= 0) scaleFactor = 1.5;
+
+                  gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
                   // Re-calculate box after scaling
                   const scaledBox = new THREE.Box3().setFromObject(gltf.scene);
                   const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
 
                   // Place at top of character bounding box (head area)
-                  gltf.scene.position.x = -scaledCenter.x;
-                  gltf.scene.position.z = -scaledCenter.z;
-                  gltf.scene.position.y = charBox.max.y - scaledBox.min.y - 0.05;
+                  gltf.scene.position.x = (charBox.min.x + charBox.max.x) / 2 - scaledCenter.x;
+                  gltf.scene.position.z = (charBox.min.z + charBox.max.z) / 2 - scaledCenter.z;
+                  gltf.scene.position.y = charBox.max.y - (scaledBox.max.y - scaledBox.min.y) * 0.4;
 
                   viewer.model.scene.add(gltf.scene);
                 } else {
-                  gltf.scene.scale.set(1.0, 1.0, 1.0);
-                  gltf.scene.position.set(0, 1.6, 0);
+                  gltf.scene.scale.set(1.8, 1.8, 1.8);
+                  gltf.scene.position.set(0, 1.65, 0);
                   viewer.model.scene.add(gltf.scene);
                 }
               }
