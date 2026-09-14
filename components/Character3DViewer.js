@@ -212,31 +212,52 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
               if (gltf && gltf.scene && viewer.model && viewer.model.scene) {
                 currentHeadwearNode = gltf.scene;
                 const THREE = window.THREE || viewer.model.scene.constructor.THREE || (viewer.constructor && viewer.constructor.THREE);
-                if (THREE && THREE.Box3 && THREE.Vector3) {
+                
+                // Try attaching to Head bone first if character armature is rigged
+                let headBone = null;
+                viewer.model.scene.traverse((node) => {
+                  if (node.isBone && (node.name.toLowerCase().includes('head') || node.name.toLowerCase().includes('skull'))) {
+                    headBone = node;
+                  }
+                });
+
+                if (headBone) {
+                  // Attach directly to head bone
+                  gltf.scene.scale.set(1.0, 1.0, 1.0);
+                  gltf.scene.position.set(0, 0, 0);
+                  headBone.add(gltf.scene);
+                } else if (THREE && THREE.Box3 && THREE.Vector3) {
                   const charBox = new THREE.Box3().setFromObject(viewer.model.scene);
                   const charSize = charBox.getSize(new THREE.Vector3());
                   
                   const headBox = new THREE.Box3().setFromObject(gltf.scene);
                   const headSize = headBox.getSize(new THREE.Vector3());
 
-                  const targetScale = (charSize.x * 0.45) / (headSize.x || 1);
-                  if (targetScale > 0 && isFinite(targetScale)) {
-                    gltf.scene.scale.set(targetScale, targetScale, targetScale);
-                  }
+                  // Proper proportional scale for headwear (approx 20-30% of character height)
+                  const targetWidth = charSize.x * 0.45;
+                  const currentWidth = headSize.x > 0 ? headSize.x : 1;
+                  const scaleFactor = targetWidth / currentWidth;
                   
-                  const updatedHeadBox = new THREE.Box3().setFromObject(gltf.scene);
-                  const updatedHeadSize = updatedHeadBox.getSize(new THREE.Vector3());
-                  const headCenter = updatedHeadBox.getCenter(new THREE.Vector3());
+                  if (isFinite(scaleFactor) && scaleFactor > 0) {
+                    gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                  }
 
-                  gltf.scene.position.x = -headCenter.x;
-                  gltf.scene.position.z = -headCenter.z;
-                  gltf.scene.position.y = charBox.max.y - updatedHeadBox.min.y - (updatedHeadSize.y * 0.35);
+                  // Re-calculate box after scaling
+                  const scaledBox = new THREE.Box3().setFromObject(gltf.scene);
+                  const scaledSize = scaledBox.getSize(new THREE.Vector3());
+                  const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
+
+                  // Center horizontally & place at top 15% of character height (head area)
+                  gltf.scene.position.x = (charBox.min.x + charBox.max.x) / 2 - scaledCenter.x;
+                  gltf.scene.position.z = (charBox.min.z + charBox.max.z) / 2 - scaledCenter.z;
+                  gltf.scene.position.y = charBox.max.y - scaledBox.max.y - (scaledSize.y * 0.1);
+
+                  viewer.model.scene.add(gltf.scene);
                 } else {
-                  gltf.scene.scale.set(1.5, 1.5, 1.5);
-                  gltf.scene.position.set(0, 1.8, 0);
+                  gltf.scene.scale.set(1.0, 1.0, 1.0);
+                  gltf.scene.position.set(0, 1.6, 0);
+                  viewer.model.scene.add(gltf.scene);
                 }
-
-                viewer.model.scene.add(gltf.scene);
               }
             } catch(e) {
               console.error('Error attaching 3D headwear:', e);
