@@ -1050,7 +1050,22 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const renderKiyimGrid = () => {
-    const combinedSkins = [...backendSkins, ...kiyimData];
+    const charName = user?.character ? String(user.character).toLowerCase() : '';
+    const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
+    const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
+    let userGender = route.params?.gender;
+    if (!userGender) {
+      if (isGirlChar) userGender = 'girls';
+      else if (isBoyChar) userGender = 'boys';
+      else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
+    }
+
+    const combinedSkins = [...backendSkins, ...kiyimData].filter(item => {
+      if (item.targetGender && item.targetGender !== 'all') {
+        return item.targetGender === userGender;
+      }
+      return true;
+    });
     let filteredByCategory = combinedSkins.filter(item => item.category === kiyimKategoriya);
     const filteredData = activeKiyimFilter === 'BARCHASI' ? filteredByCategory : filteredByCategory.filter(item => item.rarity === activeKiyimFilter);
 
