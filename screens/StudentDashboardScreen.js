@@ -2808,15 +2808,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg'), gender: 'girls' },
                     ]
                     .filter(item => {
-                      const charName = user?.character ? String(user.character).toLowerCase() : '';
-                      const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
-                      const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
-                      let userGender = route.params?.gender;
-                      if (!userGender) {
-                        if (isGirlChar) userGender = 'girls';
-                        else if (isBoyChar) userGender = 'boys';
-                        else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
-                      }
+                      const userGender = getCurrentUserGender();
                       return item.gender === userGender;
                     })
                     .map((item) => {
@@ -2928,44 +2920,59 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {isSkinlarOpen && (
               <View style={{ marginBottom: 15, paddingHorizontal: 2 }}>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                  {[
-                    { keyId: 'ustki_kiyim', label: t.invTopWear,     icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: '8 / 24' },
-                    { keyId: 'shim',        label: t.invPants,       icon: 'human-handsdown', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.35)',  count: '6 / 15' },
-                    { keyId: 'oyoq_kiyim',  label: t.invShoes,       icon: 'shoe-sneaker',    color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.35)', count: '4 / 12' },
-                    { keyId: 'aksessuar',   label: t.invAccessories, icon: 'glasses',         color: '#EAB308', bg: 'rgba(234,179,8,0.1)',   border: 'rgba(234,179,8,0.35)',  count: '3 / 10' },
-                    { keyId: 'ryukzak',     label: t.invBackpacks,   icon: 'bag-personal',    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.35)', count: '5 / 18' },
-                  ].map((item, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      style={{
-                        width: '31%',
-                        paddingVertical: 12,
-                        borderRadius: 12,
-                        backgroundColor: item.bg,
-                        borderWidth: 1,
-                        borderColor: item.border,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                      onPress={() => {
-                        setKiyimKategoriya(item.keyId);
-                        setInventorySubTab('kiyim');
-                      }}
-                      activeOpacity={0.8}
-                    >
-                      <MaterialCommunityIcons name={item.icon} size={22} color={item.color} />
-                      <View style={{ height: 5 }} />
-                      <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 8, textAlign: 'center' }}>
-                        {item.label}
-                      </Text>
-                      <View style={{ height: 4 }} />
-                      <View style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: 5, paddingHorizontal: 7, paddingVertical: 2 }}>
-                        <Text style={{ color: item.color, fontFamily: 'Inter_700Bold', fontSize: 8 }}>
-                          {item.count}
+                  {(() => {
+                    const userGender = getCurrentUserGender();
+                    const combinedSkins = [...backendSkins, ...kiyimData].filter(item => {
+                      if (item.targetGender && item.targetGender !== 'all') {
+                        return item.targetGender === userGender;
+                      }
+                      return true;
+                    });
+                    const getCountStr = (catKey) => {
+                      const total = combinedSkins.filter(i => i.category === catKey).length;
+                      const unlocked = combinedSkins.filter(i => i.category === catKey && !i.isLocked && (!i.price || Number(i.price) === 0)).length;
+                      return `${unlocked} / ${total || 12}`;
+                    };
+
+                    return [
+                      { keyId: 'ustki_kiyim', label: t.invTopWear,     icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: getCountStr('ustki_kiyim') },
+                      { keyId: 'shim',        label: t.invPants,       icon: 'human-handsdown', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.35)',  count: getCountStr('shim') },
+                      { keyId: 'oyoq_kiyim',  label: t.invShoes,       icon: 'shoe-sneaker',    color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.35)', count: getCountStr('oyoq_kiyim') },
+                      { keyId: 'aksessuar',   label: t.invAccessories, icon: 'glasses',         color: '#EAB308', bg: 'rgba(234,179,8,0.1)',   border: 'rgba(234,179,8,0.35)',  count: getCountStr('aksessuar') },
+                      { keyId: 'ryukzak',     label: t.invBackpacks,   icon: 'bag-personal',    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.35)', count: getCountStr('ryukzak') },
+                    ].map((item, i) => (
+                      <TouchableOpacity
+                        key={i}
+                        style={{
+                          width: '31%',
+                          paddingVertical: 12,
+                          borderRadius: 12,
+                          backgroundColor: item.bg,
+                          borderWidth: 1,
+                          borderColor: item.border,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                        onPress={() => {
+                          setKiyimKategoriya(item.keyId);
+                          setInventorySubTab('kiyim');
+                        }}
+                        activeOpacity={0.8}
+                      >
+                        <MaterialCommunityIcons name={item.icon} size={22} color={item.color} />
+                        <View style={{ height: 5 }} />
+                        <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 8, textAlign: 'center' }}>
+                          {item.label}
                         </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
+                        <View style={{ height: 4 }} />
+                        <View style={{ backgroundColor: 'rgba(0,0,0,0.25)', borderRadius: 5, paddingHorizontal: 7, paddingVertical: 2 }}>
+                          <Text style={{ color: item.color, fontFamily: 'Inter_700Bold', fontSize: 8 }}>
+                            {item.count}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    ));
+                  })()}
                 </View>
               </View>
             )}
