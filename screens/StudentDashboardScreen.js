@@ -1219,7 +1219,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const renderKiyimScreen = () => {
     const headerTexts = {
       'bosh_kiyim': { title: 'BOSH KIYIM', subtitle: 'Personajingiz uchun bosh kiyim tanlang' },
-      'ustki_kiyim': { title: 'KIYIM-KECHAK', subtitle: 'Personajingiz uslubini tanlang' },
+      'ustki_kiyim': { title: 'USTKI KIYIM', subtitle: 'Personajingiz uslubini tanlang' },
+      'futbolka': { title: 'FUTBOLKA', subtitle: 'Futbolka va qisqa yengli kiyimlar tanlang' },
       'shim': { title: 'SHIM', subtitle: 'O\'zingizga mos shim tanlang' },
       'oyoq_kiyim': { title: 'OYOQ KIYIM', subtitle: 'Qulay poyabzal tanlang' },
       'aksessuar': { title: 'AKSESSUAR', subtitle: 'Personajingizni bezang' },
@@ -1247,6 +1248,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               {[
                 { key: 'bosh_kiyim', label: 'BOSH KIYIM', icon: 'crown' },
                 { key: 'ustki_kiyim', label: 'USTKI KIYIM', icon: 'tshirt-crew' },
+                { key: 'futbolka', label: 'FUTBOLKA', icon: 'tshirt-v' },
                 { key: 'shim', label: 'SHIM', icon: 'human-handsdown' },
                 { key: 'oyoq_kiyim', label: 'OYOQ KIYIM', icon: 'shoe-sneaker' },
                 { key: 'aksessuar', label: 'AKSESSUAR', icon: 'glasses' },
@@ -2958,11 +2960,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     };
 
                     return [
-                      { keyId: 'ustki_kiyim', label: t.invTopWear,     icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: getCountStr('ustki_kiyim') },
-                      { keyId: 'shim',        label: t.invPants,       icon: 'human-handsdown', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.35)',  count: getCountStr('shim') },
-                      { keyId: 'oyoq_kiyim',  label: t.invShoes,       icon: 'shoe-sneaker',    color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.35)', count: getCountStr('oyoq_kiyim') },
-                      { keyId: 'aksessuar',   label: t.invAccessories, icon: 'glasses',         color: '#EAB308', bg: 'rgba(234,179,8,0.1)',   border: 'rgba(234,179,8,0.35)',  count: getCountStr('aksessuar') },
-                      { keyId: 'ryukzak',     label: t.invBackpacks,   icon: 'bag-personal',    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.35)', count: getCountStr('ryukzak') },
+                      { keyId: 'bosh_kiyim',  label: t.shopHeadwear || 'Bosh kiyim', icon: 'crown',           color: '#EC4899', bg: 'rgba(236,72,153,0.1)',  border: 'rgba(236,72,153,0.35)', count: getCountStr('bosh_kiyim') },
+                      { keyId: 'ustki_kiyim', label: t.invTopWear || 'Ustki kiyim',  icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: getCountStr('ustki_kiyim') },
+                      { keyId: 'futbolka',    label: 'Futbolka',                     icon: 'tshirt-v',        color: '#3B82F6', bg: 'rgba(59,130,246,0.1)',   border: 'rgba(59,130,246,0.35)', count: getCountStr('futbolka') },
+                      { keyId: 'shim',        label: t.invPants || 'Shim',           icon: 'human-handsdown', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.35)',  count: getCountStr('shim') },
+                      { keyId: 'oyoq_kiyim',  label: t.invShoes || 'Oyoq kiyim',     icon: 'shoe-sneaker',    color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.35)', count: getCountStr('oyoq_kiyim') },
+                      { keyId: 'aksessuar',   label: t.invAccessories || 'Aksessuarlar', icon: 'glasses',     color: '#EAB308', bg: 'rgba(234,179,8,0.1)',   border: 'rgba(234,179,8,0.35)',  count: getCountStr('aksessuar') },
+                      { keyId: 'ryukzak',     label: t.invBackpacks || 'Ryukzaklar', icon: 'bag-personal',    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.35)', count: getCountStr('ryukzak') },
                     ].map((item, i) => (
                       <TouchableOpacity
                         key={i}
