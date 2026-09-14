@@ -219,6 +219,11 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           controls.dampingFactor = 0.05;
           controls.autoRotate = false;
 
+          // Lock vertical rotation (only allow horizontal rotation around y-axis)
+          controls.minPolarAngle = Math.PI / 2;
+          controls.maxPolarAngle = Math.PI / 2;
+
+
           // Lights
           const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
           scene.add(ambientLight);
@@ -383,9 +388,10 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 characterModel.position.z -= center.z;
 
                 scene.add(characterModel);
-                controls.target.set(0, size.y * 0.5, 0);
-                camera.position.set(0, size.y * 0.6, Math.max(size.x, size.y, size.z) * 2.2);
+                controls.target.set(0, size.y * 0.52, 0);
+                camera.position.set(0, size.y * 0.52, Math.max(size.x, size.y, size.z) * 1.55);
                 controls.update();
+
 
                 // Apply initial skins if ready
                 if (window.pendingHeadwearB64) {
