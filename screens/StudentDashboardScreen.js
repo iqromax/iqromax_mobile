@@ -4527,9 +4527,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       .filter(item => {
                         if (item.category !== 'inventory') return false;
                         
-                        const sub = item.subcategory || 'headwear';
-                        const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
-                        if (normalizedSub !== activeSkinCategory) return false;
+                        // Subcategory filtering (if item has subcategory, filter by activeSkinCategory; otherwise match)
+                        if (item.subcategory) {
+                          const sub = item.subcategory;
+                          const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                          if (normalizedSub !== activeSkinCategory) return false;
+                        }
                         
                         const userGender = getCurrentUserGender();
                         if (item.targetGender && item.targetGender !== 'all') {
@@ -4639,9 +4642,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                     {shopItems.filter(item => {
                       if (item.category !== 'inventory') return false;
-                      const sub = item.subcategory || 'headwear';
-                      const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
-                      if (normalizedSub !== activeSkinCategory) return false;
+                      if (item.subcategory) {
+                        const sub = item.subcategory;
+                        const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                        if (normalizedSub !== activeSkinCategory) return false;
+                      }
                       const userGender = getCurrentUserGender();
                       if (item.targetGender && item.targetGender !== 'all') {
                         return item.targetGender === userGender;
