@@ -91,23 +91,22 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           uri = asset.localUri || asset.uri;
         } else if (typeof headwearPath === 'string') {
           if (!headwearPath.startsWith('http://') && !headwearPath.startsWith('https://')) {
-            const cleanPath = headwearPath.startsWith('/api') 
-              ? headwearPath 
-              : headwearPath.startsWith('/') 
-                ? `/api${headwearPath}` 
-                : `/api/${headwearPath}`;
+            const cleanPath = headwearPath.startsWith('/') ? headwearPath : `/${headwearPath}`;
             uri = `https://iqromax.net${cleanPath}`;
           }
         }
         
         let downloadedUri = uri;
         if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const downloaded = await FileSystem.downloadAsync(uri, FileSystem.cacheDirectory + 'temp_headwear.glb');
+          const tempPath = FileSystem.cacheDirectory + `temp_headwear_${Date.now()}.glb`;
+          const downloaded = await FileSystem.downloadAsync(uri, tempPath);
           downloadedUri = downloaded.uri;
         }
         
         const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
-        if (isMounted) setHeadwearBase64(b64);
+        if (isMounted && b64) {
+          setHeadwearBase64(b64);
+        }
       } catch (err) {
         console.log('Error downloading headwear for WebView:', err);
       }
@@ -116,9 +115,26 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     return () => { isMounted = false; };
   }, [headwearPath]);
 
-  const currentIdx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
-  const currentOrientation = MODEL_ORIENTATIONS[currentIdx] || '0deg 0deg 0deg';
-  const currentOrbit = MODEL_ORBITS[currentIdx] || '90deg 75deg auto';
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (headwearBase64) {
+      const js = `
+        if (window.updateHeadwear) {
+          window.updateHeadwear("${headwearBase64}");
+        }
+        true;
+      `;
+      webViewRef.current.injectJavaScript(js);
+    } else {
+      const js = `
+        if (window.removeHeadwear) {
+          window.removeHeadwear();
+        }
+        true;
+      `;
+      webViewRef.current.injectJavaScript(js);
+    }
+  }, [headwearBase64]);
 
   const htmlContent = modelBase64 ? `
     <!DOCTYPE html>
@@ -165,74 +181,79 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
         </model-viewer>
         <script>
           const viewer = document.getElementById('viewer');
-          if (viewer) {
-            const attachHeadwear = async () => {
-              ${headwearBase64 ? `
-                try {
-                  const headwearB64 = "${headwearBase64}";
-                  const res = await fetch("data:model/gltf-binary;base64," + headwearB64);
-                  const blob = await res.blob();
-                  const url = URL.createObjectURL(blob);
-                  
-                  let gltf = null;
-                  if (typeof viewer.loadGltf === 'function') {
-                    gltf = await viewer.loadGltf(url);
-                  } else if (viewer.model && typeof viewer.model.loadGltf === 'function') {
-                    gltf = await viewer.model.loadGltf(url);
-                  }
+          let currentHeadwearNode = null;
 
-                  if (gltf && gltf.scene && viewer.model && viewer.model.scene) {
-                    const THREE = window.THREE || viewer.model.scene.constructor.THREE || (viewer.constructor && viewer.constructor.THREE);
-                    if (THREE && THREE.Box3 && THREE.Vector3) {
-                      const charBox = new THREE.Box3().setFromObject(viewer.model.scene);
-                      const charSize = charBox.getSize(new THREE.Vector3());
-                      
-                      const headBox = new THREE.Box3().setFromObject(gltf.scene);
-                      const headSize = headBox.getSize(new THREE.Vector3());
-
-                      const targetScale = (charSize.x * 0.45) / (headSize.x || 1);
-                      if (targetScale > 0 && isFinite(targetScale)) {
-                        gltf.scene.scale.set(targetScale, targetScale, targetScale);
-                      }
-                      
-                      const updatedHeadBox = new THREE.Box3().setFromObject(gltf.scene);
-                      const updatedHeadSize = updatedHeadBox.getSize(new THREE.Vector3());
-                      const headCenter = updatedHeadBox.getCenter(new THREE.Vector3());
-
-                      gltf.scene.position.x = -headCenter.x;
-                      gltf.scene.position.z = -headCenter.z;
-                      gltf.scene.position.y = charBox.max.y - updatedHeadBox.min.y - (updatedHeadSize.y * 0.35);
-                    } else {
-                      gltf.scene.scale.set(1.5, 1.5, 1.5);
-                      gltf.scene.position.set(0, 1.8, 0);
-                    }
-
-                    viewer.model.scene.add(gltf.scene);
-                  }
-                } catch(e) {
-                  console.error('Error attaching 3D headwear:', e);
-                }
-              ` : ''}
-            };
-
-            if (viewer.loaded) {
-              attachHeadwear();
-            } else {
-              viewer.addEventListener('load', attachHeadwear);
+          window.removeHeadwear = function() {
+            if (currentHeadwearNode && viewer && viewer.model && viewer.model.scene) {
+              viewer.model.scene.remove(currentHeadwearNode);
+              currentHeadwearNode = null;
             }
+          };
+
+          window.updateHeadwear = async function(headwearB64) {
+            window.removeHeadwear();
+            if (!viewer || !headwearB64) return;
+            try {
+              const res = await fetch("data:model/gltf-binary;base64," + headwearB64);
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              
+              let gltf = null;
+              if (typeof viewer.loadGltf === 'function') {
+                gltf = await viewer.loadGltf(url);
+              } else if (viewer.model && typeof viewer.model.loadGltf === 'function') {
+                gltf = await viewer.model.loadGltf(url);
+              }
+
+              if (gltf && gltf.scene && viewer.model && viewer.model.scene) {
+                currentHeadwearNode = gltf.scene;
+                const THREE = window.THREE || viewer.model.scene.constructor.THREE || (viewer.constructor && viewer.constructor.THREE);
+                if (THREE && THREE.Box3 && THREE.Vector3) {
+                  const charBox = new THREE.Box3().setFromObject(viewer.model.scene);
+                  const charSize = charBox.getSize(new THREE.Vector3());
+                  
+                  const headBox = new THREE.Box3().setFromObject(gltf.scene);
+                  const headSize = headBox.getSize(new THREE.Vector3());
+
+                  const targetScale = (charSize.x * 0.45) / (headSize.x || 1);
+                  if (targetScale > 0 && isFinite(targetScale)) {
+                    gltf.scene.scale.set(targetScale, targetScale, targetScale);
+                  }
+                  
+                  const updatedHeadBox = new THREE.Box3().setFromObject(gltf.scene);
+                  const updatedHeadSize = updatedHeadBox.getSize(new THREE.Vector3());
+                  const headCenter = updatedHeadBox.getCenter(new THREE.Vector3());
+
+                  gltf.scene.position.x = -headCenter.x;
+                  gltf.scene.position.z = -headCenter.z;
+                  gltf.scene.position.y = charBox.max.y - updatedHeadBox.min.y - (updatedHeadSize.y * 0.35);
+                } else {
+                  gltf.scene.scale.set(1.5, 1.5, 1.5);
+                  gltf.scene.position.set(0, 1.8, 0);
+                }
+
+                viewer.model.scene.add(gltf.scene);
+              }
+            } catch(e) {
+              console.error('Error attaching 3D headwear:', e);
+            }
+          };
+
+          if (viewer) {
+            viewer.addEventListener('load', () => {
+              ${headwearBase64 ? `window.updateHeadwear("${headwearBase64}");` : ''}
+            });
           }
         </script>
       </body>
     </html>
   ` : '';
 
-  const headwearKey = typeof headwearPath === 'string' ? headwearPath : (headwearPath || 'none');
-
   return (
     <View style={[styles.container, style]}>
       {modelBase64 ? (
         <WebView
-          key={`char_${characterIndex}_hw_${headwearKey}_b64_${headwearBase64 ? 'loaded' : 'pending'}`}
+          key={`char_${characterIndex}`}
           ref={webViewRef}
           originWhitelist={['*']}
           source={{ html: htmlContent }}
