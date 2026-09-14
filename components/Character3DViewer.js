@@ -92,7 +92,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
         } else if (typeof headwearPath === 'string') {
           if (!headwearPath.startsWith('http://') && !headwearPath.startsWith('https://')) {
             const cleanPath = headwearPath.startsWith('/') ? headwearPath : `/${headwearPath}`;
-            uri = `https://iqromax.net${cleanPath}`;
+            uri = `https://iqromax.net/api${cleanPath}`;
           }
         }
         
@@ -170,12 +170,36 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                   const blob = await res.blob();
                   const url = URL.createObjectURL(blob);
                   const gltf = await viewer.loadGltf(url);
-                  if (gltf && gltf.scene) {
-                    gltf.scene.scale.set(25.0, 25.0, 25.0);
-                    gltf.scene.position.set(0, 0.5, 0);
+                  if (gltf && gltf.scene && viewer.model && viewer.model.scene) {
+                    const THREE = window.THREE || viewer.constructor.THREE;
+                    
+                    // Compute bounding boxes for character and headwear
+                    const charBox = new THREE.Box3().setFromObject(viewer.model.scene);
+                    const charSize = charBox.getSize(new THREE.Vector3());
+                    
+                    const headBox = new THREE.Box3().setFromObject(gltf.scene);
+                    const headSize = headBox.getSize(new THREE.Vector3());
+
+                    // Auto-scale headwear if too big or too small
+                    const targetScale = (charSize.x * 0.45) / (headSize.x || 1);
+                    if (targetScale > 0) {
+                      gltf.scene.scale.set(targetScale, targetScale, targetScale);
+                    }
+                    
+                    // Position at top of character head
+                    const updatedHeadBox = new THREE.Box3().setFromObject(gltf.scene);
+                    const updatedHeadSize = updatedHeadBox.getSize(new THREE.Vector3());
+                    const headCenter = updatedHeadBox.getCenter(new THREE.Vector3());
+
+                    gltf.scene.position.x = -headCenter.x;
+                    gltf.scene.position.z = -headCenter.z;
+                    gltf.scene.position.y = charBox.max.y - updatedHeadBox.min.y - (updatedHeadSize.y * 0.35);
+
                     viewer.model.scene.add(gltf.scene);
                   }
-                } catch(e) {}
+                } catch(e) {
+                  console.error('Error attaching 3D headwear:', e);
+                }
               ` : ''}
             });
           }
@@ -188,7 +212,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     <View style={[styles.container, style]}>
       {modelBase64 ? (
         <WebView
-          key={`char_${characterIndex}`}
+          key={`char_${characterIndex}_head_${headwearBase64 ? 'has' : 'none'}`}
           ref={webViewRef}
           originWhitelist={['*']}
           source={{ html: htmlContent }}
