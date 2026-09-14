@@ -191,6 +191,20 @@ export default function StudentDashboardScreen({ navigation, route }) {
     return defaultIdx;
   };
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(() => getCharIndexFromUser(user, selectedChar));
+
+  const getCurrentUserGender = () => {
+    const charName = user?.character ? String(user.character).toLowerCase() : '';
+    const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
+    const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
+    let uGender = route.params?.gender || user?.gender;
+    if (uGender === 'qiz' || uGender === 'girl' || uGender === 'female') uGender = 'girls';
+    if (uGender === 'ogil' || uGender === 'o\'g'il' || uGender === 'boy' || uGender === 'male') uGender = 'boys';
+
+    if (uGender === 'girls' || uGender === 'boys') return uGender;
+    if (isGirlChar) return 'girls';
+    if (isBoyChar) return 'boys';
+    return activeAvatarIndex >= 4 ? 'girls' : 'boys';
+  };
   const [equippedAccessories, setEquippedAccessories] = useState({});
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
   const [equippedHeadwears, setEquippedHeadwears] = useState({});
@@ -1050,15 +1064,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const renderKiyimGrid = () => {
-    const charName = user?.character ? String(user.character).toLowerCase() : '';
-    const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
-    const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
-    let userGender = route.params?.gender;
-    if (!userGender) {
-      if (isGirlChar) userGender = 'girls';
-      else if (isBoyChar) userGender = 'boys';
-      else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
-    }
+    const userGender = getCurrentUserGender();
 
     const combinedSkins = [...backendSkins, ...kiyimData].filter(item => {
       if (item.targetGender && item.targetGender !== 'all') {
@@ -4525,15 +4531,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
                         if (normalizedSub !== activeSkinCategory) return false;
                         
-                        const charName = user?.character ? String(user.character).toLowerCase() : '';
-                        const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
-                        const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
-                        let userGender = route.params?.gender;
-                        if (!userGender) {
-                          if (isGirlChar) userGender = 'girls';
-                          else if (isBoyChar) userGender = 'boys';
-                          else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
-                        }
+                        const userGender = getCurrentUserGender();
                         if (item.targetGender && item.targetGender !== 'all') {
                           return item.targetGender === userGender;
                         }
@@ -4644,15 +4642,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       const sub = item.subcategory || 'headwear';
                       const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
                       if (normalizedSub !== activeSkinCategory) return false;
-                      const charName = user?.character ? String(user.character).toLowerCase() : '';
-                      const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
-                      const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
-                      let userGender = route.params?.gender;
-                      if (!userGender) {
-                        if (isGirlChar) userGender = 'girls';
-                        else if (isBoyChar) userGender = 'boys';
-                        else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
-                      }
+                      const userGender = getCurrentUserGender();
                       if (item.targetGender && item.targetGender !== 'all') {
                         return item.targetGender === userGender;
                       }
