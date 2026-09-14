@@ -198,7 +198,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
     let uGender = route.params?.gender || user?.gender;
     if (uGender === 'qiz' || uGender === 'girl' || uGender === 'female') uGender = 'girls';
-    if (uGender === 'ogil' || uGender === 'o\'g'il' || uGender === 'boy' || uGender === 'male') uGender = 'boys';
+    if (uGender === 'ogil' || uGender === 'o_gil' || uGender === "o'g'il" || uGender === 'boy' || uGender === 'male') uGender = 'boys';
 
     if (uGender === 'girls' || uGender === 'boys') return uGender;
     if (isGirlChar) return 'girls';
