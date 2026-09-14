@@ -944,7 +944,20 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [kiyimKategoriya, setKiyimKategoriya] = useState('bosh_kiyim');
   const [activeKiyimFilter, setActiveKiyimFilter] = useState('BARCHASI');
 
-  const kiyimData = [];
+  const kiyimData = [
+    {
+      id: 'local_shelby_kepka',
+      category: 'bosh_kiyim',
+      targetGender: 'boys',
+      name: "Shelbi Kepka",
+      rarity: 'ODDIY',
+      image: require('../assets/shelby_kepka.png'),
+      model: require('../assets/models/shelby_kepka.glb'),
+      isLocked: false,
+      price: 0,
+      state: 'KIYISH'
+    }
+  ];
 
   const renderFramesGrid = () => {
     const filteredData = activeRamkaFilter === 'BARCHASI' ? framesData : framesData.filter(item => item.rarity === activeRamkaFilter);
