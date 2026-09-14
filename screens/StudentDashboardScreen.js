@@ -193,17 +193,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(() => getCharIndexFromUser(user, selectedChar));
 
   const getCurrentUserGender = () => {
+    // Check avatar index first (0-3: boys, 4-7: girls)
+    if (typeof activeAvatarIndex === 'number') {
+      if (activeAvatarIndex >= 4) return 'girls';
+      if (activeAvatarIndex >= 0) return 'boys';
+    }
+
     const charName = user?.character ? String(user.character).toLowerCase() : '';
     const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
     const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
-    let uGender = route.params?.gender || user?.gender;
-    if (uGender === 'qiz' || uGender === 'girl' || uGender === 'female') uGender = 'girls';
-    if (uGender === 'ogil' || uGender === 'o_gil' || uGender === "o'g'il" || uGender === 'boy' || uGender === 'male') uGender = 'boys';
-
-    if (uGender === 'girls' || uGender === 'boys') return uGender;
     if (isGirlChar) return 'girls';
     if (isBoyChar) return 'boys';
-    return activeAvatarIndex >= 4 ? 'girls' : 'boys';
+
+    let uGender = route.params?.gender || user?.gender;
+    if (uGender === 'qiz' || uGender === 'girl' || uGender === 'female' || uGender === 'girls') return 'girls';
+    if (uGender === 'ogil' || uGender === 'o_gil' || uGender === "o'g'il" || uGender === 'boy' || uGender === 'male' || uGender === 'boys') return 'boys';
+
+    return 'boys';
   };
   const [equippedAccessories, setEquippedAccessories] = useState({});
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
@@ -4527,13 +4533,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       .filter(item => {
                         if (item.category !== 'inventory') return false;
                         
-                        // Subcategory filtering (if item has subcategory, filter by activeSkinCategory; otherwise match)
-                        if (item.subcategory) {
-                          const sub = item.subcategory;
-                          const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
-                          if (normalizedSub !== activeSkinCategory) return false;
-                        }
+                        // Strict subcategory filtering with default to 'headwear' if missing
+                        const sub = item.subcategory || 'headwear';
+                        const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                        if (normalizedSub !== activeSkinCategory) return false;
                         
+                        // Strict targetGender filtering
                         const userGender = getCurrentUserGender();
                         if (item.targetGender && item.targetGender !== 'all') {
                           return item.targetGender === userGender;
@@ -4642,11 +4647,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                     {shopItems.filter(item => {
                       if (item.category !== 'inventory') return false;
-                      if (item.subcategory) {
-                        const sub = item.subcategory;
-                        const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
-                        if (normalizedSub !== activeSkinCategory) return false;
-                      }
+                      const sub = item.subcategory || 'headwear';
+                      const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                      if (normalizedSub !== activeSkinCategory) return false;
                       const userGender = getCurrentUserGender();
                       if (item.targetGender && item.targetGender !== 'all') {
                         return item.targetGender === userGender;
