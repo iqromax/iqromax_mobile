@@ -1072,14 +1072,31 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const renderKiyimGrid = () => {
     const userGender = getCurrentUserGender();
 
-    const combinedSkins = [...backendSkins, ...kiyimData].filter(item => {
+    // Map shopItems (category === 'inventory') to match inventory skin structure
+    const shopInventoryItems = (shopItems || []).filter(item => item.category === 'inventory').map(item => {
+      const sub = item.subcategory || 'headwear';
+      const catMap = { headwear: 'bosh_kiyim', top: 'ustki_kiyim', pants: 'shim', shoes: 'oyoq_kiyim', accessories: 'aksessuar', backpacks: 'ryukzak' };
+      const category = catMap[sub] || (sub === 'bosh_kiyim' ? 'bosh_kiyim' : sub === 'ustki_kiyim' ? 'ustki_kiyim' : sub === 'shim' ? 'shim' : sub === 'oyoq_kiyim' ? 'oyoq_kiyim' : sub === 'aksessuar' ? 'aksessuar' : sub === 'ryukzak' ? 'ryukzak' : 'bosh_kiyim');
+      return {
+        ...item,
+        category,
+        rarity: item.rarity || 'RARE',
+        state: 'BUY'
+      };
+    });
+
+    const combinedSkins = [...backendSkins, ...shopInventoryItems, ...kiyimData].filter(item => {
+      // Subcategory normalization check
+      if (item.category !== kiyimKategoriya) return false;
+
+      // Gender check
       if (item.targetGender && item.targetGender !== 'all') {
         return item.targetGender === userGender;
       }
       return true;
     });
-    let filteredByCategory = combinedSkins.filter(item => item.category === kiyimKategoriya);
-    const filteredData = activeKiyimFilter === 'BARCHASI' ? filteredByCategory : filteredByCategory.filter(item => item.rarity === activeKiyimFilter);
+
+    const filteredData = activeKiyimFilter === 'BARCHASI' ? combinedSkins : combinedSkins.filter(item => item.rarity === activeKiyimFilter);
 
     if (filteredData.length === 0) {
       return (
@@ -2922,7 +2939,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {(() => {
                     const userGender = getCurrentUserGender();
-                    const combinedSkins = [...backendSkins, ...kiyimData].filter(item => {
+                    const shopInventoryItems = (shopItems || []).filter(item => item.category === 'inventory').map(item => {
+                      const sub = item.subcategory || 'headwear';
+                      const catMap = { headwear: 'bosh_kiyim', top: 'ustki_kiyim', pants: 'shim', shoes: 'oyoq_kiyim', accessories: 'aksessuar', backpacks: 'ryukzak' };
+                      const category = catMap[sub] || (sub === 'bosh_kiyim' ? 'bosh_kiyim' : sub === 'ustki_kiyim' ? 'ustki_kiyim' : sub === 'shim' ? 'shim' : sub === 'oyoq_kiyim' ? 'oyoq_kiyim' : sub === 'aksessuar' ? 'aksessuar' : sub === 'ryukzak' ? 'ryukzak' : 'bosh_kiyim');
+                      return { ...item, category };
+                    });
+                    const combinedSkins = [...backendSkins, ...shopInventoryItems, ...kiyimData].filter(item => {
                       if (item.targetGender && item.targetGender !== 'all') {
                         return item.targetGender === userGender;
                       }
