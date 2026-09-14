@@ -222,9 +222,27 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 });
 
                 if (headBone) {
-                  // Attach directly to head bone
-                  gltf.scene.scale.set(1.0, 1.0, 1.0);
-                  gltf.scene.position.set(0, 0, 0);
+                  // Direct attachment to character's Head bone
+                  const headBoneBox = new THREE.Box3().setFromObject(headBone);
+                  const headBoneSize = headBoneBox.getSize(new THREE.Vector3());
+                  
+                  const headBox = new THREE.Box3().setFromObject(gltf.scene);
+                  const headSize = headBox.getSize(new THREE.Vector3());
+
+                  // Scale relative to head bone size (approx 1.2x head bone width)
+                  const targetWidth = (headBoneSize.x > 0 ? headBoneSize.x : 0.25) * 1.25;
+                  const currentWidth = headSize.x > 0 ? headSize.x : 1;
+                  const scaleFactor = targetWidth / currentWidth;
+                  
+                  if (isFinite(scaleFactor) && scaleFactor > 0) {
+                    gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
+                  }
+
+                  // Position at top of head bone
+                  const scaledHeadBox = new THREE.Box3().setFromObject(gltf.scene);
+                  const scaledHeadSize = scaledHeadBox.getSize(new THREE.Vector3());
+                  
+                  gltf.scene.position.set(0, (headBoneSize.y || 0.2) * 0.5, 0);
                   headBone.add(gltf.scene);
                 } else if (THREE && THREE.Box3 && THREE.Vector3) {
                   const charBox = new THREE.Box3().setFromObject(viewer.model.scene);
@@ -233,8 +251,8 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                   const headBox = new THREE.Box3().setFromObject(gltf.scene);
                   const headSize = headBox.getSize(new THREE.Vector3());
 
-                  // Proper proportional scale for headwear (approx 20-30% of character height)
-                  const targetWidth = charSize.x * 0.45;
+                  // Proper proportional scale for headwear (approx 15-20% of character height)
+                  const targetWidth = charSize.x * 0.4;
                   const currentWidth = headSize.x > 0 ? headSize.x : 1;
                   const scaleFactor = targetWidth / currentWidth;
                   
@@ -244,13 +262,12 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
 
                   // Re-calculate box after scaling
                   const scaledBox = new THREE.Box3().setFromObject(gltf.scene);
-                  const scaledSize = scaledBox.getSize(new THREE.Vector3());
                   const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
 
-                  // Center horizontally & place at top 15% of character height (head area)
-                  gltf.scene.position.x = (charBox.min.x + charBox.max.x) / 2 - scaledCenter.x;
-                  gltf.scene.position.z = (charBox.min.z + charBox.max.z) / 2 - scaledCenter.z;
-                  gltf.scene.position.y = charBox.max.y - scaledBox.max.y - (scaledSize.y * 0.1);
+                  // Place at top of character bounding box (head area)
+                  gltf.scene.position.x = -scaledCenter.x;
+                  gltf.scene.position.z = -scaledCenter.z;
+                  gltf.scene.position.y = charBox.max.y - scaledBox.min.y - 0.05;
 
                   viewer.model.scene.add(gltf.scene);
                 } else {
