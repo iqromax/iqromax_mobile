@@ -11,6 +11,7 @@ interface ShopItem {
   imageUrl?: string | null;
   value: number;
   price: number;
+  targetGender?: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -31,6 +32,7 @@ const ShopAdmin = () => {
   const [description, setDescription] = useState('');
   const [value, setValue] = useState<number>(1);
   const [price, setPrice] = useState<number>(50);
+  const [targetGender, setTargetGender] = useState<string>('all');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -58,6 +60,7 @@ const ShopAdmin = () => {
     setDescription('');
     setValue(1);
     setPrice(50);
+    setTargetGender('all');
     setImageFile(null);
     setImagePreview(null);
     setIsModalOpen(true);
@@ -71,6 +74,7 @@ const ShopAdmin = () => {
     setDescription(item.description || '');
     setValue(item.value || 1);
     setPrice(item.price || 50);
+    setTargetGender(item.targetGender || 'all');
     setImageFile(null);
     setImagePreview(item.imageUrl || null);
     setIsModalOpen(true);
@@ -102,6 +106,7 @@ const ShopAdmin = () => {
       formData.append('category', category);
       if (category === 'inventory') {
         formData.append('subcategory', subcategory);
+        formData.append('targetGender', targetGender);
       }
       formData.append('name', name.trim());
       formData.append('description', description.trim());
@@ -318,9 +323,14 @@ const ShopAdmin = () => {
                     {/* Subcategory or Value */}
                     <td className="py-4 px-6 text-gray-300 text-xs font-semibold">
                       {item.category === 'inventory' ? (
-                        <span className="bg-[#15152A] px-2.5 py-1 rounded-md border border-[#252545]">
-                          {getSubcategoryLabel(item.subcategory)}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="bg-[#15152A] px-2.5 py-1 rounded-md border border-[#252545]">
+                            {getSubcategoryLabel(item.subcategory)}
+                          </span>
+                          <span className="bg-indigo-500/10 text-indigo-300 px-2 py-1 rounded-md border border-indigo-500/20 text-[11px]">
+                            {item.targetGender === 'boys' ? "👦 O'g'il" : item.targetGender === 'girls' ? '👧 Qiz' : '👥 Barchasi'}
+                          </span>
+                        </div>
                       ) : item.category === 'energy' ? (
                         <span className="text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">
                           ⚡ +{item.value} Chaqmoq
@@ -426,23 +436,40 @@ const ShopAdmin = () => {
 
                 {/* 2. Dynamic Field: INVENTAR SUB-CATEGORY SELECT */}
                 {category === 'inventory' && (
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
-                      Inventar Bo'limi (Subcategory)
-                    </label>
-                    <select
-                      value={subcategory}
-                      onChange={(e) => setSubcategory(e.target.value as any)}
-                      className="w-full bg-[#121225] border border-[#1A1A35] focus:border-amber-500 text-purple-300 font-bold rounded-xl p-3.5 text-sm focus:outline-none transition-colors"
-                    >
-                      <option value="headwear">🤠 Bosh kiyim</option>
-                      <option value="top">🧥 Ustki kiyim</option>
-                      <option value="pants">👖 Shim</option>
-                      <option value="shoes">👟 Oyoq kiyim</option>
-                      <option value="accessories">👓 Aksessuarlar</option>
-                      <option value="backpacks">🎒 Ryukzaklar</option>
-                    </select>
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                        Inventar Bo'limi (Subcategory)
+                      </label>
+                      <select
+                        value={subcategory}
+                        onChange={(e) => setSubcategory(e.target.value as any)}
+                        className="w-full bg-[#121225] border border-[#1A1A35] focus:border-amber-500 text-purple-300 font-bold rounded-xl p-3.5 text-sm focus:outline-none transition-colors"
+                      >
+                        <option value="headwear">🤠 Bosh kiyim</option>
+                        <option value="top">🧥 Ustki kiyim</option>
+                        <option value="pants">👖 Shim</option>
+                        <option value="shoes">👟 Oyoq kiyim</option>
+                        <option value="accessories">👓 Aksessuarlar</option>
+                        <option value="backpacks">🎒 Ryukzaklar</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                        Kimlar uchun (Jins)
+                      </label>
+                      <select
+                        value={targetGender}
+                        onChange={(e) => setTargetGender(e.target.value)}
+                        className="w-full bg-[#121225] border border-[#1A1A35] focus:border-amber-500 text-indigo-300 font-bold rounded-xl p-3.5 text-sm focus:outline-none transition-colors"
+                      >
+                        <option value="all">👥 Barchasi uchun (O'g'il va Qiz)</option>
+                        <option value="boys">👦 Faqat O'g'il bolalar uchun</option>
+                        <option value="girls">👧 Faqat Qiz bolalar uchun</option>
+                      </select>
+                    </div>
+                  </>
                 )}
 
                 {/* 3. Product Image Upload (Only for Inventory) */}

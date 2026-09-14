@@ -89,7 +89,8 @@ router.get('/admin/inventory-skins', async (req, res) => {
 // Admin: Create inventory skin
 router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
   try {
-    const { category, name, rarity, price, isLocked } = req.body;
+    const { category, name, rarity, price, isLocked, targetGender } = req.body;
+    const genderValue = targetGender ? targetGender.trim() : 'all';
 
     if (!category || !name) {
       return res.status(400).json({ error: 'Category and name are required' });
@@ -130,6 +131,7 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
           imageUrl,
           modelUrl,
           price: parsedPrice,
+          targetGender: genderValue,
           isLocked: shouldBeLocked,
           isActive: true
         }
@@ -140,7 +142,7 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
         try {
           const categorySubmap: Record<string, string> = {
             'ustki_kiyim': 'top',
-            'bosh_kiyim': 'top',
+            'bosh_kiyim': 'headwear',
             'shim': 'pants',
             'oyoq_kiyim': 'shoes',
             'aksessuar': 'accessories',
@@ -156,6 +158,7 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
               imageUrl: imageUrl,
               value: 1,
               price: parsedPrice,
+              targetGender: genderValue,
               isActive: true
             }
           });

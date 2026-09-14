@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, Platform, Modal, StatusBar, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Modal, StatusBar, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from '../src/utils/safeAudio';

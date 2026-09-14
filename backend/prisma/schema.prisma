@@ -105,6 +105,7 @@ model InventorySkin {
   imageUrl    String?  // skin preview image URL
   modelUrl    String?  // .glb 3D model URL
   price       Int      @default(0) // Coin price
+  targetGender String? @default("all") // "all", "boys", "girls"
   isLocked    Boolean  @default(false)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -120,6 +121,7 @@ model ShopItem {
   imageUrl    String?  // uploaded image URL or static asset identifier
   value       Int      @default(1) // energy count or key count
   price       Int      // Coin price e.g. 50
+  targetGender String? @default("all") // "all", "boys", "girls"
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

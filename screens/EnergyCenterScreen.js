@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter, Linking } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, StatusBar, Platform, Animated, Modal, DeviceEventEmitter, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video, Audio } from '../src/utils/safeAudio';
 import { API_URL, SOCKET_URL } from '../src/config/api';
@@ -657,45 +659,65 @@ export default function EnergyCenterScreen({ navigation, route }) {
             {/* Video Container */}
             <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
               {(playingMission && playingMission.fileUrl) || adVideoUrl ? (
-                <Video
-                  source={{ 
-                    uri: encodeURI(
-                      playingMission 
-                        ? `${API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL}${playingMission.fileUrl.startsWith('/') ? playingMission.fileUrl : '/' + playingMission.fileUrl}`
-                        : adVideoUrl
-                    )
-                  }}
-                  style={{ width: '100%', flex: 1 }}
-                  useNativeControls={true}
-                  resizeMode="contain"
-                  shouldPlay={isVideoModalVisible}
-                  onError={(error) => {
-                    console.error('Video error:', error);
-                    alert('Video o\'qishda xatolik yuz berdi. Iltimos, keyinroq qayta urinib ko\'ring.');
-                    setIsVideoModalVisible(false);
-                    setPlayingMission(null);
-                  }}
-                  onPlaybackStatusUpdate={async (status) => {
-                    if (status.didJustFinish) {
-                      setIsVideoModalVisible(false);
-                      try {
-                        if (playingMission) {
-                          handleCompleteMission(playingMission);
-                          setPlayingMission(null);
-                        } else {
-                          await addEnergy(1);
-                          await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
-                          if (adVideoTimestamp) {
-                            await AsyncStorage.setItem('claimed_video_timestamp', String(adVideoTimestamp));
+                (() => {
+                  const targetVideoUrl = encodeURI(
+                    playingMission 
+                      ? `${API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL}${playingMission.fileUrl.startsWith('/') ? playingMission.fileUrl : '/' + playingMission.fileUrl}`
+                      : adVideoUrl
+                  );
+
+                  return (
+                    <View style={{ width: '100%', height: '100%', backgroundColor: '#000' }}>
+                      <WebView
+                        allowsInlineMediaPlayback={true}
+                        mediaPlaybackRequiresUserAction={false}
+                        allowsFullscreenVideo={true}
+                        domStorageEnabled={true}
+                        javaScriptEnabled={true}
+                        originWhitelist={['*']}
+                        source={{
+                          html: `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                              <style>
+                                * { box-sizing: border-box; }
+                                body, html { margin:0; padding:0; background:#000; width:100%; height:100%; overflow:hidden; display:flex; justify-content:center; align-items:center; }
+                                video { width:100%; height:100%; object-fit:contain; background:#000; }
+                              </style>
+                            </head>
+                            <body>
+                              <video src="${targetVideoUrl}" controls autoplay playsinline webkit-playsinline onended="window.ReactNativeWebView.postMessage('ENDED')"></video>
+                            </body>
+                            </html>
+                          `
+                        }}
+                        onMessage={async (event) => {
+                          if (event.nativeEvent.data === 'ENDED') {
+                            setIsVideoModalVisible(false);
+                            try {
+                              if (playingMission) {
+                                handleCompleteMission(playingMission);
+                                setPlayingMission(null);
+                              } else {
+                                await addEnergy(1);
+                                await AsyncStorage.setItem('daily_video_claim_time', Date.now().toString());
+                                if (adVideoTimestamp) {
+                                  await AsyncStorage.setItem('claimed_video_timestamp', String(adVideoTimestamp));
+                                }
+                                setDailyVideoClaimed(true);
+                              }
+                            } catch (e) {
+                              console.error('Error claiming video:', e);
+                            }
                           }
-                          setDailyVideoClaimed(true);
-                        }
-                      } catch (e) {
-                        console.error('Error claiming video:', e);
-                      }
-                    }
-                  }}
-                />
+                        }}
+                        style={{ flex: 1, backgroundColor: '#000' }}
+                      />
+                    </View>
+                  );
+                })()
               ) : (
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                   <Ionicons name="videocam-off-outline" size={48} color="rgba(255,255,255,0.2)" />

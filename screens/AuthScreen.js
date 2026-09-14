@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated, Alert, ActivityIndicator, Modal } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Animated, Alert, ActivityIndicator, Modal } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -293,15 +294,18 @@ export default function AuthScreen({ navigation, route }) {
         if (response.ok) {
           let charIndex = 0;
           let gender = 'boys';
-          const boysChars = ["Max", "Sam", "Leo", "Ray"];
-          const girlsChars = ["Mia", "Zoe", "Eva", "Lily"];
+          const boysChars = ["Alex", "Maks", "David", "Kevin"];
+          const girlsChars = ["Lily", "Maya", "Emma", "Sophia"];
           
           if (data.user && data.user.character) {
-             if (boysChars.includes(data.user.character)) {
-               charIndex = boysChars.indexOf(data.user.character);
+             const charName = String(data.user.character);
+             const bIdx = boysChars.findIndex(c => c.toLowerCase() === charName.toLowerCase());
+             const gIdx = girlsChars.findIndex(c => c.toLowerCase() === charName.toLowerCase());
+             if (bIdx !== -1) {
+               charIndex = bIdx;
                gender = 'boys';
-             } else if (girlsChars.includes(data.user.character)) {
-               charIndex = girlsChars.indexOf(data.user.character);
+             } else if (gIdx !== -1) {
+               charIndex = gIdx + 4;
                gender = 'girls';
              }
           }

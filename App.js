@@ -29,7 +29,7 @@ import FriendInviteScreen from './screens/FriendInviteScreen';
 import BattleResultScreen from './screens/BattleResultScreen';
 import MysteryBoxScreen from './screens/MysteryBoxScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
-
+import { SoundPlayerBridge } from './src/utils/soundPlayer';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black } from '@expo-google-fonts/inter';
@@ -417,6 +417,7 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
+      <SoundPlayerBridge />
       <NavigationContainer ref={navigationRef}>
         <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
           <Stack.Screen name="StepOne" component={StepOneScreen} />

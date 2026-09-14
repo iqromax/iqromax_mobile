@@ -511,6 +511,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
     };
   }, [activeTab]);
   const [activeExerciseType, setActiveExerciseType] = useState(route.params?.initialExerciseType || 'abacus');
+  const [activeAbacusSubMode, setActiveAbacusSubMode] = useState('classic'); // 'classic' | 'math'
+  const [selectedAbacusExamples, setSelectedAbacusExamples] = useState(7);
+  const [selectedAbacusDigits, setSelectedAbacusDigits] = useState(1);
+  const [isAbacusExamplesPickerOpen, setIsAbacusExamplesPickerOpen] = useState(false);
+  const [isAbacusDigitsPickerOpen, setIsAbacusDigitsPickerOpen] = useState(false);
+  const abacusExampleNumbers = Array.from({ length: 19 }, (_, i) => i + 7);
 
   const [isPersonajOpen, setIsPersonajOpen] = useState(false);
   const [isSkinlarOpen, setIsSkinlarOpen] = useState(false);
@@ -1467,8 +1473,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
     const success = await consumeEnergy(reqEnergy);
     if (success) {
       if (activeExerciseType === 'abacus') {
-        saveActivityLog("Abakus simulyatori", 10);
-        navigation.navigate('AbacusSimulator', { language });
+        if (activeAbacusSubMode === 'math') {
+          saveActivityLog("Abakusda hisoblash", 0);
+          navigation.navigate('AbacusSimulator', {
+            mode: 'math',
+            examplesCount: selectedAbacusExamples,
+            digits: selectedAbacusDigits,
+            language
+          });
+        } else {
+          saveActivityLog("Abakus simulyatori", 10);
+          navigation.navigate('AbacusSimulator', { mode: 'classic', language });
+        }
       } else {
         const isMultiply = ['multiply', 'kopaytirish', 'divide', 'bolish'].includes(isSpeed ? speedSecOperation : selectedOperation);
         const modeTitle = isSpeed 
@@ -1805,32 +1821,204 @@ export default function StudentDashboardScreen({ navigation, route }) {
         
         {activeExerciseType === 'abacus' && (
           <View style={{ marginTop: 10 }}>
-            {/* ABAKUS INFO CARD */}
-            <View style={[styles.infoCardContainer, { marginTop: 10, backgroundColor: '#0A0A16', padding: 20, aspectRatio: 'auto', borderWidth: 1.5, borderColor: 'rgba(168, 85, 247, 0.3)', borderRadius: 16 }]}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={[styles.infoTitle, { marginBottom: 0 }]}>{t.abacusInfoTitle || 'ABAKUS (SOROBAN) HAQIDA'}</Text>
-                <MaterialCommunityIcons name="information-outline" size={20} color="#9CA3AF" />
-              </View>
-              
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ flex: 1, height: 120 }}>
-                   <Image source={require('../assets/abacus_info.png')} style={{ width: '100%', height: '100%' }} contentFit="contain" />
-                </View>
-                <View style={{ flex: 1, paddingLeft: 15 }}>
-                  <Text style={[styles.infoDesc, { fontSize: 13, lineHeight: 20, color: '#D1D5DB' }]}>
-                    {t.abacusInfoDesc || 'Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.'}
-                  </Text>
-                  
-                  <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }} activeOpacity={0.7}>
-                    <Text style={{ color: '#A855F7', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>
-                      {t.abacusLearnRules || "Qoidalarni o'rganish"}
-                    </Text>
-                    <MaterialCommunityIcons name="chevron-right" size={16} color="#A855F7" />
-                  </TouchableOpacity>
-                </View>
-              </View>
+            {/* SUB-MODE TOGGLE BUTTONS */}
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 15 }}>
+              <TouchableOpacity
+                onPress={() => setActiveAbacusSubMode('classic')}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  paddingVertical: 12,
+                  paddingHorizontal: 12,
+                  borderRadius: 14,
+                  backgroundColor: activeAbacusSubMode === 'classic' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255,255,255,0.03)',
+                  borderWidth: 1.5,
+                  borderColor: activeAbacusSubMode === 'classic' ? '#A855F7' : 'rgba(255,255,255,0.08)',
+                }}
+              >
+                <MaterialCommunityIcons name="abacus" size={18} color={activeAbacusSubMode === 'classic' ? '#A855F7' : '#9CA3AF'} style={{ marginRight: 6 }} />
+                <Text style={{ color: activeAbacusSubMode === 'classic' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 13 }}>
+                  Klassik abakus
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setActiveAbacusSubMode('math')}
+                style={{
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  paddingVertical: 12,
+                  paddingHorizontal: 12,
+                  borderRadius: 14,
+                  backgroundColor: activeAbacusSubMode === 'math' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(255,255,255,0.03)',
+                  borderWidth: 1.5,
+                  borderColor: activeAbacusSubMode === 'math' ? '#3B82F6' : 'rgba(255,255,255,0.08)',
+                }}
+              >
+                <MaterialCommunityIcons name="calculator-variant" size={18} color={activeAbacusSubMode === 'math' ? '#3B82F6' : '#9CA3AF'} style={{ marginRight: 6 }} />
+                <Text style={{ color: activeAbacusSubMode === 'math' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 13 }}>
+                  Abakusda hisoblash
+                </Text>
+              </TouchableOpacity>
             </View>
 
+            {/* CLASSIC MODE INFO CARD */}
+            {activeAbacusSubMode === 'classic' && (
+              <View style={[styles.infoCardContainer, { marginTop: 0, backgroundColor: '#0A0A16', padding: 20, aspectRatio: 'auto', borderWidth: 1.5, borderColor: 'rgba(168, 85, 247, 0.3)', borderRadius: 16 }]}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <Text style={[styles.infoTitle, { marginBottom: 0 }]}>{t.abacusInfoTitle || 'ABAKUS (SOROBAN) HAQIDA'}</Text>
+                  <MaterialCommunityIcons name="information-outline" size={20} color="#9CA3AF" />
+                </View>
+                
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ flex: 1, height: 120 }}>
+                     <Image source={require('../assets/abacus_info.png')} style={{ width: '100%', height: '100%' }} contentFit="contain" />
+                  </View>
+                  <View style={{ flex: 1, paddingLeft: 15 }}>
+                    <Text style={[styles.infoDesc, { fontSize: 13, lineHeight: 20, color: '#D1D5DB' }]}>
+                      {t.abacusInfoDesc || 'Yuqori qatordagi 1 ta boncuk – 5 qiymatni, pastki qatordagi 4 ta boncuk – 1 qiymatni bildiradi.'}
+                    </Text>
+                    
+                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }} activeOpacity={0.7}>
+                      <Text style={{ color: '#A855F7', fontFamily: 'Inter_600SemiBold', fontSize: 13, marginRight: 5 }}>
+                        {t.abacusLearnRules || "Qoidalarni o'rganish"}
+                      </Text>
+                      <MaterialCommunityIcons name="chevron-right" size={16} color="#A855F7" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* MATH MODE CONFIGURATION */}
+            {activeAbacusSubMode === 'math' && (
+              <>
+                {/* HADLAR SONI (7 - 25) */}
+                <View style={styles.examplesContainer}>
+                  <View style={styles.examplesHeader}>
+                    <View style={styles.examplesIconBox}>
+                      <MaterialCommunityIcons name="format-list-bulleted" size={24} color="#A855F7" />
+                    </View>
+                    <View style={styles.examplesHeaderTextContainer}>
+                      <Text style={styles.examplesTitle}>{t.examplesCountTitle || 'HADLAR SONI'}</Text>
+                      <Text style={styles.examplesSubtitle}>{t.examplesCountSubtitle || 'Har bir misoldagi amallar soni (7 - 25)'}</Text>
+                    </View>
+                  </View>
+
+                  {!isAbacusExamplesPickerOpen ? (
+                    <TouchableOpacity 
+                      style={styles.examplesSelectorClosed} 
+                      activeOpacity={0.8}
+                      onPress={() => setIsAbacusExamplesPickerOpen(true)}
+                    >
+                      <Text style={styles.examplesSelectorValueText}>{selectedAbacusExamples} <Text style={styles.examplesSelectorLabelText}>{t.exampleWord || 'had'}</Text></Text>
+                      <MaterialCommunityIcons name="chevron-down" size={24} color="#A855F7" />
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={styles.examplesPickerExpanded}>
+                      <ScrollView 
+                        style={styles.examplesPickerScroll} 
+                        nestedScrollEnabled={true}
+                        showsVerticalScrollIndicator={false}
+                        snapToInterval={40}
+                        decelerationRate="fast"
+                        onMomentumScrollEnd={(e) => {
+                          const offsetY = e.nativeEvent.contentOffset.y;
+                          const index = Math.round(offsetY / 40);
+                          if (abacusExampleNumbers[index]) {
+                            setSelectedAbacusExamples(abacusExampleNumbers[index]);
+                          }
+                        }}
+                      >
+                        <View style={{ height: 40 }} />
+                        {abacusExampleNumbers.map((num) => {
+                          const isSelected = selectedAbacusExamples === num;
+                          return (
+                            <TouchableOpacity 
+                              key={num} 
+                              style={[styles.examplesPickerItem, isSelected && styles.examplesPickerItemSelected]}
+                              onPress={() => {
+                                setSelectedAbacusExamples(num);
+                                setIsAbacusExamplesPickerOpen(false);
+                              }}
+                            >
+                              <Text style={[styles.examplesPickerItemText, isSelected && styles.examplesPickerItemTextSelected]}>
+                                {num} {isSelected && <Text style={styles.examplesPickerItemLabel}>{t.exampleWord || 'had'}</Text>}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                        <View style={{ height: 40 }} />
+                      </ScrollView>
+                    </View>
+                  )}
+                </View>
+
+                {/* DIGITS SECTION */}
+                <View style={[styles.examplesContainer, { marginTop: 15 }]}>
+                  <View style={styles.examplesHeader}>
+                    <View style={styles.examplesIconBox}>
+                      <MaterialCommunityIcons name="numeric" size={24} color="#A855F7" />
+                    </View>
+                    <View style={styles.examplesHeaderTextContainer}>
+                      <Text style={styles.examplesTitle}>{ext.digitsTitle || 'SON XONASI'}</Text>
+                      <Text style={styles.examplesSubtitle}>{ext.digitsSubtitle || 'Misollarning xona soni'}</Text>
+                    </View>
+                  </View>
+
+                  {!isAbacusDigitsPickerOpen ? (
+                    <TouchableOpacity
+                      style={styles.examplesSelectorClosed}
+                      activeOpacity={0.8}
+                      onPress={() => setIsAbacusDigitsPickerOpen(true)}
+                    >
+                      <Text style={styles.examplesSelectorValueText}>
+                        {selectedAbacusDigits} {ext.digitsLabel || 'xonali'} ({selectedAbacusDigits === 1 ? '1-9' : selectedAbacusDigits === 2 ? '10-99' : selectedAbacusDigits === 3 ? '100-999' : '1000-9999'})
+                      </Text>
+                      <MaterialCommunityIcons name="chevron-down" size={24} color="#A855F7" />
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={styles.examplesPickerExpanded}>
+                      <ScrollView
+                        style={styles.examplesPickerScroll}
+                        nestedScrollEnabled={true}
+                        showsVerticalScrollIndicator={false}
+                        snapToInterval={40}
+                      >
+                        {[1, 2, 3, 4].map((d) => {
+                          const isSelected = selectedAbacusDigits === d;
+                          const label = `${d} ${ext.digitsLabel || 'xonali'} (${d === 1 ? '1-9' : d === 2 ? '10-99' : d === 3 ? '100-999' : '1000-9999'})`;
+                          return (
+                            <TouchableOpacity
+                              key={d.toString()}
+                              style={[styles.examplesPickerItem, isSelected && styles.examplesPickerItemSelected]}
+                              onPress={() => {
+                                setSelectedAbacusDigits(d);
+                                setIsAbacusDigitsPickerOpen(false);
+                              }}
+                            >
+                              <Text style={[styles.examplesPickerItemText, isSelected && styles.examplesPickerItemTextSelected]}>
+                                {label}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </ScrollView>
+                      <TouchableOpacity
+                        style={styles.examplesPickerCloseBtn}
+                        onPress={() => setIsAbacusDigitsPickerOpen(false)}
+                      >
+                        <MaterialCommunityIcons name="chevron-up" size={24} color="#A855F7" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </>
+            )}
           </View>
         )}
 
@@ -2398,7 +2586,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         <View style={{ height: 100 }} />
         </ScrollView>
-        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 60 : 79, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
+        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 46 : 79, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
           {/* START EXERCISE BUTTON */}
           {activeExerciseType === 'battle' ? (
             <TouchableOpacity 
@@ -2593,7 +2781,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg'), gender: 'girls' },
                     ]
                     .filter(item => {
-                      const userGender = route.params?.gender || (activeAvatarIndex < 4 ? 'boys' : 'girls');
+                      const charName = user?.character ? String(user.character).toLowerCase() : '';
+                      const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
+                      const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
+                      let userGender = route.params?.gender;
+                      if (!userGender) {
+                        if (isGirlChar) userGender = 'girls';
+                        else if (isBoyChar) userGender = 'boys';
+                        else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
+                      }
                       return item.gender === userGender;
                     })
                     .map((item) => {
@@ -2785,7 +2981,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       {/* Golden Frame Card */}
       <ImageBackground source={require('../assets/ranking_frame.png')} style={styles.rankingGoldenFrame} contentFit="fill">
         {/* Left: Avatar with wreath */}
-        <View style={styles.rankingFrameLeft}>
+        <View style={[styles.rankingFrameLeft, Platform.OS === 'ios' && { marginLeft: 6 }]}>
             <Image source={top1.avatar} style={styles.rankingAvatar} />
         </View>
 
@@ -2849,7 +3045,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <ImageBackground source={require('../assets/ranking_podium.png')} style={styles.podiumImage} contentFit="contain">
           
           {/* 2nd Place (Left) */}
-          <View style={[styles.podiumSecond, Platform.OS === 'android' ? { left: -10 } : { left: '-3%' }]}>
+          <View style={[styles.podiumSecond, Platform.OS === 'android' ? { left: 25 } : { left: '11%' }]}>
               <Image source={top2.avatar} style={styles.podiumAvatar} />
           </View>
 
@@ -2859,7 +3055,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
           {/* 3rd Place (Right) */}
-          <View style={styles.podiumThird}>
+          <View style={[styles.podiumThird, Platform.OS === 'android' && { right: '8%' }]}>
               <Image source={top3.avatar} style={styles.podiumAvatar} />
           </View>
 
@@ -2868,7 +3064,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         {/* User Info Under Podium */}
         <View style={styles.podiumInfoRow}>
           {/* 2nd Place Info */}
-          <View style={[styles.podiumInfoBox, { marginTop: -50, marginLeft: 5 }]}>
+          <View style={[styles.podiumInfoBox, { marginTop: -50 }, Platform.OS === 'android' ? { marginLeft: -6 } : { marginLeft: 5 }]}>
             <Text style={styles.podiumInfoName} numberOfLines={1}>{top2.name}</Text>
             <View style={styles.podiumInfoXpBadge}>
               <Text style={styles.podiumInfoXpText}>{top2.xp} XP</Text>
@@ -2884,7 +3080,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
 
           {/* 3rd Place Info */}
-          <View style={[styles.podiumInfoBox, { marginTop: -52, marginRight: 5 }]}>
+          <View style={[styles.podiumInfoBox, { marginTop: -52 }, Platform.OS === 'android' ? { marginRight: -6 } : { marginRight: 5 }]}>
             <Text style={styles.podiumInfoName} numberOfLines={1}>{top3.name}</Text>
             <View style={styles.podiumInfoXpBadge}>
               <Text style={styles.podiumInfoXpText}>{top3.xp} XP</Text>
@@ -4307,7 +4503,24 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {/* Skins Items Grid */}
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginTop: 10 }}>
                     {shopItems
-                      .filter(item => item.category === 'inventory' && (item.subcategory || 'top') === activeSkinCategory)
+                      .filter(item => {
+                        if (item.category !== 'inventory') return false;
+                        if ((item.subcategory || 'top') !== activeSkinCategory) return false;
+                        
+                        const charName = user?.character ? String(user.character).toLowerCase() : '';
+                        const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
+                        const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
+                        let userGender = route.params?.gender;
+                        if (!userGender) {
+                          if (isGirlChar) userGender = 'girls';
+                          else if (isBoyChar) userGender = 'boys';
+                          else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
+                        }
+                        if (item.targetGender && item.targetGender !== 'all') {
+                          return item.targetGender === userGender;
+                        }
+                        return true;
+                      })
                       .map(item => {
                         const iconName = activeSkinCategory === 'headwear' ? 'hat-cowboy' : activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'glasses' : 'suitcase';
                         const itemColor = '#F59E0B';
@@ -4408,7 +4621,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         );
                       })}
 
-                    {shopItems.filter(item => item.category === 'inventory' && (item.subcategory || 'top') === activeSkinCategory).length === 0 && (
+                    {shopItems.filter(item => {
+                      if (item.category !== 'inventory') return false;
+                      if ((item.subcategory || 'top') !== activeSkinCategory) return false;
+                      const charName = user?.character ? String(user.character).toLowerCase() : '';
+                      const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
+                      const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
+                      let userGender = route.params?.gender;
+                      if (!userGender) {
+                        if (isGirlChar) userGender = 'girls';
+                        else if (isBoyChar) userGender = 'boys';
+                        else userGender = activeAvatarIndex >= 4 ? 'girls' : 'boys';
+                      }
+                      if (item.targetGender && item.targetGender !== 'all') {
+                        return item.targetGender === userGender;
+                      }
+                      return true;
+                    }).length === 0 && (
                       <View style={{ width: '100%', paddingVertical: 30, alignItems: 'center' }}>
                         <FontAwesome5 name="store-alt-slash" size={32} color="#666" />
                         <Text style={{ color: '#888', fontFamily: 'Inter_500Medium', fontSize: 13, marginTop: 8 }}>Ushbu bo'limda hozircha mahsulotlar yo'q</Text>

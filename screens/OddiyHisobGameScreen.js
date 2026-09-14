@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Animated, Easing, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Animated, Easing, Platform, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Audio } from '../src/utils/safeAudio';
@@ -110,17 +111,31 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
 
   const playSound = async (type, op = '+') => {
     try {
-      if (type === 'tick' && tickSound.current) {
-        if (op === '-') {
-          await tickSound.current.setRateAsync(0.6, true);
+      if (type === 'tick') {
+        const rate = (op === '-') ? 0.6 : 1.6;
+        if (tickSound.current) {
+          await tickSound.current.setRateAsync(rate, true);
+          await tickSound.current.replayAsync();
         } else {
-          await tickSound.current.setRateAsync(1.6, true);
+          const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'), { shouldPlay: false });
+          tickSound.current = sound;
+          await sound.setRateAsync(rate, true);
+          await sound.playAsync();
         }
-        await tickSound.current.replayAsync();
-      } else if (type === 'correct' && correctSound.current) {
-        await correctSound.current.replayAsync();
-      } else if (type === 'wrong' && wrongSound.current) {
-        await wrongSound.current.replayAsync();
+      } else if (type === 'correct') {
+        if (correctSound.current) {
+          await correctSound.current.replayAsync();
+        } else {
+          const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/correct.wav'), { shouldPlay: true });
+          correctSound.current = sound;
+        }
+      } else if (type === 'wrong') {
+        if (wrongSound.current) {
+          await wrongSound.current.replayAsync();
+        } else {
+          const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/wrong.wav'), { shouldPlay: true });
+          wrongSound.current = sound;
+        }
       }
     } catch (e) {
       console.log('Error playing sound', e);
@@ -303,7 +318,6 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           setPhase('countdown');
           setCountdown(3);
         } else {
-          playSound('tick', newSeq[0]?.op || '+');
           setPhase('flashing');
         }
       }
@@ -311,17 +325,21 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     }
   }, [currentQIndex, questions]);
 
-  // Sequence tick
+  // Sequence tick & sound trigger for each flashing number
+  useEffect(() => {
+    if (phase === 'flashing' && sequence.length > 0 && seqIndex < sequence.length) {
+      const currentOp = sequence[seqIndex]?.op || '+';
+      playSound('tick', currentOp);
+    }
+  }, [seqIndex, phase]);
+
   useEffect(() => {
     let timeout;
     if (phase === 'flashing' && sequence.length > 0) {
       if (seqIndex < sequence.length) {
-        // user's speed is in seconds (0.1 to 3)
         const delay = speed * 1000;
         timeout = setTimeout(() => {
           if (seqIndex + 1 < sequence.length) {
-            const nextOp = sequence[seqIndex + 1]?.op || '+';
-            playSound('tick', nextOp);
             setSeqIndex(seqIndex + 1);
           } else {
             setQuestionStartTime(Date.now());

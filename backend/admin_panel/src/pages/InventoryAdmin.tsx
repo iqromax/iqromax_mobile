@@ -10,6 +10,7 @@ interface SkinItem {
   imageUrl?: string;
   modelUrl?: string;
   price?: number;
+  targetGender?: string;
   isLocked?: boolean;
   isActive?: boolean;
   createdAt?: string;
@@ -37,6 +38,7 @@ export default function InventoryAdmin() {
   const [name, setName] = useState<string>('');
   const [rarity, setRarity] = useState<string>('ODDIY');
   const [price, setPrice] = useState<number>(0);
+  const [targetGender, setTargetGender] = useState<string>('all');
   const [isLocked, setIsLocked] = useState<boolean>(false);
   
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -88,6 +90,7 @@ export default function InventoryAdmin() {
       formData.append('name', name.trim());
       formData.append('rarity', rarity);
       formData.append('price', String(price));
+      formData.append('targetGender', targetGender);
       formData.append('isLocked', String(isLocked));
       
       if (imageFile) formData.append('image', imageFile);
@@ -104,6 +107,7 @@ export default function InventoryAdmin() {
         // Reset form
         setName('');
         setPrice(0);
+        setTargetGender('all');
         setIsLocked(false);
         setImageFile(null);
         setGlbFile(null);
@@ -229,7 +233,7 @@ export default function InventoryAdmin() {
 
                   <h3 className="font-bold text-white text-base truncate">{item.name}</h3>
                   
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-md ${
                       item.rarity === 'LEGENDARY' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                       item.rarity === 'EPIC' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
@@ -237,6 +241,9 @@ export default function InventoryAdmin() {
                       'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                     }`}>
                       {item.rarity}
+                    </span>
+                    <span className="text-[10px] font-extrabold px-2 py-1 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      {item.targetGender === 'boys' ? "👦 O'g'il" : item.targetGender === 'girls' ? '👧 Qiz' : '👥 Barchasi'}
                     </span>
                     {item.price ? (
                       <span className="text-xs font-bold text-amber-400">🪙 {item.price} Coin</span>
@@ -295,6 +302,23 @@ export default function InventoryAdmin() {
                     {CATEGORIES.map(c => (
                       <option key={c.id} value={c.id}>{c.label}</option>
                     ))}
+                  </select>
+                </div>
+
+                {/* Target Gender Selection */}
+                <div>
+                  <label className="block text-xs font-bold text-indigo-200/70 uppercase tracking-wider mb-2">
+                    Jins (Gender) *
+                  </label>
+                  <select
+                    value={targetGender}
+                    onChange={(e) => setTargetGender(e.target.value)}
+                    className="w-full bg-[#121225] border border-[#252545] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 text-sm font-semibold"
+                    required
+                  >
+                    <option value="all">👥 Barchasi uchun (O'g'il va Qiz)</option>
+                    <option value="boys">👦 Faqat O'g'il bolalar uchun</option>
+                    <option value="girls">👧 Faqat Qiz bolalar uchun</option>
                   </select>
                 </div>
 

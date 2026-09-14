@@ -44,7 +44,7 @@ router.get('/admin/shop-items', async (req, res) => {
 // Admin: Create shop item (Supports file upload for image)
 router.post('/admin/shop-items', upload.single('image'), async (req, res) => {
   try {
-    const { category, subcategory, name, description, value, price } = req.body;
+    const { category, subcategory, name, description, value, price, targetGender } = req.body;
     let imageUrl = req.body.imageUrl || null;
 
     if (req.file) {
@@ -65,6 +65,7 @@ router.post('/admin/shop-items', upload.single('image'), async (req, res) => {
         imageUrl,
         value: value ? parseInt(value, 10) : 1,
         price: parseInt(price, 10),
+        targetGender: targetGender ? targetGender.trim() : 'all',
       },
     });
 
@@ -84,7 +85,7 @@ router.post('/admin/shop-items', upload.single('image'), async (req, res) => {
 router.put('/admin/shop-items/:id', upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, subcategory, name, description, value, price, isActive } = req.body;
+    const { category, subcategory, name, description, value, price, isActive, targetGender } = req.body;
 
     // @ts-ignore
     const existing = await prisma.shopItem.findUnique({ where: { id } });
@@ -108,6 +109,7 @@ router.put('/admin/shop-items/:id', upload.single('image'), async (req, res) => 
         imageUrl,
         value: value !== undefined ? parseInt(value, 10) : existing.value,
         price: price !== undefined ? parseInt(price, 10) : existing.price,
+        targetGender: targetGender !== undefined ? targetGender.trim() : existing.targetGender,
         isActive: isActive !== undefined ? (isActive === 'true' || isActive === true) : existing.isActive,
       },
     });

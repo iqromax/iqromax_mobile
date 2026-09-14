@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, StatusBar, Share, Alert, DeviceEventEmitter } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar, Share, Alert, DeviceEventEmitter } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Feather, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as Clipboard from 'expo-clipboard';
@@ -953,7 +954,7 @@ export default function MysteryBoxScreen({ navigation, route }) {
 
             {/* Premium Animated Glowing Status Badge */}
             <View style={styles.openingStatusBadge}>
-              <MaterialCommunityIcons name="sparkles" size={20} color="#F59E0B" style={{ marginRight: 8 }} />
+              <MaterialCommunityIcons name="star-four-points" size={20} color="#F59E0B" style={{ marginRight: 8 }} />
               <Text style={styles.openingStatusText}>
                 {t.openingText}
               </Text>
