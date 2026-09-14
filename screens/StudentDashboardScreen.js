@@ -1164,22 +1164,22 @@ export default function StudentDashboardScreen({ navigation, route }) {
           key={item.id || i} 
           activeOpacity={0.8}
           onPress={handleSkinPress}
-          style={{ width: '22%', aspectRatio: 0.55, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, borderWidth: 1, borderColor: currentItemState === 'KIYILGAN' ? '#EAB308' : 'rgba(255,255,255,0.08)', marginBottom: 12, padding: 6, alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}
+          style={{ width: '22%', aspectRatio: 0.72, backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: 10, borderWidth: 1, borderColor: currentItemState === 'KIYILGAN' ? '#EAB308' : 'rgba(255,255,255,0.08)', marginBottom: 10, padding: 4, alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}
         >
           {currentItemState === 'KIYILGAN' ? (
-             <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EAB308', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
-               <MaterialCommunityIcons name="check" size={10} color="#000" />
+             <View style={{ position: 'absolute', top: 3, right: 3, width: 13, height: 13, borderRadius: 6.5, backgroundColor: '#EAB308', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
+               <MaterialCommunityIcons name="check" size={9} color="#000" />
              </View>
           ) : null}
           {isPricedOrLocked ? (
-             <View style={{ position: 'absolute', top: 4, right: 4, width: 14, height: 14, borderRadius: 7, backgroundColor: '#1F2937', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
-               <MaterialCommunityIcons name="lock" size={8} color="#FFFFFF" />
+             <View style={{ position: 'absolute', top: 3, right: 3, width: 13, height: 13, borderRadius: 6.5, backgroundColor: '#1F2937', justifyContent: 'center', alignItems: 'center', zIndex: 2 }}>
+               <MaterialCommunityIcons name="lock" size={7} color="#FFFFFF" />
              </View>
           ) : null}
-          <Image source={imgSrc} style={{ width: '85%', height: '50%', borderRadius: 6, marginTop: 6 }} contentFit="contain" />
-          <View style={{ alignItems: 'center', width: '100%', marginTop: 6, marginBottom: 2 }}>
+          <Image source={imgSrc} style={{ width: '85%', height: '44%', borderRadius: 6, marginTop: 2 }} contentFit="contain" />
+          <View style={{ alignItems: 'center', width: '100%', marginTop: 2, marginBottom: 2 }}>
             <Text style={{ color: isPricedOrLocked ? '#9CA3AF' : '#FFFFFF', fontFamily: 'Inter_600SemiBold', fontSize: 8, textAlign: 'center', marginBottom: 2 }} numberOfLines={1}>{String(item.name || '')}</Text>
-            <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginBottom: 6 }}>
+            <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 3, marginBottom: 4 }}>
               <Text style={{ color: rarityColor, fontFamily: 'Inter_700Bold', fontSize: 7 }}>{item.rarity || 'ODDIY'}</Text>
             </View>
             
