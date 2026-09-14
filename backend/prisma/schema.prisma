@@ -119,6 +119,7 @@ model ShopItem {
   name        String
   description String?
   imageUrl    String?  // uploaded image URL or static asset identifier
+  modelUrl    String?  // uploaded 3D .glb model file URL
   value       Int      @default(1) // energy count or key count
   price       Int      // Coin price e.g. 50
   targetGender String? @default("all") // "all", "boys", "girls"

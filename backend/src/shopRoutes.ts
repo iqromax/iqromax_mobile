@@ -12,20 +12,27 @@ const router = express.Router();
 // @ts-ignore
 const prisma = new PrismaClient();
 
-// Configure Multer for shop item images
+// Configure Multer for shop item images & 3D models
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../public/uploads/shop');
+    const isModel = file.fieldname === 'model' || file.originalname.toLowerCase().endsWith('.glb');
+    const uploadDir = path.join(__dirname, isModel ? '../../public/uploads/models' : '../../public/uploads/shop');
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, `shop_${Date.now()}${path.extname(file.originalname)}`);
+    const isModel = file.fieldname === 'model' || file.originalname.toLowerCase().endsWith('.glb');
+    const prefix = isModel ? 'model_' : 'shop_';
+    cb(null, `${prefix}${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 const upload = multer({ storage });
+const uploadFields = upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'model', maxCount: 1 }
+]);
 
 // Admin: Get all shop items
 router.get('/admin/shop-items', async (req, res) => {
@@ -41,14 +48,19 @@ router.get('/admin/shop-items', async (req, res) => {
   }
 });
 
-// Admin: Create shop item (Supports file upload for image)
-router.post('/admin/shop-items', upload.single('image'), async (req, res) => {
+// Admin: Create shop item (Supports file upload for image & .glb model)
+router.post('/admin/shop-items', uploadFields, async (req, res) => {
   try {
-    const { category, subcategory, name, description, value, price, targetGender } = req.body;
+    const { category, subcategory, name, description, value, price, targetGender, modelUrl: bodyModelUrl } = req.body;
     let imageUrl = req.body.imageUrl || null;
+    let modelUrl = bodyModelUrl || null;
 
-    if (req.file) {
-      imageUrl = `/api/uploads/shop/${req.file.filename}`;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    if (files?.image && files.image[0]) {
+      imageUrl = `/api/uploads/shop/${files.image[0].filename}`;
+    }
+    if (files?.model && files.model[0]) {
+      modelUrl = `/api/uploads/models/${files.model[0].filename}`;
     }
 
     if (!category || !name || price === undefined) {
@@ -63,6 +75,7 @@ router.post('/admin/shop-items', upload.single('image'), async (req, res) => {
         name: name.trim(),
         description: description ? description.trim() : null,
         imageUrl,
+        modelUrl,
         value: value ? parseInt(value, 10) : 1,
         price: parseInt(price, 10),
         targetGender: targetGender ? targetGender.trim() : 'all',
@@ -82,20 +95,29 @@ router.post('/admin/shop-items', upload.single('image'), async (req, res) => {
 });
 
 // Admin: Update shop item
-router.put('/admin/shop-items/:id', upload.single('image'), async (req, res) => {
+router.put('/admin/shop-items/:id', uploadFields, async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, subcategory, name, description, value, price, isActive, targetGender } = req.body;
+    const { category, subcategory, name, description, value, price, isActive, targetGender, modelUrl: bodyModelUrl } = req.body;
 
     // @ts-ignore
     const existing = await prisma.shopItem.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ error: 'Shop item not found' });
 
     let imageUrl = existing.imageUrl;
-    if (req.file) {
-      imageUrl = `/api/uploads/shop/${req.file.filename}`;
+    let modelUrl = existing.modelUrl || bodyModelUrl || null;
+
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    if (files?.image && files.image[0]) {
+      imageUrl = `/api/uploads/shop/${files.image[0].filename}`;
     } else if (req.body.imageUrl !== undefined) {
       imageUrl = req.body.imageUrl;
+    }
+
+    if (files?.model && files.model[0]) {
+      modelUrl = `/api/uploads/models/${files.model[0].filename}`;
+    } else if (req.body.modelUrl !== undefined) {
+      modelUrl = req.body.modelUrl;
     }
 
     // @ts-ignore
@@ -107,6 +129,7 @@ router.put('/admin/shop-items/:id', upload.single('image'), async (req, res) => 
         name: name ? name.trim() : existing.name,
         description: description !== undefined ? description.trim() : existing.description,
         imageUrl,
+        modelUrl,
         value: value !== undefined ? parseInt(value, 10) : existing.value,
         price: price !== undefined ? parseInt(price, 10) : existing.price,
         targetGender: targetGender !== undefined ? targetGender.trim() : existing.targetGender,

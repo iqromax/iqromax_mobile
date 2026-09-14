@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
-import { ShoppingBag, Plus, Trash2, Edit, Sparkles, AlertCircle, CheckCircle2, Zap, Image as ImageIcon, Key, Shirt, Filter } from 'lucide-react';
+import { ShoppingBag, Plus, Trash2, Edit, Sparkles, AlertCircle, CheckCircle2, Zap, Image as ImageIcon, Key, Shirt, Filter, Box } from 'lucide-react';
 
 interface ShopItem {
   id: string;
@@ -9,6 +9,7 @@ interface ShopItem {
   name: string;
   description?: string | null;
   imageUrl?: string | null;
+  modelUrl?: string | null;
   value: number;
   price: number;
   targetGender?: string;
@@ -35,6 +36,9 @@ const ShopAdmin = () => {
   const [targetGender, setTargetGender] = useState<string>('all');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const [modelFile, setModelFile] = useState<File | null>(null);
+  const [modelName, setModelName] = useState<string | null>(null);
 
   const fetchShopItems = async () => {
     try {
@@ -63,6 +67,8 @@ const ShopAdmin = () => {
     setTargetGender('all');
     setImageFile(null);
     setImagePreview(null);
+    setModelFile(null);
+    setModelName(null);
     setIsModalOpen(true);
   };
 
@@ -77,6 +83,8 @@ const ShopAdmin = () => {
     setTargetGender(item.targetGender || 'all');
     setImageFile(null);
     setImagePreview(item.imageUrl || null);
+    setModelFile(null);
+    setModelName(item.modelUrl ? item.modelUrl.split('/').pop() || '3D Model Mavjud' : null);
     setIsModalOpen(true);
   };
 
@@ -85,6 +93,14 @@ const ShopAdmin = () => {
       const file = e.target.files[0];
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleModelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setModelFile(file);
+      setModelName(file.name);
     }
   };
 
@@ -114,6 +130,9 @@ const ShopAdmin = () => {
       formData.append('price', String(price));
       if (imageFile) {
         formData.append('image', imageFile);
+      }
+      if (modelFile) {
+        formData.append('model', modelFile);
       }
 
       const url = editingItem ? `/api/admin/shop-items/${editingItem.id}` : '/api/admin/shop-items';
@@ -472,30 +491,55 @@ const ShopAdmin = () => {
                   </>
                 )}
 
-                {/* 3. Product Image Upload (Only for Inventory) */}
+                {/* 3. Product Image & 3D Model Upload (Only for Inventory) */}
                 {category === 'inventory' && (
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
-                      Mahsulot Rasmi (Image Upload)
-                    </label>
-                    <div className="flex items-center gap-4 bg-[#121225] p-3 border border-[#1A1A35] rounded-xl">
-                      {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" className="w-14 h-14 rounded-lg object-cover border border-amber-500/30" />
-                      ) : (
-                        <div className="w-14 h-14 rounded-lg bg-[#181832] flex items-center justify-center text-gray-500 border border-[#252545]">
-                          <ImageIcon className="w-6 h-6" />
+                  <>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                        Mahsulot Rasmi (Image Upload)
+                      </label>
+                      <div className="flex items-center gap-4 bg-[#121225] p-3 border border-[#1A1A35] rounded-xl">
+                        {imagePreview ? (
+                          <img src={imagePreview} alt="Preview" className="w-14 h-14 rounded-lg object-cover border border-amber-500/30" />
+                        ) : (
+                          <div className="w-14 h-14 rounded-lg bg-[#181832] flex items-center justify-center text-gray-500 border border-[#252545]">
+                            <ImageIcon className="w-6 h-6" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-lg cursor-pointer transition-all">
+                            <ImageIcon className="w-4 h-4" />
+                            <span>Rasm Tanlash...</span>
+                            <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                          </label>
+                          <p className="text-[11px] text-gray-400 mt-1">PNG, JPG formatdagi rasmlar</p>
                         </div>
-                      )}
-                      <div className="flex-1">
-                        <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-lg cursor-pointer transition-all">
-                          <ImageIcon className="w-4 h-4" />
-                          <span>Rasm Tanlash...</span>
-                          <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-                        </label>
-                        <p className="text-[11px] text-gray-400 mt-1">PNG, JPG formatdagi rasmlar</p>
                       </div>
                     </div>
-                  </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                        Mahsulot Modeli (.GLB 3D Model File)
+                      </label>
+                      <div className="flex items-center gap-4 bg-[#121225] p-3 border border-[#1A1A35] rounded-xl">
+                        <div className="w-14 h-14 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                          <Box className="w-7 h-7" />
+                        </div>
+                        <div className="flex-1">
+                          <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 text-xs font-bold rounded-lg cursor-pointer transition-all">
+                            <Box className="w-4 h-4" />
+                            <span>.GLB Model Tanlash...</span>
+                            <input type="file" accept=".glb" onChange={handleModelChange} className="hidden" />
+                          </label>
+                          {modelName ? (
+                            <p className="text-[11px] text-amber-300 font-semibold mt-1 truncate">📦 {modelName}</p>
+                          ) : (
+                            <p className="text-[11px] text-gray-400 mt-1">3D Personaj uchun .glb formatdagi model fayli</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
 
                 {/* 4. Product Name */}
