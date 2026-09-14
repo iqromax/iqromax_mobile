@@ -136,6 +136,10 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     }
   }, [headwearBase64]);
 
+  const currentIdx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
+  const currentOrientation = MODEL_ORIENTATIONS[currentIdx] || '0deg 0deg 0deg';
+  const currentOrbit = MODEL_ORBITS[currentIdx] || '90deg 75deg auto';
+
   const htmlContent = modelBase64 ? `
     <!DOCTYPE html>
     <html>
