@@ -166,14 +166,21 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
         <script>
           const viewer = document.getElementById('viewer');
           if (viewer) {
-            viewer.addEventListener('load', async () => {
+            const attachHeadwear = async () => {
               ${headwearBase64 ? `
                 try {
                   const headwearB64 = "${headwearBase64}";
                   const res = await fetch("data:model/gltf-binary;base64," + headwearB64);
                   const blob = await res.blob();
                   const url = URL.createObjectURL(blob);
-                  const gltf = await viewer.loadGltf(url);
+                  
+                  let gltf = null;
+                  if (typeof viewer.loadGltf === 'function') {
+                    gltf = await viewer.loadGltf(url);
+                  } else if (viewer.model && typeof viewer.model.loadGltf === 'function') {
+                    gltf = await viewer.model.loadGltf(url);
+                  }
+
                   if (gltf && gltf.scene && viewer.model && viewer.model.scene) {
                     const THREE = window.THREE || viewer.model.scene.constructor.THREE || (viewer.constructor && viewer.constructor.THREE);
                     if (THREE && THREE.Box3 && THREE.Vector3) {
@@ -206,18 +213,26 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                   console.error('Error attaching 3D headwear:', e);
                 }
               ` : ''}
-            });
+            };
+
+            if (viewer.loaded) {
+              attachHeadwear();
+            } else {
+              viewer.addEventListener('load', attachHeadwear);
+            }
           }
         </script>
       </body>
     </html>
   ` : '';
 
+  const headwearKey = typeof headwearPath === 'string' ? headwearPath : (headwearPath || 'none');
+
   return (
     <View style={[styles.container, style]}>
       {modelBase64 ? (
         <WebView
-          key={`char_${characterIndex}_head_${headwearBase64 ? 'has' : 'none'}`}
+          key={`char_${characterIndex}_hw_${headwearKey}_b64_${headwearBase64 ? 'loaded' : 'pending'}`}
           ref={webViewRef}
           originWhitelist={['*']}
           source={{ html: htmlContent }}
