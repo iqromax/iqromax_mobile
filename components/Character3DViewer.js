@@ -213,61 +213,49 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 currentHeadwearNode = gltf.scene;
                 const THREE = window.THREE || viewer.model.scene.constructor.THREE || (viewer.constructor && viewer.constructor.THREE);
                 
-                // Try attaching to Head bone first if character armature is rigged
-                let headBone = null;
-                viewer.model.scene.traverse((node) => {
-                  if (node.isBone && (node.name.toLowerCase().includes('head') || node.name.toLowerCase().includes('skull'))) {
-                    headBone = node;
-                  }
-                });
-
-                if (headBone) {
-                  // Direct attachment to character's Head bone
-                  const headBoneBox = new THREE.Box3().setFromObject(headBone);
-                  const headBoneSize = headBoneBox.getSize(new THREE.Vector3());
-                  
-                  const headBox = new THREE.Box3().setFromObject(gltf.scene);
-                  const headSize = headBox.getSize(new THREE.Vector3());
-
-                  const targetWidth = (headBoneSize.x > 0 ? headBoneSize.x : 0.4) * 1.5;
-                  const currentWidth = headSize.x > 0 ? headSize.x : 1;
-                  const scaleFactor = targetWidth / currentWidth;
-                  
-                  if (isFinite(scaleFactor) && scaleFactor > 0) {
-                    gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
-                  } else {
-                    gltf.scene.scale.set(1.5, 1.5, 1.5);
-                  }
-
-                  gltf.scene.position.set(0, (headBoneSize.y || 0.2) * 0.4, 0);
-                  headBone.add(gltf.scene);
-                } else if (THREE && THREE.Box3 && THREE.Vector3) {
+                if (THREE && THREE.Box3 && THREE.Vector3) {
+                  // 1-BOSQICH: Asosiy Personajning 3D Ekstremum Chegaralarini (Bounding Box) Hisoblash
                   const charBox = new THREE.Box3().setFromObject(viewer.model.scene);
                   const charSize = charBox.getSize(new THREE.Vector3());
+
+                  // 2-BOSQICH: Kiyim/Bosh kiyimining Proportsional Masshtabini (Auto-Scaling) Hisoblash
+                  const skinBox = new THREE.Box3().setFromObject(gltf.scene);
+                  const skinSize = skinBox.getSize(new THREE.Vector3());
                   
-                  const headBox = new THREE.Box3().setFromObject(gltf.scene);
-                  const headSize = headBox.getSize(new THREE.Vector3());
+                  // Inson va humanoid personajlarda kalla eni elka kengligining ~78% qismini tashkil qiladi
+                  const targetHatWidth = charSize.x * 0.78;
+                  const maxSkinDim = Math.max(skinSize.x, skinSize.z, 0.0001);
+                  const hatScale = targetHatWidth / maxSkinDim;
+                  
+                  gltf.scene.scale.set(hatScale, hatScale, hatScale);
 
-                  // Proper proportional scale for headwear
-                  const targetWidth = (charSize.x > 0 ? charSize.x : 1) * 0.55;
-                  const currentWidth = headSize.x > 0 ? headSize.x : 1;
-                  let scaleFactor = targetWidth / currentWidth;
-                  if (!isFinite(scaleFactor) || scaleFactor <= 0) scaleFactor = 1.5;
+                  // 3-BOSQICH: Masshtablangan 3D Obyektni Personaj Boshining Markaziga Aniq Tekislash
+                  const scaledSkinBox = new THREE.Box3().setFromObject(gltf.scene);
+                  const scaledSkinCenter = scaledSkinBox.getCenter(new THREE.Vector3());
+                  const scaledSkinMinY = scaledSkinBox.min.y;
+                  
+                  // Personaj bo'yining 96.5% balandligi (soch va kalla qismi)
+                  const headY = charSize.y * 0.965;
+                  
+                  gltf.scene.position.x = -scaledSkinCenter.x;       // X o'qi bo'yicha markazlashtirish
+                  gltf.scene.position.y = headY - scaledSkinMinY;    // Y o'qi bo'yicha kalla ustiga qo'yish
+                  gltf.scene.position.z = -scaledSkinCenter.z;       // Z o'qi bo'yicha markazlashtirish
 
-                  gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-                  // Re-calculate box after scaling
-                  const scaledBox = new THREE.Box3().setFromObject(gltf.scene);
-                  const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
-
-                  // Place at top of character bounding box (head area)
-                  gltf.scene.position.x = (charBox.min.x + charBox.max.x) / 2 - scaledCenter.x;
-                  gltf.scene.position.z = (charBox.min.z + charBox.max.z) / 2 - scaledCenter.z;
-                  gltf.scene.position.y = charBox.max.y - (scaledBox.max.y - scaledBox.min.y) * 0.4;
+                  // 4-BOSQICH: 3D Renderlash Optimallashtirish Funksiyalari
+                  gltf.scene.traverse((child) => {
+                    if (child.isMesh) {
+                      child.castShadow = true;
+                      child.receiveShadow = true;
+                      child.frustumCulled = false; // Kamera burilganda model yo'qolib qolmasligi uchun
+                      if (child.material) {
+                        child.material.side = THREE.DoubleSide; // Ichki va tashqi poligonlarni 100% ko'rsatish
+                      }
+                    }
+                  });
 
                   viewer.model.scene.add(gltf.scene);
                 } else {
-                  gltf.scene.scale.set(1.8, 1.8, 1.8);
+                  gltf.scene.scale.set(1.0, 1.0, 1.0);
                   gltf.scene.position.set(0, 1.65, 0);
                   viewer.model.scene.add(gltf.scene);
                 }
