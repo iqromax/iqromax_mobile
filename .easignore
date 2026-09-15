@@ -1,13 +1,13 @@
-# EAS build ignore list
-node_modules/
-.expo/
+# EAS Build ignore file
+# Ignore non-mobile folders to keep EAS archive tiny and fast
+
+backend/
+iqromax-web-frontend/
 dist/
 web-build/
-backend/
+node_modules/
+.expo/
 .git/
-*.apk
-*.aab
-*.tar.gz
-*.zip
+.idea/
 android/
 ios/
