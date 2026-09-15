@@ -505,13 +505,6 @@ export default function AbacusSimulatorScreen() {
           </LinearGradient>
         </View>
 
-        {/* Column Rod Labels (Minglik, Yuzlik, O'nlik, Birlik) */}
-        <View style={{ flexDirection: 'row', width: 330, justifyContent: 'space-evenly', marginTop: 10 }}>
-          <View style={{ width: 70, alignItems: 'center' }}><Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 10 }}>1000 (M)</Text></View>
-          <View style={{ width: 70, alignItems: 'center' }}><Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 10 }}>100 (Y)</Text></View>
-          <View style={{ width: 70, alignItems: 'center' }}><Text style={{ color: '#FBBF24', fontFamily: 'Inter_700Bold', fontSize: 11 }}>10 (O'nlik)</Text></View>
-          <View style={{ width: 70, alignItems: 'center' }}><Text style={{ color: '#34D399', fontFamily: 'Inter_700Bold', fontSize: 11 }}>1 (Birlik)</Text></View>
-        </View>
 
         {/* Bottom Controls */}
         <View style={styles.bottomControls}>
