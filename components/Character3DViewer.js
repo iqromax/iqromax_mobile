@@ -306,7 +306,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 window.headwearModel.position.y = headY - scaledMinY;
                 window.headwearModel.position.z = -scaledCenter.z;
 
+                window.headwearModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
                 scene.add(window.headwearModel);
+
               });
             } catch(e) {
               console.error('Headwear parse error:', e);
@@ -358,7 +360,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 window.accessoryModel.position.y = chestY - scaledCenter.y;
                 window.accessoryModel.position.z = -scaledCenter.z;
 
+                window.accessoryModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
                 scene.add(window.accessoryModel);
+
               });
             } catch(e) {
               console.error('Accessory parse error:', e);
@@ -388,9 +392,17 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 characterModel.position.z -= center.z;
 
                 scene.add(characterModel);
+
+                // Set initial character rotation so all characters face straight forward towards the camera
+                const modelRotationsY = [-Math.PI / 2, 0, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2];
+                const charIdx = ${characterIndex};
+                const targetRotY = modelRotationsY[charIdx] !== undefined ? modelRotationsY[charIdx] : -Math.PI / 2;
+                characterModel.rotation.y = targetRotY;
+
                 controls.target.set(0, size.y * 0.52, 0);
                 camera.position.set(0, size.y * 0.52, Math.max(size.x, size.y, size.z) * 1.55);
                 controls.update();
+
 
 
                 // Apply initial skins if ready
