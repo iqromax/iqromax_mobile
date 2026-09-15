@@ -538,26 +538,20 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isAbacusDigitsPickerOpen, setIsAbacusDigitsPickerOpen] = useState(false);
   const abacusExampleNumbers = Array.from({ length: 19 }, (_, i) => i + 7);
 
-  const [isPersonajOpen, setIsPersonajOpen] = useState(false);
+  const [isPersonajOpen, setIsPersonajOpen] = useState(true);
   const [isSkinlarOpen, setIsSkinlarOpen] = useState(false);
 
   const togglePersonajAccordion = () => {
     if (!checkGuestAuth()) return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsPersonajOpen(prev => {
-      if (!prev) setIsSkinlarOpen(false);
-      return !prev;
-    });
+    setIsPersonajOpen(prev => !prev);
   };
 
   const toggleSkinlarAccordion = () => {
     if (!checkGuestAuth()) return;
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsSkinlarOpen(prev => {
-      if (!prev) setIsPersonajOpen(false);
-      return !prev;
-    });
+    Alert.alert("Tez kunda!", "Skinlar bo'limi tez kunda ishga tushadi. Hozircha personajlarni almashtirishingiz mumkin!");
   };
+
 
   const updateCharacterOnServer = async (index) => {
     const charNames = {
@@ -2899,7 +2893,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             )}
 
-            {/* 2. SKINLAR ACCORDION DROPDOWN BUTTON */}
+            {/* 2. SKINLAR ACCORDION DROPDOWN BUTTON (LOCKED FOR PRODUCTION RELEASE) */}
             <TouchableOpacity
               style={{
                 flexDirection: 'row',
@@ -2907,11 +2901,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 alignItems: 'center',
                 backgroundColor: '#0F111E',
                 borderWidth: 1.5,
-                borderColor: isSkinlarOpen ? '#A855F7' : '#1F2937',
+                borderColor: '#1F2937',
                 borderRadius: 14,
                 paddingHorizontal: 16,
                 paddingVertical: 14,
                 marginBottom: 10,
+                opacity: 0.9,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.4,
@@ -2930,11 +2925,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     {t.invSkins || 'SKINLAR'}
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }}>
-                    {isSkinlarOpen ? "Yopish uchun bosing" : "Kiyimlar, poyabzal va aksessuarlar kiyish"}
+                    Tez kunda yangi kiyimlar va aksessuarlar qo'shiladi!
                   </Text>
                 </View>
               </View>
+
+              {/* Lock Badge */}
+              <View style={{ backgroundColor: 'rgba(234, 179, 8, 0.15)', borderWidth: 1, borderColor: '#EAB308', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="lock-closed" size={12} color="#EAB308" style={{ marginRight: 4 }} />
+                <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 9 }}>TEZ KUNDA</Text>
+              </View>
             </TouchableOpacity>
+
 
             {/* SKINLAR GRID CONTENT */}
             {isSkinlarOpen && (
