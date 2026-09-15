@@ -12,11 +12,18 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=4096"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "NODE_OPTIONS": "--max-old-space-size=4096"
+      }
     }
+
   },
   "submit": {
     "production": {}
