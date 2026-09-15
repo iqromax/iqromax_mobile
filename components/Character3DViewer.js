@@ -394,10 +394,11 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 scene.add(characterModel);
 
                 // Set initial character rotation so all characters face straight forward towards the camera
-                const modelRotationsY = [-Math.PI / 2, 0, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2];
+                const modelRotationsY = [-Math.PI / 2, 0, -Math.PI / 2, -Math.PI / 2, 0, 0, 0, 0];
                 const charIdx = ${characterIndex};
-                const targetRotY = modelRotationsY[charIdx] !== undefined ? modelRotationsY[charIdx] : -Math.PI / 2;
+                const targetRotY = modelRotationsY[charIdx] !== undefined ? modelRotationsY[charIdx] : 0;
                 characterModel.rotation.y = targetRotY;
+
 
                 controls.target.set(0, size.y * 0.52, 0);
                 camera.position.set(0, size.y * 0.52, Math.max(size.x, size.y, size.z) * 1.55);
