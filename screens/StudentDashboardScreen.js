@@ -549,8 +549,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const toggleSkinlarAccordion = () => {
     if (!checkGuestAuth()) return;
-    Alert.alert("Tez kunda!", "Skinlar bo'limi tez kunda ishga tushadi. Hozircha personajlarni almashtirishingiz mumkin!");
+    showCustomAlert(
+      "Tez Kunda!",
+      "Kiyimlar va aksessuarlar bo'limi tez kunda ishga tushadi. Hozircha personajlarni almashtirishingiz va tanlashingiz mumkin!",
+      "warning",
+      [{ text: "Tushundim", onPress: () => {} }]
+    );
   };
+
 
 
   const updateCharacterOnServer = async (index) => {
@@ -2916,25 +2922,25 @@ export default function StudentDashboardScreen({ navigation, route }) {
               activeOpacity={0.8}
               onPress={toggleSkinlarAccordion}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, paddingRight: 10 }}>
                 <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(168, 85, 247, 0.15)', justifyContent: 'center', alignItems: 'center', marginRight: 12 }}>
                   <MaterialCommunityIcons name="tshirt-crew" size={20} color="#A855F7" />
                 </View>
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     {t.invSkins || 'SKINLAR'}
                   </Text>
-                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }}>
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }} numberOfLines={1}>
                     Tez kunda yangi kiyimlar va aksessuarlar qo'shiladi!
                   </Text>
                 </View>
               </View>
 
-              {/* Lock Badge */}
-              <View style={{ backgroundColor: 'rgba(234, 179, 8, 0.15)', borderWidth: 1, borderColor: '#EAB308', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, flexDirection: 'row', alignItems: 'center' }}>
-                <Ionicons name="lock-closed" size={12} color="#EAB308" style={{ marginRight: 4 }} />
-                <Text style={{ color: '#EAB308', fontFamily: 'Inter_700Bold', fontSize: 9 }}>TEZ KUNDA</Text>
+              {/* Compact Lock Icon */}
+              <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(234, 179, 8, 0.15)', borderWidth: 1, borderColor: '#EAB308', justifyContent: 'center', alignItems: 'center' }}>
+                <Ionicons name="lock-closed" size={14} color="#EAB308" />
               </View>
+
             </TouchableOpacity>
 
 
@@ -5156,9 +5162,29 @@ export default function StudentDashboardScreen({ navigation, route }) {
               elevation: 12
             }
           ]}>
+            {/* Top Glowing Icon Badge */}
+            <View style={{
+              width: 54,
+              height: 54,
+              borderRadius: 27,
+              backgroundColor: customAlert.type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+              borderWidth: 1.5,
+              borderColor: customAlert.type === 'success' ? '#10B981' : '#F59E0B',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 12
+            }}>
+              <Ionicons 
+                name={customAlert.type === 'success' ? 'checkmark-circle' : 'lock-closed'} 
+                size={26} 
+                color={customAlert.type === 'success' ? '#10B981' : '#F59E0B'} 
+              />
+            </View>
+
             <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 8, marginTop: 4 }}>
               {customAlert.title}
             </Text>
+
 
             <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 24, lineHeight: 20 }}>
               {customAlert.message}
