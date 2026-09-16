@@ -9,5 +9,4 @@ node_modules/
 .expo/
 .git/
 .idea/
-android/
-ios/
+
