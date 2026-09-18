@@ -124,7 +124,7 @@ const Students = () => {
         {/* Toolbar: Search and Add */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#0A0A16] border border-[#1A1A2F] p-4 rounded-2xl shadow-lg">
           {/* Search */}
-          <div className="relative w-full sm:max-w-md group">
+          <div className="relative w-full group">
             <input 
               type="text" 
               placeholder="Ism, tel raqami yoki email bo'yicha qidirish..." 
@@ -134,12 +134,6 @@ const Students = () => {
             />
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-indigo-300/40 group-focus-within:text-purple-400 transition-colors" />
           </div>
-
-          {/* Add Button */}
-          <button className="w-full sm:w-auto flex items-center justify-center gap-2 h-11 px-6 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium text-sm tracking-wide transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] hover:shadow-[0_0_25px_rgba(139,92,246,0.5)] active:scale-95 shrink-0">
-            <Plus className="w-4.5 h-4.5" />
-            <span>Foydalanuvchi qo'shish</span>
-          </button>
         </div>
 
         {/* Table Container */}
