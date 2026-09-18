@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle, Package, Download, ShoppingBag } from 'lucide-react';
+import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle, Package, Download, ShoppingBag, Menu } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
@@ -15,8 +15,16 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen bg-[#070712] text-white font-sans selection:bg-purple-500/30">
       
+      {/* Mobile Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className={`${isSidebarOpen ? 'w-[260px]' : 'w-[88px]'} transition-all duration-300 flex-shrink-0 bg-[#05050C] border-r border-[#151528] flex flex-col justify-between sticky top-0 h-screen overflow-y-auto`}>
+      <aside className={`fixed md:sticky top-0 left-0 h-screen z-50 transition-all duration-300 flex-shrink-0 bg-[#05050C] border-r border-[#151528] flex flex-col justify-between overflow-y-auto ${isSidebarOpen ? 'translate-x-0 w-[260px]' : '-translate-x-full md:translate-x-0 w-[260px] md:w-[88px]'}`}>
         
         {/* Top Section */}
         <div>
@@ -41,7 +49,14 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="px-4 space-y-2">
+          <nav 
+            className="px-4 space-y-2"
+            onClick={(e) => {
+              if ((e.target as HTMLElement).closest('a')) {
+                if (window.innerWidth < 768) setIsSidebarOpen(false);
+              }
+            }}
+          >
             <Link 
               to="/dashboard" 
               className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
@@ -220,10 +235,16 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       <main className="flex-1 flex flex-col min-w-0">
         
         {/* Top Header */}
-        <header className="h-[88px] flex items-center justify-between px-8 border-b border-[#151528] bg-[#070712]/80 backdrop-blur-md sticky top-0 z-40">
+        <header className="h-[88px] flex items-center justify-between px-4 md:px-8 border-b border-[#151528] bg-[#070712]/80 backdrop-blur-md sticky top-0 z-30">
           
-          <div className="flex items-center gap-6">
-             {/* Left side of header can have breadcrumbs or greeting, but based on image, greeting is in body. Search is here. */}
+          <div className="flex items-center gap-4 md:gap-6">
+             {/* Hamburger for mobile */}
+             <button 
+               className="md:hidden p-2 -ml-2 rounded-xl text-indigo-200 hover:text-white hover:bg-[#121223] transition-colors" 
+               onClick={() => setIsSidebarOpen(true)}
+             >
+               <Menu className="w-6 h-6" />
+             </button>
           </div>
 
           {/* Right Header Utilities */}
@@ -246,7 +267,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 p-8 overflow-x-hidden">
+        <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
           {children}
         </div>
       </main>
