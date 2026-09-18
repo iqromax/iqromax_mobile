@@ -54,78 +54,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               {isSidebarOpen && <span>Dashboard</span>}
             </Link>
 
-            <Link 
-              to="/mystery-box" 
-              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
-                location.pathname === '/mystery-box' 
-                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
-                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
-              }`}
-            >
-              <Package className={`w-5 h-5 ${location.pathname === '/mystery-box' ? 'text-purple-200' : ''}`} />
-              {isSidebarOpen && <span>Sirli Sandiq</span>}
-            </Link>
-
-            <Link 
-              to="/shop" 
-              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
-                location.pathname === '/shop' 
-                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
-                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
-              }`}
-            >
-              <ShoppingBag className={`w-5 h-5 ${location.pathname === '/shop' ? 'text-purple-200' : ''}`} />
-              {isSidebarOpen && <span>IQROSHOP</span>}
-            </Link>
-
-            <Link 
-              to="/inventory-admin" 
-              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
-                location.pathname === '/inventory-admin' 
-                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
-                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
-              }`}
-            >
-              <Package className={`w-5 h-5 ${location.pathname === '/inventory-admin' ? 'text-purple-200' : ''}`} />
-              {isSidebarOpen && <span>Inventar (Skinlar)</span>}
-            </Link>
-
-            <Link 
-              to="/app-downloading" 
-              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
-                location.pathname === '/app-downloading' 
-                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
-                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
-              }`}
-            >
-              <Download className={`w-5 h-5 ${location.pathname === '/app-downloading' ? 'text-purple-200' : ''}`} />
-              {isSidebarOpen && <span>App Downloading</span>}
-            </Link>
-            
-            <Link 
-              to="/energy-center" 
-              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
-                location.pathname === '/energy-center' 
-                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
-                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
-              }`}
-            >
-              <PlayCircle className={`w-5 h-5 ${location.pathname === '/energy-center' ? 'text-purple-200' : ''}`} />
-              {isSidebarOpen && <span>Energiya markazi</span>}
-            </Link>
-            
-            <Link 
-              to="/notifications" 
-              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
-                location.pathname === '/notifications' 
-                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
-                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
-              }`}
-            >
-              <Bell className={`w-5 h-5 ${location.pathname === '/notifications' ? 'text-purple-200' : ''}`} />
-              {isSidebarOpen && <span>Xabarnomalar</span>}
-            </Link>
-            
             <div className="space-y-1">
               <button 
                 onClick={() => {
@@ -201,6 +129,78 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
               </div>
             </div>
+
+            <Link 
+              to="/mystery-box" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/mystery-box' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <Package className={`w-5 h-5 ${location.pathname === '/mystery-box' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>Sirli Sandiq</span>}
+            </Link>
+
+            <Link 
+              to="/shop" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/shop' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <ShoppingBag className={`w-5 h-5 ${location.pathname === '/shop' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>IQROSHOP</span>}
+            </Link>
+
+            <Link 
+              to="/inventory-admin" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/inventory-admin' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <Package className={`w-5 h-5 ${location.pathname === '/inventory-admin' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>Inventar (Skinlar)</span>}
+            </Link>
+
+            <Link 
+              to="/app-downloading" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/app-downloading' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <Download className={`w-5 h-5 ${location.pathname === '/app-downloading' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>App Downloading</span>}
+            </Link>
+            
+            <Link 
+              to="/energy-center" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/energy-center' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <PlayCircle className={`w-5 h-5 ${location.pathname === '/energy-center' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>Energiya markazi</span>}
+            </Link>
+            
+            <Link 
+              to="/notifications" 
+              className={`flex items-center gap-3 ${isSidebarOpen ? 'px-4' : 'justify-center'} py-3.5 rounded-xl transition-all ${
+                location.pathname === '/notifications' 
+                  ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                  : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+              }`}
+            >
+              <Bell className={`w-5 h-5 ${location.pathname === '/notifications' ? 'text-purple-200' : ''}`} />
+              {isSidebarOpen && <span>Xabarnomalar</span>}
+            </Link>
           </nav>
         </div>
 

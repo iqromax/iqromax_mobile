@@ -14,6 +14,7 @@ interface User {
   status: string;
   avatar?: string;
   character?: string;
+  createdAt?: string;
 }
 
 const Students = () => {
@@ -154,6 +155,7 @@ const Students = () => {
                   <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase tracking-wider">Tel raqami</th>
                   <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase tracking-wider">Email</th>
                   <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase tracking-wider">Country</th>
+                  <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase tracking-wider">Sana</th>
                   <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase tracking-wider">Holati</th>
                   <th className="py-4 px-6 text-xs font-semibold text-indigo-200/50 uppercase tracking-wider text-right">Amallar</th>
                 </tr>
@@ -212,6 +214,10 @@ const Students = () => {
                       
                       <td className="py-4 px-6 text-sm text-indigo-100/80 whitespace-nowrap">
                         {getCountryFullName(student.country)}
+                      </td>
+                      
+                      <td className="py-4 px-6 text-sm text-indigo-200/60 whitespace-nowrap">
+                        {student.createdAt ? new Date(student.createdAt).toLocaleDateString('uz-UZ') : '-'}
                       </td>
                       
                       <td className="py-4 px-6 whitespace-nowrap">
