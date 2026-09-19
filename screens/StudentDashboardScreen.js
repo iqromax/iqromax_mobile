@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react
 import { useFocusEffect } from '@react-navigation/native';
 import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator, Share, DeviceEventEmitter } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, ImageBackground } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as THREE from 'three';
@@ -177,6 +177,7 @@ const getAvatarByName = (name) => {
 };
 
 export default function StudentDashboardScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
   const { energy: currentEnergy, addEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
   const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
@@ -3548,7 +3549,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
 
         {/* Stats Row 2 */}
-        <View style={styles.navBarContainer}>
+        <View style={[styles.navBarContainer, { paddingBottom: Platform.OS === 'android' ? Math.max(insets.bottom, 15) : insets.bottom, height: 80 + (Platform.OS === 'android' ? Math.max(insets.bottom, 15) : insets.bottom) }]}>
           <TouchableOpacity 
             style={[styles.navItem, activeTab === 'home' && styles.navItemActive]} 
             onPress={() => setActiveTab('home')}
