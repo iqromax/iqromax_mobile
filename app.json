@@ -5,7 +5,8 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "backgroundColor": "#05050C",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
@@ -15,6 +16,10 @@
         "foregroundImage": "./assets/icon.png"
       },
       "package": "com.iqromax.iqromax_mobile"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#05050C",
+      "barStyle": "light-content"
     },
     "web": {
       "favicon": "./assets/favicon.png"

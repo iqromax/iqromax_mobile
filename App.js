@@ -2,8 +2,10 @@ import './src/utils/safeWeakMap';
 import { Asset } from 'expo-asset';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking } from 'react-native';
-import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking, Platform } from 'react-native';
+import * as SystemUI from 'expo-system-ui';
+SystemUI.setBackgroundColorAsync('#05050C');
+import { NavigationContainer, createNavigationContainerRef, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { io } from 'socket.io-client';
@@ -40,6 +42,14 @@ export const navigationRef = createNavigationContainerRef();
 import TeacherDashboardScreen from './screens/TeacherDashboardScreen';
 import ParentDashboardScreen from './screens/ParentDashboardScreen';
 
+const MyDarkTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: '#05050C',
+  },
+};
+
 export default function App() {
   
   const [assetsLoaded, setAssetsLoaded] = useState(false);
@@ -52,7 +62,6 @@ export default function App() {
   const [inviteTimer, setInviteTimer] = useState(0);
   const [rejectionAlert, setRejectionAlert] = useState(null);
   const inviteSlideAnim = useRef(new Animated.Value(-300)).current;
-  const rejectionSlideAnim = useRef(new Animated.Value(-200)).current;
   const socketRef = useRef(null);
 
   const handleRespondInvite = async (status) => {
@@ -416,9 +425,9 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: '#05050C' }}>
       <SoundPlayerBridge />
-      <NavigationContainer ref={navigationRef}>
+      <NavigationContainer ref={navigationRef} theme={MyDarkTheme}>
         <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
           <Stack.Screen name="StepOne" component={StepOneScreen} />
           <Stack.Screen name="StepTwo" component={StepTwoScreen} />

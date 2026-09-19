@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, StatusBar, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, StatusBar, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image, ImageBackground } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 

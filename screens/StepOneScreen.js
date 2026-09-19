@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, StatusBar, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 

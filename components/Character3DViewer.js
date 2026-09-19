@@ -222,6 +222,12 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           // Lock vertical rotation (only allow horizontal rotation around y-axis)
           controls.minPolarAngle = Math.PI / 2;
           controls.maxPolarAngle = Math.PI / 2;
+          
+          // Disable zooming (pinch to zoom)
+          controls.enableZoom = false;
+          
+          // Disable panning (moving off-center with two fingers)
+          controls.enablePan = false;
 
 
           // Lights

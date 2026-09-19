@@ -618,8 +618,8 @@ export default function ParentDashboardScreen({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#05050C" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
 
       {/* TOP HEADER BAR */}
       <LinearGradient colors={['#1F1035', '#090914']} style={styles.topHeader}>

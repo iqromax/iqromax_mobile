@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   Share,
@@ -13,6 +12,7 @@ import {
   ActivityIndicator,
   ImageBackground,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 import * as Clipboard from 'expo-clipboard';

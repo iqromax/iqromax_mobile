@@ -5,13 +5,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  SafeAreaView,
   StatusBar,
   Platform,
   ScrollView,
   KeyboardAvoidingView,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import io from 'socket.io-client';
 import { API_URL, SOCKET_URL } from '../src/config/api';

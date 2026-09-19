@@ -749,8 +749,8 @@ export default function TeacherDashboardScreen({ navigation, route }) {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#05050C" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
 
       {/* TOP HEADER */}
       <LinearGradient

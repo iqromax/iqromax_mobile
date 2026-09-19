@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Dimensions, StatusBar, TextInput, FlatList, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, StatusBar, TextInput, FlatList, ScrollView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { COUNTRIES } from '../data/countries';

@@ -1287,7 +1287,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Center Column: Showcase */}
             <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
-              <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
+              <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
                 <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
               </View>
               <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
@@ -1401,7 +1401,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               contentFit="cover" 
             />
             {/* 3D Model */}
-            <View style={{ position: 'absolute', top: 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
+            <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -40 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
               <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
             </View>
             <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
@@ -1552,8 +1552,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#05050C" />
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent={true} />
       
       {/* Home Tab Content */}
       <View style={{ flex: 1, display: activeTab === 'home' ? 'flex' : 'none' }}>
@@ -1634,7 +1634,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
 
             {/* 3D Model Container */}
-            <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], width: '100%', height: '100%' }} pointerEvents="auto">
+            <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], width: '100%', height: '100%' }} pointerEvents="auto">
               <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
             </View>
             
@@ -1695,53 +1695,55 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             </View>
           </View>
-
-        {/* Level Progress Bar Section */}
-        <View style={[styles.levelBarContainer, Platform.OS === 'ios' ? { marginTop: 10 } : { marginTop: -40 }]} pointerEvents="box-none">
-          <View style={styles.levelCardWrapper}>
-            <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
-              
-              {/* Middle Progress Section (flex: 1) */}
-              <View style={styles.progressSection}>
-                <View style={styles.progressHeaderRow}>
-                  <Text style={styles.progressValueBold}>{userXp}<Text style={styles.progressValueNormal}> / {userRankInfo.isMax ? 'MAX' : userRankInfo.nextRankXP} </Text><Text style={styles.progressXP}>XP</Text></Text>
-                </View>
-                <View style={styles.progressBarTrack}>
-                  <View style={[styles.progressBarFill, { width: `${userRankInfo.progressPercent}%`, backgroundColor: userRankInfo.color }]} />
-                </View>
-                <Text style={styles.progressFooterText}>{userRankInfo.isMax ? 'Max darajadasiz!' : `${t.toNextLevel} ${userRankInfo.xpRemaining} XP`}</Text>
-              </View>
-              
-            </Animated.View>
-            
-            {/* Overlapping Shield (Absolute) */}
-            <View style={styles.shieldWrapper}>
-              <Image source={require('../assets/level_shield.png')} style={styles.shieldImage} contentFit="contain" />
-              <View style={styles.shieldTextWrapper}>
-                <Text style={styles.shieldLevelText}>{t.levelText}</Text>
-                <Text style={styles.shieldLevelNumber}>{levelNumber}</Text>
-              </View>
-            </View>
-
-            {/* Overlapping Chest (Absolute) */}
-            <View style={styles.chestWrapper}>
-              <Image source={require('../assets/level_chest.png')} style={styles.chestImage} contentFit="contain" />
-            </View>
-          </View>
-
-          {/* Start Exercise Button */}
-          <TouchableOpacity 
-            activeOpacity={0.7} 
-            style={styles.startButton}
-            onPress={() => setActiveTab('exercise')}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="fill" pointerEvents="none" />
-            <View style={styles.startButtonTouchable} pointerEvents="none">
-              <Text style={styles.startButtonText}>{t.startExercise}</Text>
-            </View>
-          </TouchableOpacity>
         </View>
+
+        {/* Level and Start Button - Absolute Bottom */}
+        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 95 : 95, left: 0, right: 0, zIndex: 20 }} pointerEvents="box-none">
+          <View style={[styles.levelBarContainer, { marginTop: 0 }]} pointerEvents="box-none">
+            <View style={styles.levelCardWrapper}>
+              <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
+                
+                {/* Middle Progress Section (flex: 1) */}
+                <View style={styles.progressSection}>
+                  <View style={styles.progressHeaderRow}>
+                    <Text style={styles.progressValueBold}>{userXp}<Text style={styles.progressValueNormal}> / {userRankInfo.isMax ? 'MAX' : userRankInfo.nextRankXP} </Text><Text style={styles.progressXP}>XP</Text></Text>
+                  </View>
+                  <View style={styles.progressBarTrack}>
+                    <View style={[styles.progressBarFill, { width: `${userRankInfo.progressPercent}%`, backgroundColor: userRankInfo.color }]} />
+                  </View>
+                  <Text style={styles.progressFooterText}>{userRankInfo.isMax ? 'Max darajadasiz!' : `${t.toNextLevel} ${userRankInfo.xpRemaining} XP`}</Text>
+                </View>
+                
+              </Animated.View>
+              
+              {/* Overlapping Shield (Absolute) */}
+              <View style={styles.shieldWrapper}>
+                <Image source={require('../assets/level_shield.png')} style={styles.shieldImage} contentFit="contain" />
+                <View style={styles.shieldTextWrapper}>
+                  <Text style={styles.shieldLevelText}>{t.levelText}</Text>
+                  <Text style={styles.shieldLevelNumber}>{levelNumber}</Text>
+                </View>
+              </View>
+
+              {/* Overlapping Chest (Absolute) */}
+              <View style={styles.chestWrapper}>
+                <Image source={require('../assets/level_chest.png')} style={styles.chestImage} contentFit="contain" />
+              </View>
+            </View>
+
+            {/* Start Exercise Button */}
+            <TouchableOpacity 
+              activeOpacity={0.7} 
+              style={styles.startButton}
+              onPress={() => setActiveTab('exercise')}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Image source={require('../assets/start_btn_new.png')} style={{ position: 'absolute', width: '100%', height: '100%' }} contentFit="fill" pointerEvents="none" />
+              <View style={styles.startButtonTouchable} pointerEvents="none">
+                <Text style={styles.startButtonText}>{t.startExercise}</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Scrollable Bottom Section */}
@@ -2631,9 +2633,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
           </View>
         )}
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 200 }} />
         </ScrollView>
-        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 46 : 79, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
+        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 46 : 140, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
           {/* START EXERCISE BUTTON */}
           {activeExerciseType === 'battle' ? (
             <TouchableOpacity 
