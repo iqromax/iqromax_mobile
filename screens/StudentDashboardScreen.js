@@ -1304,7 +1304,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Center Column: Showcase */}
             <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
               <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                {!isInventoryModalOpen && (
+                {activeTab === 'dashboard' && (
                   <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
                 )}
               </View>
@@ -1420,7 +1420,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             />
             {/* 3D Model */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -40 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              {!isInventoryModalOpen && (
+              {activeTab === 'battle' && (
                 <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
               )}
             </View>
@@ -1655,7 +1655,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* 3D Model Container */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], width: '100%', height: '100%' }} pointerEvents="auto">
-              {!isInventoryModalOpen && (
+              {activeTab === 'stats' && (
                 <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
               )}
             </View>
@@ -2750,7 +2750,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* 3D Model Render */}
                 <View style={{ position: 'absolute', top: -10, bottom: 25, left: 20, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                  <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+                  {activeTab === 'inventory' && (
+                    <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+                  )}
                 </View>
 
                 {/* Left Absolute Overlay: Active Character Details */}
