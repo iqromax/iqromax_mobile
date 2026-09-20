@@ -468,7 +468,7 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
                 scene.add(characterModel);
 
                 // Default rotation so characters face straight forward towards the camera
-                characterModel.rotation.y = -Math.PI / 2;
+                characterModel.rotation.y = 0;
 
 
 

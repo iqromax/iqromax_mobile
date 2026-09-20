@@ -188,32 +188,43 @@ export default function StepFiveScreen({ navigation, route }) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [userData, setUserData] = useState(null);
+  
+  const [dynamicCharacters, setDynamicCharacters] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/skins`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDynamicCharacters(data.filter(s => s.category === 'personajlar'));
+        }
+      })
+      .catch(err => console.error("Error fetching skins in step 5:", err));
+  }, []);
+
+  const boysChars = dynamicCharacters.filter(c => c.targetGender === 'ogil' || c.targetGender === 'boy' || c.targetGender === 'male' || c.targetGender === "o'g'il" || c.targetGender === 'boys');
+  const girlsChars = dynamicCharacters.filter(c => c.targetGender === 'qiz' || c.targetGender === 'girl' || c.targetGender === 'female' || c.targetGender === 'girls');
+
+  // Fallback to hardcoded if backend is empty
+  const currentChars = gender === 'boys' 
+    ? (boysChars.length > 0 ? boysChars : t.boysChars.map(n => ({ name: n, id: n }))) 
+    : (girlsChars.length > 0 ? girlsChars : t.girlsChars.map(n => ({ name: n, id: n })));
 
   const handlePrev = () => {
-    if (gender === 'boys') {
-      setSelectedChar(prev => (prev === 0 ? 3 : prev - 1));
-    } else {
-      setSelectedChar(prev => (prev === 4 ? 7 : prev - 1));
-    }
+    setSelectedChar(prev => (prev === 0 ? currentChars.length - 1 : prev - 1));
     setModelLoaded(false);
   };
 
   const handleNext = () => {
-    if (gender === 'boys') {
-      setSelectedChar(prev => (prev === 3 ? 0 : prev + 1));
-    } else {
-      setSelectedChar(prev => (prev === 7 ? 4 : prev + 1));
-    }
+    setSelectedChar(prev => (prev === currentChars.length - 1 ? 0 : prev + 1));
     setModelLoaded(false);
   };
 
   const handleFinish = async () => {
     const { role = 'student', name = 'Mehmon', country = 'UZ', referralCode = '' } = route.params || {};
     
-    // Determine character name
-    const charList = gender === 'boys' ? t.boysChars : t.girlsChars;
-    const charIndex = gender === 'boys' ? selectedChar : selectedChar - 4;
-    const characterName = charList[charIndex];
+    // Determine character name or id
+    const characterName = currentChars[selectedChar]?.id || currentChars[selectedChar]?.name || 'Personaj';
 
     setIsRegistering(true);
     try {
@@ -331,7 +342,10 @@ export default function StepFiveScreen({ navigation, route }) {
           <Image source={require('../assets/character_bg.png')} style={styles.previewBg} contentFit="cover" />
 
           <View style={styles.canvasContainer}>
-            {isFocused && (
+            {isFocused && currentChars[selectedChar]?.modelUrl && (
+              <Character3DViewer characterPath={`${API_URL.replace(/\/api\/?$/, '')}${currentChars[selectedChar].modelUrl}`} />
+            )}
+            {isFocused && !currentChars[selectedChar]?.modelUrl && (
               <Character3DViewer characterIndex={selectedChar} />
             )}
           </View>
@@ -350,8 +364,8 @@ export default function StepFiveScreen({ navigation, route }) {
           <TouchableOpacity 
             style={[styles.tabButton, gender === 'boys' && styles.tabButtonActive]}
             onPress={() => {
-              setGender('boys');
-              if (selectedChar >= 4) {
+              if (gender !== 'boys') {
+                setGender('boys');
                 setSelectedChar(0);
                 setModelLoaded(false);
               }
@@ -365,9 +379,9 @@ export default function StepFiveScreen({ navigation, route }) {
           <TouchableOpacity 
             style={[styles.tabButton, gender === 'girls' && styles.tabButtonActive]}
             onPress={() => {
-              setGender('girls');
-              if (selectedChar < 4) {
-                setSelectedChar(4);
+              if (gender !== 'girls') {
+                setGender('girls');
+                setSelectedChar(0);
                 setModelLoaded(false);
               }
             }}
@@ -381,8 +395,8 @@ export default function StepFiveScreen({ navigation, route }) {
         {/* Character List */}
         <View style={styles.listWrapper}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.listContainer}>
-            {(gender === 'boys' ? t.boysChars : t.girlsChars).map((charName, i) => {
-              const actualIndex = gender === 'boys' ? i : i + 4;
+            {currentChars.map((charObj, i) => {
+              const actualIndex = i;
               const isSelected = selectedChar === actualIndex;
               // Placeholder colors matching design
               const colors = ['#A855F7', '#3B82F6', '#10B981', '#EAB308'];
@@ -402,24 +416,10 @@ export default function StepFiveScreen({ navigation, route }) {
                 >
                   <View style={[styles.charAvatarWrapper, isSelected && styles.charAvatarWrapperSelected]}>
                     <View style={[styles.charAvatar, { backgroundColor: bgCol, overflow: 'hidden' }]}>
-                      {actualIndex === 0 ? (
-                        <Image source={require('../assets/avatar_alex.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                      ) : actualIndex === 1 ? (
-                        <Image source={require('../assets/avatar_maks.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                      ) : actualIndex === 2 ? (
-                        <Image source={require('../assets/avatar_david.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                      ) : actualIndex === 3 ? (
-                        <Image source={require('../assets/avatar_kevin.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                      ) : actualIndex === 4 ? (
-                        <Image source={require('../assets/avatar_lily.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                      ) : actualIndex === 5 ? (
-                        <Image source={require('../assets/avatar_maya.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                      ) : actualIndex === 6 ? (
-                        <Image source={require('../assets/avatar_emma.jpg')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
-                      ) : actualIndex === 7 ? (
-                        <Image source={require('../assets/avatar_sophia.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                      {charObj.imageUrl ? (
+                        <Image source={{ uri: `${API_URL.replace(/\/api\/?$/, '')}${charObj.imageUrl}` }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       ) : (
-                        <Ionicons name="person" size={32} color="#FFF" />
+                        <Image source={require('../assets/avatar_maks.png')} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                       )}
                     </View>
                     {isSelected && (

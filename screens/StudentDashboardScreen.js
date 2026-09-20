@@ -1006,7 +1006,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           <ImageBackground source={require('../assets/character_bg.png')} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 16, overflow: 'hidden', marginHorizontal: 10, marginVertical: 5 }} imageStyle={{ borderRadius: 16, transform: [{ translateY: -40 }, { scale: 1.1 }] }}>
             <View style={{ width: 160, height: 160, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-               <Image source={require('../assets/avatar_maks.png')} style={{ width: 110, height: 110, borderRadius: 55 }} />
+               <Image source={selectedAvatarObj && selectedAvatarObj.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.imageUrl}` } : require('../assets/avatar_maks.png')} style={{ width: 110, height: 110, borderRadius: 55 }} />
                <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 160, height: 160 }} contentFit="contain" />
                <View style={{ position: 'absolute', bottom: -20, width: 180, height: 40, borderRadius: 90, borderWidth: 1, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: 10 }} />
                <View style={{ position: 'absolute', bottom: -20, width: 140, height: 30, borderRadius: 70, borderWidth: 2, borderColor: '#60A5FA', transform: [{ scaleY: 0.3 }], shadowColor: '#60A5FA', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -2835,16 +2835,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
               {isPersonajOpen && inventorySubTab === 'personaj' && (
                 <View style={{ marginBottom: 15, paddingHorizontal: 2 }}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 8 }}>
-                    {[
-                      { id: 0, name: 'Alex', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_alex.jpg'), gender: 'boys' },
-                      { id: 1, name: 'Tech Genius', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_maks.png'), gender: 'boys' },
-                      { id: 2, name: 'Creative Mind', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_david.jpg'), gender: 'boys' },
-                      { id: 3, name: 'Mental Warrior', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_kevin.png'), gender: 'boys' },
-                      { id: 4, name: 'Lily', rarity: 'COMMON', locked: false, avatar: require('../assets/avatar_lily.jpg'), gender: 'girls' },
-                      { id: 5, name: 'Maya', rarity: 'RARE', locked: false, avatar: require('../assets/avatar_maya.jpg'), gender: 'girls' },
-                      { id: 6, name: 'Sophia', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_sophia.png'), gender: 'girls' },
-                      { id: 7, name: 'Emma', rarity: 'EPIC', locked: false, avatar: require('../assets/avatar_emma.jpg'), gender: 'girls' },
-                    ]
+                    {dynamicCharacters
+                    .map(char => ({
+                      id: char.id,
+                      name: char.name || 'Personaj',
+                      rarity: char.rarity || 'ODDIY',
+                      locked: char.isLocked || false,
+                      avatar: char.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${char.imageUrl}` } : require('../assets/avatar_maks.png'),
+                      gender: char.targetGender === 'qiz' || char.targetGender === 'female' ? 'girls' : 'boys'
+                    }))
                     .filter(item => {
                       const userGender = getCurrentUserGender();
                       return item.gender === userGender;
