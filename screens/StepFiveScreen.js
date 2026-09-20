@@ -205,17 +205,16 @@ export default function StepFiveScreen({ navigation, route }) {
   const boysChars = dynamicCharacters.filter(c => c.targetGender === 'ogil' || c.targetGender === 'boy' || c.targetGender === 'male' || c.targetGender === "o'g'il" || c.targetGender === 'boys');
   const girlsChars = dynamicCharacters.filter(c => c.targetGender === 'qiz' || c.targetGender === 'girl' || c.targetGender === 'female' || c.targetGender === 'girls');
 
-  // Fallback to hardcoded if backend is empty
-  const currentChars = gender === 'boys' 
-    ? (boysChars.length > 0 ? boysChars : t.boysChars.map(n => ({ name: n, id: n }))) 
-    : (girlsChars.length > 0 ? girlsChars : t.girlsChars.map(n => ({ name: n, id: n })));
+  const currentChars = gender === 'boys' ? boysChars : girlsChars;
 
   const handlePrev = () => {
+    if (currentChars.length === 0) return;
     setSelectedChar(prev => (prev === 0 ? currentChars.length - 1 : prev - 1));
     setModelLoaded(false);
   };
 
   const handleNext = () => {
+    if (currentChars.length === 0) return;
     setSelectedChar(prev => (prev === currentChars.length - 1 ? 0 : prev + 1));
     setModelLoaded(false);
   };
