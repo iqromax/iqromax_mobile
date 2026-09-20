@@ -162,3 +162,12 @@ model Friend {
 
   @@unique([userId1, userId2])
 }
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String   // customId of the sender
+  receiverId String   // customId of the receiver
+  content    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}

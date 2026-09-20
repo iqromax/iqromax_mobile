@@ -2106,6 +2106,27 @@ app.post('/api/user/friends/remove', async (req, res) => {
   }
 });
 
+// GET /api/chat/messages/:user1/:user2
+app.get('/api/chat/messages/:user1/:user2', async (req, res) => {
+  try {
+    const { user1, user2 } = req.params;
+    // @ts-ignore
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: user1, receiverId: user2 },
+          { senderId: user2, receiverId: user1 }
+        ]
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+    res.json(messages);
+  } catch (error) {
+    console.error('Chat messages fetch error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Fallback to admin panel for unhandled routes
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
@@ -2182,6 +2203,30 @@ io.on('connection', (socket) => {
       }
     } catch (e) {
       console.error('Error responding to battle invite:', e);
+    }
+  });
+
+  socket.on('send_chat_message', async (data) => {
+    // data: { senderId, receiverId, content }
+    try {
+      // @ts-ignore
+      const message = await prisma.message.create({
+        data: {
+          senderId: data.senderId,
+          receiverId: data.receiverId,
+          content: data.content
+        }
+      });
+      
+      // Emit back to sender (for confirmation/ID) and to receiver
+      socket.emit('chat_message_received', message);
+      
+      const targetSocketId = onlineUsers.get(data.receiverId.toUpperCase());
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('chat_message_received', message);
+      }
+    } catch (e) {
+      console.error('Error saving chat message:', e);
     }
   });
 

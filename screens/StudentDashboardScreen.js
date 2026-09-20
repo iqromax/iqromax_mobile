@@ -5730,12 +5730,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{friend.name}</Text>
                       <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 13 }}>{friend.xp} XP</Text>
                     </View>
-                    <TouchableOpacity 
-                      style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(239, 68, 68, 0.15)', alignItems: 'center', justifyContent: 'center' }}
-                      onPress={() => handleDeleteFriend(friend.customId)}
-                    >
-                      <MaterialCommunityIcons name="delete" size={20} color="#EF4444" />
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <TouchableOpacity 
+                        style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(168, 85, 247, 0.15)', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+                        onPress={() => {
+                          setIsFriendsModalOpen(false);
+                          navigation.navigate('ChatScreen', { friend });
+                        }}
+                      >
+                        <MaterialCommunityIcons name="chat-processing-outline" size={20} color="#A855F7" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(239, 68, 68, 0.15)', alignItems: 'center', justifyContent: 'center' }}
+                        onPress={() => handleDeleteFriend(friend.customId)}
+                      >
+                        <MaterialCommunityIcons name="delete" size={20} color="#EF4444" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 )) : (
                   <View style={{ alignItems: 'center', marginTop: 40 }}>
