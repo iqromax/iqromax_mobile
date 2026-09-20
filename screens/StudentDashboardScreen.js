@@ -563,19 +563,27 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isAbacusDigitsPickerOpen, setIsAbacusDigitsPickerOpen] = useState(false);
   const abacusExampleNumbers = Array.from({ length: 19 }, (_, i) => i + 7);
 
-  const [isPersonajOpen, setIsPersonajOpen] = useState(true);
+  const [isPersonajOpen, setIsPersonajOpen] = useState(false);
   const [isSkinlarOpen, setIsSkinlarOpen] = useState(false);
 
   const togglePersonajAccordion = () => {
     if (!checkGuestAuth()) return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsPersonajOpen(prev => !prev);
+    setIsPersonajOpen(prev => {
+      const next = !prev;
+      if (next) setIsSkinlarOpen(false);
+      return next;
+    });
   };
 
   const toggleSkinlarAccordion = () => {
     if (!checkGuestAuth()) return;
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setIsSkinlarOpen(prev => !prev);
+    setIsSkinlarOpen(prev => {
+      const next = !prev;
+      if (next) setIsPersonajOpen(false);
+      return next;
+    });
   };
 
 
