@@ -1744,6 +1744,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
       transports: ['websocket'] 
     });
 
+    socket.on('connect', () => {
+      socket.emit('register', user.customId);
+    });
+
     socket.on('friend_request_received', (data) => {
       if (data.receiverId === user.customId) {
         fetchFriendRequests();
