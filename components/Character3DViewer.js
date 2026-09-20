@@ -356,119 +356,121 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           window.pendingPantsB64 = ${JSON.stringify(pantsBase64 || null)};
 
           window.updateHeadwear = function(b64) {
-            if (window.headwearModel) {
-              scene.remove(window.headwearModel);
-              window.headwearModel = null;
-            }
-            if (!b64 || !characterModel) return;
-            try {
-              const buffer = base64ToArrayBuffer(b64);
-              gltfLoader.parse(buffer, '', function(gltf) {
-                if (window.headwearModel) {
-                  scene.remove(window.headwearModel);
-                }
-                window.headwearModel = gltf.scene;
-
-                window.headwearModel.traverse(function(child) {
-                  if (child.isMesh) {
-                    if (child.material) {
-                      child.material.side = THREE.DoubleSide;
-                    }
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.frustumCulled = false;
+            return new Promise(function(resolve) {
+              if (window.headwearModel) {
+                scene.remove(window.headwearModel);
+                window.headwearModel = null;
+              }
+              if (!b64 || !characterModel) return resolve();
+              try {
+                const buffer = base64ToArrayBuffer(b64);
+                gltfLoader.parse(buffer, '', function(gltf) {
+                  if (window.headwearModel) {
+                    scene.remove(window.headwearModel);
                   }
-                });
+                  window.headwearModel = gltf.scene;
 
-                window.headwearModel.position.set(0, 0, 0);
-                window.headwearModel.scale.set(1, 1, 1);
+                  window.headwearModel.traverse(function(child) {
+                    if (child.isMesh) {
+                      if (child.material) child.material.side = THREE.DoubleSide;
+                      child.castShadow = true;
+                      child.receiveShadow = true;
+                      child.frustumCulled = false;
+                    }
+                  });
 
-                window.headwearModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
-                scene.add(window.headwearModel);
-
-              });
-            } catch(e) {
-              console.error('Headwear parse error:', e);
-            }
+                  window.headwearModel.position.set(0, 0, 0);
+                  window.headwearModel.scale.set(1, 1, 1);
+                  window.headwearModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
+                  scene.add(window.headwearModel);
+                  resolve();
+                }, function() { resolve(); });
+              } catch(e) {
+                console.error('Headwear parse error:', e);
+                resolve();
+              }
+            });
           };
 
           window.updateAccessory = function(b64) {
-            if (window.accessoryModel) {
-              scene.remove(window.accessoryModel);
-              window.accessoryModel = null;
-            }
-            if (!b64 || !characterModel) return;
-            try {
-              const buffer = base64ToArrayBuffer(b64);
-              gltfLoader.parse(buffer, '', function(gltf) {
-                if (window.accessoryModel) {
-                  scene.remove(window.accessoryModel);
-                }
-                window.accessoryModel = gltf.scene;
-
-                window.accessoryModel.traverse(function(child) {
-                  if (child.isMesh) {
-                    if (child.material) {
-                      child.material.side = THREE.DoubleSide;
-                    }
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.frustumCulled = false;
+            return new Promise(function(resolve) {
+              if (window.accessoryModel) {
+                scene.remove(window.accessoryModel);
+                window.accessoryModel = null;
+              }
+              if (!b64 || !characterModel) return resolve();
+              try {
+                const buffer = base64ToArrayBuffer(b64);
+                gltfLoader.parse(buffer, '', function(gltf) {
+                  if (window.accessoryModel) {
+                    scene.remove(window.accessoryModel);
                   }
-                });
+                  window.accessoryModel = gltf.scene;
 
-                window.accessoryModel.position.set(0, 0, 0);
-                window.accessoryModel.scale.set(1, 1, 1);
+                  window.accessoryModel.traverse(function(child) {
+                    if (child.isMesh) {
+                      if (child.material) child.material.side = THREE.DoubleSide;
+                      child.castShadow = true;
+                      child.receiveShadow = true;
+                      child.frustumCulled = false;
+                    }
+                  });
 
-                window.accessoryModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
-                scene.add(window.accessoryModel);
-
-              });
-            } catch(e) {
-              console.error('Accessory parse error:', e);
-            }
+                  window.accessoryModel.position.set(0, 0, 0);
+                  window.accessoryModel.scale.set(1, 1, 1);
+                  window.accessoryModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
+                  scene.add(window.accessoryModel);
+                  resolve();
+                }, function() { resolve(); });
+              } catch(e) {
+                console.error('Accessory parse error:', e);
+                resolve();
+              }
+            });
           };
 
           window.updatePants = function(b64) {
-            if (window.pantsModel) {
-              scene.remove(window.pantsModel);
-              window.pantsModel = null;
-            }
-            if (!b64 || !characterModel) return;
-            try {
-              const buffer = base64ToArrayBuffer(b64);
-              gltfLoader.parse(buffer, '', function(gltf) {
-                if (window.pantsModel) {
-                  scene.remove(window.pantsModel);
-                }
-                window.pantsModel = gltf.scene;
-
-                window.pantsModel.traverse(function(child) {
-                  if (child.isMesh) {
-                    if (child.material) {
-                      child.material.side = THREE.DoubleSide;
-                    }
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.frustumCulled = false;
+            return new Promise(function(resolve) {
+              if (window.pantsModel) {
+                scene.remove(window.pantsModel);
+                window.pantsModel = null;
+              }
+              if (!b64 || !characterModel) return resolve();
+              try {
+                const buffer = base64ToArrayBuffer(b64);
+                gltfLoader.parse(buffer, '', function(gltf) {
+                  if (window.pantsModel) {
+                    scene.remove(window.pantsModel);
                   }
-                });
+                  window.pantsModel = gltf.scene;
 
-                window.pantsModel.position.set(0, 0, 0);
-                window.pantsModel.scale.set(1, 1, 1);
-                window.pantsModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
-                scene.add(window.pantsModel);
+                  window.pantsModel.traverse(function(child) {
+                    if (child.isMesh) {
+                      if (child.material) child.material.side = THREE.DoubleSide;
+                      child.castShadow = true;
+                      child.receiveShadow = true;
+                      child.frustumCulled = false;
+                    }
+                  });
 
-              });
-            } catch(e) {
-              console.error('Pants parse error:', e);
-            }
+                  window.pantsModel.position.set(0, 0, 0);
+                  window.pantsModel.scale.set(1, 1, 1);
+                  window.pantsModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
+                  scene.add(window.pantsModel);
+                  resolve();
+                }, function() { resolve(); });
+              } catch(e) {
+                console.error('Pants parse error:', e);
+                resolve();
+              }
+            });
           };
 
           if (charB64Str.length > 0) {
+            scene.visible = false;
             try {
               const charBuffer = base64ToArrayBuffer(charB64Str);
-              gltfLoader.parse(charBuffer, '', function(gltf) {
+              gltfLoader.parse(charBuffer, '', async function(gltf) {
                 characterModel = gltf.scene;
                 
                 characterModel.traverse(function(child) {
@@ -494,27 +496,28 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
                 // Default rotation so characters face straight forward towards the camera
                 characterModel.rotation.y = 0;
 
-
-
                 controls.target.set(0, size.y * 0.52, 0);
                 camera.position.set(0, size.y * 0.52, Math.max(size.x, size.y, size.z) * 1.55);
                 controls.update();
 
-
-
                 // Apply initial skins if ready
+                const promises = [];
                 if (window.pendingHeadwearB64) {
-                  window.updateHeadwear(window.pendingHeadwearB64);
+                  promises.push(window.updateHeadwear(window.pendingHeadwearB64));
                 }
                 if (window.pendingAccessoryB64) {
-                  window.updateAccessory(window.pendingAccessoryB64);
+                  promises.push(window.updateAccessory(window.pendingAccessoryB64));
                 }
                 if (window.pendingPantsB64) {
-                  window.updatePants(window.pendingPantsB64);
+                  promises.push(window.updatePants(window.pendingPantsB64));
                 }
+                
+                await Promise.all(promises);
+                scene.visible = true;
               });
             } catch(e) {
               console.error('Char Parse Error:', e);
+              scene.visible = true;
             }
           }
 
