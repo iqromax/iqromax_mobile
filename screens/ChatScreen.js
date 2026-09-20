@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Modal } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,6 +28,7 @@ export default function ChatScreen({ route, navigation }) {
   const [inputText, setInputText] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isClearModalVisible, setIsClearModalVisible] = useState(false);
   const socketRef = useRef(null);
   const flatListRef = useRef(null);
 
@@ -117,25 +118,7 @@ export default function ChatScreen({ route, navigation }) {
   };
 
   const promptClearChat = () => {
-    Alert.alert(
-      "Xabarlarni o'chirish",
-      `${friend.name} bilan barcha xabarlarni o'chirib tashlamoqchimisiz?`,
-      [
-        {
-          text: `Men va ${friend.name} uchun o'chirish`,
-          onPress: () => executeClearChat(true),
-          style: 'destructive'
-        },
-        {
-          text: "Mendan o'chirish",
-          onPress: () => executeClearChat(false),
-        },
-        {
-          text: "Bekor qilish",
-          style: 'cancel'
-        }
-      ]
-    );
+    setIsClearModalVisible(true);
   };
 
   const handleSend = () => {
@@ -233,6 +216,43 @@ export default function ChatScreen({ route, navigation }) {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Custom Clear Chat Modal */}
+      <Modal visible={isClearModalVisible} transparent={true} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalIconContainer}>
+              <MaterialCommunityIcons name="trash-can-outline" size={32} color="#EF4444" />
+            </View>
+            <Text style={styles.modalTitle}>Xabarlarni o'chirish</Text>
+            <Text style={styles.modalMessage}>
+              <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold' }}>{friend.name}</Text> bilan barcha xabarlarni o'chirib tashlamoqchimisiz?
+            </Text>
+            
+            <TouchableOpacity 
+              style={[styles.modalBtn, { backgroundColor: 'rgba(239, 68, 68, 0.15)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.3)' }]}
+              onPress={() => { setIsClearModalVisible(false); executeClearChat(true); }}
+            >
+              <Text style={[styles.modalBtnText, { color: '#EF4444' }]}>Men va {friend.name} uchun o'chirish</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.modalBtn}
+              onPress={() => { setIsClearModalVisible(false); executeClearChat(false); }}
+            >
+              <Text style={styles.modalBtnText}>Mendan o'chirish</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.modalBtn, { backgroundColor: 'transparent', marginTop: 8 }]}
+              onPress={() => setIsClearModalVisible(false)}
+            >
+              <Text style={[styles.modalBtnText, { color: '#9CA3AF' }]}>Bekor qilish</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -386,5 +406,57 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: '#12121D',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  modalIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    color: '#FFF',
+    fontSize: 20,
+    fontFamily: 'Inter_700Bold',
+    marginBottom: 8,
+  },
+  modalMessage: {
+    color: '#9CA3AF',
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  modalBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalBtnText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontFamily: 'Inter_600SemiBold',
   },
 });
