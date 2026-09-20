@@ -2830,7 +2830,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   paddingHorizontal: 16,
                   paddingVertical: 14,
                   marginTop: 10,
-                  marginBottom: 10,
+                  marginBottom: 5,
                   shadowColor: '#000',
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.4,
@@ -2857,7 +2857,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
               {/* PERSONAJLAR GRID CONTENT */}
               {isPersonajOpen && inventorySubTab === 'personaj' && (
-                <View style={{ marginBottom: 15, paddingHorizontal: 2 }}>
+                <View style={{ marginBottom: 0, paddingHorizontal: 2 }}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 8 }}>
                     {dynamicCharacters
                     .map(char => ({
