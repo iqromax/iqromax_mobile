@@ -3156,9 +3156,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
                 <Text style={styles.rankingTopSubtitle}>{t.rankingSubtitle || "Eng kuchli matematiklar"}</Text>
               </View>
-              <View style={{ width: 44 }} />
+              <TouchableOpacity style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.08)', borderRadius: 22 }}>
+                <Feather name="users" size={20} color="#FFF" />
+              </TouchableOpacity>
             </View>
-
 {(() => {
   const top1 = leaderboardData[0] || { name: '---', xp: 0, avatar: require('../assets/avatar_alex.jpg') };
   const top2 = leaderboardData[1] || { name: '---', xp: 0, avatar: require('../assets/avatar_david.jpg') };
