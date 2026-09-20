@@ -320,8 +320,33 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isMysteryBoxModalOpen, setIsMysteryBoxModalOpen] = useState(false);
   const [isShopModalOpen, setIsShopModalOpen] = useState(false);
   const [activeShopTab, setActiveShopTab] = useState('inventory'); // 'inventory' | 'energy' | 'mystery'
-  const [activeSkinCategory, setActiveSkinCategory] = useState('headwear'); // 'headwear' | 'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'
+  const [activeSkinCategory, setActiveSkinCategory] = useState('all'); // 'all' | 'headwear' | 'top' | 'pants' | 'shoes' | 'accessories' | 'backpacks'
   const [shopItems, setShopItems] = useState([]);
+  const [purchasedSkins, setPurchasedSkins] = useState([]);
+
+  const saveSkinPurchase = async (skinId, price = 0) => {
+    try {
+      const uDataStr = await AsyncStorage.getItem('user_data');
+      const userData = uDataStr ? JSON.parse(uDataStr) : user;
+      const customId = userData?.customId || user?.customId;
+      const userIdKey = customId || userData?.id || 'guest';
+      const storageKey = `purchased_skins_${userIdKey}`;
+      const existingStr = await AsyncStorage.getItem(storageKey);
+      let existingArr = existingStr ? JSON.parse(existingStr) : [];
+      if (!existingArr.includes(skinId)) {
+        existingArr.push(skinId);
+        await AsyncStorage.setItem(storageKey, JSON.stringify(existingArr));
+        setPurchasedSkins(existingArr);
+      }
+      if (customId && price > 0) {
+        fetch(`${API_URL}/user/purchase-skin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customId, itemId: skinId, price })
+        }).catch(err => console.log('Purchase sync err:', err));
+      }
+    } catch(e) { console.log(e); }
+  };
 
   // Shop Purchase Animation state
   const [purchaseSuccessItem, setPurchaseSuccessItem] = useState(null);
@@ -450,6 +475,36 @@ export default function StudentDashboardScreen({ navigation, route }) {
           console.log(e);
           setIsSkinsLoaded(true);
         });
+
+        AsyncStorage.getItem(`purchased_skins_${userIdKey}`).then(val => {
+          if (val) {
+            try {
+              setPurchasedSkins(JSON.parse(val));
+            } catch(e) {}
+          }
+          if (user?.customId) {
+            fetch(`${API_URL}/user/purchases/${user.customId}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data && data.purchasedSkins) {
+                  const merged = Array.from(new Set([...(val ? JSON.parse(val) : []), ...data.purchasedSkins]));
+                  setPurchasedSkins(merged);
+                  AsyncStorage.setItem(`purchased_skins_${userIdKey}`, JSON.stringify(merged)).catch(console.log);
+                  if (data.coin !== undefined) {
+                    setUserCoin(data.coin);
+                    AsyncStorage.getItem('user_data').then(curStr => {
+                      if (curStr) {
+                        const cur = JSON.parse(curStr);
+                        cur.coin = data.coin;
+                        AsyncStorage.setItem('user_data', JSON.stringify(cur)).catch(console.log);
+                      }
+                    });
+                  }
+                }
+              })
+              .catch(e => console.log('Fetch purchases err', e));
+          }
+        }).catch(e => console.log(e));
       });
     }, [user?.customId, user?.id, route.params])
   );
@@ -606,12 +661,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
     const characterName = charNames[index] || 'maks';
     
     // Update local user state immediately
-    setUser(prev => {
-      const updated = { ...prev, character: characterName };
-      import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
-         AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
-      });
-      return updated;
+    setUser(prev => ({ ...prev, character: characterName }));
+    import('@react-native-async-storage/async-storage').then(({ default: AsyncStorage }) => {
+       AsyncStorage.getItem('user_data').then(str => {
+         if (str) {
+           const cur = JSON.parse(str);
+           cur.character = characterName;
+           AsyncStorage.setItem('user_data', JSON.stringify(cur)).catch(console.error);
+         }
+       });
     });
 
     if (user?.customId || route.params?.user?.customId) {
@@ -659,10 +717,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   });
                   if (me) {
                     setUserXp(me.xp);
-                    setUser(prev => {
-                      const updated = { ...prev, xp: me.xp, isGuest: false };
-                      AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(e => console.log(e));
-                      return updated;
+                    setUser(prev => ({ ...prev, xp: me.xp, isGuest: false }));
+                    AsyncStorage.getItem('user_data').then(str => {
+                      if (str) {
+                        const cur = JSON.parse(str);
+                        cur.xp = me.xp;
+                        cur.isGuest = false;
+                        AsyncStorage.setItem('user_data', JSON.stringify(cur)).catch(console.error);
+                      }
                     });
                   }
                 }
@@ -797,10 +859,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
     socket.on('user_xp_updated', async (data) => {
       if (user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase()) {
-        setUser(prev => {
-          const updated = { ...prev, xp: data.xp };
-          AsyncStorage.setItem('user_data', JSON.stringify(updated)).catch(console.error);
-          return updated;
+        setUser(prev => ({ ...prev, xp: data.xp }));
+        AsyncStorage.getItem('user_data').then(str => {
+          if (str) {
+            const cur = JSON.parse(str);
+            cur.xp = data.xp;
+            AsyncStorage.setItem('user_data', JSON.stringify(cur)).catch(console.error);
+          }
         });
       }
       
@@ -1133,7 +1198,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
     return filteredData.map((item, i) => {
       const rarityColor = item.rarity === 'LEGENDARY' ? '#EAB308' : item.rarity === 'EPIC' ? '#A855F7' : item.rarity === 'RARE' ? '#3B82F6' : '#10B981';
       
-      const isPricedOrLocked = Boolean(item.isLocked || (item.price && Number(item.price) > 0));
+      const isOwned = purchasedSkins.includes(item.id);
+      const isPricedOrLocked = Boolean(!isOwned && (item.isLocked || (item.price && Number(item.price) > 0)));
       
       // Determine if item is equipped
       const itemGlb = item.modelUrl || item.glbModel || item.model;
@@ -1705,7 +1771,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 activeOpacity={0.8}
                 onPress={() => checkGuestAuth(() => {
                   setActiveShopTab('inventory');
-                  setActiveSkinCategory('headwear');
+                  setActiveSkinCategory('all');
                   setIsShopModalOpen(true);
                 })}
               >
@@ -1756,7 +1822,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
 
         {/* Level and Start Button - Absolute Bottom */}
-        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 95 : 95, left: 0, right: 0, zIndex: 20 }} pointerEvents="box-none">
+        <View style={{ position: 'absolute', bottom: 80 + (Platform.OS === 'android' ? Math.max(insets.bottom, 15) : insets.bottom), left: 0, right: 0, zIndex: 20 }} pointerEvents="box-none">
           <View style={[styles.levelBarContainer, { marginTop: 0 }]} pointerEvents="box-none">
             <View style={styles.levelCardWrapper}>
               <Animated.View style={[styles.levelCard, { borderColor: borderColorInterp, borderWidth: 1.5 }]}>
@@ -2693,7 +2759,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         <View style={{ height: 200 }} />
         </ScrollView>
-        <View style={{ position: 'absolute', bottom: Platform.OS === 'ios' ? 46 : 140, left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
+        <View style={{ position: 'absolute', bottom: 80 + (Platform.OS === 'android' ? Math.max(insets.bottom, 15) : insets.bottom), left: 0, right: 0, paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6, backgroundColor: '#05050C', zIndex: 50, borderTopWidth: 1, borderTopColor: 'rgba(255, 255, 255, 0.05)' }}>
           {/* START EXERCISE BUTTON */}
           {activeExerciseType === 'battle' ? (
             <TouchableOpacity 
@@ -4596,8 +4662,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {/* Skin Sub-categories filter horizontal scroll */}
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 10 }}>
                     {[
+                      { id: 'all', label: t.all || 'Umumiy', icon: 'border-all' },
                       { id: 'headwear', label: t.shopHeadwear || 'Bosh kiyim', icon: 'hat-cowboy' },
                       { id: 'top', label: t.shopTop || 'Ustki kiyim', icon: 'tshirt' },
+                      { id: 'tshirt', label: t.shopTshirt || 'Futbolka', icon: 'tshirt' },
                       { id: 'pants', label: t.shopPants || 'Shim', icon: 'user-ninja' },
                       { id: 'shoes', label: t.shopShoes || 'Oyoq kiyim', icon: 'shoe-prints' },
                       { id: 'accessories', label: t.shopAccessories || 'Aksessuarlar', icon: 'glasses' },
@@ -4626,14 +4694,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                   {/* Skins Items Grid */}
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginTop: 10 }}>
-                    {shopItems
+                    {[
+                      ...shopItems.filter(item => item.category === 'inventory'),
+                      ...backendSkins.filter(item => item.price > 0 && item.category !== 'personajlar')
+                    ]
+                      .filter((item, index, self) => self.findIndex(t => t.id === item.id) === index)
                       .filter(item => {
-                        if (item.category !== 'inventory') return false;
-                        
-                        // Strict subcategory filtering with default to 'headwear' if missing
-                        const sub = item.subcategory || 'headwear';
+                        // Strict subcategory filtering with default
+                        const sub = item.subcategory || item.category || 'headwear';
                         const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'futbolka' ? 'tshirt' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
-                        if (normalizedSub !== activeSkinCategory) return false;
+                        if (activeSkinCategory !== 'all' && normalizedSub !== activeSkinCategory) return false;
                         
                         // Strict targetGender filtering
                         const userGender = getCurrentUserGender();
@@ -4643,9 +4713,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         return true;
                       })
                       .map(item => {
-                        const iconName = activeSkinCategory === 'headwear' ? 'hat-cowboy' : activeSkinCategory === 'top' ? 'tshirt' : activeSkinCategory === 'pants' ? 'user-ninja' : activeSkinCategory === 'shoes' ? 'shoe-prints' : activeSkinCategory === 'accessories' ? 'glasses' : 'suitcase';
+                        const sub = item.subcategory || item.category || 'headwear';
+                        const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'futbolka' ? 'tshirt' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                        const iconSub = activeSkinCategory === 'all' ? normalizedSub : activeSkinCategory;
+                        const iconName = iconSub === 'headwear' ? 'hat-cowboy' : (iconSub === 'top' || iconSub === 'tshirt') ? 'tshirt' : iconSub === 'pants' ? 'user-ninja' : iconSub === 'shoes' ? 'shoe-prints' : iconSub === 'accessories' ? 'glasses' : 'suitcase';
                         const itemColor = '#F59E0B';
-                        const fullImgUrl = getShopImageUrl(item.imageUrl);
+                        const fullImgUrl = getShopImageUrl(item.imageUrl || item.image);
 
                         return (
                           <View 
@@ -4689,64 +4762,92 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                             <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13, textAlign: 'center', marginTop: 2 }} numberOfLines={1}>{item.name}</Text>
                             
-                            <TouchableOpacity
-                              style={{
-                                width: '100%',
-                                backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255,255,255,0.05)',
-                                borderWidth: 1.5,
-                                borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
-                                paddingVertical: 10,
-                                borderRadius: 12,
-                                flexDirection: 'row',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                gap: 6
-                              }}
-                              activeOpacity={0.8}
-                              onPress={() => {
-                                if (userCoin < item.price) {
-                                  showCustomAlert("Tangalar yetarli emas!", `Ushbu skinni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
-                                  return;
-                                }
+                            {purchasedSkins.includes(item.id) ? (
+                              <TouchableOpacity
+                                style={{
+                                  width: '100%',
+                                  backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                                  borderWidth: 1.5,
+                                  borderColor: 'transparent',
+                                  paddingVertical: 10,
+                                  borderRadius: 12,
+                                  flexDirection: 'row',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  gap: 6
+                                }}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                  setIsShopModalOpen(false);
+                                }}
+                              >
+                                <Text style={{ color: '#3B82F6', fontFamily: 'Inter_700Bold', fontSize: 13 }}>KIYISH</Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                style={{
+                                  width: '100%',
+                                  backgroundColor: userCoin >= item.price ? 'rgba(245, 158, 11, 0.25)' : 'rgba(255,255,255,0.05)',
+                                  borderWidth: 1.5,
+                                  borderColor: userCoin >= item.price ? '#F59E0B' : 'rgba(255,255,255,0.1)',
+                                  paddingVertical: 10,
+                                  borderRadius: 12,
+                                  flexDirection: 'row',
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                  gap: 6
+                                }}
+                                activeOpacity={0.8}
+                                onPress={() => {
+                                  if (userCoin < item.price) {
+                                    showCustomAlert("Tangalar yetarli emas!", `Ushbu skinni sotib olish uchun sizga kamida ${item.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
+                                    return;
+                                  }
 
-                                showCustomAlert(
-                                  "Mahsulot Xaridi",
-                                  `Siz ushbu "${item.name}" mahsulotini ${item.price} tangaga xarid qilmoqchimisiz?\n\n${item.description || "Ushbu buyum profilingiz va personajingiz uchun moslashtiriladi."}`,
-                                  "warning",
-                                  [
-                                    { text: "Bekor qilish", onPress: () => {} },
-                                    {
-                                      text: "Xarid qilish",
-                                      onPress: async () => {
-                                        try {
-                                          const newCoin = userCoin - item.price;
-                                          setUserCoin(newCoin);
-                                          const uDataStr = await AsyncStorage.getItem('user_data');
-                                          if (uDataStr) {
-                                            const uData = JSON.parse(uDataStr);
-                                            uData.coin = newCoin;
-                                            await AsyncStorage.setItem('user_data', JSON.stringify(uData));
-                                          }
-                                          triggerPurchaseAnimation(item, "Bosh sahifa -> INVENTAR");
-                                        } catch(e) {}
+                                  showCustomAlert(
+                                    "Mahsulot Xaridi",
+                                    `Siz ushbu "${item.name}" mahsulotini ${item.price} tangaga xarid qilmoqchimisiz?\n\n${item.description || "Ushbu buyum profilingiz va personajingiz uchun moslashtiriladi."}`,
+                                    "warning",
+                                    [
+                                      { text: "Bekor qilish", onPress: () => {} },
+                                      {
+                                        text: "Xarid qilish",
+                                        onPress: async () => {
+                                          try {
+                                            const newCoin = userCoin - item.price;
+                                            setUserCoin(newCoin);
+                                            const uDataStr = await AsyncStorage.getItem('user_data');
+                                            if (uDataStr) {
+                                              const uData = JSON.parse(uDataStr);
+                                              uData.coin = newCoin;
+                                              await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                                            }
+                                            await saveSkinPurchase(item.id, item.price);
+                                            triggerPurchaseAnimation(item, "Bosh sahifa -> INVENTAR");
+                                          } catch(e) {}
+                                        }
                                       }
-                                    }
-                                  ]
-                                );
-                              }}
-                            >
-                              <Image source={require('../assets/s_coin.png')} style={{ width: 15, height: 15 }} />
-                              <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
-                            </TouchableOpacity>
+                                    ]
+                                  );
+                                }}
+                              >
+                                <Image source={require('../assets/s_coin.png')} style={{ width: 15, height: 15 }} />
+                                <Text style={{ color: userCoin >= item.price ? '#F59E0B' : '#888', fontFamily: 'Inter_800ExtraBold', fontSize: 13 }}>{item.price}</Text>
+                              </TouchableOpacity>
+                            )}
                           </View>
                         );
                       })}
 
-                    {shopItems.filter(item => {
-                      if (item.category !== 'inventory') return false;
-                      const sub = item.subcategory || 'headwear';
-                      const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
-                      if (normalizedSub !== activeSkinCategory) return false;
+                    {[
+                      ...shopItems.filter(item => item.category === 'inventory'),
+                      ...backendSkins.filter(item => item.price > 0 && item.category !== 'personajlar')
+                    ]
+                      .filter((item, index, self) => self.findIndex(t => t.id === item.id) === index)
+                      .filter(item => {
+                      const sub = item.subcategory || item.category || 'headwear';
+                      const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'futbolka' ? 'tshirt' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
+                      if (activeSkinCategory !== 'all' && normalizedSub !== activeSkinCategory) return false;
                       const userGender = getCurrentUserGender();
                       if (item.targetGender && item.targetGender !== 'all') {
                         return item.targetGender === userGender;
@@ -5322,7 +5423,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </Text>
 
             <Text style={{ color: '#9CA3AF', fontSize: 13, textAlign: 'center', marginBottom: 20, lineHeight: 20 }}>
-              Ushbu skinni kiyish uchun avval uni IQROSHOP do'konidan xarid qilishingiz kerak!
+              Ushbu skinni kiyish uchun avval uni xarid qilishingiz kerak!
             </Text>
 
             {skinPurchaseAlertItem?.price > 0 && (
@@ -5339,32 +5440,36 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   width: '100%',
                   paddingVertical: 14,
                   borderRadius: 14,
-                  backgroundColor: '#EAB308',
+                  backgroundColor: userCoin >= skinPurchaseAlertItem?.price ? '#EAB308' : 'rgba(255, 255, 255, 0.1)',
                   alignItems: 'center',
-                  shadowColor: '#EAB308',
+                  shadowColor: userCoin >= skinPurchaseAlertItem?.price ? '#EAB308' : 'transparent',
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.3,
                   shadowRadius: 8
                 }}
-                onPress={() => {
-                  setSkinPurchaseAlertItem(null);
-                  setActiveShopTab('inventory');
-                  const catSubmap = {
-                    'ustki_kiyim': 'top',
-                    'futbolka': 'tshirt',
-                    'bosh_kiyim': 'top',
-                    'shim': 'pants',
-                    'oyoq_kiyim': 'shoes',
-                    'aksessuar': 'accessories',
-                    'ryukzak': 'backpacks'
-                  };
-                  if (skinPurchaseAlertItem?.category) {
-                    setActiveSkinCategory(catSubmap[skinPurchaseAlertItem.category] || 'top');
+                onPress={async () => {
+                  if (userCoin < skinPurchaseAlertItem?.price) {
+                    showCustomAlert("Tangalar yetarli emas!", `Ushbu skinni sotib olish uchun sizga kamida ${skinPurchaseAlertItem.price} Coin kerak. Hozir sizda ${userCoin} Coin bor.`, "warning");
+                    return;
                   }
-                  setIsShopModalOpen(true);
+
+                  try {
+                    const newCoin = userCoin - skinPurchaseAlertItem.price;
+                    setUserCoin(newCoin);
+                    const uDataStr = await AsyncStorage.getItem('user_data');
+                    if (uDataStr) {
+                      const uData = JSON.parse(uDataStr);
+                      uData.coin = newCoin;
+                      await AsyncStorage.setItem('user_data', JSON.stringify(uData));
+                    }
+                    await saveSkinPurchase(skinPurchaseAlertItem.id, skinPurchaseAlertItem.price);
+                    const purchasedItem = skinPurchaseAlertItem;
+                    setSkinPurchaseAlertItem(null);
+                    triggerPurchaseAnimation(purchasedItem, "Bosh sahifa -> INVENTAR");
+                  } catch(e) {}
                 }}
               >
-                <Text style={{ color: '#000', fontFamily: 'Inter_700Bold', fontSize: 15 }}>XARID QILISH</Text>
+                <Text style={{ color: userCoin >= skinPurchaseAlertItem?.price ? '#000' : 'rgba(255, 255, 255, 0.3)', fontFamily: 'Inter_700Bold', fontSize: 15 }}>XARID QILISH</Text>
               </TouchableOpacity>
 
               <TouchableOpacity

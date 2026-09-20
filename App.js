@@ -1,5 +1,4 @@
 import './src/utils/safeWeakMap';
-import { Asset } from 'expo-asset';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking, Platform } from 'react-native';
@@ -32,6 +31,7 @@ import BattleResultScreen from './screens/BattleResultScreen';
 import MysteryBoxScreen from './screens/MysteryBoxScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 import { SoundPlayerBridge } from './src/utils/soundPlayer';
+import { ModelPreloader } from './src/utils/ModelPreloader';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_900Black } from '@expo-google-fonts/inter';
@@ -402,6 +402,11 @@ export default function App() {
       } catch (error) {
         console.error('Failed to check auth status', error);
       } finally {
+        try {
+          await ModelPreloader.preloadAllModels();
+        } catch (e) {
+          console.error('Preload models error:', e);
+        }
         setAssetsLoaded(true);
         setIsReady(true);
       }

@@ -732,6 +732,89 @@ app.post('/api/user/coin', async (req, res) => {
   }
 });
 
+// Sync User Purchases
+app.get('/api/user/purchases/:customId', async (req, res) => {
+  try {
+    const { customId } = req.params;
+    const cleanId = customId.replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId }
+        ]
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // @ts-ignore
+    const purchases = await prisma.userPurchase.findMany({
+      where: { userId: user.id }
+    });
+
+    const purchasedSkinIds = purchases.map((p: any) => p.itemId);
+    res.json({ coin: user.coin, purchasedSkins: purchasedSkinIds });
+  } catch (error) {
+    console.error('Fetch purchases error:', error);
+    res.status(500).json({ error: 'Failed to fetch purchases' });
+  }
+});
+
+// Purchase a skin (deducts coins and saves to DB)
+app.post('/api/user/purchase-skin', async (req, res) => {
+  try {
+    const { customId, itemId, price } = req.body;
+    if (!customId || !itemId || price == null) {
+      return res.status(400).json({ error: 'customId, itemId and price are required' });
+    }
+
+    const cleanId = customId.replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId }
+        ]
+      }
+    });
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (user.coin < price) {
+      return res.status(400).json({ error: 'Not enough coins' });
+    }
+
+    // Deduct coins
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { coin: { decrement: price } }
+    });
+
+    // Save purchase
+    // @ts-ignore
+    await prisma.userPurchase.upsert({
+      where: {
+        userId_itemId: { userId: user.id, itemId: itemId }
+      },
+      update: {},
+      create: {
+        userId: user.id,
+        itemId: itemId
+      }
+    });
+
+    io.emit('user_coin_updated', { customId: updatedUser.customId, coin: updatedUser.coin });
+
+    res.json({ message: 'Purchase successful', coin: updatedUser.coin });
+  } catch (error) {
+    console.error('Purchase skin error:', error);
+    res.status(500).json({ error: 'Failed to process purchase' });
+  }
+});
+
 // Update user character
 app.put('/api/user/character', async (req, res) => {
   try {

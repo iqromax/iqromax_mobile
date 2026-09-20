@@ -1,339 +1,107 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { Asset, useAssets } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
-import { API_URL } from '../src/config/api';
+import { ModelPreloader } from '../src/utils/ModelPreloader';
 
 export function Character3DViewer({ characterPath = null, accessoryPath = null, headwearPath = null, pantsPath = null, shoesPath = null, style }) {
   const webViewRef = useRef(null);
-  const [modelBase64, setModelBase64] = useState(undefined);
-  const [headwearBase64, setHeadwearBase64] = useState(undefined);
-  const [accessoryBase64, setAccessoryBase64] = useState(undefined);
-  const [pantsBase64, setPantsBase64] = useState(undefined);
-  const [shoesBase64, setShoesBase64] = useState(undefined);
 
-  // Load Main Character Model Base64
-  useEffect(() => {
-    let isMounted = true;
-    if (!characterPath) {
-      setModelBase64(null);
-      return;
-    }
+  const [charFilename, setCharFilename] = useState(null);
+  const [headwearFilename, setHeadwearFilename] = useState(null);
+  const [accessoryFilename, setAccessoryFilename] = useState(null);
+  const [pantsFilename, setPantsFilename] = useState(null);
+  const [shoesFilename, setShoesFilename] = useState(null);
 
-    async function loadModel() {
-      try {
-        let uri = typeof characterPath === 'object' ? characterPath.uri : characterPath;
-        if (typeof characterPath === 'number') {
-          const asset = Asset.fromModule(characterPath);
-          if (!asset.localUri) {
-            await asset.downloadAsync();
-          }
-          uri = asset.localUri || asset.uri;
-        } else if (typeof characterPath === 'string') {
-          if (!characterPath.startsWith('http://') && !characterPath.startsWith('https://')) {
-            const cleanPath = characterPath.startsWith('/') ? characterPath : `/${characterPath}`;
-            const baseUrl = API_URL.replace(/\/api\/?$/, '');
-            uri = `${baseUrl}${cleanPath}`;
+  const resolveModelUrl = async (path, setter) => {
+    if (!path) return setter(null);
+    try {
+      const localUri = ModelPreloader.getLocalModelUri(path);
+      const remoteUrl = ModelPreloader.getRemoteUrl(path);
+      
+      if (localUri) {
+        const info = await FileSystem.getInfoAsync(localUri);
+        if (info.exists) {
+          if (Platform.OS === 'ios') {
+            // iOS WKWebView blocks file:// fetches. Read as base64 instead.
+            const b64 = await FileSystem.readAsStringAsync(localUri, { encoding: 'base64' });
+            return setter('base64:' + b64);
+          } else {
+            // Android allows file:// fetches when configured properly.
+            return setter(localUri.split('/').pop());
           }
         }
-        
-        let downloadedUri = uri;
-        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const filename = uri.split('/').pop() || 'temp_char.glb';
-          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-          const cachePath = FileSystem.cacheDirectory + 'char_' + safeFilename;
-          
-          const fileInfo = await FileSystem.getInfoAsync(cachePath);
-          if (!fileInfo.exists) {
-            await FileSystem.downloadAsync(uri, cachePath);
-          }
-          downloadedUri = cachePath;
-        }
-        
-        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
-        if (isMounted && b64) {
-          setModelBase64(b64);
-        }
-      } catch (err) {
-        console.warn('Error downloading character for WebView:', err);
-        if (isMounted) setModelBase64(null);
       }
-    }
-
-    loadModel();
-    return () => {
-      isMounted = false;
-    };
-  }, [characterPath]);
-
-  // Load Headwear Model Base64 dynamically
-  useEffect(() => {
-    let isMounted = true;
-    if (!headwearPath) {
-      setHeadwearBase64(null);
-      return;
-    }
-
-    async function loadHeadwear() {
-      try {
-        let uri = typeof headwearPath === 'object' ? headwearPath.uri : headwearPath;
-        if (typeof headwearPath === 'number') {
-          const asset = Asset.fromModule(headwearPath);
-          if (!asset.localUri) {
-            await asset.downloadAsync();
-          }
-          uri = asset.localUri || asset.uri;
-        } else if (typeof headwearPath === 'string') {
-          if (!headwearPath.startsWith('http://') && !headwearPath.startsWith('https://')) {
-            const cleanPath = headwearPath.startsWith('/') ? headwearPath : `/${headwearPath}`;
-            const baseUrl = API_URL.replace(/\/api\/?$/, '');
-            uri = `${baseUrl}${cleanPath}`;
-          }
-        }
-        
-        let downloadedUri = uri;
-        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const filename = uri.split('/').pop() || 'temp_hw.glb';
-          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-          const cachePath = FileSystem.cacheDirectory + 'hw_' + safeFilename;
-          
-          const fileInfo = await FileSystem.getInfoAsync(cachePath);
-          if (!fileInfo.exists) {
-            await FileSystem.downloadAsync(uri, cachePath);
-          }
-          downloadedUri = cachePath;
-        }
-        
-        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
-        if (isMounted && b64) {
-          setHeadwearBase64(b64);
-        }
-      } catch (err) {
-        console.warn('Error downloading headwear for WebView:', err);
-        if (isMounted) setHeadwearBase64(null);
-      }
-    }
-    loadHeadwear();
-    return () => { isMounted = false; };
-  }, [headwearPath]);
-
-  // Load Accessory Model Base64 dynamically
-  useEffect(() => {
-    let isMounted = true;
-    if (!accessoryPath) {
-      setAccessoryBase64(null);
-      return;
-    }
-
-    async function loadAccessory() {
-      try {
-        let uri = typeof accessoryPath === 'object' ? accessoryPath.uri : accessoryPath;
-        if (typeof accessoryPath === 'number') {
-          const asset = Asset.fromModule(accessoryPath);
-          if (!asset.localUri) {
-            await asset.downloadAsync();
-          }
-          uri = asset.localUri || asset.uri;
-        } else if (typeof accessoryPath === 'string') {
-          if (!accessoryPath.startsWith('http://') && !accessoryPath.startsWith('https://')) {
-            const cleanPath = accessoryPath.startsWith('/') ? accessoryPath : `/${accessoryPath}`;
-            const baseUrl = API_URL.replace(/\/api\/?$/, '');
-            uri = `${baseUrl}${cleanPath}`;
-          }
-        }
-        
-        let downloadedUri = uri;
-        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const filename = uri.split('/').pop() || 'temp_acc.glb';
-          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-          const cachePath = FileSystem.cacheDirectory + 'acc_' + safeFilename;
-          
-          const fileInfo = await FileSystem.getInfoAsync(cachePath);
-          if (!fileInfo.exists) {
-            await FileSystem.downloadAsync(uri, cachePath);
-          }
-          downloadedUri = cachePath;
-        }
-        
-        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
-        if (isMounted && b64) {
-          setAccessoryBase64(b64);
-        }
-      } catch (err) {
-        console.warn('Error downloading accessory for WebView:', err);
-        if (isMounted) setAccessoryBase64(null);
-      }
-    }
-    loadAccessory();
-    return () => { isMounted = false; };
-  }, [accessoryPath]);
-
-  // Load Pants Model Base64 dynamically
-  useEffect(() => {
-    let isMounted = true;
-    if (!pantsPath) {
-      setPantsBase64(null);
-      return;
-    }
-
-    async function loadPants() {
-      try {
-        let uri = typeof pantsPath === 'object' ? pantsPath.uri : pantsPath;
-        if (typeof pantsPath === 'number') {
-          const asset = Asset.fromModule(pantsPath);
-          if (!asset.localUri) {
-            await asset.downloadAsync();
-          }
-          uri = asset.localUri || asset.uri;
-        } else if (typeof pantsPath === 'string') {
-          if (!pantsPath.startsWith('http://') && !pantsPath.startsWith('https://')) {
-            const cleanPath = pantsPath.startsWith('/') ? pantsPath : `/${pantsPath}`;
-            const baseUrl = API_URL.replace(/\/api\/?$/, '');
-            uri = `${baseUrl}${cleanPath}`;
-          }
-        }
-        
-        let downloadedUri = uri;
-        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const filename = uri.split('/').pop() || 'temp_pants.glb';
-          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-          const cachePath = FileSystem.cacheDirectory + 'pants_' + safeFilename;
-          
-          const fileInfo = await FileSystem.getInfoAsync(cachePath);
-          if (!fileInfo.exists) {
-            await FileSystem.downloadAsync(uri, cachePath);
-          }
-          downloadedUri = cachePath;
-        }
-        
-        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
-        if (isMounted && b64) {
-          setPantsBase64(b64);
-        }
-      } catch (err) {
-        console.warn('Error downloading pants for WebView:', err);
-        if (isMounted) setPantsBase64(null);
-      }
-    }
-    loadPants();
-    return () => { isMounted = false; };
-  }, [pantsPath]);
-
-  // Load Shoes Model Base64 dynamically
-  useEffect(() => {
-    let isMounted = true;
-    if (!shoesPath) {
-      setShoesBase64(null);
-      return;
-    }
-
-    async function loadShoes() {
-      try {
-        let uri = typeof shoesPath === 'object' ? shoesPath.uri : shoesPath;
-        if (typeof shoesPath === 'number') {
-          const asset = Asset.fromModule(shoesPath);
-          if (!asset.localUri) {
-            await asset.downloadAsync();
-          }
-          uri = asset.localUri || asset.uri;
-        } else if (typeof shoesPath === 'string') {
-          if (!shoesPath.startsWith('http://') && !shoesPath.startsWith('https://')) {
-            const cleanPath = shoesPath.startsWith('/') ? shoesPath : `/${shoesPath}`;
-            const baseUrl = API_URL.replace(/\/api\/?$/, '');
-            uri = `${baseUrl}${cleanPath}`;
-          }
-        }
-        
-        let downloadedUri = uri;
-        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const filename = uri.split('/').pop() || 'temp_shoes.glb';
-          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-          const cachePath = FileSystem.cacheDirectory + 'shoes_' + safeFilename;
-          
-          const fileInfo = await FileSystem.getInfoAsync(cachePath);
-          if (!fileInfo.exists) {
-            await FileSystem.downloadAsync(uri, cachePath);
-          }
-          downloadedUri = cachePath;
-        }
-        
-        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
-        if (isMounted && b64) {
-          setShoesBase64(b64);
-        }
-      } catch (err) {
-        console.warn('Error downloading shoes for WebView:', err);
-        if (isMounted) setShoesBase64(null);
-      }
-    }
-    loadShoes();
-    return () => { isMounted = false; };
-  }, [shoesPath]);
-
-  // Dynamically update WebView without unmounting character
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (headwearBase64) {
-      const js = `if (window.updateHeadwear) { window.updateHeadwear(${JSON.stringify(headwearBase64)}); } else { window.pendingHeadwearB64 = ${JSON.stringify(headwearBase64)}; } true;`;
-      webViewRef.current.injectJavaScript(js);
-    } else {
-      const js = `if (window.updateHeadwear) { window.updateHeadwear(null); } window.pendingHeadwearB64 = null; true;`;
-      webViewRef.current.injectJavaScript(js);
-    }
-  }, [headwearBase64]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (accessoryBase64) {
-      const js = `if (window.updateAccessory) { window.updateAccessory(${JSON.stringify(accessoryBase64)}); } else { window.pendingAccessoryB64 = ${JSON.stringify(accessoryBase64)}; } true;`;
-      webViewRef.current.injectJavaScript(js);
-    } else {
-      const js = `if (window.updateAccessory) { window.updateAccessory(null); } window.pendingAccessoryB64 = null; true;`;
-      webViewRef.current.injectJavaScript(js);
-    }
-  }, [accessoryBase64]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (pantsBase64) {
-      const js = `if (window.updatePants) { window.updatePants(${JSON.stringify(pantsBase64)}); } else { window.pendingPantsB64 = ${JSON.stringify(pantsBase64)}; } true;`;
-      webViewRef.current.injectJavaScript(js);
-    } else {
-      const js = `if (window.updatePants) { window.updatePants(null); } window.pendingPantsB64 = null; true;`;
-      webViewRef.current.injectJavaScript(js);
-    }
-  }, [pantsBase64]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (shoesBase64) {
-      const js = `if (window.updateShoes) { window.updateShoes(${JSON.stringify(shoesBase64)}); } else { window.pendingShoesB64 = ${JSON.stringify(shoesBase64)}; } true;`;
-      webViewRef.current.injectJavaScript(js);
-    } else {
-      const js = `if (window.updateShoes) { window.updateShoes(null); } window.pendingShoesB64 = null; true;`;
-      webViewRef.current.injectJavaScript(js);
-    }
-  }, [shoesBase64]);
-
-  const handleWebViewLoadEnd = () => {
-    if (webViewRef.current) {
-      if (headwearBase64) {
-        webViewRef.current.injectJavaScript(`if (window.updateHeadwear) { window.updateHeadwear(${JSON.stringify(headwearBase64)}); } true;`);
-      }
-      if (accessoryBase64) {
-        webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory(${JSON.stringify(accessoryBase64)}); } true;`);
-      }
-      if (pantsBase64) {
-        webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants(${JSON.stringify(pantsBase64)}); } true;`);
-      }
-      if (shoesBase64) {
-        webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes(${JSON.stringify(shoesBase64)}); } true;`);
-      }
+      setter(remoteUrl);
+    } catch (e) {
+      console.warn('Error resolving model path', e);
+      setter(ModelPreloader.getRemoteUrl(path));
     }
   };
 
-  const htmlContent = modelBase64 ? `
+  useEffect(() => { resolveModelUrl(characterPath, setCharFilename); }, [characterPath]);
+  useEffect(() => { resolveModelUrl(headwearPath, setHeadwearFilename); }, [headwearPath]);
+  useEffect(() => { resolveModelUrl(accessoryPath, setAccessoryFilename); }, [accessoryPath]);
+  useEffect(() => { resolveModelUrl(pantsPath, setPantsFilename); }, [pantsPath]);
+  useEffect(() => { resolveModelUrl(shoesPath, setShoesFilename); }, [shoesPath]);
+
+  // Dynamically update parts when their props change
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (charFilename) {
+      webViewRef.current.injectJavaScript(`if (window.updateCharacter) { window.updateCharacter('${charFilename}'); } true;`);
+    } else {
+      webViewRef.current.injectJavaScript(`if (window.updateCharacter) { window.updateCharacter(null); } true;`);
+    }
+  }, [charFilename]);
+
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (headwearFilename) {
+      webViewRef.current.injectJavaScript(`if (window.updateHeadwear) { window.updateHeadwear('${headwearFilename}'); } true;`);
+    } else {
+      webViewRef.current.injectJavaScript(`if (window.updateHeadwear) { window.updateHeadwear(null); } true;`);
+    }
+  }, [headwearFilename]);
+
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (accessoryFilename) {
+      webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory('${accessoryFilename}'); } true;`);
+    } else {
+      webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory(null); } true;`);
+    }
+  }, [accessoryFilename]);
+
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (pantsFilename) {
+      webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants('${pantsFilename}'); } true;`);
+    } else {
+      webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants(null); } true;`);
+    }
+  }, [pantsFilename]);
+
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (shoesFilename) {
+      webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes('${shoesFilename}'); } true;`);
+    } else {
+      webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes(null); } true;`);
+    }
+  }, [shoesFilename]);
+
+  const handleWebViewLoadEnd = () => {
+    if (webViewRef.current) {
+      if (charFilename) webViewRef.current.injectJavaScript(`if (window.updateCharacter) { window.updateCharacter('${charFilename}'); } true;`);
+      if (headwearFilename) webViewRef.current.injectJavaScript(`if (window.updateHeadwear) { window.updateHeadwear('${headwearFilename}'); } true;`);
+      if (accessoryFilename) webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory('${accessoryFilename}'); } true;`);
+      if (pantsFilename) webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants('${pantsFilename}'); } true;`);
+      if (shoesFilename) webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes('${shoesFilename}'); } true;`);
+    }
+  };
+
+  const htmlContent = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -344,14 +112,31 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           html, body { width: 100%; height: 100%; overflow: hidden; background-color: transparent; }
-          #webgl-container { width: 100%; height: 100%; }
+          #webgl-container { width: 100%; height: 100%; position: relative; }
+          #loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background-color: transparent; transition: opacity 0.3s; pointer-events: none; }
+          .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-left-color: #A855F7; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+          @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         </style>
       </head>
       <body>
         <div id="webgl-container"></div>
+        <div id="loading-overlay" style="opacity: 0;"><div class="spinner"></div></div>
 
         <script>
           const container = document.getElementById('webgl-container');
+          const loadingOverlay = document.getElementById('loading-overlay');
+
+          let loadingCount = 0;
+          function showLoading() {
+            loadingCount++;
+            loadingOverlay.style.opacity = '1';
+          }
+          function hideLoading() {
+            loadingCount = Math.max(0, loadingCount - 1);
+            if (loadingCount === 0) {
+              loadingOverlay.style.opacity = '0';
+            }
+          }
 
           // Scene, Camera, Renderer
           const scene = new THREE.Scene();
@@ -373,17 +158,10 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           controls.enableDamping = true;
           controls.dampingFactor = 0.05;
           controls.autoRotate = false;
-
-          // Lock vertical rotation (only allow horizontal rotation around y-axis)
           controls.minPolarAngle = Math.PI / 2;
           controls.maxPolarAngle = Math.PI / 2;
-          
-          // Disable zooming (pinch to zoom)
           controls.enableZoom = false;
-          
-          // Disable panning (moving off-center with two fingers)
           controls.enablePan = false;
-
 
           // Lights
           const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
@@ -410,224 +188,220 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           }
 
           const gltfLoader = new THREE.GLTFLoader();
-          const charB64Str = ${JSON.stringify(modelBase64 || '')};
 
-          let characterModel = null;
+          window.characterModel = null;
           window.headwearModel = null;
           window.accessoryModel = null;
           window.pantsModel = null;
           window.shoesModel = null;
 
-          window.pendingHeadwearB64 = ${JSON.stringify(headwearBase64 || null)};
-          window.pendingAccessoryB64 = ${JSON.stringify(accessoryBase64 || null)};
-          window.pendingPantsB64 = ${JSON.stringify(pantsBase64 || null)};
-          window.pendingShoesB64 = ${JSON.stringify(shoesBase64 || null)};
+          function processMaterial(child) {
+            if (child.isMesh) {
+              if (child.material) child.material.side = THREE.DoubleSide;
+              child.castShadow = true;
+              child.receiveShadow = true;
+              child.frustumCulled = false;
+            }
+          }
 
-          window.updateHeadwear = function(b64) {
-            return new Promise(function(resolve) {
+          function loadModelIntoScene(dataOrUrl, onSuccess) {
+            showLoading();
+            if (dataOrUrl.startsWith('base64:')) {
+              try {
+                const b64 = dataOrUrl.substring(7);
+                const buffer = base64ToArrayBuffer(b64);
+                gltfLoader.parse(buffer, '', function(gltf) {
+                  onSuccess(gltf);
+                  hideLoading();
+                }, function(e) {
+                  console.error('Base64 Parse Error:', e);
+                  hideLoading();
+                });
+              } catch(e) {
+                console.error('Base64 Buffer Error:', e);
+                hideLoading();
+              }
+            } else {
+              gltfLoader.load(dataOrUrl, function(gltf) {
+                onSuccess(gltf);
+                hideLoading();
+              }, undefined, function(e) {
+                console.error('URL Load Error:', e);
+                hideLoading();
+              });
+            }
+          }
+
+          window.updateCharacter = function(filename) {
+            if (!filename) {
+              if (window.characterModel) {
+                scene.remove(window.characterModel);
+                window.characterModel = null;
+              }
+              if (window.headwearModel) window.headwearModel.visible = false;
+              if (window.accessoryModel) window.accessoryModel.visible = false;
+              if (window.pantsModel) window.pantsModel.visible = false;
+              if (window.shoesModel) window.shoesModel.visible = false;
+              return;
+            }
+            
+            loadModelIntoScene(filename, function(gltf) {
+              const newChar = gltf.scene;
+              newChar.traverse(function(child) {
+                processMaterial(child);
+                if (child.isMesh && child.material) {
+                  child.material.color.setHex(0x666666);
+                }
+              });
+
+              const box = new THREE.Box3().setFromObject(newChar);
+              const size = box.getSize(new THREE.Vector3());
+              const center = box.getCenter(new THREE.Vector3());
+
+              newChar.position.set(0, 0, 0);
+              newChar.scale.set(1, 1, 1);
+              newChar.rotation.y = 0;
+              
+              if (window.characterModel) {
+                scene.remove(window.characterModel);
+              }
+              window.characterModel = newChar;
+              scene.add(window.characterModel);
+              
+              if (window.headwearModel) {
+                 window.headwearModel.visible = true;
+                 window.headwearModel.rotation.y = window.characterModel.rotation.y;
+              }
+              if (window.accessoryModel) {
+                 window.accessoryModel.visible = true;
+                 window.accessoryModel.rotation.y = window.characterModel.rotation.y;
+              }
+              if (window.pantsModel) {
+                 window.pantsModel.visible = true;
+                 window.pantsModel.rotation.y = window.characterModel.rotation.y;
+              }
+              if (window.shoesModel) {
+                 window.shoesModel.visible = true;
+                 window.shoesModel.rotation.y = window.characterModel.rotation.y;
+              }
+              
+              controls.target.set(0, size.y * 0.52, 0);
+              camera.position.set(0, size.y * 0.52, Math.max(size.x, size.y, size.z) * 1.55);
+              controls.update();
+            });
+          };
+
+          window.updateHeadwear = function(filename) {
+            if (!filename) {
               if (window.headwearModel) {
                 scene.remove(window.headwearModel);
                 window.headwearModel = null;
               }
-              if (!b64 || !characterModel) return resolve();
-              try {
-                const buffer = base64ToArrayBuffer(b64);
-                gltfLoader.parse(buffer, '', function(gltf) {
-                  if (window.headwearModel) {
-                    scene.remove(window.headwearModel);
-                  }
-                  window.headwearModel = gltf.scene;
-
-                  window.headwearModel.traverse(function(child) {
-                    if (child.isMesh) {
-                      if (child.material) child.material.side = THREE.DoubleSide;
-                      child.castShadow = true;
-                      child.receiveShadow = true;
-                      child.frustumCulled = false;
-                    }
-                  });
-
-                  window.headwearModel.position.set(0, 0, 0);
-                  window.headwearModel.scale.set(1, 1, 1);
-                  window.headwearModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
-                  scene.add(window.headwearModel);
-                  resolve();
-                }, function() { resolve(); });
-              } catch(e) {
-                console.error('Headwear parse error:', e);
-                resolve();
+              return;
+            }
+            
+            loadModelIntoScene(filename, function(gltf) {
+              const newSkin = gltf.scene;
+              newSkin.traverse(processMaterial);
+              newSkin.position.set(0, 0, 0);
+              newSkin.scale.set(1, 1, 1);
+              
+              if (window.headwearModel) scene.remove(window.headwearModel);
+              window.headwearModel = newSkin;
+              
+              if (window.characterModel) {
+                window.headwearModel.rotation.y = window.characterModel.rotation.y;
+                window.headwearModel.visible = true;
+              } else {
+                window.headwearModel.visible = false;
               }
+              scene.add(window.headwearModel);
             });
           };
 
-          window.updateAccessory = function(b64) {
-            return new Promise(function(resolve) {
+          window.updateAccessory = function(filename) {
+            if (!filename) {
               if (window.accessoryModel) {
                 scene.remove(window.accessoryModel);
                 window.accessoryModel = null;
               }
-              if (!b64 || !characterModel) return resolve();
-              try {
-                const buffer = base64ToArrayBuffer(b64);
-                gltfLoader.parse(buffer, '', function(gltf) {
-                  if (window.accessoryModel) {
-                    scene.remove(window.accessoryModel);
-                  }
-                  window.accessoryModel = gltf.scene;
-
-                  window.accessoryModel.traverse(function(child) {
-                    if (child.isMesh) {
-                      if (child.material) child.material.side = THREE.DoubleSide;
-                      child.castShadow = true;
-                      child.receiveShadow = true;
-                      child.frustumCulled = false;
-                    }
-                  });
-
-                  window.accessoryModel.position.set(0, 0, 0);
-                  window.accessoryModel.scale.set(1, 1, 1);
-                  window.accessoryModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
-                  scene.add(window.accessoryModel);
-                  resolve();
-                }, function() { resolve(); });
-              } catch(e) {
-                console.error('Accessory parse error:', e);
-                resolve();
+              return;
+            }
+            
+            loadModelIntoScene(filename, function(gltf) {
+              const newSkin = gltf.scene;
+              newSkin.traverse(processMaterial);
+              newSkin.position.set(0, 0, 0);
+              newSkin.scale.set(1, 1, 1);
+              
+              if (window.accessoryModel) scene.remove(window.accessoryModel);
+              window.accessoryModel = newSkin;
+              
+              if (window.characterModel) {
+                window.accessoryModel.rotation.y = window.characterModel.rotation.y;
+                window.accessoryModel.visible = true;
+              } else {
+                window.accessoryModel.visible = false;
               }
+              scene.add(window.accessoryModel);
             });
           };
 
-          window.updatePants = function(b64) {
-            return new Promise(function(resolve) {
+          window.updatePants = function(filename) {
+            if (!filename) {
               if (window.pantsModel) {
                 scene.remove(window.pantsModel);
                 window.pantsModel = null;
               }
-              if (!b64 || !characterModel) return resolve();
-              try {
-                const buffer = base64ToArrayBuffer(b64);
-                gltfLoader.parse(buffer, '', function(gltf) {
-                  if (window.pantsModel) {
-                    scene.remove(window.pantsModel);
-                  }
-                  window.pantsModel = gltf.scene;
-
-                  window.pantsModel.traverse(function(child) {
-                    if (child.isMesh) {
-                      if (child.material) child.material.side = THREE.DoubleSide;
-                      child.castShadow = true;
-                      child.receiveShadow = true;
-                      child.frustumCulled = false;
-                    }
-                  });
-
-                  window.pantsModel.position.set(0, 0, 0);
-                  window.pantsModel.scale.set(1, 1, 1);
-                  window.pantsModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
-                  scene.add(window.pantsModel);
-                  resolve();
-                }, function() { resolve(); });
-              } catch(e) {
-                console.error('Pants parse error:', e);
-                resolve();
+              return;
+            }
+            
+            loadModelIntoScene(filename, function(gltf) {
+              const newSkin = gltf.scene;
+              newSkin.traverse(processMaterial);
+              newSkin.position.set(0, 0, 0);
+              newSkin.scale.set(1, 1, 1);
+              
+              if (window.pantsModel) scene.remove(window.pantsModel);
+              window.pantsModel = newSkin;
+              
+              if (window.characterModel) {
+                window.pantsModel.rotation.y = window.characterModel.rotation.y;
+                window.pantsModel.visible = true;
+              } else {
+                window.pantsModel.visible = false;
               }
+              scene.add(window.pantsModel);
             });
           };
 
-          window.updateShoes = function(b64) {
-            return new Promise(function(resolve) {
+          window.updateShoes = function(filename) {
+            if (!filename) {
               if (window.shoesModel) {
                 scene.remove(window.shoesModel);
                 window.shoesModel = null;
               }
-              if (!b64 || !characterModel) return resolve();
-              try {
-                const buffer = base64ToArrayBuffer(b64);
-                gltfLoader.parse(buffer, '', function(gltf) {
-                  if (window.shoesModel) {
-                    scene.remove(window.shoesModel);
-                  }
-                  window.shoesModel = gltf.scene;
-
-                  window.shoesModel.traverse(function(child) {
-                    if (child.isMesh) {
-                      if (child.material) child.material.side = THREE.DoubleSide;
-                      child.castShadow = true;
-                      child.receiveShadow = true;
-                      child.frustumCulled = false;
-                    }
-                  });
-
-                  window.shoesModel.position.set(0, 0, 0);
-                  window.shoesModel.scale.set(1, 1, 1);
-                  window.shoesModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
-                  scene.add(window.shoesModel);
-                  resolve();
-                }, function() { resolve(); });
-              } catch(e) {
-                console.error('Shoes parse error:', e);
-                resolve();
+              return;
+            }
+            
+            loadModelIntoScene(filename, function(gltf) {
+              const newSkin = gltf.scene;
+              newSkin.traverse(processMaterial);
+              newSkin.position.set(0, 0, 0);
+              newSkin.scale.set(1, 1, 1);
+              
+              if (window.shoesModel) scene.remove(window.shoesModel);
+              window.shoesModel = newSkin;
+              
+              if (window.characterModel) {
+                window.shoesModel.rotation.y = window.characterModel.rotation.y;
+                window.shoesModel.visible = true;
+              } else {
+                window.shoesModel.visible = false;
               }
+              scene.add(window.shoesModel);
             });
           };
-
-          if (charB64Str.length > 0) {
-            scene.visible = false;
-            try {
-              const charBuffer = base64ToArrayBuffer(charB64Str);
-              gltfLoader.parse(charBuffer, '', async function(gltf) {
-                characterModel = gltf.scene;
-                
-                characterModel.traverse(function(child) {
-                  if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.frustumCulled = false;
-                    if (child.material) {
-                      child.material.color.setHex(0x666666); // Darken the character significantly
-                    }
-                  }
-                });
-
-                const box = new THREE.Box3().setFromObject(characterModel);
-                const size = box.getSize(new THREE.Vector3());
-                const center = box.getCenter(new THREE.Vector3());
-
-                characterModel.position.set(0, 0, 0);
-                characterModel.scale.set(1, 1, 1);
-
-                scene.add(characterModel);
-
-                // Default rotation so characters face straight forward towards the camera
-                characterModel.rotation.y = 0;
-
-                controls.target.set(0, size.y * 0.52, 0);
-                camera.position.set(0, size.y * 0.52, Math.max(size.x, size.y, size.z) * 1.55);
-                controls.update();
-
-                // Apply initial skins if ready
-                const promises = [];
-                if (window.pendingHeadwearB64) {
-                  promises.push(window.updateHeadwear(window.pendingHeadwearB64));
-                }
-                if (window.pendingAccessoryB64) {
-                  promises.push(window.updateAccessory(window.pendingAccessoryB64));
-                }
-                if (window.pendingPantsB64) {
-                  promises.push(window.updatePants(window.pendingPantsB64));
-                }
-                if (window.pendingShoesB64) {
-                  promises.push(window.updateShoes(window.pendingShoesB64));
-                }
-                
-                await Promise.all(promises);
-                scene.visible = true;
-              });
-            } catch(e) {
-              console.error('Char Parse Error:', e);
-              scene.visible = true;
-            }
-          }
 
           // Animation Loop
           function animate() {
@@ -646,40 +420,29 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         </script>
       </body>
     </html>
-  ` : '';
+  `;
 
-  const renderKey = typeof characterPath === 'string' ? characterPath : 'char_fallback';
-  
-  const allLoaded = modelBase64 !== undefined && 
-                    headwearBase64 !== undefined && 
-                    accessoryBase64 !== undefined && 
-                    pantsBase64 !== undefined &&
-                    shoesBase64 !== undefined;
+  // Provide a base URL to FileSystem.cacheDirectory so ThreeJS can load the filenames directly
+  // Note: On Android we must include a trailing slash, FileSystem.cacheDirectory already ends with one usually.
+  const baseUrl = FileSystem.cacheDirectory;
 
   return (
     <View style={[styles.container, style]}>
-      {allLoaded && modelBase64 ? (
-        <WebView
-          key={renderKey}
-          ref={webViewRef}
-          originWhitelist={['*']}
-          source={{ html: htmlContent }}
-          style={styles.webview}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          allowFileAccess={true}
-          allowUniversalAccessFromFileURLs={true}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-          bounces={false}
-          onLoadEnd={handleWebViewLoadEnd}
-        />
-      ) : (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color="#A855F7" size="large" />
-        </View>
-      )}
+      <WebView
+        ref={webViewRef}
+        originWhitelist={['*']}
+        source={{ html: htmlContent, baseUrl: baseUrl }}
+        style={styles.webview}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        allowFileAccess={true}
+        allowUniversalAccessFromFileURLs={true}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={false}
+        bounces={false}
+        onLoadEnd={handleWebViewLoadEnd}
+      />
     </View>
   );
 }
@@ -691,12 +454,6 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
-    backgroundColor: 'transparent',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: 'transparent',
   }
 });
