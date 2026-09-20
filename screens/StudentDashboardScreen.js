@@ -3391,8 +3391,17 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   ]}>
                     <Text style={styles.leaderboardRank}>{item.rank}</Text>
                     <Image source={item.avatar} style={styles.leaderboardAvatar} />
-                    <Text style={styles.leaderboardName}>{item.name}</Text>
-                    <Text style={styles.leaderboardXp}>{item.xp} XP</Text>
+                    <Text style={styles.leaderboardName} numberOfLines={1}>{item.name}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text style={styles.leaderboardXp}>{item.xp} XP</Text>
+                      {item.customId !== user?.customId && (
+                        <TouchableOpacity 
+                          style={{ marginLeft: 12, backgroundColor: 'rgba(192, 132, 252, 0.1)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
+                        >
+                          <Feather name="user-plus" size={15} color="#C084FC" />
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   </Animated.View>
                 ))
               ) : (
