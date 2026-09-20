@@ -5605,9 +5605,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
       {/* Friends Modal */}
       <Modal visible={isFriendsModalOpen} animationType="slide" transparent={true}>
         <View style={{ flex: 1, backgroundColor: '#05050C' }}>
-          <SafeAreaView style={{ flex: 1 }}>
+          <View style={{ flex: 1 }}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: Platform.OS === 'ios' ? 65 : 10, paddingBottom: 20 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: Platform.OS === 'ios' ? 50 : 10, paddingBottom: 20 }}>
         <TouchableOpacity onPress={() => setIsFriendsModalOpen(false)}>
                 <MaterialCommunityIcons name="close" size={28} color="#FFF" />
               </TouchableOpacity>
@@ -5679,7 +5679,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 )
               )}
             </ScrollView>
-          </SafeAreaView>
+          </View>
         </View>
       </Modal>
 
