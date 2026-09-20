@@ -18,6 +18,7 @@ interface SkinItem {
 
 const CATEGORIES = [
   { id: 'bosh_kiyim', label: 'Bosh kiyim' },
+  { id: 'futbolka', label: 'Futbolka' },
   { id: 'ustki_kiyim', label: 'Ustki kiyim' },
   { id: 'shim', label: 'Shim' },
   { id: 'oyoq_kiyim', label: 'Oyoq kiyim' },
