@@ -39,9 +39,15 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         
         let downloadedUri = uri;
         if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const tempPath = FileSystem.cacheDirectory + `temp_char_${Date.now()}.glb`;
-          const downloaded = await FileSystem.downloadAsync(uri, tempPath);
-          downloadedUri = downloaded.uri;
+          const filename = uri.split('/').pop() || 'temp_char.glb';
+          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+          const cachePath = FileSystem.cacheDirectory + 'char_' + safeFilename;
+          
+          const fileInfo = await FileSystem.getInfoAsync(cachePath);
+          if (!fileInfo.exists) {
+            await FileSystem.downloadAsync(uri, cachePath);
+          }
+          downloadedUri = cachePath;
         }
         
         const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
@@ -87,9 +93,15 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         
         let downloadedUri = uri;
         if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const tempPath = FileSystem.cacheDirectory + `temp_hw_${Date.now()}.glb`;
-          const downloaded = await FileSystem.downloadAsync(uri, tempPath);
-          downloadedUri = downloaded.uri;
+          const filename = uri.split('/').pop() || 'temp_hw.glb';
+          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+          const cachePath = FileSystem.cacheDirectory + 'hw_' + safeFilename;
+          
+          const fileInfo = await FileSystem.getInfoAsync(cachePath);
+          if (!fileInfo.exists) {
+            await FileSystem.downloadAsync(uri, cachePath);
+          }
+          downloadedUri = cachePath;
         }
         
         const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
@@ -132,9 +144,15 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         
         let downloadedUri = uri;
         if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const tempPath = FileSystem.cacheDirectory + `temp_acc_${Date.now()}.glb`;
-          const downloaded = await FileSystem.downloadAsync(uri, tempPath);
-          downloadedUri = downloaded.uri;
+          const filename = uri.split('/').pop() || 'temp_acc.glb';
+          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+          const cachePath = FileSystem.cacheDirectory + 'acc_' + safeFilename;
+          
+          const fileInfo = await FileSystem.getInfoAsync(cachePath);
+          if (!fileInfo.exists) {
+            await FileSystem.downloadAsync(uri, cachePath);
+          }
+          downloadedUri = cachePath;
         }
         
         const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
@@ -177,9 +195,15 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         
         let downloadedUri = uri;
         if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
-          const tempPath = FileSystem.cacheDirectory + `temp_pants_${Date.now()}.glb`;
-          const downloaded = await FileSystem.downloadAsync(uri, tempPath);
-          downloadedUri = downloaded.uri;
+          const filename = uri.split('/').pop() || 'temp_pants.glb';
+          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+          const cachePath = FileSystem.cacheDirectory + 'pants_' + safeFilename;
+          
+          const fileInfo = await FileSystem.getInfoAsync(cachePath);
+          if (!fileInfo.exists) {
+            await FileSystem.downloadAsync(uri, cachePath);
+          }
+          downloadedUri = cachePath;
         }
         
         const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
