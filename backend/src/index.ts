@@ -1938,6 +1938,8 @@ app.post('/api/user/friend-request', async (req, res) => {
       data: { senderId, receiverId, status: 'PENDING' }
     });
 
+    io.emit('friend_request_received', { receiverId, senderId });
+
     res.json({ message: 'Friend request sent' });
   } catch (error) {
     console.error('Friend request error:', error);
@@ -1988,6 +1990,7 @@ app.post('/api/user/friend-request/handle', async (req, res) => {
         where: { id: requestId },
         data: { status: 'REJECTED' }
       });
+      io.emit('friend_request_handled', { senderId: request.senderId, receiverId: request.receiverId, action: 'REJECT' });
       return res.json({ message: 'Request rejected' });
     }
 
@@ -2009,6 +2012,8 @@ app.post('/api/user/friend-request/handle', async (req, res) => {
         update: {},
         create: { userId1, userId2 }
       });
+
+      io.emit('friend_request_handled', { senderId: request.senderId, receiverId: request.receiverId, action: 'ACCEPT' });
 
       return res.json({ message: 'Request accepted' });
     }

@@ -1670,13 +1670,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
       });
       const data = await res.json();
       if (res.ok) {
-        Alert.alert(t.successTitle || 'Muvaffaqiyat', 'Do\'stlik so\'rovi yuborildi!');
+        showCustomAlert(t.successTitle || 'Muvaffaqiyat', 'Do\'stlik so\'rovi yuborildi!', 'success');
       } else {
-        Alert.alert(t.errorTitle || 'Xatolik', data.error || 'Xatolik yuz berdi');
+        showCustomAlert(t.errorTitle || 'Xatolik', data.error || 'Xatolik yuz berdi', 'warning');
       }
     } catch (e) {
       console.error(e);
-      Alert.alert(t.errorTitle || 'Xatolik', 'Tarmoq xatosi');
+      showCustomAlert(t.errorTitle || 'Xatolik', 'Tarmoq xatosi', 'warning');
     }
   };
 
@@ -1695,6 +1695,31 @@ export default function StudentDashboardScreen({ navigation, route }) {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+    if (!user?.customId) return;
+    const socket = io(SOCKET_URL, { 
+      path: '/api/socket.io',
+      transports: ['websocket'] 
+    });
+
+    socket.on('friend_request_received', (data) => {
+      if (data.receiverId === user.customId) {
+        fetchFriendRequests();
+      }
+    });
+
+    socket.on('friend_request_handled', (data) => {
+      if (data.senderId === user.customId || data.receiverId === user.customId) {
+        fetchFriendRequests();
+        if (data.action === 'ACCEPT') fetchFriends();
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user?.customId]);
 
   const handleStartExercise = async () => {
     if (!checkGuestAuth()) return;
