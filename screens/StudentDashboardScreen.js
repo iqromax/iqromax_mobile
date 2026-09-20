@@ -403,7 +403,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [boxReward, setBoxReward] = useState(null);
   
   const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false);
-  const [friendsActiveTab, setFriendsActiveTab] = useState('requests'); // 'requests' | 'friends'
+  const [friendsActiveTab, setFriendsActiveTab] = useState('friends');
+  const [hasUnreadFriendRequests, setHasUnreadFriendRequests] = useState(false);
+  const friendIconPulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (hasUnreadFriendRequests) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(friendIconPulseAnim, { toValue: 1.2, duration: 500, useNativeDriver: true }),
+          Animated.timing(friendIconPulseAnim, { toValue: 1, duration: 500, useNativeDriver: true })
+        ])
+      ).start();
+    } else {
+      friendIconPulseAnim.stopAnimation();
+      friendIconPulseAnim.setValue(1);
+    }
+  }, [hasUnreadFriendRequests]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [friendsList, setFriendsList] = useState([]);
 
@@ -1641,6 +1657,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
       if (res.ok) {
         const data = await res.json();
         setFriendRequests(data);
+        if (data.length > 0 && friendsActiveTab !== 'requests') {
+          setHasUnreadFriendRequests(true);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -1725,6 +1744,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     socket.on('friend_request_received', (data) => {
       if (data.receiverId === user.customId) {
         fetchFriendRequests();
+        setHasUnreadFriendRequests(true);
       }
     });
 
@@ -3278,10 +3298,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 onPress={() => {
                   fetchFriendRequests();
                   fetchFriends();
+                  if (hasUnreadFriendRequests) {
+                    setFriendsActiveTab('requests');
+                    setHasUnreadFriendRequests(false);
+                  }
                   setIsFriendsModalOpen(true);
                 }}
               >
-                <Feather name="users" size={20} color="#FFF" />
+                <Animated.View style={{ transform: [{ scale: friendIconPulseAnim }] }}>
+                  <Feather name="users" size={20} color={hasUnreadFriendRequests ? "#EF4444" : "#FFF"} />
+                </Animated.View>
+                {hasUnreadFriendRequests && (
+                  <View style={{ position: 'absolute', top: 10, right: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#EF4444', borderWidth: 2, borderColor: '#12121D' }} />
+                )}
               </TouchableOpacity>
             </View>
 {(() => {
@@ -5643,16 +5672,24 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Tabs */}
             <View style={{ flexDirection: 'row', marginHorizontal: 20, backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: 12, padding: 4, marginBottom: 20 }}>
               <TouchableOpacity
-                style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'requests' ? '#C084FC' : 'transparent', borderRadius: 10 }}
-                onPress={() => setFriendsActiveTab('requests')}
-              >
-                <Text style={{ color: friendsActiveTab === 'requests' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Arizalar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
                 style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'friends' ? '#C084FC' : 'transparent', borderRadius: 10 }}
                 onPress={() => setFriendsActiveTab('friends')}
               >
                 <Text style={{ color: friendsActiveTab === 'friends' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Do'stlar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'requests' ? '#C084FC' : 'transparent', borderRadius: 10 }}
+                onPress={() => {
+                  setFriendsActiveTab('requests');
+                  setHasUnreadFriendRequests(false);
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ color: friendsActiveTab === 'requests' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Arizalar</Text>
+                  {hasUnreadFriendRequests && (
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
+                  )}
+                </View>
               </TouchableOpacity>
             </View>
 
