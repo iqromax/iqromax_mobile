@@ -213,6 +213,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
     return 'boys';
   };
   const [equippedAccessories, setEquippedAccessories] = useState({});
+  const [isSkinsLoaded, setIsSkinsLoaded] = useState(false);
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
   const [equippedHeadwears, setEquippedHeadwears] = useState({});
   const equippedHeadwear = equippedHeadwears[activeAvatarIndex] || null;
@@ -438,22 +439,29 @@ export default function StudentDashboardScreen({ navigation, route }) {
               if (parsed.accessories) setEquippedAccessories(parsed.accessories);
               if (parsed.headwears) setEquippedHeadwears(parsed.headwears);
               if (parsed.pants) setEquippedPantsState(parsed.pants);
+              if (parsed.avatarIndex !== undefined) setActiveAvatarIndex(parsed.avatarIndex);
             } catch (err) {}
           }
-        }).catch(e => console.log(e));
+          setIsSkinsLoaded(true);
+        }).catch(e => {
+          console.log(e);
+          setIsSkinsLoaded(true);
+        });
       });
     }, [user?.customId, user?.id, route.params])
   );
 
   useEffect(() => {
+    if (!isSkinsLoaded) return;
     const userIdKey = user?.customId || user?.id || 'guest';
     const toSave = {
       accessories: equippedAccessories,
       headwears: equippedHeadwears,
-      pants: equippedPantsState
+      pants: equippedPantsState,
+      avatarIndex: activeAvatarIndex
     };
     AsyncStorage.setItem(`user_equipped_skins_${userIdKey}`, JSON.stringify(toSave)).catch(e => console.log(e));
-  }, [equippedAccessories, equippedHeadwears, equippedPantsState, user]);
+  }, [equippedAccessories, equippedHeadwears, equippedPantsState, activeAvatarIndex, user, isSkinsLoaded]);
 
 
 
