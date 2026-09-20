@@ -7,10 +7,10 @@ import { API_URL } from '../src/config/api';
 
 export function Character3DViewer({ characterPath = null, accessoryPath = null, headwearPath = null, pantsPath = null, style }) {
   const webViewRef = useRef(null);
-  const [modelBase64, setModelBase64] = useState(null);
-  const [headwearBase64, setHeadwearBase64] = useState(null);
-  const [accessoryBase64, setAccessoryBase64] = useState(null);
-  const [pantsBase64, setPantsBase64] = useState(null);
+  const [modelBase64, setModelBase64] = useState(undefined);
+  const [headwearBase64, setHeadwearBase64] = useState(undefined);
+  const [accessoryBase64, setAccessoryBase64] = useState(undefined);
+  const [pantsBase64, setPantsBase64] = useState(undefined);
 
   // Load Main Character Model Base64
   useEffect(() => {
@@ -538,10 +538,15 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
   ` : '';
 
   const renderKey = typeof characterPath === 'string' ? characterPath : 'char_fallback';
+  
+  const allLoaded = modelBase64 !== undefined && 
+                    headwearBase64 !== undefined && 
+                    accessoryBase64 !== undefined && 
+                    pantsBase64 !== undefined;
 
   return (
     <View style={[styles.container, style]}>
-      {modelBase64 ? (
+      {allLoaded && modelBase64 ? (
         <WebView
           key={renderKey}
           ref={webViewRef}
