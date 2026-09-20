@@ -1696,6 +1696,25 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }
   };
 
+  const handleDeleteFriend = async (friendId) => {
+    if (!user?.customId) return;
+    try {
+      const res = await fetch(`${API_URL}/user/friends/remove`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.customId, friendId })
+      });
+      if (res.ok) {
+        fetchFriends();
+      } else {
+        showCustomAlert(t.errorTitle || 'Xatolik', 'Do\'stni o\'chirishda xatolik', 'warning');
+      }
+    } catch (e) {
+      console.error(e);
+      showCustomAlert(t.errorTitle || 'Xatolik', 'Tarmoq xatosi', 'warning');
+    }
+  };
+
   useEffect(() => {
     if (!user?.customId) return;
     const socket = io(SOCKET_URL, { 
@@ -1713,6 +1732,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
       if (data.senderId === user.customId || data.receiverId === user.customId) {
         fetchFriendRequests();
         if (data.action === 'ACCEPT') fetchFriends();
+      }
+    });
+
+    socket.on('friend_deleted', (data) => {
+      if (data.userId === user.customId || data.friendId === user.customId) {
+        fetchFriends();
       }
     });
 
@@ -5607,7 +5632,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <View style={{ flex: 1, backgroundColor: '#05050C' }}>
           <View style={{ flex: 1 }}>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: Platform.OS === 'ios' ? 50 : 10, paddingBottom: 20 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: Platform.OS === 'ios' ? 60 : 10, paddingBottom: 20 }}>
         <TouchableOpacity onPress={() => setIsFriendsModalOpen(false)}>
                 <MaterialCommunityIcons name="close" size={28} color="#FFF" />
               </TouchableOpacity>
@@ -5671,6 +5696,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{friend.name}</Text>
                       <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 13 }}>{friend.xp} XP</Text>
                     </View>
+                    <TouchableOpacity 
+                      style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(239, 68, 68, 0.15)', alignItems: 'center', justifyContent: 'center' }}
+                      onPress={() => handleDeleteFriend(friend.customId)}
+                    >
+                      <MaterialCommunityIcons name="delete" size={20} color="#EF4444" />
+                    </TouchableOpacity>
                   </View>
                 )) : (
                   <View style={{ alignItems: 'center', marginTop: 40 }}>

@@ -2058,6 +2058,39 @@ app.get('/api/user/friends/:customId', async (req, res) => {
   }
 });
 
+// 5. Remove friend
+app.post('/api/user/friends/remove', async (req, res) => {
+  try {
+    const { userId, friendId } = req.body;
+    if (!userId || !friendId) return res.status(400).json({ error: 'userId and friendId required' });
+
+    const u1 = userId < friendId ? userId : friendId;
+    const u2 = userId < friendId ? friendId : userId;
+
+    // @ts-ignore
+    await prisma.friend.deleteMany({
+      where: { userId1: u1, userId2: u2 }
+    });
+
+    // Also optionally reset friendRequest status to not block future requests?
+    // @ts-ignore
+    await prisma.friendRequest.deleteMany({
+      where: {
+        OR: [
+          { senderId: userId, receiverId: friendId },
+          { senderId: friendId, receiverId: userId }
+        ]
+      }
+    });
+
+    io.emit('friend_deleted', { userId, friendId });
+    res.json({ message: 'Friend removed' });
+  } catch (error) {
+    console.error('Remove friend error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Fallback to admin panel for unhandled routes
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
