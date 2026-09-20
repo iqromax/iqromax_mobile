@@ -198,6 +198,91 @@ router.post('/admin/inventory-skins', uploadFields, async (req, res) => {
   }
 });
 
+// Admin: Edit inventory skin
+router.put('/admin/inventory-skins/:id', uploadFields, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category, name, rarity, price, isLocked, targetGender } = req.body;
+    const genderValue = targetGender ? targetGender.trim() : 'all';
+
+    if (!category || !name) {
+      return res.status(400).json({ error: 'Category and name are required' });
+    }
+
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    let imageUrl = undefined;
+    let modelUrl = undefined;
+
+    if (files?.image && files.image.length > 0) {
+      imageUrl = `/api/uploads/skins/${files.image[0].filename}`;
+    }
+    if (files?.glbModel && files.glbModel.length > 0) {
+      const glbFile = files.glbModel[0];
+      modelUrl = `/api/uploads/skins/${glbFile.filename}`;
+
+      try {
+        const fullGlbPath = path.join(__dirname, '../../public/uploads/skins', glbFile.filename);
+        await convertGlbTexturesToPng(fullGlbPath);
+      } catch (convErr) {
+        console.error('Error optimizing GLB textures to PNG:', convErr);
+      }
+    }
+
+    const parsedPrice = price ? parseInt(price, 10) : 0;
+    const shouldBeLocked = parsedPrice > 0;
+
+    let updatedSkin;
+    // @ts-ignore
+    if (prisma.inventorySkin) {
+      // @ts-ignore
+      const existingSkin = await prisma.inventorySkin.findUnique({ where: { id } });
+      if (!existingSkin) {
+        return res.status(404).json({ error: 'Skin not found' });
+      }
+
+      // Delete old files if new ones are provided
+      if (imageUrl && existingSkin.imageUrl && existingSkin.imageUrl.startsWith('/api/uploads/skins/')) {
+        const oldImgPath = path.join(__dirname, '../../public/uploads/skins', path.basename(existingSkin.imageUrl));
+        if (fs.existsSync(oldImgPath)) fs.unlinkSync(oldImgPath);
+      }
+      if (modelUrl && existingSkin.modelUrl && existingSkin.modelUrl.startsWith('/api/uploads/skins/')) {
+        const oldModelPath = path.join(__dirname, '../../public/uploads/skins', path.basename(existingSkin.modelUrl));
+        if (fs.existsSync(oldModelPath)) fs.unlinkSync(oldModelPath);
+      }
+
+      const updateData: any = {
+        category: category.trim(),
+        name: name.trim(),
+        rarity: rarity ? rarity.trim() : 'ODDIY',
+        price: parsedPrice,
+        targetGender: genderValue,
+        isLocked: shouldBeLocked,
+      };
+      if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+      if (modelUrl !== undefined) updateData.modelUrl = modelUrl;
+
+      // @ts-ignore
+      updatedSkin = await prisma.inventorySkin.update({
+        where: { id },
+        data: updateData
+      });
+
+      // Optionally update shopItem if price > 0 or it already exists?
+      // For simplicity, we just update the skin here.
+    }
+
+    const io = req.app.get('io');
+    if (io && updatedSkin) {
+      io.emit('inventory_skins_updated', updatedSkin);
+    }
+
+    res.json(updatedSkin);
+  } catch (error) {
+    console.error('Error updating inventory skin:', error);
+    res.status(500).json({ error: 'Failed to update inventory skin' });
+  }
+});
+
 // Admin: Delete inventory skin
 router.delete('/admin/inventory-skins/:id', async (req, res) => {
   try {

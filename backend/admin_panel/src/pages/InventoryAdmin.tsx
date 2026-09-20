@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
-import { Plus, Trash2, Package, Upload, CheckCircle, AlertCircle, Box } from 'lucide-react';
+import { Plus, Trash2, Package, Upload, CheckCircle, AlertCircle, Box, Edit3 } from 'lucide-react';
 
 interface SkinItem {
   id: string;
@@ -36,6 +36,7 @@ export default function InventoryAdmin() {
 
   // Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [category, setCategory] = useState<string>('bosh_kiyim');
   const [name, setName] = useState<string>('');
   const [rarity, setRarity] = useState<string>('ODDIY');
@@ -100,14 +101,18 @@ export default function InventoryAdmin() {
       if (imageFile) formData.append('image', imageFile);
       if (glbFile) formData.append('glbModel', glbFile);
 
-      const res = await fetch('/api/admin/inventory-skins', {
-        method: 'POST',
+      const url = editingId ? `/api/admin/inventory-skins/${editingId}` : '/api/admin/inventory-skins';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         body: formData,
       });
 
       if (res.ok) {
-        showAlert('Yangi skin muvaffaqiyatli qo\'shildi!');
+        showAlert(editingId ? 'Skin muvaffaqiyatli tahrirlandi!' : 'Yangi skin muvaffaqiyatli qo\'shildi!');
         setIsAddModalOpen(false);
+        setEditingId(null);
         // Reset form
         setName('');
         setPrice(0);
@@ -126,6 +131,32 @@ export default function InventoryAdmin() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleEditClick = (item: SkinItem) => {
+    setEditingId(item.id);
+    setCategory(item.category || 'bosh_kiyim');
+    setName(item.name || '');
+    setRarity(item.rarity || 'ODDIY');
+    setPrice(item.price || 0);
+    setTargetGender(item.targetGender || 'all');
+    setIsLocked(item.isLocked || false);
+    setImageFile(null);
+    setGlbFile(null);
+    setIsAddModalOpen(true);
+  };
+
+  const openAddModal = () => {
+    setEditingId(null);
+    setCategory('bosh_kiyim');
+    setName('');
+    setRarity('ODDIY');
+    setPrice(0);
+    setTargetGender('all');
+    setIsLocked(false);
+    setImageFile(null);
+    setGlbFile(null);
+    setIsAddModalOpen(true);
   };
 
   const handleDeleteSkin = async (id: string) => {
@@ -162,7 +193,7 @@ export default function InventoryAdmin() {
           </div>
 
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAddModal}
             className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-purple-900/30 transition-all cursor-pointer"
           >
             <Plus className="w-5 h-5" />
@@ -259,13 +290,22 @@ export default function InventoryAdmin() {
                   <span className="text-xs text-indigo-200/40">
                     {new Date(item.createdAt || Date.now()).toLocaleDateString()}
                   </span>
-                  <button
-                    onClick={() => handleDeleteSkin(item.id)}
-                    className="p-2 text-indigo-400/60 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
-                    title="O'chirish"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleEditClick(item)}
+                      className="p-2 text-indigo-400/60 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors cursor-pointer"
+                      title="Tahrirlash"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSkin(item.id)}
+                      className="p-2 text-indigo-400/60 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+                      title="O'chirish"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -280,7 +320,7 @@ export default function InventoryAdmin() {
               <div className="p-6 border-b border-[#1F1F38] flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <Package className="w-5 h-5 text-purple-400" />
-                  Yangi Skin Qo'shish
+                  {editingId ? 'Skinni Tahrirlash' : 'Yangi Skin Qo\'shish'}
                 </h2>
                 <button
                   onClick={() => setIsAddModalOpen(false)}
@@ -427,7 +467,7 @@ export default function InventoryAdmin() {
                     disabled={submitting}
                     className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-purple-900/30 cursor-pointer disabled:opacity-50"
                   >
-                    {submitting ? 'Yaratilmoqda...' : 'Yaratish'}
+                    {submitting ? 'Saqlanmoqda...' : (editingId ? 'Saqlash' : 'Yaratish')}
                   </button>
                 </div>
 
