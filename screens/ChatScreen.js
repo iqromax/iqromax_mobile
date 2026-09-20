@@ -1,13 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Image } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { io } from 'socket.io-client';
 import { API_URL, SOCKET_URL } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getAvatarByName } from '../src/utils/avatars';
+
+const getAvatarByName = (name) => {
+  if (!name) return require('../assets/avatar_maks.png');
+  const lower = name.toLowerCase();
+  if (lower.includes('alex')) return require('../assets/avatar_alex.jpg');
+  if (lower.includes('maks')) return require('../assets/avatar_maks.png');
+  if (lower.includes('david')) return require('../assets/avatar_david.jpg');
+  if (lower.includes('kevin')) return require('../assets/avatar_kevin.png');
+  if (lower.includes('lily')) return require('../assets/avatar_lily.jpg');
+  if (lower.includes('maya')) return require('../assets/avatar_maya.jpg');
+  if (lower.includes('sophia')) return require('../assets/avatar_sophia.png');
+  if (lower.includes('emma')) return require('../assets/avatar_emma.jpg');
+  return require('../assets/avatar_maks.png');
+};
 
 export default function ChatScreen({ route, navigation }) {
+  const insets = useSafeAreaInsets();
   const { friend } = route.params;
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
@@ -102,7 +117,7 @@ export default function ChatScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? insets.top : 0 }]} edges={['right', 'bottom', 'left']}>
       <KeyboardAvoidingView 
         style={styles.keyboardAvoid} 
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}

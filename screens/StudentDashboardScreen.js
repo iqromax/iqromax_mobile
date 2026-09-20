@@ -405,10 +405,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false);
   const [friendsActiveTab, setFriendsActiveTab] = useState('friends');
   const [hasUnreadFriendRequests, setHasUnreadFriendRequests] = useState(false);
+  const [unreadChatFriends, setUnreadChatFriends] = useState({});
   const friendIconPulseAnim = useRef(new Animated.Value(1)).current;
 
+  const hasAnyUnread = hasUnreadFriendRequests || Object.keys(unreadChatFriends).length > 0;
+
   useEffect(() => {
-    if (hasUnreadFriendRequests) {
+    if (hasAnyUnread) {
       Animated.loop(
         Animated.sequence([
           Animated.timing(friendIconPulseAnim, { toValue: 1.2, duration: 500, useNativeDriver: true }),
@@ -419,7 +422,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       friendIconPulseAnim.stopAnimation();
       friendIconPulseAnim.setValue(1);
     }
-  }, [hasUnreadFriendRequests]);
+  }, [hasAnyUnread]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [friendsList, setFriendsList] = useState([]);
 
@@ -1758,6 +1761,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
     socket.on('friend_deleted', (data) => {
       if (data.userId === user.customId || data.friendId === user.customId) {
         fetchFriends();
+      }
+    });
+
+    socket.on('chat_message_received', (msg) => {
+      if (msg.receiverId === user.customId) {
+        setUnreadChatFriends((prev) => ({ ...prev, [msg.senderId]: true }));
       }
     });
 
@@ -3303,9 +3312,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 }}
               >
                 <Animated.View style={{ transform: [{ scale: friendIconPulseAnim }] }}>
-                  <Feather name="users" size={20} color={hasUnreadFriendRequests ? "#EF4444" : "#FFF"} />
+                  <Feather name="users" size={20} color={hasAnyUnread ? "#EF4444" : "#FFF"} />
                 </Animated.View>
-                {hasUnreadFriendRequests && (
+                {hasAnyUnread && (
                   <View style={{ position: 'absolute', top: 10, right: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#EF4444', borderWidth: 2, borderColor: '#12121D' }} />
                 )}
               </TouchableOpacity>
@@ -5672,7 +5681,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'friends' ? '#C084FC' : 'transparent', borderRadius: 10 }}
                 onPress={() => setFriendsActiveTab('friends')}
               >
-                <Text style={{ color: friendsActiveTab === 'friends' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Do'stlar</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ color: friendsActiveTab === 'friends' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Do'stlar</Text>
+                  {Object.keys(unreadChatFriends).length > 0 && (
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
+                  )}
+                </View>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'requests' ? '#C084FC' : 'transparent', borderRadius: 10 }}
@@ -5727,7 +5741,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <View key={friend.customId} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 16, marginBottom: 12 }}>
                     <Image source={getAvatarByName(friend.avatar)} style={{ width: 48, height: 48, borderRadius: 24 }} />
                     <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{friend.name}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{friend.name}</Text>
+                        {unreadChatFriends[friend.customId] && (
+                          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 8 }} />
+                        )}
+                      </View>
                       <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 13 }}>{friend.xp} XP</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -5735,6 +5754,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(168, 85, 247, 0.15)', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
                         onPress={() => {
                           setIsFriendsModalOpen(false);
+                          setUnreadChatFriends(prev => {
+                            const next = { ...prev };
+                            delete next[friend.customId];
+                            return next;
+                          });
                           navigation.navigate('ChatScreen', { friend });
                         }}
                       >
