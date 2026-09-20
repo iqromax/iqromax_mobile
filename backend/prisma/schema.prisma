@@ -142,3 +142,23 @@ model AppSetting {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+model FriendRequest {
+  id         String   @id @default(uuid())
+  senderId   String   // customId of the sender
+  receiverId String   // customId of the receiver
+  status     String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([senderId, receiverId])
+}
+
+model Friend {
+  id        String   @id @default(uuid())
+  userId1   String   // customId (alphabetically smaller one, for uniqueness)
+  userId2   String   // customId (alphabetically larger one)
+  createdAt DateTime @default(now())
+
+  @@unique([userId1, userId2])
+}

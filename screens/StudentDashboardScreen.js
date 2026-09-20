@@ -401,6 +401,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [realCashback, setRealCashback] = useState(0);
   const [isOpeningBox, setIsOpeningBox] = useState(false);
   const [boxReward, setBoxReward] = useState(null);
+  
+  const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false);
+  const [friendsActiveTab, setFriendsActiveTab] = useState('requests'); // 'requests' | 'friends'
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [friendsList, setFriendsList] = useState([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -1626,6 +1631,68 @@ export default function StudentDashboardScreen({ navigation, route }) {
       } else {
         navigation.navigate('BattleMatchmaking', { battleMode: activeBattleMode, language: language });
       }
+    }
+  };
+
+  const fetchFriendRequests = async () => {
+    if (!user?.customId) return;
+    try {
+      const res = await fetch(`${API_URL}/user/friend-requests/${encodeURIComponent(user.customId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setFriendRequests(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchFriends = async () => {
+    if (!user?.customId) return;
+    try {
+      const res = await fetch(`${API_URL}/user/friends/${encodeURIComponent(user.customId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setFriendsList(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSendFriendRequest = async (targetId) => {
+    if (!user?.customId || targetId === user.customId) return;
+    try {
+      const res = await fetch(`${API_URL}/user/friend-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senderId: user.customId, receiverId: targetId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Alert.alert(t.successTitle || 'Muvaffaqiyat', 'Do\'stlik so\'rovi yuborildi!');
+      } else {
+        Alert.alert(t.errorTitle || 'Xatolik', data.error || 'Xatolik yuz berdi');
+      }
+    } catch (e) {
+      console.error(e);
+      Alert.alert(t.errorTitle || 'Xatolik', 'Tarmoq xatosi');
+    }
+  };
+
+  const handleFriendRequestAction = async (requestId, action) => {
+    try {
+      const res = await fetch(`${API_URL}/user/friend-request/handle`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, action })
+      });
+      if (res.ok) {
+        fetchFriendRequests();
+        if (action === 'ACCEPT') fetchFriends();
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -3156,7 +3223,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
                 <Text style={styles.rankingTopSubtitle}>{t.rankingSubtitle || "Eng kuchli matematiklar"}</Text>
               </View>
-              <TouchableOpacity style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.08)', borderRadius: 22 }}>
+              <TouchableOpacity 
+                style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255, 255, 255, 0.08)', borderRadius: 22 }}
+                onPress={() => {
+                  fetchFriendRequests();
+                  fetchFriends();
+                  setIsFriendsModalOpen(true);
+                }}
+              >
                 <Feather name="users" size={20} color="#FFF" />
               </TouchableOpacity>
             </View>
@@ -3398,6 +3472,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       {item.customId !== user?.customId && (
                         <TouchableOpacity 
                           style={{ marginLeft: 12, backgroundColor: 'rgba(192, 132, 252, 0.1)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
+                          onPress={() => handleSendFriendRequest(item.customId)}
                         >
                           <Feather name="user-plus" size={15} color="#C084FC" />
                         </TouchableOpacity>
@@ -5499,6 +5574,87 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+      </Modal>
+
+      {/* Friends Modal */}
+      <Modal visible={isFriendsModalOpen} animationType="slide" transparent={true}>
+        <View style={{ flex: 1, backgroundColor: '#05050C' }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            {/* Header */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20 }}>
+              <TouchableOpacity onPress={() => setIsFriendsModalOpen(false)}>
+                <MaterialCommunityIcons name="close" size={28} color="#FFF" />
+              </TouchableOpacity>
+              <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>Do'stlar</Text>
+              <View style={{ width: 28 }} />
+            </View>
+
+            {/* Tabs */}
+            <View style={{ flexDirection: 'row', marginHorizontal: 20, backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: 12, padding: 4, marginBottom: 20 }}>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'requests' ? '#C084FC' : 'transparent', borderRadius: 10 }}
+                onPress={() => setFriendsActiveTab('requests')}
+              >
+                <Text style={{ color: friendsActiveTab === 'requests' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Arizalar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'friends' ? '#C084FC' : 'transparent', borderRadius: 10 }}
+                onPress={() => setFriendsActiveTab('friends')}
+              >
+                <Text style={{ color: friendsActiveTab === 'friends' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Do'stlar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Content */}
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}>
+              {friendsActiveTab === 'requests' && (
+                friendRequests.length > 0 ? friendRequests.map(req => (
+                  <View key={req.id} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 16, marginBottom: 12 }}>
+                    <Image source={getAvatarByName(req.senderAvatar)} style={{ width: 48, height: 48, borderRadius: 24 }} />
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{req.senderName}</Text>
+                      <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 13 }}>{req.senderXp} XP</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <TouchableOpacity 
+                        style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(16, 185, 129, 0.15)', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}
+                        onPress={() => handleFriendRequestAction(req.id, 'ACCEPT')}
+                      >
+                        <MaterialCommunityIcons name="check" size={24} color="#10B981" />
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(239, 68, 68, 0.15)', alignItems: 'center', justifyContent: 'center' }}
+                        onPress={() => handleFriendRequestAction(req.id, 'REJECT')}
+                      >
+                        <MaterialCommunityIcons name="close" size={24} color="#EF4444" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )) : (
+                  <View style={{ alignItems: 'center', marginTop: 40 }}>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium' }}>Arizalar yo'q</Text>
+                  </View>
+                )
+              )}
+
+              {friendsActiveTab === 'friends' && (
+                friendsList.length > 0 ? friendsList.map(friend => (
+                  <View key={friend.customId} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 16, marginBottom: 12 }}>
+                    <Image source={getAvatarByName(friend.avatar)} style={{ width: 48, height: 48, borderRadius: 24 }} />
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>{friend.name}</Text>
+                      <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 13 }}>{friend.xp} XP</Text>
+                    </View>
+                  </View>
+                )) : (
+                  <View style={{ alignItems: 'center', marginTop: 40 }}>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium' }}>Do'stlaringiz yo'q</Text>
+                  </View>
+                )
+              )}
+            </ScrollView>
+          </SafeAreaView>
         </View>
       </Modal>
 
