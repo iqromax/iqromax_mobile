@@ -216,6 +216,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
   const [equippedHeadwears, setEquippedHeadwears] = useState({});
   const equippedHeadwear = equippedHeadwears[activeAvatarIndex] || null;
+  const [equippedPantsState, setEquippedPantsState] = useState({});
+  const equippedPants = equippedPantsState[activeAvatarIndex] || null;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const toggleDropdown = () => {
@@ -223,21 +225,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
     setIsDropdownOpen(!isDropdownOpen);
   };
   
-  const baseAvatarsList = [
-    { id: 0, img: require('../assets/avatar_alex.jpg') },
-    { id: 1, img: require('../assets/avatar_maks.png') },
-    { id: 2, img: require('../assets/avatar_david.jpg') },
-    { id: 3, img: require('../assets/avatar_kevin.png') },
-    { id: 4, img: require('../assets/avatar_lily.jpg') },
-    { id: 5, img: require('../assets/avatar_maya.jpg') },
-    { id: 6, img: require('../assets/avatar_sophia.png') },
-    { id: 7, img: require('../assets/avatar_emma.jpg') }
-  ];
-
-  const selectedAvatarObj = baseAvatarsList.find(a => a.id === activeAvatarIndex);
+  const dynamicCharacters = backendSkins.filter(s => s.category === 'personajlar');
+  const selectedAvatarObj = dynamicCharacters.find(a => String(a.id) === String(activeAvatarIndex)) || dynamicCharacters[0];
+  
   const avatarsList = selectedAvatarObj 
-    ? [selectedAvatarObj, ...baseAvatarsList.filter(a => a.id !== activeAvatarIndex)]
-    : baseAvatarsList;
+    ? [selectedAvatarObj, ...dynamicCharacters.filter(a => String(a.id) !== String(selectedAvatarObj.id))]
+    : dynamicCharacters;
+
+  const activeCharacterPath = selectedAvatarObj ? (selectedAvatarObj.modelUrl ? `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.modelUrl}` : null) : null;
 
   const [leaderboardSearch, setLeaderboardSearch] = useState('');
   const [highlightedUserId, setHighlightedUserId] = useState(null);
@@ -435,9 +430,29 @@ export default function StudentDashboardScreen({ navigation, route }) {
             if (parsedUserData.xp !== undefined) setUserXp(parsedUserData.xp);
           }
         }).catch(e => console.log(e));
+        AsyncStorage.getItem(`user_equipped_skins_${userIdKey}`).then(val => {
+          if (val) {
+            try {
+              const parsed = JSON.parse(val);
+              if (parsed.accessories) setEquippedAccessories(parsed.accessories);
+              if (parsed.headwears) setEquippedHeadwears(parsed.headwears);
+              if (parsed.pants) setEquippedPantsState(parsed.pants);
+            } catch (err) {}
+          }
+        }).catch(e => console.log(e));
       });
     }, [user?.customId, user?.id, route.params])
   );
+
+  useEffect(() => {
+    const userIdKey = user?.customId || user?.id || 'guest';
+    const toSave = {
+      accessories: equippedAccessories,
+      headwears: equippedHeadwears,
+      pants: equippedPantsState
+    };
+    AsyncStorage.setItem(`user_equipped_skins_${userIdKey}`, JSON.stringify(toSave)).catch(e => console.log(e));
+  }, [equippedAccessories, equippedHeadwears, equippedPantsState, user]);
 
 
 
@@ -550,12 +565,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const toggleSkinlarAccordion = () => {
     if (!checkGuestAuth()) return;
-    showCustomAlert(
-      "Tez Kunda!",
-      "Kiyimlar va aksessuarlar bo'limi tez kunda ishga tushadi. Hozircha personajlarni almashtirishingiz va tanlashingiz mumkin!",
-      "warning",
-      [{ text: "Tushundim", onPress: () => {} }]
-    );
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsSkinlarOpen(prev => !prev);
   };
 
 
@@ -945,20 +956,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [kiyimKategoriya, setKiyimKategoriya] = useState('bosh_kiyim');
   const [activeKiyimFilter, setActiveKiyimFilter] = useState('BARCHASI');
 
-  const kiyimData = [
-    {
-      id: 'local_shelby_kepka',
-      category: 'bosh_kiyim',
-      targetGender: 'boys',
-      name: "Shelbi Kepka",
-      rarity: 'ODDIY',
-      image: require('../assets/shelby_kepka.png'),
-      model: require('../assets/models/shelby_kepka.glb'),
-      isLocked: false,
-      price: 0,
-      state: 'KIYISH'
-    }
-  ];
+  const kiyimData = [];
 
   const renderFramesGrid = () => {
     const filteredData = activeRamkaFilter === 'BARCHASI' ? framesData : framesData.filter(item => item.rarity === activeRamkaFilter);
@@ -1126,10 +1124,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
         } else if (equippedHeadwear && currentItemState === 'KIYILGAN') {
           currentItemState = 'KIYISH';
         }
-      } else if (item.category === 'aksessuar') {
+      } else if (item.category === 'aksessuar' || item.category === 'ustki_kiyim') {
         if (itemGlb && equippedAccessory === itemGlb) {
           currentItemState = 'KIYILGAN';
         } else if (equippedAccessory && currentItemState === 'KIYILGAN') {
+          currentItemState = 'KIYISH';
+        }
+      } else if (item.category === 'shim') {
+        if (itemGlb && equippedPants === itemGlb) {
+          currentItemState = 'KIYILGAN';
+        } else if (equippedPants && currentItemState === 'KIYILGAN') {
           currentItemState = 'KIYISH';
         }
       }
@@ -1160,8 +1164,18 @@ export default function StudentDashboardScreen({ navigation, route }) {
             }
             return { ...prev, [activeAvatarIndex]: itemGlb };
           });
-        } else if (item.category === 'aksessuar') {
+        } else if (item.category === 'aksessuar' || item.category === 'ustki_kiyim') {
           setEquippedAccessories(prev => {
+            const current = prev[activeAvatarIndex];
+            if (current === itemGlb) {
+              const updated = { ...prev };
+              delete updated[activeAvatarIndex];
+              return updated;
+            }
+            return { ...prev, [activeAvatarIndex]: itemGlb };
+          });
+        } else if (item.category === 'shim') {
+          setEquippedPantsState(prev => {
             const current = prev[activeAvatarIndex];
             if (current === itemGlb) {
               const updated = { ...prev };
@@ -1289,7 +1303,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Center Column: Showcase */}
             <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
               <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
+                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
               </View>
               <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
                 <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1403,7 +1417,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             />
             {/* 3D Model */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -40 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
+              <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
             </View>
             <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
               <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1636,7 +1650,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* 3D Model Container */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], width: '100%', height: '100%' }} pointerEvents="auto">
-              <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
+              <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
             </View>
             
 
@@ -2694,7 +2708,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               ) : (
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderRadius: 12, padding: 8, paddingRight: 32, paddingLeft: 10 }}>
                   <View style={{ width: 60, height: 60, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
-                    <Image source={baseAvatarsList.find(a => a.id === activeAvatarIndex)?.img || require('../assets/avatar_maks.png')} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
+                    <Image source={selectedAvatarObj && selectedAvatarObj.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.imageUrl}` } : require('../assets/avatar_maks.png')} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
                     <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 60, height: 60, zIndex: 2 }} contentFit="contain" />
                   </View>
                   <View>
@@ -2729,7 +2743,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
                 {/* 3D Model Render */}
                 <View style={{ position: 'absolute', top: -10, bottom: 25, left: 20, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                  <Character3DViewer characterIndex={activeAvatarIndex} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} />
+                  <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
                 </View>
 
                 {/* Left Absolute Overlay: Active Character Details */}
@@ -2902,7 +2916,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </View>
             )}
 
-            {/* 2. SKINLAR ACCORDION DROPDOWN BUTTON (LOCKED FOR PRODUCTION RELEASE) */}
+            {/* 2. SKINLAR ACCORDION DROPDOWN BUTTON */}
             <TouchableOpacity
               style={{
                 flexDirection: 'row',
@@ -2910,12 +2924,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 alignItems: 'center',
                 backgroundColor: '#0F111E',
                 borderWidth: 1.5,
-                borderColor: '#1F2937',
+                borderColor: isSkinlarOpen ? '#A855F7' : '#1F2937',
                 borderRadius: 14,
                 paddingHorizontal: 16,
                 paddingVertical: 14,
                 marginBottom: 10,
-                opacity: 0.9,
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.4,
@@ -2934,16 +2947,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     {t.invSkins || 'SKINLAR'}
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }} numberOfLines={1}>
-                    Tez kunda yangi kiyimlar va aksessuarlar qo'shiladi!
+                    {isSkinlarOpen ? "Yopish uchun bosing" : "Kiyimlar va aksessuarlarni ko'rish"}
                   </Text>
                 </View>
               </View>
-
-              {/* Compact Lock Icon */}
-              <View style={{ width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(234, 179, 8, 0.15)', borderWidth: 1, borderColor: '#EAB308', justifyContent: 'center', alignItems: 'center' }}>
-                <Ionicons name="lock-closed" size={14} color="#EAB308" />
-              </View>
-
             </TouchableOpacity>
 
 
@@ -3302,7 +3309,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <View style={styles.proCardGlass}>
               <View style={styles.proAvatarContainer}>
                 <View style={styles.proAvatarGlow} />
-                <Image source={baseAvatarsList.find(a => a.id === activeAvatarIndex)?.img || require('../assets/avatar_maks.png')} style={styles.proAvatarImg} />
+                <Image source={selectedAvatarObj && selectedAvatarObj.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.imageUrl}` } : require('../assets/avatar_maks.png')} style={styles.proAvatarImg} />
                 <View style={styles.proAvatarBadge}>
                   <Text style={styles.proAvatarBadgeText}>{user?.level || 12}</Text>
                 </View>

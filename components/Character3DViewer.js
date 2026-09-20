@@ -5,49 +5,52 @@ import { Asset, useAssets } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 import { API_URL } from '../src/config/api';
 
-const CHARACTER_MODELS = [
-  require('../assets/models/athletic_man_optimized.glb'),
-  require('../assets/models/adultmale3dmodel-v2.glb'),
-  require('../assets/models/mannequin_clothing_optimized.glb'),
-  require('../assets/models/businessman_optimized.glb'),
-  require('../assets/models/fashion_model_optimized.glb'),
-  require('../assets/models/casual_outfit_optimized.glb'),
-  require('../assets/models/beige_trench_coat_optimized.glb'),
-  require('../assets/models/stylized_girl_optimized.glb')
-];
-
-export function Character3DViewer({ characterIndex = 0, accessoryPath = null, headwearPath = null, style }) {
+export function Character3DViewer({ characterPath = null, accessoryPath = null, headwearPath = null, pantsPath = null, style }) {
   const webViewRef = useRef(null);
-  const [assets] = useAssets(CHARACTER_MODELS);
   const [modelBase64, setModelBase64] = useState(null);
   const [headwearBase64, setHeadwearBase64] = useState(null);
   const [accessoryBase64, setAccessoryBase64] = useState(null);
+  const [pantsBase64, setPantsBase64] = useState(null);
 
   // Load Main Character Model Base64
   useEffect(() => {
     let isMounted = true;
-    setModelBase64(null);
+    if (!characterPath) {
+      setModelBase64(null);
+      return;
+    }
 
     async function loadModel() {
-      const idx = typeof characterIndex === 'number' && characterIndex >= 0 && characterIndex < CHARACTER_MODELS.length ? characterIndex : 0;
       try {
-        const mod = CHARACTER_MODELS[idx];
-        const asset = Asset.fromModule(mod);
-        if (!asset.localUri) {
-          await asset.downloadAsync();
-        }
-        const uri = asset.localUri || asset.uri;
-
-        if (uri) {
-          const base64 = await FileSystem.readAsStringAsync(uri, {
-            encoding: 'base64'
-          });
-          if (isMounted && base64) {
-            setModelBase64(base64);
+        let uri = typeof characterPath === 'object' ? characterPath.uri : characterPath;
+        if (typeof characterPath === 'number') {
+          const asset = Asset.fromModule(characterPath);
+          if (!asset.localUri) {
+            await asset.downloadAsync();
+          }
+          uri = asset.localUri || asset.uri;
+        } else if (typeof characterPath === 'string') {
+          if (!characterPath.startsWith('http://') && !characterPath.startsWith('https://')) {
+            const cleanPath = characterPath.startsWith('/') ? characterPath : `/${characterPath}`;
+            const baseUrl = API_URL.replace(/\/api\/?$/, '');
+            uri = `${baseUrl}${cleanPath}`;
           }
         }
+        
+        let downloadedUri = uri;
+        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
+          const tempPath = FileSystem.cacheDirectory + `temp_char_${Date.now()}.glb`;
+          const downloaded = await FileSystem.downloadAsync(uri, tempPath);
+          downloadedUri = downloaded.uri;
+        }
+        
+        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
+        if (isMounted && b64) {
+          setModelBase64(b64);
+        }
       } catch (err) {
-        console.warn('Silent fallback for 3D model:', err);
+        console.warn('Error downloading character for WebView:', err);
+        if (isMounted) setModelBase64(null);
       }
     }
 
@@ -55,7 +58,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     return () => {
       isMounted = false;
     };
-  }, [assets, characterIndex]);
+  }, [characterPath]);
 
   // Load Headwear Model Base64 dynamically
   useEffect(() => {
@@ -147,6 +150,51 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     return () => { isMounted = false; };
   }, [accessoryPath]);
 
+  // Load Pants Model Base64 dynamically
+  useEffect(() => {
+    let isMounted = true;
+    if (!pantsPath) {
+      setPantsBase64(null);
+      return;
+    }
+
+    async function loadPants() {
+      try {
+        let uri = typeof pantsPath === 'object' ? pantsPath.uri : pantsPath;
+        if (typeof pantsPath === 'number') {
+          const asset = Asset.fromModule(pantsPath);
+          if (!asset.localUri) {
+            await asset.downloadAsync();
+          }
+          uri = asset.localUri || asset.uri;
+        } else if (typeof pantsPath === 'string') {
+          if (!pantsPath.startsWith('http://') && !pantsPath.startsWith('https://')) {
+            const cleanPath = pantsPath.startsWith('/') ? pantsPath : `/${pantsPath}`;
+            const baseUrl = API_URL.replace(/\/api\/?$/, '');
+            uri = `${baseUrl}${cleanPath}`;
+          }
+        }
+        
+        let downloadedUri = uri;
+        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
+          const tempPath = FileSystem.cacheDirectory + `temp_pants_${Date.now()}.glb`;
+          const downloaded = await FileSystem.downloadAsync(uri, tempPath);
+          downloadedUri = downloaded.uri;
+        }
+        
+        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
+        if (isMounted && b64) {
+          setPantsBase64(b64);
+        }
+      } catch (err) {
+        console.warn('Error downloading pants for WebView:', err);
+        if (isMounted) setPantsBase64(null);
+      }
+    }
+    loadPants();
+    return () => { isMounted = false; };
+  }, [pantsPath]);
+
   // Dynamically update WebView without unmounting character
   useEffect(() => {
     if (!webViewRef.current) return;
@@ -170,6 +218,17 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     }
   }, [accessoryBase64]);
 
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (pantsBase64) {
+      const js = `if (window.updatePants) { window.updatePants(${JSON.stringify(pantsBase64)}); } else { window.pendingPantsB64 = ${JSON.stringify(pantsBase64)}; } true;`;
+      webViewRef.current.injectJavaScript(js);
+    } else {
+      const js = `if (window.updatePants) { window.updatePants(null); } window.pendingPantsB64 = null; true;`;
+      webViewRef.current.injectJavaScript(js);
+    }
+  }, [pantsBase64]);
+
   const handleWebViewLoadEnd = () => {
     if (webViewRef.current) {
       if (headwearBase64) {
@@ -177,6 +236,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
       }
       if (accessoryBase64) {
         webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory(${JSON.stringify(accessoryBase64)}); } true;`);
+      }
+      if (pantsBase64) {
+        webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants(${JSON.stringify(pantsBase64)}); } true;`);
       }
     }
   };
@@ -211,6 +273,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           renderer.setSize(window.innerWidth, window.innerHeight);
           renderer.shadowMap.enabled = true;
           renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          renderer.outputEncoding = THREE.sRGBEncoding;
+          renderer.toneMapping = THREE.ACESFilmicToneMapping;
+          renderer.toneMappingExposure = 1.0;
           container.appendChild(renderer.domElement);
 
           // Controls
@@ -260,9 +325,11 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
           let characterModel = null;
           window.headwearModel = null;
           window.accessoryModel = null;
+          window.pantsModel = null;
 
           window.pendingHeadwearB64 = ${JSON.stringify(headwearBase64 || null)};
           window.pendingAccessoryB64 = ${JSON.stringify(accessoryBase64 || null)};
+          window.pendingPantsB64 = ${JSON.stringify(pantsBase64 || null)};
 
           window.updateHeadwear = function(b64) {
             if (window.headwearModel) {
@@ -280,37 +347,17 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
 
                 window.headwearModel.traverse(function(child) {
                   if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.frustumCulled = false;
                     if (child.material) {
                       child.material.side = THREE.DoubleSide;
                     }
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.frustumCulled = false;
                   }
                 });
 
-                const charBox = new THREE.Box3().setFromObject(characterModel);
-                const charSize = charBox.getSize(new THREE.Vector3());
-
-                const skinBox = new THREE.Box3().setFromObject(window.headwearModel);
-                const skinSize = skinBox.getSize(new THREE.Vector3());
-
-                // Target headwear width: ~68% of character shoulder width
-                const targetHatWidth = charSize.x * 0.68;
-                const maxSkinDim = Math.max(skinSize.x, skinSize.z, 0.0001);
-                const hatScale = targetHatWidth / maxSkinDim;
-
-                window.headwearModel.scale.set(hatScale, hatScale, hatScale);
-
-                const scaledBox = new THREE.Box3().setFromObject(window.headwearModel);
-                const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
-                const scaledMinY = scaledBox.min.y;
-
-                // Position headwear right on character head (~91% of height)
-                const headY = charSize.y * 0.91;
-                window.headwearModel.position.x = -scaledCenter.x;
-                window.headwearModel.position.y = headY - scaledMinY;
-                window.headwearModel.position.z = -scaledCenter.z;
+                window.headwearModel.position.set(0, 0, 0);
+                window.headwearModel.scale.set(1, 1, 1);
 
                 window.headwearModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
                 scene.add(window.headwearModel);
@@ -337,34 +384,17 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
 
                 window.accessoryModel.traverse(function(child) {
                   if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.frustumCulled = false;
                     if (child.material) {
                       child.material.side = THREE.DoubleSide;
                     }
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.frustumCulled = false;
                   }
                 });
 
-                const charBox = new THREE.Box3().setFromObject(characterModel);
-                const charSize = charBox.getSize(new THREE.Vector3());
-
-                const skinBox = new THREE.Box3().setFromObject(window.accessoryModel);
-                const skinSize = skinBox.getSize(new THREE.Vector3());
-
-                const targetWidth = charSize.x * 0.85;
-                const maxSkinDim = Math.max(skinSize.x, skinSize.y, skinSize.z, 0.0001);
-                const accScale = targetWidth / maxSkinDim;
-
-                window.accessoryModel.scale.set(accScale, accScale, accScale);
-
-                const scaledBox = new THREE.Box3().setFromObject(window.accessoryModel);
-                const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
-
-                const chestY = charSize.y * 0.55;
-                window.accessoryModel.position.x = -scaledCenter.x;
-                window.accessoryModel.position.y = chestY - scaledCenter.y;
-                window.accessoryModel.position.z = -scaledCenter.z;
+                window.accessoryModel.position.set(0, 0, 0);
+                window.accessoryModel.scale.set(1, 1, 1);
 
                 window.accessoryModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
                 scene.add(window.accessoryModel);
@@ -372,6 +402,42 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
               });
             } catch(e) {
               console.error('Accessory parse error:', e);
+            }
+          };
+
+          window.updatePants = function(b64) {
+            if (window.pantsModel) {
+              scene.remove(window.pantsModel);
+              window.pantsModel = null;
+            }
+            if (!b64 || !characterModel) return;
+            try {
+              const buffer = base64ToArrayBuffer(b64);
+              gltfLoader.parse(buffer, '', function(gltf) {
+                if (window.pantsModel) {
+                  scene.remove(window.pantsModel);
+                }
+                window.pantsModel = gltf.scene;
+
+                window.pantsModel.traverse(function(child) {
+                  if (child.isMesh) {
+                    if (child.material) {
+                      child.material.side = THREE.DoubleSide;
+                    }
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    child.frustumCulled = false;
+                  }
+                });
+
+                window.pantsModel.position.set(0, 0, 0);
+                window.pantsModel.scale.set(1, 1, 1);
+                window.pantsModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
+                scene.add(window.pantsModel);
+
+              });
+            } catch(e) {
+              console.error('Pants parse error:', e);
             }
           };
 
@@ -386,6 +452,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                     child.castShadow = true;
                     child.receiveShadow = true;
                     child.frustumCulled = false;
+                    if (child.material) {
+                      child.material.color.setHex(0x666666); // Darken the character significantly
+                    }
                   }
                 });
 
@@ -393,17 +462,13 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 const size = box.getSize(new THREE.Vector3());
                 const center = box.getCenter(new THREE.Vector3());
 
-                characterModel.position.x -= center.x;
-                characterModel.position.y -= box.min.y;
-                characterModel.position.z -= center.z;
+                characterModel.position.set(0, 0, 0);
+                characterModel.scale.set(1, 1, 1);
 
                 scene.add(characterModel);
 
-                // Set initial character rotation so all characters face straight forward towards the camera
-                const modelRotationsY = [-Math.PI / 2, 0, -Math.PI / 2, -Math.PI / 2, 0, -Math.PI / 2, -Math.PI / 2, -Math.PI / 2];
-                const charIdx = ${characterIndex};
-                const targetRotY = modelRotationsY[charIdx] !== undefined ? modelRotationsY[charIdx] : -Math.PI / 2;
-                characterModel.rotation.y = targetRotY;
+                // Default rotation so characters face straight forward towards the camera
+                characterModel.rotation.y = -Math.PI / 2;
 
 
 
@@ -419,6 +484,9 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
                 }
                 if (window.pendingAccessoryB64) {
                   window.updateAccessory(window.pendingAccessoryB64);
+                }
+                if (window.pendingPantsB64) {
+                  window.updatePants(window.pendingPantsB64);
                 }
               });
             } catch(e) {
@@ -445,7 +513,7 @@ export function Character3DViewer({ characterIndex = 0, accessoryPath = null, he
     </html>
   ` : '';
 
-  const renderKey = `char_${characterIndex}`;
+  const renderKey = typeof characterPath === 'string' ? characterPath : 'char_fallback';
 
   return (
     <View style={[styles.container, style]}>

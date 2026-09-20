@@ -23,6 +23,7 @@ const CATEGORIES = [
   { id: 'oyoq_kiyim', label: 'Oyoq kiyim' },
   { id: 'aksessuar', label: 'Aksessuarlar' },
   { id: 'ryukzak', label: 'Ryukzak' },
+  { id: 'personajlar', label: 'Personajlar' },
 ];
 
 const RARITIES = ['ODDIY', 'RARE', 'EPIC', 'LEGENDARY'];
@@ -78,20 +79,22 @@ export default function InventoryAdmin() {
 
   const handleCreateSkin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) {
+    if (category !== 'personajlar' && !name.trim()) {
       showAlert('Iltimos, skin nomini kiriting!', 'error');
       return;
     }
 
     setSubmitting(true);
     try {
+      const isPersonaj = category === 'personajlar';
+      
       const formData = new FormData();
       formData.append('category', category);
-      formData.append('name', name.trim());
-      formData.append('rarity', rarity);
-      formData.append('price', String(price));
+      formData.append('name', isPersonaj ? 'Personaj' : name.trim());
+      formData.append('rarity', isPersonaj ? 'ODDIY' : rarity);
+      formData.append('price', String(isPersonaj ? 0 : price));
       formData.append('targetGender', targetGender);
-      formData.append('isLocked', String(isLocked));
+      formData.append('isLocked', String(isPersonaj ? false : isLocked));
       
       if (imageFile) formData.append('image', imageFile);
       if (glbFile) formData.append('glbModel', glbFile);
@@ -150,10 +153,10 @@ export default function InventoryAdmin() {
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-3">
               <Package className="w-7 h-7 text-purple-400" />
-              Inventar (Skinlar) Boshqaruvi
+              Inventar Boshqaruvi
             </h1>
             <p className="text-indigo-200/60 text-sm mt-1">
-              Bosh kiyim, Ustki kiyim, Shim, Oyoq kiyim, Aksessuarlar va Ryukzak skinlarini qo'shing va boshqaring
+              Bosh kiyim, Ustki kiyim, Shim, Oyoq kiyim, Aksessuarlar, Ryukzak va Personajlarni boshqaring
             </p>
           </div>
 
@@ -323,50 +326,54 @@ export default function InventoryAdmin() {
                 </div>
 
                 {/* Skin Name */}
-                <div>
-                  <label className="block text-xs font-bold text-indigo-200/70 uppercase tracking-wider mb-2">
-                    Skin Nomi (Name) *
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Masalan: Golden Crown"
-                    className="w-full bg-[#121225] border border-[#252545] rounded-xl px-4 py-3 text-white placeholder-indigo-300/30 focus:outline-none focus:border-purple-500 text-sm font-medium"
-                    required
-                  />
-                </div>
-
-                {/* Rarity & Price */}
-                <div className="grid grid-cols-2 gap-4">
+                {category !== 'personajlar' && (
                   <div>
                     <label className="block text-xs font-bold text-indigo-200/70 uppercase tracking-wider mb-2">
-                      Noyoblik (Rarity)
-                    </label>
-                    <select
-                      value={rarity}
-                      onChange={(e) => setRarity(e.target.value)}
-                      className="w-full bg-[#121225] border border-[#252545] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 text-sm font-medium"
-                    >
-                      {RARITIES.map(r => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-indigo-200/70 uppercase tracking-wider mb-2">
-                      Narxi (Coin)
+                      Skin Nomi (Name) *
                     </label>
                     <input
-                      type="number"
-                      value={price}
-                      onChange={(e) => setPrice(Number(e.target.value))}
-                      placeholder="0"
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Masalan: Golden Crown"
                       className="w-full bg-[#121225] border border-[#252545] rounded-xl px-4 py-3 text-white placeholder-indigo-300/30 focus:outline-none focus:border-purple-500 text-sm font-medium"
+                      required={category !== 'personajlar'}
                     />
                   </div>
-                </div>
+                )}
+
+                {/* Rarity & Price */}
+                {category !== 'personajlar' && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-indigo-200/70 uppercase tracking-wider mb-2">
+                        Noyoblik (Rarity)
+                      </label>
+                      <select
+                        value={rarity}
+                        onChange={(e) => setRarity(e.target.value)}
+                        className="w-full bg-[#121225] border border-[#252545] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500 text-sm font-medium"
+                      >
+                        {RARITIES.map(r => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-indigo-200/70 uppercase tracking-wider mb-2">
+                        Narxi (Coin)
+                      </label>
+                      <input
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPrice(Number(e.target.value))}
+                        placeholder="0"
+                        className="w-full bg-[#121225] border border-[#252545] rounded-xl px-4 py-3 text-white placeholder-indigo-300/30 focus:outline-none focus:border-purple-500 text-sm font-medium"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Image Upload */}
                 <div>

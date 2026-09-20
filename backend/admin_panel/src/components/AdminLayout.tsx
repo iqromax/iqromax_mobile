@@ -178,7 +178,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               }`}
             >
               <Package className={`w-5 h-5 ${location.pathname === '/inventory-admin' ? 'text-purple-200' : ''}`} />
-              {isSidebarOpen && <span>Inventar (Skinlar)</span>}
+              {isSidebarOpen && <span>Inventar</span>}
             </Link>
 
             <Link 
