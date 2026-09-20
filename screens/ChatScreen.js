@@ -117,7 +117,7 @@ export default function ChatScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'android' ? insets.top : 0 }]} edges={['right', 'bottom', 'left']}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top }]} edges={['right', 'bottom', 'left']}>
       <KeyboardAvoidingView 
         style={styles.keyboardAvoid} 
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
