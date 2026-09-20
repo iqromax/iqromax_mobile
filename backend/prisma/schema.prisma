@@ -169,5 +169,6 @@ model Message {
   receiverId String   // customId of the receiver
   content    String
   isRead     Boolean  @default(false)
+  deletedBy  String[] @default([]) // Array of customIds who deleted this message
   createdAt  DateTime @default(now())
 }

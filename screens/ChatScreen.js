@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator, Image, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -69,6 +69,15 @@ export default function ChatScreen({ route, navigation }) {
               }, 100);
             }
           });
+          socket.on('chat_cleared', (data) => {
+            if (
+              data.forEveryone &&
+              ((data.requesterId === u.customId && data.targetId === friend.customId) ||
+               (data.requesterId === friend.customId && data.targetId === u.customId))
+            ) {
+              setMessages([]);
+            }
+          });
         }
       } catch (e) {
         console.error('Chat init error:', e);
@@ -86,6 +95,48 @@ export default function ChatScreen({ route, navigation }) {
       if (socket) socket.disconnect();
     };
   }, [friend.customId]);
+
+  const executeClearChat = async (forEveryone) => {
+    try {
+      if (!currentUser) return;
+      const res = await fetch(`${API_URL}/chat/clear`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requesterId: currentUser.customId,
+          targetId: friend.customId,
+          forEveryone
+        })
+      });
+      if (res.ok) {
+        setMessages([]);
+      }
+    } catch (e) {
+      console.error('Error clearing chat:', e);
+    }
+  };
+
+  const promptClearChat = () => {
+    Alert.alert(
+      "Xabarlarni o'chirish",
+      `${friend.name} bilan barcha xabarlarni o'chirib tashlamoqchimisiz?`,
+      [
+        {
+          text: `Men va ${friend.name} uchun o'chirish`,
+          onPress: () => executeClearChat(true),
+          style: 'destructive'
+        },
+        {
+          text: "Mendan o'chirish",
+          onPress: () => executeClearChat(false),
+        },
+        {
+          text: "Bekor qilish",
+          style: 'cancel'
+        }
+      ]
+    );
+  };
 
   const handleSend = () => {
     if (!inputText.trim() || !currentUser || !socketRef.current) return;
@@ -132,6 +183,9 @@ export default function ChatScreen({ route, navigation }) {
             <Text style={styles.headerName}>{friend.name}</Text>
             <Text style={styles.headerStatus}>{friend.customId}</Text>
           </View>
+          <TouchableOpacity onPress={promptClearChat} style={styles.clearBtn}>
+            <MaterialCommunityIcons name="trash-can-outline" size={24} color="#EF4444" />
+          </TouchableOpacity>
         </LinearGradient>
 
         {/* Chat Area */}
@@ -222,6 +276,10 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
+  },
+  clearBtn: {
+    padding: 8,
+    marginLeft: 8,
   },
   chatArea: {
     flex: 1,

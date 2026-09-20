@@ -2116,13 +2116,74 @@ app.get('/api/chat/messages/:user1/:user2', async (req, res) => {
         OR: [
           { senderId: user1, receiverId: user2 },
           { senderId: user2, receiverId: user1 }
-        ]
+        ],
+        NOT: {
+          deletedBy: {
+            has: user1
+          }
+        }
       },
       orderBy: { createdAt: 'asc' }
     });
     res.json(messages);
   } catch (error) {
     console.error('Chat messages fetch error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /api/chat/clear
+app.post('/api/chat/clear', async (req, res) => {
+  try {
+    const { requesterId, targetId, forEveryone } = req.body;
+    
+    if (forEveryone) {
+      // @ts-ignore
+      await prisma.message.deleteMany({
+        where: {
+          OR: [
+            { senderId: requesterId, receiverId: targetId },
+            { senderId: targetId, receiverId: requesterId }
+          ]
+        }
+      });
+      io.emit('chat_cleared', { forEveryone: true, requesterId, targetId });
+    } else {
+      // For PostgreSQL in Prisma we can just use raw query or try updateMany if push is supported. 
+      // Prisma updateMany doesn't always support array push easily in some versions.
+      // So we will just get the message IDs and update them, or use a simpler approach.
+      // @ts-ignore
+      const messages = await prisma.message.findMany({
+        where: {
+          OR: [
+            { senderId: requesterId, receiverId: targetId },
+            { senderId: targetId, receiverId: requesterId }
+          ],
+          NOT: {
+            deletedBy: {
+              has: requesterId
+            }
+          }
+        },
+        select: { id: true, deletedBy: true }
+      });
+      
+      for (const msg of messages) {
+        // @ts-ignore
+        await prisma.message.update({
+          where: { id: msg.id },
+          data: {
+            deletedBy: {
+              push: requesterId
+            }
+          }
+        });
+      }
+    }
+    
+    res.json({ message: 'Chat cleared successfully' });
+  } catch (error) {
+    console.error('Clear chat error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
