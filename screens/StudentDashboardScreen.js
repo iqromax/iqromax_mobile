@@ -3298,10 +3298,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 onPress={() => {
                   fetchFriendRequests();
                   fetchFriends();
-                  if (hasUnreadFriendRequests) {
-                    setFriendsActiveTab('requests');
-                    setHasUnreadFriendRequests(false);
-                  }
+                  setFriendsActiveTab('friends');
                   setIsFriendsModalOpen(true);
                 }}
               >
