@@ -483,7 +483,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             } catch(e) {}
           }
           if (user?.customId) {
-            fetch(`${API_URL}/user/purchases/${user.customId}`)
+            fetch(`${API_URL}/user/purchases/${encodeURIComponent(user.customId)}`)
               .then(res => res.json())
               .then(data => {
                 if (data && data.purchasedSkins) {
