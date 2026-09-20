@@ -1304,7 +1304,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Center Column: Showcase */}
             <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
               <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+                {!isInventoryModalOpen && (
+                  <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+                )}
               </View>
               <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
                 <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1418,7 +1420,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
             />
             {/* 3D Model */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -40 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
-              <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+              {!isInventoryModalOpen && (
+                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+              )}
             </View>
             <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
               <View style={{ width: 120, height: 30, borderRadius: 60, borderWidth: 2, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -1651,7 +1655,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* 3D Model Container */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], width: '100%', height: '100%' }} pointerEvents="auto">
-              <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+              {!isInventoryModalOpen && (
+                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} />
+              )}
             </View>
             
 
@@ -2753,11 +2759,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     {t.invActiveChar}
                   </Text>
                   <Text style={{ color: '#FFFFFF', fontFamily: 'Inter_700Bold', fontSize: 13, marginBottom: 4 }} numberOfLines={1}>
-                    {activeAvatarIndex === 0 ? 'Alex' : activeAvatarIndex === 1 ? 'Tech Genius' : activeAvatarIndex === 2 ? 'Creative Mind' : activeAvatarIndex === 3 ? 'Mental Warrior' : activeAvatarIndex === 4 ? 'Lily' : activeAvatarIndex === 5 ? 'Maya' : activeAvatarIndex === 6 ? 'Sophia' : 'Emma'}
+                    {selectedAvatarObj?.name || 'Personaj'}
                   </Text>
-                  <View style={{ alignSelf: 'flex-start', backgroundColor: activeAvatarIndex === 1 || activeAvatarIndex === 2 ? '#581C87' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? '#1E3A8A' : '#1F2937', borderRadius: 4, paddingVertical: 2, paddingHorizontal: 6, marginBottom: 6 }}>
-                    <Text style={{ color: activeAvatarIndex === 1 || activeAvatarIndex === 2 ? '#D8B4FE' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 8 }}>
-                      {activeAvatarIndex === 1 || activeAvatarIndex === 2 ? 'EPIC' : activeAvatarIndex === 3 || activeAvatarIndex === 5 ? 'RARE' : 'COMMON'}
+                  <View style={{ alignSelf: 'flex-start', backgroundColor: selectedAvatarObj?.rarity === 'EPIC' ? '#581C87' : selectedAvatarObj?.rarity === 'RARE' ? '#1E3A8A' : '#1F2937', borderRadius: 4, paddingVertical: 2, paddingHorizontal: 6, marginBottom: 6 }}>
+                    <Text style={{ color: selectedAvatarObj?.rarity === 'EPIC' ? '#D8B4FE' : selectedAvatarObj?.rarity === 'RARE' ? '#93C5FD' : '#D1D5DB', fontFamily: 'Inter_700Bold', fontSize: 8 }}>
+                      {selectedAvatarObj?.rarity || 'ODDIY'}
                     </Text>
                   </View>
                   <Ionicons name="information-circle-outline" size={14} color="#9CA3AF" />
