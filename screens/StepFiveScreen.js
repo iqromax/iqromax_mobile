@@ -192,7 +192,7 @@ export default function StepFiveScreen({ navigation, route }) {
   const [dynamicCharacters, setDynamicCharacters] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_URL}/skins`)
+    fetch(`${API_URL}/inventory-skins`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
