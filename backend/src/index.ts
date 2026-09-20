@@ -1908,13 +1908,6 @@ app.post('/api/notifications/:id/respond', async (req, res) => {
   }
 });
 
-// Fallback to admin panel for unhandled routes
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
-});
-
-const PORT = process.env.PORT || 5000;
-
 // --- FRIENDS API ---
 
 // 1. Send Friend Request
@@ -2059,6 +2052,15 @@ app.get('/api/user/friends/:customId', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+// Fallback to admin panel for unhandled routes
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
+});
+
+const PORT = process.env.PORT || 5000;
+
+
 
 // --- SOCKET LOGIC ---
 const onlineUsers = new Map<string, string>(); // customId -> socket.id
