@@ -5,12 +5,13 @@ import { Asset, useAssets } from 'expo-asset';
 import * as FileSystem from 'expo-file-system/legacy';
 import { API_URL } from '../src/config/api';
 
-export function Character3DViewer({ characterPath = null, accessoryPath = null, headwearPath = null, pantsPath = null, style }) {
+export function Character3DViewer({ characterPath = null, accessoryPath = null, headwearPath = null, pantsPath = null, shoesPath = null, style }) {
   const webViewRef = useRef(null);
   const [modelBase64, setModelBase64] = useState(undefined);
   const [headwearBase64, setHeadwearBase64] = useState(undefined);
   const [accessoryBase64, setAccessoryBase64] = useState(undefined);
   const [pantsBase64, setPantsBase64] = useState(undefined);
+  const [shoesBase64, setShoesBase64] = useState(undefined);
 
   // Load Main Character Model Base64
   useEffect(() => {
@@ -219,6 +220,57 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
     return () => { isMounted = false; };
   }, [pantsPath]);
 
+  // Load Shoes Model Base64 dynamically
+  useEffect(() => {
+    let isMounted = true;
+    if (!shoesPath) {
+      setShoesBase64(null);
+      return;
+    }
+
+    async function loadShoes() {
+      try {
+        let uri = typeof shoesPath === 'object' ? shoesPath.uri : shoesPath;
+        if (typeof shoesPath === 'number') {
+          const asset = Asset.fromModule(shoesPath);
+          if (!asset.localUri) {
+            await asset.downloadAsync();
+          }
+          uri = asset.localUri || asset.uri;
+        } else if (typeof shoesPath === 'string') {
+          if (!shoesPath.startsWith('http://') && !shoesPath.startsWith('https://')) {
+            const cleanPath = shoesPath.startsWith('/') ? shoesPath : `/${shoesPath}`;
+            const baseUrl = API_URL.replace(/\/api\/?$/, '');
+            uri = `${baseUrl}${cleanPath}`;
+          }
+        }
+        
+        let downloadedUri = uri;
+        if (typeof uri === 'string' && (uri.startsWith('http://') || uri.startsWith('https://'))) {
+          const filename = uri.split('/').pop() || 'temp_shoes.glb';
+          const safeFilename = filename.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+          const cachePath = FileSystem.cacheDirectory + 'shoes_' + safeFilename;
+          
+          const fileInfo = await FileSystem.getInfoAsync(cachePath);
+          if (!fileInfo.exists) {
+            await FileSystem.downloadAsync(uri, cachePath);
+          }
+          downloadedUri = cachePath;
+        }
+        
+        const b64 = await FileSystem.readAsStringAsync(downloadedUri, { encoding: 'base64' });
+        if (isMounted && b64) {
+          setShoesBase64(b64);
+        }
+      } catch (err) {
+        console.warn('Error downloading shoes for WebView:', err);
+        if (isMounted) setShoesBase64(null);
+      }
+    }
+    loadShoes();
+    return () => { isMounted = false; };
+  }, [shoesPath]);
+
   // Dynamically update WebView without unmounting character
   useEffect(() => {
     if (!webViewRef.current) return;
@@ -253,6 +305,17 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
     }
   }, [pantsBase64]);
 
+  useEffect(() => {
+    if (!webViewRef.current) return;
+    if (shoesBase64) {
+      const js = `if (window.updateShoes) { window.updateShoes(${JSON.stringify(shoesBase64)}); } else { window.pendingShoesB64 = ${JSON.stringify(shoesBase64)}; } true;`;
+      webViewRef.current.injectJavaScript(js);
+    } else {
+      const js = `if (window.updateShoes) { window.updateShoes(null); } window.pendingShoesB64 = null; true;`;
+      webViewRef.current.injectJavaScript(js);
+    }
+  }, [shoesBase64]);
+
   const handleWebViewLoadEnd = () => {
     if (webViewRef.current) {
       if (headwearBase64) {
@@ -263,6 +326,9 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
       }
       if (pantsBase64) {
         webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants(${JSON.stringify(pantsBase64)}); } true;`);
+      }
+      if (shoesBase64) {
+        webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes(${JSON.stringify(shoesBase64)}); } true;`);
       }
     }
   };
@@ -350,10 +416,12 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           window.headwearModel = null;
           window.accessoryModel = null;
           window.pantsModel = null;
+          window.shoesModel = null;
 
           window.pendingHeadwearB64 = ${JSON.stringify(headwearBase64 || null)};
           window.pendingAccessoryB64 = ${JSON.stringify(accessoryBase64 || null)};
           window.pendingPantsB64 = ${JSON.stringify(pantsBase64 || null)};
+          window.pendingShoesB64 = ${JSON.stringify(shoesBase64 || null)};
 
           window.updateHeadwear = function(b64) {
             return new Promise(function(resolve) {
@@ -466,6 +534,43 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
             });
           };
 
+          window.updateShoes = function(b64) {
+            return new Promise(function(resolve) {
+              if (window.shoesModel) {
+                scene.remove(window.shoesModel);
+                window.shoesModel = null;
+              }
+              if (!b64 || !characterModel) return resolve();
+              try {
+                const buffer = base64ToArrayBuffer(b64);
+                gltfLoader.parse(buffer, '', function(gltf) {
+                  if (window.shoesModel) {
+                    scene.remove(window.shoesModel);
+                  }
+                  window.shoesModel = gltf.scene;
+
+                  window.shoesModel.traverse(function(child) {
+                    if (child.isMesh) {
+                      if (child.material) child.material.side = THREE.DoubleSide;
+                      child.castShadow = true;
+                      child.receiveShadow = true;
+                      child.frustumCulled = false;
+                    }
+                  });
+
+                  window.shoesModel.position.set(0, 0, 0);
+                  window.shoesModel.scale.set(1, 1, 1);
+                  window.shoesModel.rotation.y = characterModel ? characterModel.rotation.y : 0;
+                  scene.add(window.shoesModel);
+                  resolve();
+                }, function() { resolve(); });
+              } catch(e) {
+                console.error('Shoes parse error:', e);
+                resolve();
+              }
+            });
+          };
+
           if (charB64Str.length > 0) {
             scene.visible = false;
             try {
@@ -511,6 +616,9 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
                 if (window.pendingPantsB64) {
                   promises.push(window.updatePants(window.pendingPantsB64));
                 }
+                if (window.pendingShoesB64) {
+                  promises.push(window.updateShoes(window.pendingShoesB64));
+                }
                 
                 await Promise.all(promises);
                 scene.visible = true;
@@ -545,7 +653,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
   const allLoaded = modelBase64 !== undefined && 
                     headwearBase64 !== undefined && 
                     accessoryBase64 !== undefined && 
-                    pantsBase64 !== undefined;
+                    pantsBase64 !== undefined &&
+                    shoesBase64 !== undefined;
 
   return (
     <View style={[styles.container, style]}>
