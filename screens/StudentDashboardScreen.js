@@ -225,14 +225,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
     setIsDropdownOpen(!isDropdownOpen);
   };
   
-  const dynamicCharacters = backendSkins.filter(s => s.category === 'personajlar');
-  const selectedAvatarObj = dynamicCharacters.find(a => String(a.id) === String(activeAvatarIndex)) || dynamicCharacters[0];
-  
-  const avatarsList = selectedAvatarObj 
-    ? [selectedAvatarObj, ...dynamicCharacters.filter(a => String(a.id) !== String(selectedAvatarObj.id))]
-    : dynamicCharacters;
-
-  const activeCharacterPath = selectedAvatarObj ? (selectedAvatarObj.modelUrl ? `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.modelUrl}` : null) : null;
 
   const [leaderboardSearch, setLeaderboardSearch] = useState('');
   const [highlightedUserId, setHighlightedUserId] = useState(null);
@@ -340,6 +332,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
 
   const [backendSkins, setBackendSkins] = useState([]);
+  
+  const dynamicCharacters = backendSkins.filter(s => s.category === 'personajlar');
+  const selectedAvatarObj = dynamicCharacters.find(a => String(a.id) === String(activeAvatarIndex)) || dynamicCharacters[0];
+  
+  const avatarsList = selectedAvatarObj 
+    ? [selectedAvatarObj, ...dynamicCharacters.filter(a => String(a.id) !== String(selectedAvatarObj.id))]
+    : dynamicCharacters;
+
+  const activeCharacterPath = selectedAvatarObj ? (selectedAvatarObj.modelUrl ? `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.modelUrl}` : null) : null;
   const [skinPurchaseAlertItem, setSkinPurchaseAlertItem] = useState(null);
 
   useEffect(() => {
