@@ -630,10 +630,10 @@ export default function TeacherDashboardScreen({ navigation, route }) {
 
           const studentUsers = assignedStudents.length > 0 
             ? assignedStudents 
-            : rankingDataList.filter((u, idx) => {
+            : rankingDataList.filter((u) => {
                 if (u.role === 'teacher') return false;
                 const teacherList = String(u.country || '').toUpperCase().split(',').map(s => s.trim());
-                return teacherList.includes(currentTeacherId) || idx < 2;
+                return teacherList.includes(currentTeacherId);
               });
             
           const targetUsers = studentUsers;
