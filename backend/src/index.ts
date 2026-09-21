@@ -2204,8 +2204,10 @@ io.on('connection', (socket) => {
   console.log('New socket connected:', socket.id);
 
   socket.on('register', (customId) => {
-    onlineUsers.set(customId.toUpperCase(), socket.id);
-    console.log(customId + ' registered with socket ' + socket.id);
+    if (!customId) return;
+    const safeId = customId.replace(/^#+/, '').trim().toUpperCase();
+    onlineUsers.set(safeId, socket.id);
+    console.log(safeId + ' registered with socket ' + socket.id);
   });
 
   socket.on('send_battle_invite', async (data) => {
@@ -2222,14 +2224,17 @@ io.on('connection', (socket) => {
           message: JSON.stringify({
             senderName: data.senderName,
             senderAvatar: data.senderAvatar,
+            senderEquippedSkins: data.senderEquippedSkins || {},
             level: data.level,
+            xp: data.xp || 0,
             rating: data.rating
           }),
           status: 'PENDING'
         }
       });
 
-      const targetSocketId = onlineUsers.get(data.targetId.toUpperCase());
+      const safeTargetId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
+      const targetSocketId = onlineUsers.get(safeTargetId);
       if (targetSocketId) {
         io.to(targetSocketId).emit('receive_battle_invite', {
           ...notif,
@@ -2253,17 +2258,41 @@ io.on('connection', (socket) => {
       });
       
       if (notif && notif.senderId) {
-        const senderSocketId = onlineUsers.get(notif.senderId);
+        const safeSenderId = notif.senderId.replace(/^#+/, '').trim().toUpperCase();
+        const senderSocketId = onlineUsers.get(safeSenderId);
         if (senderSocketId) {
           io.to(senderSocketId).emit('battle_invite_response', {
             ...notif,
             targetName: data.targetName,
-            targetAvatar: data.targetAvatar
+            targetAvatar: data.targetAvatar,
+            targetEquippedSkins: data.targetEquippedSkins || {}
           });
         }
       }
     } catch (e) {
       console.error('Error responding to battle invite:', e);
+    }
+  });
+
+  socket.on('start_friend_battle', (data) => {
+    console.log('Starting friend battle for target:', data.targetId);
+    if (data.targetId) {
+      const safeId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
+      const targetSocketId = onlineUsers.get(safeId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('start_friend_battle', data);
+      }
+    }
+  });
+
+  socket.on('battle_answer_submitted', (data) => {
+    // data should contain targetId, answer, time, isCorrect
+    if (data.targetId) {
+      const safeId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
+      const targetSocketId = onlineUsers.get(safeId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('battle_answer_submitted', data);
+      }
     }
   });
 

@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 import * as FileSystem from 'expo-file-system/legacy';
 import { ModelPreloader } from '../src/utils/ModelPreloader';
 
-export function Character3DViewer({ characterPath = null, accessoryPath = null, topsPath = null, headwearPath = null, pantsPath = null, shoesPath = null, backpackPath = null, isBackView = false, categoryName = null, style }) {
+export function Character3DViewer({ characterPath = null, accessoryPath = null, topsPath = null, headwearPath = null, pantsPath = null, shoesPath = null, backpackPath = null, isBackView = false, disableRotation = false, categoryName = null, style }) {
   const webViewRef = useRef(null);
 
   const [charFilename, setCharFilename] = useState(null);
@@ -198,6 +198,7 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           controls.maxPolarAngle = Math.PI / 2;
           controls.enableZoom = false;
           controls.enablePan = false;
+          controls.enableRotate = !${disableRotation};
 
           // Lights
           const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);

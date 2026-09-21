@@ -433,7 +433,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       const difficultyMultiplier = Math.min(1.5, 1 + (digits * 0.1) + (examplesCount * 0.05));
       const logicScore = Math.min(100, Math.round(accuracyPercent * difficultyMultiplier));
 
-      import('@react-native-async-storage/async-storage').then(async ({ default: AsyncStorage }) => {
+      (async () => {
         try {
           const dataStr = await AsyncStorage.getItem('user_data');
           const userData = dataStr ? JSON.parse(dataStr) : null;
@@ -503,7 +503,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         } catch (e) {
           console.log('Error saving game stats in OddiyHisob:', e);
         }
-      });
+      })();
     }
   }, [phase, speedResults]);
 

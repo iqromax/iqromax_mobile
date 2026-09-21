@@ -106,6 +106,12 @@ export default function BattleGameScreen({ navigation, route }) {
 
   const [isExitModalVisible, setIsExitModalVisible] = useState(false);
   const [userData, setUserData] = useState(null);
+  
+  // Multiplayer states
+  const [socket, setSocket] = useState(null);
+  const [waitingForOpponent, setWaitingForOpponent] = useState(false);
+  const [opponentResult, setOpponentResult] = useState(null);
+  const [myResult, setMyResult] = useState(null);
 
   const baseAvatarsList = [
     { id: 0, name: 'Alex', img: require('../assets/avatar_alex.jpg') },
@@ -130,13 +136,33 @@ export default function BattleGameScreen({ navigation, route }) {
   const userLevel = userData ? calculateUserRank(userData.xp || 0).levelNumber : 1;
 
   useEffect(() => {
+    let activeSocket = null;
     async function fetchUser() {
       try {
         const data = await AsyncStorage.getItem('user_data');
-        if (data) setUserData(JSON.parse(data));
+        if (data) {
+          const parsed = JSON.parse(data);
+          setUserData(parsed);
+          
+          if (route.params?.isFriendBattle) {
+            const io = require('socket.io-client');
+            const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL || 'https://iqromax-production.up.railway.app';
+            activeSocket = io(SOCKET_URL, { path: '/api/socket.io', transports: ['websocket'] });
+            activeSocket.emit('register', parsed.customId);
+            
+            activeSocket.on('battle_answer_submitted', (data) => {
+               setOpponentResult(data);
+            });
+            setSocket(activeSocket);
+          }
+        }
       } catch (e) {}
     }
     fetchUser();
+    
+    return () => {
+      if (activeSocket) activeSocket.disconnect();
+    }
   }, []);
 
   const tickSound = useRef(null);
@@ -180,12 +206,16 @@ export default function BattleGameScreen({ navigation, route }) {
   }, [questionStartTime]);
 
   useEffect(() => {
-    const generated = [];
-    for (let i = 0; i < totalQuestions; i++) {
-      generated.push(MentalMathGenerator.generate(operation, digits, examplesCount));
+    if (route.params?.questions) {
+      setQuestions(route.params.questions);
+    } else {
+      const generated = [];
+      for (let i = 0; i < totalQuestions; i++) {
+        generated.push(MentalMathGenerator.generate(operation, digits, examplesCount));
+      }
+      setQuestions(generated);
     }
-    setQuestions(generated);
-  }, []);
+  }, [route.params?.questions, operation, digits, examplesCount]);
 
   useEffect(() => {
     if (questions.length > 0 && currentQIndex < questions.length) {
@@ -292,25 +322,89 @@ export default function BattleGameScreen({ navigation, route }) {
       const avgTime = (totalTime + timeForThisQuestion) / totalQuestions;
       const finalMaxCombo = isCorrect ? Math.max(newMaxCombo, newCombo) : newMaxCombo;
       
-      navigation.replace('BattleResult', {
-         correct: finalCorrect,
-         incorrect: finalIncorrect,
-         avgTime: avgTime.toFixed(1),
-         maxCombo: finalMaxCombo,
-         xp: xp,
-         coins: coins,
-         oppCorrect: isCorrect ? 0 : 1,
-         oppIncorrect: isCorrect ? 1 : 0,
-         oppAvgTime: (Math.random() * 2 + 1).toFixed(1),
-         oppMaxCombo: 0,
-         oppName: t.opponent,
-         actualAnswer: currentQ.answer,
-         userAnswer: inputValue,
-         examplesCount,
-         language
-      });
+      if (route.params?.isFriendBattle && route.params?.targetId) {
+        const resultObj = {
+          correct: finalCorrect,
+          incorrect: finalIncorrect,
+          time: timeForThisQuestion, // using last question time or total avg time, for 1 question it's the same
+          avgTime: avgTime.toFixed(1),
+          maxCombo: finalMaxCombo,
+          xp: xp,
+          coins: coins,
+          answer: inputValue
+        };
+        setMyResult(resultObj);
+        setWaitingForOpponent(true);
+        
+        if (socket) {
+          socket.emit('battle_answer_submitted', {
+            targetId: route.params.targetId,
+            senderId: userData?.customId || '',
+            ...resultObj
+          });
+        }
+      } else {
+        navigation.replace('BattleResult', {
+           correct: finalCorrect,
+           incorrect: finalIncorrect,
+           avgTime: avgTime.toFixed(1),
+           maxCombo: finalMaxCombo,
+           xp: xp,
+           coins: coins,
+           oppCorrect: isCorrect ? 0 : 1,
+           oppIncorrect: isCorrect ? 1 : 0,
+           oppAvgTime: (Math.random() * 2 + 1).toFixed(1),
+           oppMaxCombo: 0,
+           oppName: t.opponent,
+           actualAnswer: currentQ.answer,
+           userAnswer: inputValue,
+           examplesCount,
+           language
+        });
+      }
     }
   };
+
+  useEffect(() => {
+    if (myResult && opponentResult) {
+       // Both answered!
+       let iWin = false;
+       let oppWin = false;
+       
+       if (myResult.correct > 0 && opponentResult.correct > 0) {
+          if (myResult.time < opponentResult.time) iWin = true;
+          else if (opponentResult.time < myResult.time) oppWin = true;
+          else { iWin = true; oppWin = true; } // tie
+       } else if (myResult.correct > 0) {
+          iWin = true;
+       } else if (opponentResult.correct > 0) {
+          oppWin = true;
+       }
+
+       setWaitingForOpponent(false);
+       
+       navigation.replace('BattleResult', {
+         correct: myResult.correct,
+         incorrect: myResult.incorrect,
+         avgTime: myResult.avgTime,
+         maxCombo: myResult.maxCombo,
+         xp: myResult.xp,
+         coins: myResult.coins,
+         oppCorrect: opponentResult.correct,
+         oppIncorrect: opponentResult.incorrect,
+         oppAvgTime: opponentResult.avgTime,
+         oppMaxCombo: opponentResult.maxCombo,
+         oppName: t.opponent,
+         actualAnswer: questions[currentQIndex]?.answer,
+         userAnswer: myResult.answer,
+         examplesCount,
+         language,
+         isFriendBattle: true,
+         win: iWin,
+         lose: oppWin
+       });
+    }
+  }, [myResult, opponentResult, navigation]);
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
@@ -404,7 +498,12 @@ export default function BattleGameScreen({ navigation, route }) {
         )}
       </View>
 
-      {phase === 'input' ? (
+      {waitingForOpponent ? (
+        <View style={styles.waitingContainer}>
+           <MaterialCommunityIcons name="timer-sand" size={64} color="#f97316" style={{ marginBottom: 20 }} />
+           <Text style={styles.waitingText}>{t.waitingOpponent || "Raqib javobi kutilmoqda..."}</Text>
+        </View>
+      ) : phase === 'input' ? (
         <View style={styles.keypadWrapper}>
           {[
             ['1', '2', '3'],
@@ -811,9 +910,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
   },
-  exitOverlay: {
+  waitingContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.85)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#05050A',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+  },
+  waitingText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_600SemiBold',
+    textAlign: 'center'
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,

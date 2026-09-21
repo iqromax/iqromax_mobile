@@ -1,7 +1,15 @@
 import './src/utils/safeWeakMap';
 import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking, Platform } from 'react-native';
+import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking, Platform, LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'PushNotificationIOS has been extracted from react-native core',
+  'ProgressBarAndroid has been extracted from react-native core',
+  'SafeAreaView has been deprecated',
+  'Clipboard has been extracted',
+  'InteractionManager has been deprecated',
+]);
 import * as SystemUI from 'expo-system-ui';
 SystemUI.setBackgroundColorAsync('#05050C');
 import { NavigationContainer, createNavigationContainerRef, DefaultTheme } from '@react-navigation/native';
@@ -22,6 +30,7 @@ import BattleSettingsScreen from './screens/BattleSettingsScreen';
 import BattleMatchmakingScreen from './screens/BattleMatchmakingScreen';
 import BattleGameScreen from './screens/BattleGameScreen';
 import FriendInviteScreen from './screens/FriendInviteScreen';
+import FriendBattleLobbyScreen from './screens/FriendBattleLobbyScreen';
 import BattleResultScreen from './screens/BattleResultScreen';
 import MysteryBoxScreen from './screens/MysteryBoxScreen';
 import ChatScreen from './screens/ChatScreen';
@@ -70,12 +79,46 @@ export default function App() {
     try {
       const userDataStr = await AsyncStorage.getItem('user_data');
       const currentUser = userDataStr ? JSON.parse(userDataStr) : null;
+      
+      let targetEquippedSkins = {};
+      try {
+        if (currentUser) {
+          const userIdKey = currentUser.customId || currentUser.id || 'guest';
+          const skinsStr = await AsyncStorage.getItem(`user_equipped_skins_${userIdKey}`);
+          if (skinsStr) {
+            const parsedSkins = JSON.parse(skinsStr);
+            let activeAvatarIndex = 0;
+            if (currentUser.character) {
+              const lowerChar = currentUser.character.toLowerCase();
+              const boysChars = ["alex", "maks", "david", "kevin"];
+              const girlsChars = ["lily", "maya", "emma", "sophia"];
+              if (boysChars.includes(lowerChar)) {
+                activeAvatarIndex = boysChars.indexOf(lowerChar);
+              } else if (girlsChars.includes(lowerChar)) {
+                activeAvatarIndex = girlsChars.indexOf(lowerChar) + 4;
+              }
+            }
+            targetEquippedSkins = {
+              accessories: parsedSkins.accessories?.[activeAvatarIndex] || null,
+              tops: parsedSkins.tops?.[activeAvatarIndex] || null,
+              headwears: parsedSkins.headwears?.[activeAvatarIndex] || null,
+              pants: parsedSkins.pants?.[activeAvatarIndex] || null,
+              shoes: parsedSkins.shoes?.[activeAvatarIndex] || null,
+              backpacks: parsedSkins.backpacks?.[activeAvatarIndex] || null,
+            };
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching target skins', e);
+      }
+
       if (socketRef.current) {
         socketRef.current.emit('respond_battle_invite', {
           notifId: battleInvite.id,
           status,
           targetName: currentUser?.name || "Do'stingiz",
-          targetAvatar: currentUser?.avatar || null
+          targetAvatar: currentUser?.character || currentUser?.avatar || null,
+          targetEquippedSkins: targetEquippedSkins
         });
       }
       if (status === 'ACCEPTED') {
@@ -202,6 +245,10 @@ export default function App() {
 
     socket.on('ad_video_deleted', (data) => {
       DeviceEventEmitter.emit('ad_video_deleted', data);
+    });
+
+    socket.on('start_friend_battle', (data) => {
+      DeviceEventEmitter.emit('global_start_friend_battle', data);
     });
 
     // Continuous Auth Verification Polling (every 3 seconds)
@@ -447,6 +494,7 @@ export default function App() {
           <Stack.Screen name="AbacusSimulator" component={AbacusSimulatorScreen} />
           <Stack.Screen name="BattleSettings" component={BattleSettingsScreen} />
                     <Stack.Screen name="FriendInvite" component={FriendInviteScreen} />
+                    <Stack.Screen name="FriendBattleLobby" component={FriendBattleLobbyScreen} />
 <Stack.Screen name="BattleMatchmaking" component={BattleMatchmakingScreen} />
           <Stack.Screen name="BattleGame" component={BattleGameScreen} />
           <Stack.Screen name="BattleResult" component={BattleResultScreen} />

@@ -17,6 +17,7 @@ import io from 'socket.io-client';
 import { API_URL, SOCKET_URL } from '../src/config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { calculateUserRank } from '../src/utils/rankUtils';
 
 const TRANSLATIONS = {
   uz: {
@@ -214,7 +215,38 @@ const FriendInviteScreen = ({ navigation, route }) => {
   const [foundUser, setFoundUser] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isInviteSent, setIsInviteSent] = useState(false);
+  const [isInviteAccepted, setIsInviteAccepted] = useState(false);
+  const [inviteRespData, setInviteRespData] = useState(null);
   const inviteLink = 'iqromax.app/battle/invite/IQX567890';
+  
+  React.useEffect(() => {
+    let socket;
+    const connectSocket = async () => {
+      try {
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          if (userData.customId) {
+            socket = io(SOCKET_URL, { path: '/api/socket.io', transports: ['websocket'] });
+            socket.emit('register', userData.customId);
+            
+            socket.on('battle_invite_response', (data) => {
+              if (data.status === 'ACCEPTED') {
+                setIsInviteAccepted(true);
+                setInviteRespData(data);
+              } else {
+                setIsInviteSent(false); // Enable resend if rejected
+              }
+            });
+          }
+        }
+      } catch (e) {}
+    };
+    connectSocket();
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  }, []);
   
   const { language = 'uz' } = route?.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
@@ -252,10 +284,14 @@ const FriendInviteScreen = ({ navigation, route }) => {
             </View>
             <View style={styles.stepLine} />
             <View style={styles.stepItem}>
-              <View style={[styles.stepCircle, styles.stepInactive]}>
-                <Text style={styles.stepTextInactive}>2</Text>
+              <View style={[styles.stepCircle, isInviteAccepted ? styles.stepActive : styles.stepInactive]}>
+                {isInviteAccepted ? (
+                  <MaterialCommunityIcons name="check" size={16} color="#FFF" />
+                ) : (
+                  <Text style={styles.stepTextInactive}>2</Text>
+                )}
               </View>
-              <Text style={styles.stepLabelInactive}>{t.step2}</Text>
+              <Text style={isInviteAccepted ? styles.stepLabelActive : styles.stepLabelInactive}>{t.step2}</Text>
             </View>
             <View style={styles.stepLine} />
             <View style={styles.stepItem}>
@@ -292,7 +328,8 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   style={styles.textInput}
                   placeholder={t.inputPlaceholder}
                   placeholderTextColor="#6B7280"
-                  keyboardType="number-pad"
+                  keyboardType="default"
+                  autoCapitalize="characters"
                   value={friendId}
                   onFocus={() => {
                     if (friendId.length === 0 || friendId === '') {
@@ -301,7 +338,7 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   }}
                   onChangeText={async (text) => {
                     setIsInviteSent(false);
-                    const cleaned = text.replace(/[^0-9]/g, '');
+                    const cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
                     const formatted = cleaned.length > 0 ? `#${cleaned}` : '#';
                     setFriendId(formatted);
                     if (formatted.length >= 5 && cleaned.length >= 4) {
@@ -326,11 +363,14 @@ const FriendInviteScreen = ({ navigation, route }) => {
                           if ((myId && foundId && myId === foundId) || (myCustomId && foundCustomId && myCustomId === foundCustomId)) {
                             setFoundUser(null);
                           } else {
+                            const foundXp = data.xp || 0;
+                            const foundRank = calculateUserRank(foundXp);
                             setFoundUser({
                               id: data.id,
                               name: data.name,
-                              level: data.level || 1,
+                              level: foundRank.levelNumber,
                               rating: data.rating || 1000,
+                              xp: foundXp,
                               avatar: data.avatar && data.avatar.startsWith('http') ? { uri: data.avatar } : require('../assets/avatar_alex.jpg'),
                             });
                           }
@@ -386,33 +426,91 @@ const FriendInviteScreen = ({ navigation, route }) => {
                   </View>
                 </View>
               </View>
-              <TouchableOpacity 
-                style={[styles.inviteButton, isInviteSent && { backgroundColor: '#4B5563', shadowOpacity: 0 }]} 
-                disabled={isInviteSent}
-                onPress={async () => {
-                const userDataStr = await AsyncStorage.getItem('user_data');
-                const userData = userDataStr ? JSON.parse(userDataStr) : null;
-                const socket = io(SOCKET_URL, { 
-                  path: '/api/socket.io',
-                  transports: ['websocket'] 
-                });
-                socket.emit('send_battle_invite', {
-                  senderId: userData?.customId || 'NOMA\'LUM',
-                  targetId: foundUser.id,
-                  senderName: userData?.name || 'Foydalanuvchi',
-                  senderAvatar: userData?.character ? `https://api.dicebear.com/7.x/avataaars/png?seed=${userData.name}` : null,
-                  level: 1,
-                  rating: 1000
-                });
-                setIsInviteSent(true);
-              }}>
-                <Text style={styles.inviteButtonText}>{isInviteSent ? t.inviteSent : t.sendInvite}</Text>
-                {!isInviteSent ? (
-                  <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
-                ) : (
-                  <MaterialCommunityIcons name="check-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
-                )}
-              </TouchableOpacity>
+              {isInviteAccepted ? (
+                <TouchableOpacity 
+                  style={[styles.inviteButton, { backgroundColor: '#A855F7' }]}
+                  onPress={() => {
+                    navigation.navigate('BattleSettings', { 
+                      language, 
+                      battleMode: 'dost', 
+                      isFriendBattle: true, 
+                      inviteData: inviteRespData,
+                      foundUser: foundUser,
+                      targetId: foundUser.id
+                    });
+                  }}
+                >
+                  <Text style={styles.inviteButtonText}>O'yinni sozlash</Text>
+                  <MaterialCommunityIcons name="cog" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity 
+                  style={[styles.inviteButton, isInviteSent && { backgroundColor: '#4B5563', shadowOpacity: 0 }]} 
+                  disabled={isInviteSent}
+                  onPress={async () => {
+                  const userDataStr = await AsyncStorage.getItem('user_data');
+                  const userData = userDataStr ? JSON.parse(userDataStr) : null;
+                  
+                  const socket = io(SOCKET_URL, { 
+                    path: '/api/socket.io',
+                    transports: ['websocket'] 
+                  });
+                  const userXp = userData?.xp || 0;
+                  const rankInfo = calculateUserRank(userXp);
+
+                  // Fetch equipped skins
+                  let equippedSkins = {};
+                  try {
+                    const userIdKey = userData?.customId || userData?.id || 'guest';
+                    const skinsStr = await AsyncStorage.getItem(`user_equipped_skins_${userIdKey}`);
+                    if (skinsStr) {
+                      const parsedSkins = JSON.parse(skinsStr);
+                      // Calculate active avatar index based on character
+                      let activeAvatarIndex = 0;
+                      if (userData?.character) {
+                        const lowerChar = userData.character.toLowerCase();
+                        const boysChars = ["alex", "maks", "david", "kevin"];
+                        const girlsChars = ["lily", "maya", "emma", "sophia"];
+                        if (boysChars.includes(lowerChar)) {
+                          activeAvatarIndex = boysChars.indexOf(lowerChar);
+                        } else if (girlsChars.includes(lowerChar)) {
+                          activeAvatarIndex = girlsChars.indexOf(lowerChar) + 4;
+                        }
+                      }
+                      
+                      equippedSkins = {
+                        accessories: parsedSkins.accessories?.[activeAvatarIndex] || null,
+                        tops: parsedSkins.tops?.[activeAvatarIndex] || null,
+                        headwears: parsedSkins.headwears?.[activeAvatarIndex] || null,
+                        pants: parsedSkins.pants?.[activeAvatarIndex] || null,
+                        shoes: parsedSkins.shoes?.[activeAvatarIndex] || null,
+                        backpacks: parsedSkins.backpacks?.[activeAvatarIndex] || null,
+                      };
+                    }
+                  } catch (e) {
+                    console.error('Error fetching equipped skins', e);
+                  }
+
+                  socket.emit('send_battle_invite', {
+                    senderId: userData?.customId || 'NOMA\'LUM',
+                    targetId: foundUser.id,
+                    senderName: userData?.name || 'Foydalanuvchi',
+                    senderAvatar: userData?.character || null,
+                    senderEquippedSkins: equippedSkins,
+                    level: rankInfo.levelNumber,
+                    xp: userXp,
+                    rating: userXp
+                  });
+                  setIsInviteSent(true);
+                }}>
+                  <Text style={styles.inviteButtonText}>{isInviteSent ? t.inviteSent : t.sendInvite}</Text>
+                  {!isInviteSent ? (
+                    <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+                  ) : (
+                    <MaterialCommunityIcons name="check-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           ) : (
             <View style={styles.searchStateCard}>
@@ -454,7 +552,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: '#05050C',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
     flexDirection: 'row',

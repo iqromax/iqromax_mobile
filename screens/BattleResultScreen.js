@@ -148,7 +148,7 @@ export default function BattleResultScreen({ navigation, route }) {
   } = route.params || {};
 
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
-  const isWin = correct >= oppCorrect; // Simple logic: whoever has more correct answers wins
+  const isWin = route.params?.win !== undefined ? route.params.win : (correct >= oppCorrect);
 
   useEffect(() => {
     async function fetchUserAndSaveXP() {
