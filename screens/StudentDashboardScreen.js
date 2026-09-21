@@ -215,17 +215,95 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [equippedAccessories, setEquippedAccessories] = useState({});
   const [isSkinsLoaded, setIsSkinsLoaded] = useState(false);
   const equippedAccessory = equippedAccessories[activeAvatarIndex] || null;
+  const [equippedTopsState, setEquippedTopsState] = useState({});
+  const equippedTop = equippedTopsState[activeAvatarIndex] || null;
   const [equippedHeadwears, setEquippedHeadwears] = useState({});
   const equippedHeadwear = equippedHeadwears[activeAvatarIndex] || null;
   const [equippedPantsState, setEquippedPantsState] = useState({});
   const equippedPants = equippedPantsState[activeAvatarIndex] || null;
   const [equippedShoesState, setEquippedShoesState] = useState({});
   const equippedShoes = equippedShoesState[activeAvatarIndex] || null;
+  const [equippedBackpacksState, setEquippedBackpacksState] = useState({});
+  const equippedBackpack = equippedBackpacksState[activeAvatarIndex] || null;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   const toggleDropdown = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setIsDropdownOpen(!isDropdownOpen);
+  };
+  
+  const handleEquipItemGlobal = (item) => {
+    const itemGlb = item.glb_url || item.modelUrl;
+    
+    // Normalize category
+    let cat = item.category;
+    if (cat === 'inventory' || item.subcategory) {
+      const sub = item.subcategory || item.category || 'headwear';
+      const catMap = { headwear: 'bosh_kiyim', top: 'ustki_kiyim', tshirt: 'futbolka', pants: 'shim', shoes: 'oyoq_kiyim', accessories: 'aksessuar', backpacks: 'ryukzak' };
+      cat = catMap[sub] || (sub === 'bosh_kiyim' ? 'bosh_kiyim' : sub === 'ustki_kiyim' ? 'ustki_kiyim' : sub === 'futbolka' ? 'futbolka' : sub === 'shim' ? 'shim' : sub === 'oyoq_kiyim' ? 'oyoq_kiyim' : sub === 'aksessuar' ? 'aksessuar' : sub === 'ryukzak' ? 'ryukzak' : 'bosh_kiyim');
+    }
+
+    if (cat === 'bosh_kiyim') {
+      setEquippedHeadwears(prev => {
+        const current = prev[activeAvatarIndex];
+        if (current === itemGlb) {
+          const updated = { ...prev };
+          delete updated[activeAvatarIndex];
+          return updated;
+        }
+        return { ...prev, [activeAvatarIndex]: itemGlb };
+      });
+    } else if (cat === 'aksessuar') {
+      setEquippedAccessories(prev => {
+        const current = prev[activeAvatarIndex];
+        if (current === itemGlb) {
+          const updated = { ...prev };
+          delete updated[activeAvatarIndex];
+          return updated;
+        }
+        return { ...prev, [activeAvatarIndex]: itemGlb };
+      });
+    } else if (cat === 'ustki_kiyim' || cat === 'futbolka') {
+      setEquippedTopsState(prev => {
+        const current = prev[activeAvatarIndex];
+        if (current === itemGlb) {
+          const updated = { ...prev };
+          delete updated[activeAvatarIndex];
+          return updated;
+        }
+        return { ...prev, [activeAvatarIndex]: itemGlb };
+      });
+    } else if (cat === 'shim') {
+      setEquippedPantsState(prev => {
+        const current = prev[activeAvatarIndex];
+        if (current === itemGlb) {
+          const updated = { ...prev };
+          delete updated[activeAvatarIndex];
+          return updated;
+        }
+        return { ...prev, [activeAvatarIndex]: itemGlb };
+      });
+    } else if (cat === 'oyoq_kiyim') {
+      setEquippedShoesState(prev => {
+        const current = prev[activeAvatarIndex];
+        if (current === itemGlb) {
+          const updated = { ...prev };
+          delete updated[activeAvatarIndex];
+          return updated;
+        }
+        return { ...prev, [activeAvatarIndex]: itemGlb };
+      });
+    } else if (cat === 'ryukzak') {
+      setEquippedBackpacksState(prev => {
+        const current = prev[activeAvatarIndex];
+        if (current === itemGlb) {
+          const updated = { ...prev };
+          delete updated[activeAvatarIndex];
+          return updated;
+        }
+        return { ...prev, [activeAvatarIndex]: itemGlb };
+      });
+    }
   };
   
 
@@ -488,9 +566,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
             try {
               const parsed = JSON.parse(val);
               if (parsed.accessories) setEquippedAccessories(parsed.accessories);
+              if (parsed.tops) setEquippedTopsState(parsed.tops);
               if (parsed.headwears) setEquippedHeadwears(parsed.headwears);
               if (parsed.pants) setEquippedPantsState(parsed.pants);
               if (parsed.shoes) setEquippedShoesState(parsed.shoes);
+              if (parsed.backpacks) setEquippedBackpacksState(parsed.backpacks);
               if (parsed.avatarIndex !== undefined) setActiveAvatarIndex(parsed.avatarIndex);
             } catch (err) {}
           }
@@ -538,13 +618,15 @@ export default function StudentDashboardScreen({ navigation, route }) {
     const userIdKey = user?.customId || user?.id || 'guest';
     const toSave = {
       accessories: equippedAccessories,
+      tops: equippedTopsState,
       headwears: equippedHeadwears,
       pants: equippedPantsState,
       shoes: equippedShoesState,
+      backpacks: equippedBackpacksState,
       avatarIndex: activeAvatarIndex
     };
     AsyncStorage.setItem(`user_equipped_skins_${userIdKey}`, JSON.stringify(toSave)).catch(e => console.log(e));
-  }, [equippedAccessories, equippedHeadwears, equippedPantsState, equippedShoesState, activeAvatarIndex, user, isSkinsLoaded]);
+  }, [equippedAccessories, equippedTopsState, equippedHeadwears, equippedPantsState, equippedShoesState, equippedBackpacksState, activeAvatarIndex, user, isSkinsLoaded]);
 
 
 
@@ -1235,10 +1317,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
         } else if (equippedHeadwear && currentItemState === 'KIYILGAN') {
           currentItemState = 'KIYISH';
         }
-      } else if (item.category === 'aksessuar' || item.category === 'ustki_kiyim' || item.category === 'futbolka') {
+      } else if (item.category === 'aksessuar') {
         if (itemGlb && equippedAccessory === itemGlb) {
           currentItemState = 'KIYILGAN';
         } else if (equippedAccessory && currentItemState === 'KIYILGAN') {
+          currentItemState = 'KIYISH';
+        }
+      } else if (item.category === 'ustki_kiyim' || item.category === 'futbolka') {
+        if (itemGlb && equippedTop === itemGlb) {
+          currentItemState = 'KIYILGAN';
+        } else if (equippedTop && currentItemState === 'KIYILGAN') {
           currentItemState = 'KIYISH';
         }
       } else if (item.category === 'shim') {
@@ -1251,6 +1339,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
         if (itemGlb && equippedShoes === itemGlb) {
           currentItemState = 'KIYILGAN';
         } else if (equippedShoes && currentItemState === 'KIYILGAN') {
+          currentItemState = 'KIYISH';
+        }
+      } else if (item.category === 'ryukzak') {
+        if (itemGlb && equippedBackpack === itemGlb) {
+          currentItemState = 'KIYILGAN';
+        } else if (equippedBackpack && currentItemState === 'KIYILGAN') {
           currentItemState = 'KIYISH';
         }
       }
@@ -1271,47 +1365,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           return;
         }
 
-        if (item.category === 'bosh_kiyim') {
-          setEquippedHeadwears(prev => {
-            const current = prev[activeAvatarIndex];
-            if (current === itemGlb) {
-              const updated = { ...prev };
-              delete updated[activeAvatarIndex];
-              return updated;
-            }
-            return { ...prev, [activeAvatarIndex]: itemGlb };
-          });
-        } else if (item.category === 'aksessuar' || item.category === 'ustki_kiyim' || item.category === 'futbolka') {
-          setEquippedAccessories(prev => {
-            const current = prev[activeAvatarIndex];
-            if (current === itemGlb) {
-              const updated = { ...prev };
-              delete updated[activeAvatarIndex];
-              return updated;
-            }
-            return { ...prev, [activeAvatarIndex]: itemGlb };
-          });
-        } else if (item.category === 'shim') {
-          setEquippedPantsState(prev => {
-            const current = prev[activeAvatarIndex];
-            if (current === itemGlb) {
-              const updated = { ...prev };
-              delete updated[activeAvatarIndex];
-              return updated;
-            }
-            return { ...prev, [activeAvatarIndex]: itemGlb };
-          });
-        } else if (item.category === 'oyoq_kiyim') {
-          setEquippedShoesState(prev => {
-            const current = prev[activeAvatarIndex];
-            if (current === itemGlb) {
-              const updated = { ...prev };
-              delete updated[activeAvatarIndex];
-              return updated;
-            }
-            return { ...prev, [activeAvatarIndex]: itemGlb };
-          });
-        }
+        handleEquipItemGlobal(item);
       };
 
       return (
@@ -1431,7 +1485,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <View style={{ flex: 1, marginHorizontal: 10, position: 'relative' }}>
               <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
                 {activeTab === 'inventory' && (
-                  <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} />
+                  <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} topsPath={equippedTop} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} backpackPath={equippedBackpack} isBackView={activeTab === 'inventory' && kiyimKategoriya === 'ryukzak'} categoryName={kiyimKategoriya} />
                 )}
               </View>
               <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
@@ -1547,7 +1601,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* 3D Model */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -40 : 0, bottom: -20, left: 0, right: 0, zIndex: 2 }} pointerEvents="box-none">
               {activeTab === 'inventory' && (
-                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} />
+                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} topsPath={equippedTop} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} backpackPath={equippedBackpack} isBackView={activeTab === 'inventory' && kiyimKategoriya === 'ryukzak'} categoryName={kiyimKategoriya} />
               )}
             </View>
             <View style={{ position: 'absolute', bottom: 10, left: 0, right: 0, alignItems: 'center' }}>
@@ -1908,7 +1962,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* 3D Model Container */}
             <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], width: '100%', height: '100%' }} pointerEvents="auto">
               {activeTab === 'home' && (
-                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} />
+                <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} topsPath={equippedTop} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} backpackPath={equippedBackpack} isBackView={activeTab === 'inventory' && kiyimKategoriya === 'ryukzak'} categoryName={kiyimKategoriya} />
               )}
             </View>
             
@@ -3003,7 +3057,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 {/* 3D Model Render */}
                 <View style={{ position: 'absolute', top: -10, bottom: 25, left: 20, right: 0, zIndex: 2 }} pointerEvents="box-none">
                   {activeTab === 'inventory' && (
-                    <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} />
+                    <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} topsPath={equippedTop} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} backpackPath={equippedBackpack} isBackView={activeTab === 'inventory' && kiyimKategoriya === 'ryukzak'} categoryName={kiyimKategoriya} />
                   )}
                 </View>
 
@@ -4952,6 +5006,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                                 }}
                                 activeOpacity={0.8}
                                 onPress={() => {
+                                  handleEquipItemGlobal(item);
                                   setIsShopModalOpen(false);
                                 }}
                               >

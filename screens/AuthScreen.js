@@ -270,10 +270,10 @@ export default function AuthScreen({ navigation, route }) {
       return;
     } else {
       // Login logic (allows username, email, or phone)
-      const rawIdentifier = role === 'teacher' ? (usernameInput || phone) : (phone || usernameInput);
+      const rawIdentifier = (phone || usernameInput);
       const loginIdentifier = String(rawIdentifier || '').trim();
       if (!loginIdentifier || !password) {
-        showAlert(t.errorTitle, role === 'teacher' ? 'Iltimos, username va parolni kiriting!' : t.errPhonePass);
+        showAlert(t.errorTitle, t.errPhonePass);
         return;
       }
       setIsLoading(true);
@@ -316,17 +316,35 @@ export default function AuthScreen({ navigation, route }) {
             console.error('AsyncStorage error', e);
           }
 
-          if (role === 'teacher' || data.user?.role?.toLowerCase() === 'teacher') {
+          const actualRole = data.user?.role?.toLowerCase();
+
+          if (role === 'teacher') {
+            if (actualRole !== 'teacher' && data.user?.role !== "O'qituvchi") {
+              showAlert(t.errorTitle, "Kechirasiz, bu yerdan faqat o'qituvchilar kira oladi!");
+              setIsLoading(false);
+              return;
+            }
             navigation.reset({
               index: 0,
               routes: [{ name: 'TeacherDashboard', params: { user: data.user, language } }]
             });
-          } else if (role === 'parent' || data.user?.role?.toLowerCase() === 'parent') {
+          } else if (role === 'parent') {
+            if (actualRole !== 'parent' && data.user?.role !== "Ota-ona") {
+              showAlert(t.errorTitle, "Kechirasiz, bu yerdan faqat ota-onalar kira oladi!");
+              setIsLoading(false);
+              return;
+            }
             navigation.reset({
               index: 0,
               routes: [{ name: 'ParentDashboard', params: { user: data.user, language } }]
             });
           } else {
+            // Check if student tries to login as teacher or parent
+            if (actualRole === 'teacher' || actualRole === 'parent' || data.user?.role === "O'qituvchi" || data.user?.role === "Ota-ona") {
+              showAlert(t.errorTitle, "Kechirasiz, bu yerdan faqat o'quvchilar kira oladi!");
+              setIsLoading(false);
+              return;
+            }
             navigation.reset({
               index: 0,
               routes: [{ 
@@ -445,26 +463,15 @@ export default function AuthScreen({ navigation, route }) {
             </View>
           ) : (
             <>
-              {role === 'teacher' ? (
-                <CustomAnimatedInput
-                  icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
-                  placeholder={t.username || "Username"}
-                  placeholderTextColor="#555566"
-                  value={usernameInput}
-                  onChangeText={setUsernameInput}
-                  onFocus={handleInputFocus}
-                />
-              ) : (
-                <CustomAnimatedInput
-                  icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
-                  placeholder={t.phone}
-                  placeholderTextColor="#555566"
-                  keyboardType="phone-pad"
-                  value={phone}
-                  onChangeText={setPhone}
-                  onFocus={handleInputFocus}
-                />
-              )}
+              <CustomAnimatedInput
+                icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
+                placeholder={t.phone}
+                placeholderTextColor="#555566"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={setPhone}
+                onFocus={handleInputFocus}
+              />
 
               <CustomAnimatedInput
                 icon={<Feather name="lock" size={18} color="#888899" style={styles.inputIcon} />}
