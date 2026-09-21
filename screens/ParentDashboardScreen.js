@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { io } from 'socket.io-client';
 import { SOCKET_URL, API_URL } from '../src/config/api';
+import { calculateUserRank } from '../src/utils/rankUtils';
 
 const getAvatarByName = (avatarVal, studentName = '') => {
   if (avatarVal && typeof avatarVal === 'string' && (avatarVal.startsWith('http://') || avatarVal.startsWith('https://') || avatarVal.startsWith('file://'))) {
@@ -87,7 +88,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
         }
 
         const studentXp = studentObj.xp || 0;
-        const realStudentLevel = studentObj.level || (studentXp > 0 ? Math.floor(studentXp / 100) + 1 : 1);
+        const realStudentLevel = calculateUserRank(studentXp).levelNumber;
         const todayEx = Math.floor((studentXp % 500) / 25);
         const todayAcc = todayEx > 0 ? Math.min(100, Math.max(65, 80 + Math.floor((studentXp % 10)))) : 0;
         const appTime = todayEx > 0 ? `${Math.min(120, todayEx * 3 + 10)} min` : '0 min';
@@ -209,7 +210,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
               if (matched) {
                 const studentXp = matched.xp || 0;
-                const studentLevel = (matched.level !== undefined && matched.level !== null && matched.level > 0) ? matched.level : 1;
+                const studentLevel = calculateUserRank(studentXp).levelNumber;
 
                 const todayExercisesCount = Math.floor((studentXp % 500) / 25);
                 const todayAccuracyVal = todayExercisesCount > 0 ? Math.min(100, Math.max(65, 80 + Math.floor((studentXp % 10)))) : 0;
@@ -343,7 +344,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
               rank: index + 1,
               name: u.name || "O'quvchi",
               xp: u.xp || 0,
-              level: u.level || 1,
+              level: calculateUserRank(u.xp || 0).levelNumber,
               avatar: u.avatar || null,
               customId: u.id || u.customId
             }));
