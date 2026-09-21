@@ -9,11 +9,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { io } from 'socket.io-client';
 import { SOCKET_URL, API_URL } from './src/config/api';
-import StepOneScreen from './screens/StepOneScreen';
-import StepTwoScreen from './screens/StepTwoScreen';
-import AuthScreen from './screens/AuthScreen';
-import OtpScreen from './screens/OtpScreen';
-import StepThreeScreen from './screens/StepThreeScreen';
 import StepFourScreen from './screens/StepFourScreen';
 import StepFiveScreen from './screens/StepFiveScreen';
 import StudentDashboardScreen from './screens/StudentDashboardScreen';
@@ -42,6 +37,8 @@ export const navigationRef = createNavigationContainerRef();
 
 import TeacherDashboardScreen from './screens/TeacherDashboardScreen';
 import ParentDashboardScreen from './screens/ParentDashboardScreen';
+import AuthScreen from './screens/AuthScreen';
+import OtpScreen from './screens/OtpScreen';
 
 const MyDarkTheme = {
   ...DefaultTheme,
@@ -54,7 +51,7 @@ const MyDarkTheme = {
 export default function App() {
   
   const [assetsLoaded, setAssetsLoaded] = useState(false);
-  const [initialRoute, setInitialRoute] = useState('StepOne');
+  const [initialRoute, setInitialRoute] = useState('AuthScreen');
   const [initialParams, setInitialParams] = useState({});
   const [isReady, setIsReady] = useState(false);
   const [splashFinished, setSplashFinished] = useState(false);
@@ -326,7 +323,7 @@ export default function App() {
     if (navigationRef.isReady()) {
       navigationRef.reset({
         index: 0,
-        routes: [{ name: 'StepOne' }],
+        routes: [{ name: 'AuthScreen' }],
       });
     }
   };
@@ -350,7 +347,7 @@ export default function App() {
               clearTimeout(timeoutId);
               if (res.status === 404) {
                 await AsyncStorage.removeItem('user_data');
-                setInitialRoute('StepOne');
+                setInitialRoute('AuthScreen');
               } else if (res.ok) {
                 const text = await res.text();
                 if (text && text.trim().startsWith('{')) {
@@ -435,13 +432,10 @@ export default function App() {
       <SoundPlayerBridge />
       <NavigationContainer ref={navigationRef} theme={MyDarkTheme}>
         <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-          <Stack.Screen name="StepOne" component={StepOneScreen} />
-          <Stack.Screen name="StepTwo" component={StepTwoScreen} />
           <Stack.Screen name="AuthScreen" component={AuthScreen} />
           <Stack.Screen name="OtpScreen" component={OtpScreen} />
           <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} />
           <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
-          <Stack.Screen name="StepThree" component={StepThreeScreen} />
           <Stack.Screen name="StepFour" component={StepFourScreen} />
           <Stack.Screen name="StepFive" component={StepFiveScreen} />
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} initialParams={initialRoute === 'StudentDashboard' ? initialParams : undefined} />

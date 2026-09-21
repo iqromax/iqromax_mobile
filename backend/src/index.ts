@@ -500,7 +500,7 @@ app.post('/api/teacher/approve', async (req, res) => {
           
           <div style="background-color: #121223; padding: 24px; border-radius: 14px; border: 1px solid #A855F7; margin-bottom: 30px;">
             <p style="color: #9CA3AF; font-size: 14px; margin-bottom: 10px;">Tizimga kirish ma'lumotlaringiz:</p>
-            <p style="color: #FFFFFF; font-size: 16px; margin: 6px 0;"><strong>Username (Ismingiz):</strong> <span style="color: #A855F7;">${reqItem.name}</span></p>
+            <p style="color: #FFFFFF; font-size: 16px; margin: 6px 0;"><strong>Telefon raqam:</strong> <span style="color: #A855F7;">${reqItem.phone}</span></p>
             <p style="color: #FFFFFF; font-size: 16px; margin: 6px 0;"><strong>Parol (Password):</strong> <span style="color: #10B981; font-weight: bold;">${generatedPass}</span></p>
           </div>
           

@@ -145,9 +145,11 @@ const CustomAnimatedInput = ({ icon, rightIcon, ...props }) => {
 };
 
 export default function AuthScreen({ navigation, route }) {
-  const { role = 'student', language = 'uz', initialTab = 'login' } = route.params || {};
+  const language = route.params?.language || 'uz';
+  const initialTab = route.params?.initialTab || 'login';
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
   const [activeTab, setActiveTab] = useState(initialTab); // 'register' or 'login'
+  const [registerRole, setRegisterRole] = useState('student'); // 'student', 'parent', 'teacher'
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -198,7 +200,7 @@ export default function AuthScreen({ navigation, route }) {
 
   const handleAuthAction = async () => {
     if (activeTab === 'register') {
-      if (role === 'teacher') {
+      if (registerRole === 'teacher') {
         if (!name.trim() || !phone.trim() || !email.trim()) {
           showAlert(t.errorTitle, t.errFillFields);
           return;
@@ -240,7 +242,7 @@ export default function AuthScreen({ navigation, route }) {
         return;
       }
 
-      if (role === 'parent') {
+      if (registerRole === 'parent') {
         // Go to ParentDashboard directly for guest register
         const parentUser = {
           id: 'parent_' + Date.now(),
@@ -262,7 +264,7 @@ export default function AuthScreen({ navigation, route }) {
       // Step 3 -> Name entered -> Go to Step 4 (Country Selection)
       navigation.navigate('StepFour', {
         ...route.params,
-        role,
+        role: registerRole,
         name: name.trim(),
         referralCode: referralCode.trim(),
         language
@@ -318,33 +320,17 @@ export default function AuthScreen({ navigation, route }) {
 
           const actualRole = data.user?.role?.toLowerCase();
 
-          if (role === 'teacher') {
-            if (actualRole !== 'teacher' && data.user?.role !== "O'qituvchi") {
-              showAlert(t.errorTitle, "Kechirasiz, bu yerdan faqat o'qituvchilar kira oladi!");
-              setIsLoading(false);
-              return;
-            }
+          if (actualRole === 'teacher' || actualRole === "o'qituvchi") {
             navigation.reset({
               index: 0,
               routes: [{ name: 'TeacherDashboard', params: { user: data.user, language } }]
             });
-          } else if (role === 'parent') {
-            if (actualRole !== 'parent' && data.user?.role !== "Ota-ona") {
-              showAlert(t.errorTitle, "Kechirasiz, bu yerdan faqat ota-onalar kira oladi!");
-              setIsLoading(false);
-              return;
-            }
+          } else if (actualRole === 'parent' || actualRole === 'ota-ona') {
             navigation.reset({
               index: 0,
               routes: [{ name: 'ParentDashboard', params: { user: data.user, language } }]
             });
           } else {
-            // Check if student tries to login as teacher or parent
-            if (actualRole === 'teacher' || actualRole === 'parent' || data.user?.role === "O'qituvchi" || data.user?.role === "Ota-ona") {
-              showAlert(t.errorTitle, "Kechirasiz, bu yerdan faqat o'quvchilar kira oladi!");
-              setIsLoading(false);
-              return;
-            }
             navigation.reset({
               index: 0,
               routes: [{ 
@@ -378,22 +364,18 @@ export default function AuthScreen({ navigation, route }) {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         style={{ flex: 1 }}
       >
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} activeOpacity={0.7}>
-            <Ionicons name="chevron-back" size={28} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
+
 
         <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {/* Hero Image with Text */}
           <View style={styles.heroContainer}>
             <Image 
               source={
-                role === 'teacher'
+                registerRole === 'teacher'
                   ? require('../assets/auth_hero_teacher.png')
                   : (activeTab === 'login' 
                       ? require('../assets/auth_hero_with_text.jpg') 
-                      : (role === 'parent' ? require('../assets/auth_hero_parent.jpg') : require('../assets/register_hero_with_text.jpg')))
+                      : (registerRole === 'parent' ? require('../assets/auth_hero_parent.jpg') : require('../assets/register_hero_with_text.jpg')))
               } 
               style={styles.heroImage} 
               contentFit="contain" 
@@ -428,6 +410,31 @@ export default function AuthScreen({ navigation, route }) {
           {/* Form */}
           {activeTab === 'register' ? (
             <View>
+              {/* Inline Role Picker */}
+              <View style={styles.rolePickerContainer}>
+                <TouchableOpacity 
+                  style={[styles.rolePickerButton, registerRole === 'student' && styles.rolePickerButtonActive]} 
+                  onPress={() => setRegisterRole('student')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.rolePickerText, registerRole === 'student' && styles.rolePickerTextActive]}>O'quvchi</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.rolePickerButton, registerRole === 'parent' && styles.rolePickerButtonActive]} 
+                  onPress={() => setRegisterRole('parent')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.rolePickerText, registerRole === 'parent' && styles.rolePickerTextActive]}>Ota-ona</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.rolePickerButton, registerRole === 'teacher' && styles.rolePickerButtonActive]} 
+                  onPress={() => setRegisterRole('teacher')}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.rolePickerText, registerRole === 'teacher' && styles.rolePickerTextActive]}>O'qituvchi</Text>
+                </TouchableOpacity>
+              </View>
+
               <CustomAnimatedInput
                 icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
                 placeholder={t.fullName}
@@ -437,7 +444,7 @@ export default function AuthScreen({ navigation, route }) {
                 onFocus={handleInputFocus}
               />
 
-              {role === 'teacher' && (
+              {registerRole === 'teacher' && (
                 <>
                   <CustomAnimatedInput
                     icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
@@ -488,15 +495,13 @@ export default function AuthScreen({ navigation, route }) {
                 }
               />
 
-              {role !== 'teacher' && (
-                <TouchableOpacity 
-                  style={styles.forgotPasswordContainer} 
-                  onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity 
+                style={styles.forgotPasswordContainer} 
+                onPress={() => navigation.navigate('ForgotPasswordScreen', { language })}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.forgotPasswordText}>{t.forgotPassword}</Text>
+              </TouchableOpacity>
             </>
           )}
 
@@ -630,6 +635,32 @@ const styles = StyleSheet.create({
   heroImage: {
     width: '100%',
     height: 320,
+  },
+  rolePickerContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#0A0A16',
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#1A1A2E',
+  },
+  rolePickerButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  rolePickerButtonActive: {
+    backgroundColor: '#3B0764',
+  },
+  rolePickerText: {
+    color: '#888899',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  rolePickerTextActive: {
+    color: '#FFFFFF',
   },
   tabContainer: {
     flexDirection: 'row',

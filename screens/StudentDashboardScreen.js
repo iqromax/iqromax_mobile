@@ -3883,7 +3883,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 try {
                   await AsyncStorage.removeItem('user_data');
                 } catch (e) {}
-                navigation.reset({ index: 0, routes: [{ name: 'StepOne' }] });
+                navigation.reset({ index: 0, routes: [{ name: 'AuthScreen' }] });
               }}
             >
               <MaterialCommunityIcons name="logout-variant" size={20} color="#EF4444" />
@@ -3964,7 +3964,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 } catch (e) {}
                 navigation.reset({
                   index: 0,
-                  routes: [{ name: 'StepOne' }]
+                  routes: [{ name: 'AuthScreen' }]
                 });
               }}
               activeOpacity={0.8}

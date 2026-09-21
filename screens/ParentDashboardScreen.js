@@ -363,7 +363,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
     } catch (e) {}
     navigation.reset({
       index: 0,
-      routes: [{ name: 'StepOne', params: { language } }]
+      routes: [{ name: 'AuthScreen', params: { language } }]
     });
   };
 
