@@ -1017,7 +1017,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, marginBottom: 16 }}>
                   {childrenList.map((ch, idx) => (
                     <TouchableOpacity
-                      key={ch.id}
+                      key={`${ch.id}_${idx}`}
                       style={[styles.childSelectChip, selectedChildIndex === idx && styles.childSelectChipActive]}
                       onPress={() => setSelectedChildIndex(idx)}
                       activeOpacity={0.85}
@@ -1173,8 +1173,8 @@ export default function ParentDashboardScreen({ navigation, route }) {
               </Text>
 
               {childrenList.length > 0 ? (
-                childrenList.map((ch) => (
-                  <View key={ch.id} style={styles.linkedChildRow}>
+                childrenList.map((ch, idx) => (
+                  <View key={`${ch.id}_${idx}`} style={styles.linkedChildRow}>
                     <View style={styles.linkedChildAvatar}>
                       <Image source={getAvatarByName(ch.avatar, ch.name)} style={{ width: 40, height: 40, borderRadius: 20 }} />
                     </View>
