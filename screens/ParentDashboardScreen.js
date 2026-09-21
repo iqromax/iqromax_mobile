@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, ScrollView, Modal, TextInput, Image, Dimensions, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, ScrollView, Modal, TextInput, Image, Dimensions, ActivityIndicator, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -439,23 +439,19 @@ export default function ParentDashboardScreen({ navigation, route }) {
 
   // Submit Parent Auth & Invite Form
   const handleAuthAndInviteSubmit = async () => {
-    if (!authEmail.trim() || !authPhone.trim() || !childIdInput.trim()) {
-      setFeedbackAlert({
-        visible: true,
-        title: 'Diqqat',
-        message: 'Iltimos, Email, Telefon raqam va Farzand ID sini kiriting!',
-        type: 'error'
-      });
+    if (!authEmail.trim() || !authPhone.trim() || !authPassword.trim() || !authConfirmPassword.trim() || !childIdInput.trim()) {
+      Alert.alert('Diqqat', 'Iltimos, barcha maydonlarni to\'ldiring!');
       return;
     }
 
-    if (authPassword && authConfirmPassword && authPassword !== authConfirmPassword) {
-      setFeedbackAlert({
-        visible: true,
-        title: 'Xatolik',
-        message: 'Parollar bir-biriga mos kelmadi!',
-        type: 'error'
-      });
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(authEmail.trim())) {
+      Alert.alert('Xatolik', 'Email noto\'g\'ri formatda kiritildi (@ belgisi bilan yozing)');
+      return;
+    }
+
+    if (authPassword !== authConfirmPassword) {
+      Alert.alert('Xatolik', 'Parollar bir-biriga mos kelmadi!');
       return;
     }
 
