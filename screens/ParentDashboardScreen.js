@@ -194,7 +194,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
       }
 
       if (targetChildId && String(targetChildId).trim()) {
-        const rawChildIds = String(targetChildId).split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+        const rawChildIds = [...new Set(String(targetChildId).split(',').map(s => s.trim().toUpperCase()).filter(Boolean))];
         try {
           const res = await fetch(`${API_URL}/admin/users?role=student`);
           if (res.ok) {
@@ -945,8 +945,8 @@ export default function ParentDashboardScreen({ navigation, route }) {
                       const idMatch = item.customId && item.customId.toLowerCase().includes(q);
                       return nameMatch || idMatch;
                     })
-                    .map((item) => (
-                      <View key={item.customId} style={styles.rankRow}>
+                    .map((item, idx) => (
+                      <View key={`${item.customId || 'no_id'}_${idx}`} style={styles.rankRow}>
                         <Text style={[
                           styles.rankNum,
                           item.rank === 1 && { color: '#F59E0B' },
