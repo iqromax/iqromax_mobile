@@ -33,6 +33,12 @@ export default function ForgotPasswordScreen({ route, navigation }) {
       return;
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert(t.errorTitle, 'Email noto\'g\'ri formatda kiritildi (@ belgisi bilan yozing)');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch(`${API_URL}/auth/forgot-password-otp`, {

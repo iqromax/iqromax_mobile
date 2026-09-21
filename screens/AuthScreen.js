@@ -205,6 +205,12 @@ export default function AuthScreen({ navigation, route }) {
           showAlert(t.errorTitle, t.errFillFields);
           return;
         }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+          showAlert(t.errorTitle, 'Email noto\'g\'ri formatda kiritildi (@ belgisi bilan yozing)');
+          return;
+        }
 
         setIsLoading(true);
         try {
