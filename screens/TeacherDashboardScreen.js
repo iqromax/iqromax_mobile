@@ -658,23 +658,23 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               const count = rankedData.length;
               const totalEx = rankedData.reduce((acc, u) => acc + (u.exercisesCount || 0), 0);
               const totalAcc = rankedData.reduce((acc, u) => acc + (u.accuracy || 0), 0);
-              const meanAcc = count > 0 ? Math.round(totalAcc / count) : 85;
-              const meanSpeed = count > 0 ? (rankedData.reduce((acc, u) => acc + parseFloat(u.speed || 1.5), 0) / count).toFixed(1) : '1.8';
+              const meanAcc = count > 0 ? Math.round(totalAcc / count) : 0;
+              const meanSpeed = count > 0 ? (rankedData.reduce((acc, u) => acc + parseFloat(u.speed || 1.5), 0) / count).toFixed(1) : '0.0';
 
               // Performance categories
               const high = rankedData.filter(u => u.accuracy >= 85).length;
               const mid = rankedData.filter(u => u.accuracy >= 65 && u.accuracy < 85).length;
               const low = rankedData.filter(u => u.accuracy < 65).length;
 
-              const highP = count > 0 ? Math.round((high / count) * 100) : 42;
-              const midP = count > 0 ? Math.round((mid / count) * 100) : 38;
-              const lowP = count > 0 ? Math.max(0, 100 - highP - midP) : 20;
+              const highP = count > 0 ? Math.round((high / count) * 100) : 0;
+              const midP = count > 0 ? Math.round((mid / count) * 100) : 0;
+              const lowP = count > 0 ? Math.max(0, 100 - highP - midP) : 0;
 
               // Exercise efficiency calculation (Tasavvur vs Speed)
               const calcEx = Math.round(totalEx * 0.62);
               const speedEx = Math.round(totalEx * 0.38);
-              const calcAcc = Math.min(98, meanAcc + 3);
-              const speedAcc = Math.max(65, meanAcc - 5);
+              const calcAcc = count > 0 ? Math.min(98, meanAcc + 3) : 0;
+              const speedAcc = count > 0 ? Math.max(65, meanAcc - 5) : 0;
 
               // Top 3 active students
               const sortedByEx = [...rankedData].sort((a, b) => b.exercisesCount - a.exercisesCount);
@@ -684,11 +684,11 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               const needsAttention = rankedData.filter(u => u.lastActiveDays >= 3 || u.accuracy < 70).slice(0, 3);
 
               // Weekly trend
-              const w1 = Math.max(40, meanAcc - 25);
-              const w2 = Math.max(50, meanAcc - 15);
-              const w3 = Math.max(60, meanAcc - 5);
-              const w4 = meanAcc;
-              const trendDiff = Math.max(10, w4 - w1);
+              const w1 = count > 0 ? Math.max(40, meanAcc - 25) : 0;
+              const w2 = count > 0 ? Math.max(50, meanAcc - 15) : 0;
+              const w3 = count > 0 ? Math.max(60, meanAcc - 5) : 0;
+              const w4 = count > 0 ? meanAcc : 0;
+              const trendDiff = count > 0 ? Math.max(10, w4 - w1) : 0;
 
           setRealStatsData({
             studentCount: count,
@@ -704,11 +704,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
             speedExercises: speedEx,
             speedAccuracy: speedAcc,
             topStudents: top3,
-            attentionUsers: needsAttention.length > 0 ? needsAttention : [
-              { name: "Azizbek", reason: "5 kundan beri mashq bajarmadi", color: "#EF4444" },
-              { name: "Madina", reason: "O'rtacha natija: 54%", color: "#F59E0B" },
-              { name: "Jasur", reason: "So'nggi 10 ta mashqdan 6 tasida xato", color: "#F59E0B" }
-            ],
+            attentionUsers: needsAttention,
             weeklyTrend: [w1, w2, w3, w4],
             trendIncrease: trendDiff
           });
