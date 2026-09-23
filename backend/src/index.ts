@@ -2187,14 +2187,15 @@ app.post('/api/chat/clear', async (req, res) => {
 // GET /api/chat/recent/:customId
 app.get('/api/chat/recent/:customId', async (req, res) => {
   try {
-    const { customId } = req.params;
+    const cleanId = customId.replace(/^#+/, '').trim();
+    const hashId = '#' + cleanId;
     
     // @ts-ignore
     const messages = await prisma.message.findMany({
       where: {
         OR: [
-          { senderId: customId },
-          { receiverId: customId }
+          { senderId: { in: [cleanId, hashId] } },
+          { receiverId: { in: [cleanId, hashId] } }
         ],
         NOT: {
           deletedBy: {
@@ -2207,7 +2208,8 @@ app.get('/api/chat/recent/:customId', async (req, res) => {
 
     const recentMap = new Map();
     for (const msg of messages) {
-      const partnerId = msg.senderId === customId ? msg.receiverId : msg.senderId;
+      const isMe = msg.senderId === cleanId || msg.senderId === hashId;
+      const partnerId = isMe ? msg.receiverId : msg.senderId;
       if (!recentMap.has(partnerId)) {
         recentMap.set(partnerId, msg);
       }
@@ -2360,7 +2362,8 @@ io.on('connection', (socket) => {
       // Emit back to sender (for confirmation/ID) and to receiver
       socket.emit('chat_message_received', message);
       
-      const targetSocketId = onlineUsers.get(data.receiverId.toUpperCase());
+      const safeTargetId = data.receiverId.replace(/^#+/, '').trim().toUpperCase();
+      const targetSocketId = onlineUsers.get(safeTargetId);
       if (targetSocketId) {
         io.to(targetSocketId).emit('chat_message_received', message);
       }
