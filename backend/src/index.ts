@@ -2184,6 +2184,59 @@ app.post('/api/chat/clear', async (req, res) => {
   }
 });
 
+// GET /api/chat/recent/:customId
+app.get('/api/chat/recent/:customId', async (req, res) => {
+  try {
+    const { customId } = req.params;
+    
+    // @ts-ignore
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          { senderId: customId },
+          { receiverId: customId }
+        ],
+        NOT: {
+          deletedBy: {
+            has: customId
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const recentMap = new Map();
+    for (const msg of messages) {
+      const partnerId = msg.senderId === customId ? msg.receiverId : msg.senderId;
+      if (!recentMap.has(partnerId)) {
+        recentMap.set(partnerId, msg);
+      }
+    }
+
+    const partnerIds = Array.from(recentMap.keys());
+    const users = await prisma.user.findMany({
+      where: { customId: { in: partnerIds } }
+    });
+
+    const userMap = new Map(users.map((u: any) => [u.customId, u]));
+    const result = partnerIds.map(pid => {
+      const u = userMap.get(pid);
+      return {
+        customId: pid,
+        name: u?.name || 'Noma\\'lum',
+        avatar: u?.character || u?.avatar || '',
+        xp: u?.xp || 0,
+        lastMessage: recentMap.get(pid)
+      };
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('Recent chats fetch error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Fallback to admin panel for unhandled routes
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
