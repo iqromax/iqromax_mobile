@@ -1932,19 +1932,15 @@ app.post('/api/user/friend-request', async (req, res) => {
       if (existingReq.status === 'PENDING') return res.status(400).json({ error: 'Request already pending' });
       if (existingReq.status === 'ACCEPTED') return res.status(400).json({ error: 'Already friends' });
       if (existingReq.status === 'REJECTED') {
-        if (existingReq.senderId === senderId) {
-          return res.status(400).json({ error: 'Foydalanuvchi arizangizni rad etgan' });
-        } else {
-          // @ts-ignore
-          await prisma.friendRequest.deleteMany({
-            where: {
-              OR: [
-                { senderId, receiverId },
-                { senderId: receiverId, receiverId: senderId }
-              ]
-            }
-          });
-        }
+        // @ts-ignore
+        await prisma.friendRequest.deleteMany({
+          where: {
+            OR: [
+              { senderId, receiverId },
+              { senderId: receiverId, receiverId: senderId }
+            ]
+          }
+        });
       }
     }
 
