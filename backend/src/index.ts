@@ -2184,9 +2184,9 @@ app.post('/api/chat/clear', async (req, res) => {
   }
 });
 
-// GET /api/chat/recent/:customId
 app.get('/api/chat/recent/:customId', async (req, res) => {
   try {
+    const { customId } = req.params;
     const cleanId = customId.replace(/^#+/, '').trim();
     const hashId = '#' + cleanId;
     
