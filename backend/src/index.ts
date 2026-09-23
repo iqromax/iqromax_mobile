@@ -2223,7 +2223,7 @@ app.get('/api/chat/recent/:customId', async (req, res) => {
       const u = userMap.get(pid);
       return {
         customId: pid,
-        name: u?.name || 'Noma\\'lum',
+        name: u?.name || "Noma'lum",
         avatar: u?.character || u?.avatar || '',
         xp: u?.xp || 0,
         lastMessage: recentMap.get(pid)
