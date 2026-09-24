@@ -2562,7 +2562,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         {/* CALC ONLY CONFIGURATION */}
         {activeExerciseType === 'calc' && (
-          <>
+          <View style={{ marginTop: 20 }}>
             {/* NUMBER OF EXAMPLES SECTION */}
             <View style={styles.examplesContainer}>
               <View style={styles.examplesHeader}>
@@ -2830,7 +2830,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               )}
             </View>
-          </>
+          </View>
         )}
 
         {/* SPEED CONFIGURATION */}
