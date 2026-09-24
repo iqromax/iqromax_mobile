@@ -264,6 +264,21 @@ export default function App() {
       Animated.spring(inviteSlideAnim, { toValue: 50, useNativeDriver: true, tension: 50, friction: 8 }).start();
     });
 
+    const inviteSub = DeviceEventEmitter.addListener('global_receive_battle_invite', (data) => {
+      let enrichedData = { ...data };
+      try {
+        if (enrichedData.message) {
+          const msgObj = typeof enrichedData.message === 'string' ? JSON.parse(enrichedData.message) : enrichedData.message;
+          if (msgObj.senderAvatar) enrichedData.senderAvatar = msgObj.senderAvatar;
+          if (msgObj.senderName) enrichedData.senderName = msgObj.senderName;
+          if (msgObj.senderEquippedSkins) enrichedData.senderEquippedSkins = msgObj.senderEquippedSkins;
+        }
+      } catch (e) {}
+      setBattleInvite(enrichedData);
+      setInviteTimer(30);
+      Animated.spring(inviteSlideAnim, { toValue: 50, useNativeDriver: true, tension: 50, friction: 8 }).start();
+    });
+
     socket.on('battle_invite_response', (data) => {
       if (data && data.status === 'REJECTED') {
         const name = data.targetName || "Do'stingiz";
@@ -393,6 +408,7 @@ export default function App() {
       socket.disconnect();
       clearInterval(authInterval);
       urlSub.remove();
+      if (inviteSub) inviteSub.remove();
     };
   }, []);
 

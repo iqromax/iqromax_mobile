@@ -1028,6 +1028,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
       });
     });
 
+    socket.on('receive_battle_invite', (data) => {
+      DeviceEventEmitter.emit('global_receive_battle_invite', data);
+    });
+
     socket.on('user_xp_updated', async (data) => {
       if (user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase()) {
         setUser(prev => ({ ...prev, xp: data.xp }));
