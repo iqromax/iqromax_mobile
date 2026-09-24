@@ -108,7 +108,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setOpponent(data.opponent);
       
-      // Auto-navigate after 3 seconds showing the opponent
+      // Auto-navigate after 5 seconds showing the opponent
       setTimeout(() => {
         if (socketRef.current) socketRef.current.disconnect();
         navigation.replace('BattleGame', {
@@ -122,7 +122,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           language,
           opponentData: data.opponent
         });
-      }, 3000);
+      }, 5000);
     });
 
     // 5-minute timeout (300,000 ms)

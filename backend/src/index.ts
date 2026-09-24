@@ -2445,7 +2445,7 @@ io.on('connection', (socket) => {
   // Random Matchmaking Events
   socket.on('join_random_battle', (data) => {
     // data: { customId, name, avatar, equippedSkins, level, rating, settings }
-    const existingIndex = randomMatchmakingQueue.findIndex(p => p.socketId === socket.id || p.customId === data.customId);
+    const existingIndex = randomMatchmakingQueue.findIndex(p => p.socketId === socket.id);
     if (existingIndex === -1) {
       randomMatchmakingQueue.push({ ...data, socketId: socket.id });
     }
