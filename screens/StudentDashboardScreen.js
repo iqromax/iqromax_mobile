@@ -209,7 +209,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "AKSESSUAR",
     accessoryDesc: "Personajingizni bezang",
     backpackTitle: "RYUKZAK",
-    backpackDesc: "Orqa sumkangizni tanlang"
+    backpackDesc: "Orqa sumkangizni tanlang",
+    filterAll: "Barchasi",
+    noSkins: "Ushbu bo'limda skinlar yo'q"
   },
   en: {
     charsView: "View and change characters",
@@ -228,7 +230,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "ACCESSORY",
     accessoryDesc: "Decorate your character",
     backpackTitle: "BACKPACK",
-    backpackDesc: "Choose your backpack"
+    backpackDesc: "Choose your backpack",
+    filterAll: "All",
+    noSkins: "No skins in this section"
   },
   ru: {
     charsView: "Просмотр и смена персонажей",
@@ -247,7 +251,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "АКСЕССУАР",
     accessoryDesc: "Украсьте своего персонажа",
     backpackTitle: "РЮКЗАК",
-    backpackDesc: "Выберите рюкзак"
+    backpackDesc: "Выберите рюкзак",
+    filterAll: "Все",
+    noSkins: "В этом разделе нет скинов"
   },
   ar: {
     charsView: "عرض وتغيير الشخصيات",
@@ -266,7 +272,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "إكسسوار",
     accessoryDesc: "زيّن شخصيتك",
     backpackTitle: "حقيبة ظهر",
-    backpackDesc: "اختر حقيبة الظهر الخاصة بك"
+    backpackDesc: "اختر حقيبة الظهر الخاصة بك",
+    filterAll: "الكل",
+    noSkins: "لا يوجد ملابس في هذا القسم"
   },
   tr: {
     charsView: "Karakterleri görüntüle ve değiştir",
@@ -285,7 +293,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "AKSESUAR",
     accessoryDesc: "Karakterinizi süsleyin",
     backpackTitle: "SIRT ÇANTASI",
-    backpackDesc: "Sırt çantanızı seçin"
+    backpackDesc: "Sırt çantanızı seçin",
+    filterAll: "Hepsi",
+    noSkins: "Bu bölümde kıyafet yok"
   },
   zh: {
     charsView: "查看和更换角色",
@@ -304,7 +314,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "配饰",
     accessoryDesc: "装饰您的角色",
     backpackTitle: "背包",
-    backpackDesc: "选择背包"
+    backpackDesc: "选择背包",
+    filterAll: "全部",
+    noSkins: "此部分没有皮肤"
   },
   ky: {
     charsView: "Персонаждарды көрүү жана алмаштыруу",
@@ -323,7 +335,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "АКСЕССУАР",
     accessoryDesc: "Персонажыңызды кооздоңуз",
     backpackTitle: "РЮКЗАК",
-    backpackDesc: "Рюкзагыңызды тандаңыз"
+    backpackDesc: "Рюкзагыңызды тандаңыз",
+    filterAll: "Баардыгы",
+    noSkins: "Бул бөлүмдө терилер жок"
   },
   kk: {
     charsView: "Кейіпкерлерді көру және ауыстыру",
@@ -342,7 +356,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "АКСЕССУАР",
     accessoryDesc: "Кейіпкеріңізді безендіріңіз",
     backpackTitle: "РЮКЗАК",
-    backpackDesc: "Рюкзагыңызды таңдаңыз"
+    backpackDesc: "Рюкзагыңызды таңдаңыз",
+    filterAll: "Барлығы",
+    noSkins: "Бұл бөлімде мұқабалар жоқ"
   },
   tg: {
     charsView: "Дидан ва иваз кардани персонажҳо",
@@ -361,7 +377,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "ЛАВОЗИМОТ",
     accessoryDesc: "Персонажи худро оро диҳед",
     backpackTitle: "ҶУЗВДОН",
-    backpackDesc: "Ҷузвдони худро интихоб кунед"
+    backpackDesc: "Ҷузвдони худро интихоб кунед",
+    filterAll: "Ҳама",
+    noSkins: "Дар ин бахш пӯстҳо нестанд"
   },
   hi: {
     charsView: "पात्रों को देखें और बदलें",
@@ -380,7 +398,9 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "सामान",
     accessoryDesc: "अपने पात्र को सजाएं",
     backpackTitle: "बैकपैक",
-    backpackDesc: "अपना बैकपैक चुनें"
+    backpackDesc: "अपना बैकपैक चुनें",
+    filterAll: "सभी",
+    noSkins: "इस अनुभाग में कोई खाल नहीं है"
   },
   ur: {
     charsView: "کرداروں کو دیکھیں اور تبدیل کریں",
@@ -399,8 +419,24 @@ export const INVENTORY_TRANSLATIONS = {
     accessoryTitle: "لوازمات",
     accessoryDesc: "اپنے کردار کو سجائیں",
     backpackTitle: "بیک پیک",
-    backpackDesc: "اپنا بیک پیک منتخب کریں"
+    backpackDesc: "اپنا بیک پیک منتخب کریں",
+    filterAll: "سب",
+    noSkins: "اس حصے میں کوئی کھالیں نہیں ہیں"
   }
+};
+
+export const EXTRA_TRANSLATIONS = {
+  uz: { classicAbacus: "Klassik abakus", mathAbacus: "Abakusda hisoblash", shopBrand: "IQROSHOP", startAbacus: "ABAKUSNI OCHISH" },
+  en: { classicAbacus: "Classic abacus", mathAbacus: "Math abacus", shopBrand: "IQROSHOP", startAbacus: "OPEN ABACUS" },
+  ru: { classicAbacus: "Классический абакус", mathAbacus: "Счет на абакусе", shopBrand: "IQROSHOP", startAbacus: "ОТКРЫТЬ АБАКУС" },
+  ar: { classicAbacus: "المعداد الكلاسيكي", mathAbacus: "حساب المعداد", shopBrand: "IQROSHOP", startAbacus: "فتح المعداد" },
+  tr: { classicAbacus: "Klasik abaküs", mathAbacus: "Abaküs ile hesaplama", shopBrand: "IQROSHOP", startAbacus: "ABAKÜSÜ AÇ" },
+  zh: { classicAbacus: "经典算盘", mathAbacus: "算盘计算", shopBrand: "IQROSHOP", startAbacus: "打开算盘" },
+  ky: { classicAbacus: "Классикалык абакус", mathAbacus: "Абакуста эсептөө", shopBrand: "IQROSHOP", startAbacus: "АБАКУСТУ АЧУУ" },
+  kk: { classicAbacus: "Классикалық абакус", mathAbacus: "Абакуста есептеу", shopBrand: "IQROSHOP", startAbacus: "АБАКУСТЫ АШУ" },
+  tg: { classicAbacus: "Абакуси классикӣ", mathAbacus: "Ҳисоб бо абакус", shopBrand: "IQROSHOP", startAbacus: "КУШОДАНИ АБАКУС" },
+  hi: { classicAbacus: "क्लासिक एबेकस", mathAbacus: "एबेकस गणना", shopBrand: "IQROSHOP", startAbacus: "एबेकस खोलें" },
+  ur: { classicAbacus: "کلاسک اباکس", mathAbacus: "اباکس پر حساب", shopBrand: "IQROSHOP", startAbacus: "اباکس کھولیں" }
 };
 
 export default function StudentDashboardScreen({ navigation, route }) {
@@ -936,6 +972,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const energyText = ENERGY_TRANSLATIONS[language] || ENERGY_TRANSLATIONS['uz'];
   const fmt = FRIENDS_MODAL_TRANSLATIONS[language] || FRIENDS_MODAL_TRANSLATIONS['uz'];
   const invT = INVENTORY_TRANSLATIONS[language] || INVENTORY_TRANSLATIONS['uz'];
+  const extT = EXTRA_TRANSLATIONS[language] || EXTRA_TRANSLATIONS['uz'];
 
   const yutuqScrollRef = useRef(null);
   const [currentYutuqIndex, setCurrentYutuqIndex] = useState(0);
@@ -1652,7 +1689,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <View style={{ width: '100%', paddingVertical: 40, alignItems: 'center', justifyContent: 'center' }}>
           <MaterialCommunityIcons name="tshirt-crew-outline" size={32} color="rgba(255,255,255,0.2)" />
           <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 11, marginTop: 8 }}>
-            Ushbu bo'limda skinlar yo'q
+            {invT.noSkins}
           </Text>
         </View>
       );
@@ -2382,7 +2419,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               >
                 <FontAwesome5 name="store" size={18} color="#F59E0B" />
                 <View style={styles.rightStatTextCol}>
-                  <Text style={[styles.rightStatTopLabel, { color: '#F59E0B' }]} numberOfLines={1}>IQROSHOP</Text>
+                  <Text style={[styles.rightStatTopLabel, { color: '#F59E0B' }]} numberOfLines={1}>{extT.shopBrand}</Text>
                   <Text style={[styles.rightStatNumber, { color: '#FFF', fontSize: 11 }]} numberOfLines={1}>{t.shopBtnLabel || "DO'KON"}</Text>
                 </View>
               </TouchableOpacity>
@@ -2618,7 +2655,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               >
                 <MaterialCommunityIcons name="abacus" size={18} color={activeAbacusSubMode === 'classic' ? '#A855F7' : '#9CA3AF'} style={{ marginRight: 6 }} />
                 <Text style={{ color: activeAbacusSubMode === 'classic' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 13 }}>
-                  Klassik abakus
+                  {extT.classicAbacus}
                 </Text>
               </TouchableOpacity>
 
@@ -2639,7 +2676,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               >
                 <MaterialCommunityIcons name="calculator-variant" size={18} color={activeAbacusSubMode === 'math' ? '#3B82F6' : '#9CA3AF'} style={{ marginRight: 6 }} />
                 <Text style={{ color: activeAbacusSubMode === 'math' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 13 }}>
-                  Abakusda hisoblash
+                  {extT.mathAbacus}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -3390,7 +3427,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             >
               <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FFF" style={styles.startBtnIcon} />
               <Text style={styles.startExerciseBtnText}>
-                {activeExerciseType === 'abacus' ? (t.startAbacus || "ABAKUSNI OCHISH") : t.startExercise}
+                {activeExerciseType === 'abacus' ? (extT.startAbacus || "ABAKUSNI OCHISH") : t.startExercise}
               </Text>
             </TouchableOpacity>
           )}
@@ -5559,7 +5596,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {/* Skin Sub-categories filter horizontal scroll */}
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 10 }}>
                     {[
-                      { id: 'all', label: t.all || 'Umumiy', icon: 'border-all' },
+                      { id: 'all', label: invT.filterAll || t.all || 'Umumiy', icon: 'border-all' },
                       { id: 'headwear', label: t.shopHeadwear || 'Bosh kiyim', icon: 'hat-cowboy' },
                       { id: 'top', label: t.shopTop || 'Ustki kiyim', icon: 'tshirt' },
                       { id: 'tshirt', label: t.shopTshirt || 'Futbolka', icon: 'tshirt' },
