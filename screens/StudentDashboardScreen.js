@@ -1005,7 +1005,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
     
     // Register user to receive targeted messages
     if (user.customId) {
-      socket.emit('register', user.customId);
+      socket.on('connect', () => {
+        socket.emit('register', user.customId);
+      });
+      // Continuous registration to ensure socket ownership is not lost
+      const regInterval = setInterval(() => {
+        if (socket && socket.connected) {
+          socket.emit('register', user.customId);
+        }
+      }, 2000);
+      socket.regInterval = regInterval;
     }
 
     socket.on('user_updated', (data) => {
@@ -1103,7 +1112,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
     });
 
     return () => {
-      socket.disconnect();
+      if (socket) {
+        if (socket.regInterval) clearInterval(socket.regInterval);
+        socket.disconnect();
+      }
     };
   }, [user?.id, user?.customId]);
 
