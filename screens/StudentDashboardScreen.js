@@ -2358,7 +2358,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <ScrollView style={{ flex: 1 }} nestedScrollEnabled={true} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: 275, paddingBottom: 170, paddingHorizontal: 20 }}>
         
         {activeExerciseType === 'abacus' && (
-          <View style={{ marginTop: 10 }}>
+          <View style={{ marginTop: 30 }}>
             {/* SUB-MODE TOGGLE BUTTONS */}
             <View style={{ flexDirection: 'row', gap: 10, marginBottom: 15 }}>
               <TouchableOpacity
