@@ -1827,8 +1827,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
       saveActivityLog("1v1 Boshma-bosh o'yin", 0);
       if (activeBattleMode === 'dost') {
         navigation.navigate('FriendInvite', { language });
-      } else if (activeBattleMode === 'oddiy') {
-        navigation.navigate('BattleSettings', { battleMode: activeBattleMode, language: language });
       } else {
         navigation.navigate('BattleMatchmaking', { battleMode: activeBattleMode, language: language });
       }
