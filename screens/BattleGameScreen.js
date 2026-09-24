@@ -533,6 +533,7 @@ export default function BattleGameScreen({ navigation, route }) {
             </View>
           ))}
         </View>
+      ) : (
         <View style={{ height: 60 }} />
       )}
 
