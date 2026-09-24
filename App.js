@@ -124,7 +124,33 @@ export default function App() {
       }
       if (status === 'ACCEPTED') {
         if (navigationRef.isReady()) {
-          navigationRef.navigate('BattleMatchmaking', { mode: 'dost', inviteData: battleInvite });
+          // Format inviteData to match StudentDashboardScreen formatting
+          let parsedSenderSkins = {};
+          let parsedSenderAvatar = null;
+          let parsedSenderName = null;
+          try {
+            if (battleInvite.message) {
+              const msgObj = typeof battleInvite.message === 'string' ? JSON.parse(battleInvite.message) : battleInvite.message;
+              parsedSenderSkins = msgObj.senderEquippedSkins || {};
+              parsedSenderAvatar = msgObj.senderAvatar || null;
+              parsedSenderName = msgObj.senderName || null;
+            }
+          } catch(e) {}
+          if (!parsedSenderSkins || Object.keys(parsedSenderSkins).length === 0) {
+            parsedSenderSkins = battleInvite.senderEquippedSkins || {};
+          }
+          if (!parsedSenderAvatar) parsedSenderAvatar = battleInvite.senderAvatar || null;
+          if (!parsedSenderName) parsedSenderName = battleInvite.senderName || null;
+
+          navigationRef.navigate('FriendBattleLobby', { 
+            language: 'uz', // Defaulting to uz, user can change it later
+            inviteData: {
+              ...battleInvite,
+              senderEquippedSkins: parsedSenderSkins,
+              senderAvatar: parsedSenderAvatar,
+              senderName: parsedSenderName,
+            }
+          });
         }
       }
       try {
@@ -224,7 +250,16 @@ export default function App() {
     });
 
     socket.on('receive_battle_invite', (data) => {
-      setBattleInvite(data);
+      let enrichedData = { ...data };
+      try {
+        if (enrichedData.message) {
+          const msgObj = typeof enrichedData.message === 'string' ? JSON.parse(enrichedData.message) : enrichedData.message;
+          if (msgObj.senderAvatar) enrichedData.senderAvatar = msgObj.senderAvatar;
+          if (msgObj.senderName) enrichedData.senderName = msgObj.senderName;
+          if (msgObj.senderEquippedSkins) enrichedData.senderEquippedSkins = msgObj.senderEquippedSkins;
+        }
+      } catch (e) {}
+      setBattleInvite(enrichedData);
       setInviteTimer(30);
       Animated.spring(inviteSlideAnim, { toValue: 50, useNativeDriver: true, tension: 50, friction: 8 }).start();
     });
@@ -535,7 +570,20 @@ export default function App() {
             </View>
             <View style={styles.topAlertBody}>
               <Image 
-                source={battleInvite?.senderAvatar ? { uri: battleInvite.senderAvatar } : require('./assets/avatar_alex.jpg')} 
+                source={
+                  battleInvite?.senderAvatar?.startsWith('http') 
+                  ? { uri: battleInvite.senderAvatar } 
+                  : (
+                    battleInvite?.senderAvatar?.toLowerCase().includes('maks') ? require('./assets/avatar_maks.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('david') ? require('./assets/avatar_david.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('kevin') ? require('./assets/avatar_kevin.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('lily') ? require('./assets/avatar_lily.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('maya') ? require('./assets/avatar_maya.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('emma') ? require('./assets/avatar_emma.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('sophia') ? require('./assets/avatar_sophia.jpg') :
+                    require('./assets/avatar_alex.jpg')
+                  )
+                } 
                 style={styles.topAlertAvatar} 
               />
               <View style={styles.topAlertUserInfo}>
