@@ -20,12 +20,10 @@ const TRANSLATIONS = {
 
 export default function BattleMatchmakingScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const { language = 'uz', examplesCount = 10, operation = 'oddiy', speed = 1, digits = 1, battleMode = 'oddiy' } = route.params || {};
+  const { language = 'uz', examplesCount = 10, operation = 'oddiy', speed = 1, digits = 1, battleMode = 'oddiy', myCharPath, myEquippedSkins, dynamicCharacters = [] } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
 
   const [userData, setUserData] = useState(null);
-  const [myEquippedSkins, setMyEquippedSkins] = useState(null);
-  const [dynamicCharacters, setDynamicCharacters] = useState([]);
   const [opponent, setOpponent] = useState(null);
   
   const socketRef = useRef(null);
@@ -55,15 +53,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
     async function loadData() {
       try {
         const uDataStr = await AsyncStorage.getItem('user_data');
-        const equippedStr = await AsyncStorage.getItem('equipped_skins');
         if (uDataStr) setUserData(JSON.parse(uDataStr));
-        if (equippedStr) setMyEquippedSkins(JSON.parse(equippedStr));
-
-        const charsRes = await fetch(`${API_URL}/inventory-skins`);
-        if (charsRes.ok) {
-          const charsData = await charsRes.json();
-          setDynamicCharacters(charsData.filter(s => s.category === 'personajlar'));
-        }
       } catch (e) {
         console.error(e);
       }
@@ -89,7 +79,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
     return null;
   };
 
-  const myCharPath = useMemo(() => getCharPath(userData?.character), [userData?.character, dynamicCharacters]);
+  // opponentCharPath will still be computed since opponent may have different characters
   const opponentCharPath = useMemo(() => getCharPath(opponent?.character), [opponent?.character, dynamicCharacters]);
 
   useEffect(() => {
@@ -280,12 +270,6 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
         </SafeAreaView>
 
       </ImageBackground>
-      {/* DEBUG BOX */}
-      <View style={{ position: 'absolute', top: 50, left: 10, backgroundColor: 'red', padding: 5, zIndex: 100 }}>
-        <Text style={{ color: 'white', fontSize: 10 }}>Chars len: {dynamicCharacters.length}</Text>
-        <Text style={{ color: 'white', fontSize: 10 }}>myCharPath: {myCharPath ? myCharPath : 'null'}</Text>
-        <Text style={{ color: 'white', fontSize: 10 }}>userData char: {userData?.character}</Text>
-      </View>
     </View>
   );
 }

@@ -1828,7 +1828,20 @@ export default function StudentDashboardScreen({ navigation, route }) {
       if (activeBattleMode === 'dost') {
         navigation.navigate('FriendInvite', { language });
       } else {
-        navigation.navigate('BattleMatchmaking', { battleMode: activeBattleMode, language: language });
+        navigation.navigate('BattleMatchmaking', { 
+          battleMode: activeBattleMode, 
+          language: language,
+          myCharPath: activeCharacterPath,
+          dynamicCharacters: dynamicCharacters,
+          myEquippedSkins: {
+            accessories: equippedAccessory,
+            tops: equippedTop,
+            headwears: equippedHeadwear,
+            pants: equippedPants,
+            shoes: equippedShoes,
+            backpacks: equippedBackpack
+          }
+        });
       }
     }
   };
