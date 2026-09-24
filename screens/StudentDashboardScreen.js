@@ -895,10 +895,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
         }
         if (sn.type === 'BATTLE_STARTED' && !dismissedNotifsRef.current.has(sn.id)) {
           dismissedNotifsRef.current.add(sn.id);
-          try {
-            const parsedData = typeof sn.message === 'string' ? JSON.parse(sn.message) : sn.message;
-            DeviceEventEmitter.emit('global_start_friend_battle', parsedData);
-          } catch(e) {}
+          const isRecent = sn.createdAt ? (Date.now() - new Date(sn.createdAt).getTime() < 30000) : true;
+          if (isRecent) {
+            try {
+              const parsedData = typeof sn.message === 'string' ? JSON.parse(sn.message) : sn.message;
+              DeviceEventEmitter.emit('global_start_friend_battle', parsedData);
+            } catch(e) {}
+          }
           // Mark as read in backend
           fetch(`${API_URL}/notifications/${sn.id}/status`, {
             method: 'PATCH',

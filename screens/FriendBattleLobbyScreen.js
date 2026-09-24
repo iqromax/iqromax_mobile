@@ -276,7 +276,11 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
           const res = await fetch(`${API_URL}/notifications/${encodeURIComponent(cleanId)}`);
           if (res.ok) {
             const notifs = await res.json();
-            const startedNotif = notifs.find(n => n.type === 'BATTLE_STARTED');
+            const startedNotif = notifs.find(n => 
+               n.type === 'BATTLE_STARTED' && 
+               n.senderId === route.params?.inviteData?.senderId &&
+               (Date.now() - new Date(n.createdAt).getTime() < 30000)
+            );
             if (startedNotif) {
               // Mark as read so we don't trigger it again
               fetch(`${API_URL}/notifications/${startedNotif.id}/status`, {
