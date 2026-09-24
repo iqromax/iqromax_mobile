@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions, Platform, DeviceEventEmitter } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { DASHBOARD_TRANSLATIONS } from './StudentDashboardScreen';
@@ -326,7 +326,16 @@ export default function BattleSettingsScreen({ navigation, route }) {
         <TouchableOpacity 
           style={styles.startBtn}
           onPress={async () => {
-            if (route.params?.isFriendBattle && route.params?.targetId) {
+            if (route.params?.isFromMatchmaking) {
+              const settings = {
+                examplesCount: selectedExamples,
+                operation: selectedOperation,
+                speed: selectedSpeed,
+                digits: selectedDigits
+              };
+              DeviceEventEmitter.emit('trigger_start_host_battle', settings);
+              navigation.goBack();
+            } else if (route.params?.isFriendBattle && route.params?.targetId) {
               const settings = {
                 examplesCount: selectedExamples,
                 operation: selectedOperation,
@@ -344,7 +353,6 @@ export default function BattleSettingsScreen({ navigation, route }) {
                 ? route.params.foundUser.character 
                 : (route.params.foundUser?.avatar?.uri ? route.params.foundUser.avatar.uri : route.params.foundUser?.avatar);
 
-              // Load host's own equipped skins from AsyncStorage
               let myEquippedSkins = {};
               try {
                 const userDataStr = await AsyncStorage.getItem('user_data');
