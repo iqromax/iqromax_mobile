@@ -192,41 +192,6 @@ export default function BattleSettingsScreen({ navigation, route }) {
               <Text style={styles.opsCardDesc} numberOfLines={2}>{t.opsAralashDesc}</Text>
             </TouchableOpacity>
 
-            {/* Kopaytirish */}
-            <TouchableOpacity 
-              style={[styles.opsCard, selectedOperation === 'kopaytirish' && styles.opsCardSelected]}
-              onPress={() => setSelectedOperation('kopaytirish')}
-              activeOpacity={0.8}
-            >
-              {selectedOperation === 'kopaytirish' && (
-                <View style={styles.opsCheckmarkBadge}>
-                  <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
-                </View>
-              )}
-              <View style={styles.opsCardIconWrapper}>
-                <MaterialCommunityIcons name="close" size={28} color={selectedOperation === 'kopaytirish' ? '#A855F7' : '#9CA3AF'} />
-              </View>
-              <Text style={[styles.opsCardTitle, selectedOperation === 'kopaytirish' && styles.opsCardTitleSelected]}>{t.speedKopaytirish || "Ko'paytirish"}</Text>
-              <Text style={styles.opsCardDesc} numberOfLines={2}>{""}</Text>
-            </TouchableOpacity>
-
-            {/* Bolish */}
-            <TouchableOpacity 
-              style={[styles.opsCard, selectedOperation === 'bolish' && styles.opsCardSelected]}
-              onPress={() => setSelectedOperation('bolish')}
-              activeOpacity={0.8}
-            >
-              {selectedOperation === 'bolish' && (
-                <View style={styles.opsCheckmarkBadge}>
-                  <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
-                </View>
-              )}
-              <View style={styles.opsCardIconWrapper}>
-                <MaterialCommunityIcons name="division" size={28} color={selectedOperation === 'bolish' ? '#A855F7' : '#9CA3AF'} />
-              </View>
-              <Text style={[styles.opsCardTitle, selectedOperation === 'bolish' && styles.opsCardTitleSelected]}>{t.speedBolish || "Bo'lish"}</Text>
-              <Text style={styles.opsCardDesc} numberOfLines={2}>{""}</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
