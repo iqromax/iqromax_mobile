@@ -1793,11 +1793,24 @@ app.post('/api/notifications/admin-send', async (req, res) => {
 app.post('/api/notifications/:id/respond', async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, targetName, targetAvatar, targetEquippedSkins } = req.body;
     const updated = await prisma.notification.update({
       where: { id },
       data: { status }
     });
+    
+    if (updated && updated.senderId && updated.type === 'BATTLE_INVITE') {
+      const safeSenderId = updated.senderId.replace(/^#+/, '').trim().toUpperCase();
+      const senderSocketId = onlineUsers.get(safeSenderId);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit('battle_invite_response', {
+          ...updated,
+          targetName,
+          targetAvatar,
+          targetEquippedSkins: targetEquippedSkins || {}
+        });
+      }
+    }
 
     if (updated.type === 'PARENT_INVITE' && status === 'ACCEPTED') {
       try {
@@ -2334,7 +2347,7 @@ io.on('connection', (socket) => {
           data: {
             type: 'BATTLE_STARTED',
             senderId: data.senderId,
-            targetId: data.targetId,
+            userId: data.targetId,
             message: JSON.stringify(data)
           }
         });
@@ -2393,6 +2406,37 @@ io.on('connection', (socket) => {
     }
   });
 });
+// ----------------------------------------------------
+
+app.post('/api/battle/start', async (req, res) => {
+  try {
+    const data = req.body;
+    if (data.targetId) {
+      try {
+        await prisma.notification.create({
+          data: {
+            type: 'BATTLE_STARTED',
+            senderId: data.senderId,
+            userId: data.targetId,
+            message: JSON.stringify(data)
+          }
+        });
+      } catch(e) {
+        console.error("Battle start db save error:", e);
+      }
+      
+      const safeId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
+      const targetSocketId = onlineUsers.get(safeId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('start_friend_battle', data);
+      }
+    }
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ----------------------------------------------------
 
 server.listen(PORT, () => {

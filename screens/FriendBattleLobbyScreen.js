@@ -208,6 +208,26 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
   useEffect(() => {
     let socket;
     if (userData) {
+      // Use REST API for 100% reliable delivery + database fallback
+      const sendStartAPI = async () => {
+        if (route.params?.isHost && route.params?.targetId && !hasEmitted.current) {
+           hasEmitted.current = true;
+           const payload = {
+               targetId: route.params.targetId,
+               senderId: userData.customId,
+               questions: route.params.questions,
+               ...route.params.settings
+           };
+           try {
+             await fetch(`${API_URL}/battle/start`, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify(payload)
+             });
+           } catch(e) {}
+        }
+      };
+
       socket = io(SOCKET_URL, { 
         path: '/api/socket.io',
         transports: ['websocket'] 
@@ -225,35 +245,13 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
         socket.regInterval = regInterval;
         
         if (route.params?.isHost && route.params?.targetId && !hasEmitted.current) {
-           hasEmitted.current = true;
-           const payload = {
-               targetId: route.params.targetId,
-               senderId: userData.customId,
-               questions: route.params.questions,
-               ...route.params.settings
-           };
-           socket.emit('start_friend_battle', payload);
-           // Fallback retries to ensure delivery even if target was momentarily disconnected
-           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 1000);
-           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 2500);
+           sendStartAPI();
         }
       });
 
-      // Just in case it was already connected synchronously
       if (socket.connected) {
         socket.emit('register', userData.customId);
-        if (route.params?.isHost && route.params?.targetId && !hasEmitted.current) {
-           hasEmitted.current = true;
-           const payload = {
-               targetId: route.params.targetId,
-               senderId: userData.customId,
-               questions: route.params.questions,
-               ...route.params.settings
-           };
-           socket.emit('start_friend_battle', payload);
-           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 1000);
-           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 2500);
-        }
+        sendStartAPI();
       }
 
       socket.on('start_friend_battle', (settingsData) => {
