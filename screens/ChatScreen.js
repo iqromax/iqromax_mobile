@@ -21,6 +21,20 @@ const getAvatarByName = (name) => {
   return require('../assets/avatar_maks.png');
 };
 
+const CHAT_TRANSLATIONS = {
+  uz: { typeMessage: "Xabar yozing..." },
+  en: { typeMessage: "Type a message..." },
+  ru: { typeMessage: "Напишите сообщение..." },
+  ar: { typeMessage: "اكتب رسالة..." },
+  tr: { typeMessage: "Mesaj yazın..." },
+  zh: { typeMessage: "输入消息..." },
+  ky: { typeMessage: "Билдирүү жазыңыз..." },
+  kk: { typeMessage: "Хабарлама жазыңыз..." },
+  tg: { typeMessage: "Паём нависед..." },
+  hi: { typeMessage: "एक संदेश टाइप करें..." },
+  ur: { typeMessage: "ایک پیغام ٹائپ کریں..." }
+};
+
 export default function ChatScreen({ route, navigation }) {
   const insets = (typeof useSafeAreaInsets === 'function') ? useSafeAreaInsets() : { top: 40, bottom: 20, left: 0, right: 0 };
   const { friend } = route?.params || {};
@@ -197,7 +211,7 @@ export default function ChatScreen({ route, navigation }) {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Xabar yozing..."
+            placeholder={CHAT_TRANSLATIONS[currentUser?.language]?.typeMessage || CHAT_TRANSLATIONS['uz'].typeMessage}
             placeholderTextColor="#6B7280"
             value={inputText}
             onChangeText={setInputText}

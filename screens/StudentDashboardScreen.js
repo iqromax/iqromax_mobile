@@ -177,6 +177,20 @@ const getAvatarByName = (name) => {
   return require('../assets/avatar_maks.png');
 };
 
+export const FRIENDS_MODAL_TRANSLATIONS = {
+  uz: { title: "Do'stlar", requests: "Arizalar", chats: "Chatlar", noRequests: "Arizalar yo'q", noChats: "Sizda hali suhbatlar yo'q", chatStarted: "Chat boshlandi", noFriends: "Do'stlaringiz yo'q" },
+  en: { title: "Friends", requests: "Requests", chats: "Chats", noRequests: "No requests", noChats: "You have no chats yet", chatStarted: "Chat started", noFriends: "You have no friends" },
+  ru: { title: "Друзья", requests: "Заявки", chats: "Чаты", noRequests: "Нет заявок", noChats: "У вас еще нет чатов", chatStarted: "Чат начался", noFriends: "У вас нет друзей" },
+  ar: { title: "أصدقاء", requests: "طلبات", chats: "دردشات", noRequests: "لا توجد طلبات", noChats: "ليس لديك محادثات بعد", chatStarted: "بدأت الدردشة", noFriends: "ليس لديك أصدقاء" },
+  tr: { title: "Arkadaşlar", requests: "İstekler", chats: "Sohbetler", noRequests: "İstek yok", noChats: "Henüz sohbetiniz yok", chatStarted: "Sohbet başladı", noFriends: "Arkadaşınız yok" },
+  zh: { title: "朋友", requests: "请求", chats: "聊天", noRequests: "没有请求", noChats: "您还没有聊天", chatStarted: "聊天开始", noFriends: "您没有朋友" },
+  ky: { title: "Достор", requests: "Сурамдар", chats: "Чаттар", noRequests: "Сурамдар жок", noChats: "Сизде азырынча баарлашуулар жок", chatStarted: "Чат башталды", noFriends: "Сизде достор жок" },
+  kk: { title: "Достар", requests: "Сұраныстар", chats: "Чаттар", noRequests: "Сұраныстар жоқ", noChats: "Сізде әзірге сұхбаттар жоқ", chatStarted: "Чат басталды", noFriends: "Сізде достар жоқ" },
+  tg: { title: "Дӯстон", requests: "Дархостҳо", chats: "Чатҳо", noRequests: "Дархостҳо нест", noChats: "Шумо ҳанӯз сӯҳбат надоред", chatStarted: "Чат оғоз ёфт", noFriends: "Шумо дӯст надоред" },
+  hi: { title: "मित्र", requests: "अनुरोध", chats: "चैट", noRequests: "कोई अनुरोध नहीं", noChats: "आपकी कोई चैट नहीं है", chatStarted: "चैट शुरू हुई", noFriends: "आपके कोई मित्र नहीं हैं" },
+  ur: { title: "دوست", requests: "درخواستیں", chats: "چیٹس", noRequests: "کوئی درخواست نہیں", noChats: "آپ کی کوئی چیٹ نہیں ہے", chatStarted: "چیٹ شروع ہوئی", noFriends: "آپ کے کوئی دوست نہیں ہیں" }
+};
+
 export default function StudentDashboardScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { energy: currentEnergy, addEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
@@ -708,6 +722,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const ext = EXERCISE_TYPES_TRANSLATIONS[language] || EXERCISE_TYPES_TRANSLATIONS['en'];
   const coinText = COIN_TRANSLATIONS[language] || COIN_TRANSLATIONS['en'];
   const energyText = ENERGY_TRANSLATIONS[language] || ENERGY_TRANSLATIONS['uz'];
+  const fmt = FRIENDS_MODAL_TRANSLATIONS[language] || FRIENDS_MODAL_TRANSLATIONS['uz'];
 
   const yutuqScrollRef = useRef(null);
   const [currentYutuqIndex, setCurrentYutuqIndex] = useState(0);
@@ -6179,7 +6194,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         <TouchableOpacity onPress={() => setIsFriendsModalOpen(false)}>
                 <MaterialCommunityIcons name="close" size={28} color="#FFF" />
               </TouchableOpacity>
-              <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>Do'stlar</Text>
+              <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold' }}>{fmt.title}</Text>
               <View style={{ width: 28 }} />
             </View>
 
@@ -6190,7 +6205,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 onPress={() => setFriendsActiveTab('friends')}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ color: friendsActiveTab === 'friends' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Do'stlar</Text>
+                  <Text style={{ color: friendsActiveTab === 'friends' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>{fmt.title}</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
@@ -6201,7 +6216,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ color: friendsActiveTab === 'requests' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Arizalar</Text>
+                  <Text style={{ color: friendsActiveTab === 'requests' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>{fmt.requests}</Text>
                   {hasUnreadFriendRequests && (
                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
                   )}
@@ -6215,7 +6230,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ color: friendsActiveTab === 'chats' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Chatlar</Text>
+                  <Text style={{ color: friendsActiveTab === 'chats' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>{fmt.chats}</Text>
                   {Object.keys(unreadChatFriends).length > 0 && (
                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
                   )}
@@ -6250,7 +6265,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   </View>
                 )) : (
                   <View style={{ alignItems: 'center', marginTop: 40 }}>
-                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium' }}>Arizalar yo'q</Text>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium' }}>{fmt.noRequests}</Text>
                   </View>
                 )
               )}
@@ -6260,7 +6275,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   {recentChats.length === 0 ? (
                     <View style={{ alignItems: 'center', marginTop: 40 }}>
                       <MaterialCommunityIcons name="chat-outline" size={64} color="rgba(255,255,255,0.1)" />
-                      <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', marginTop: 16 }}>Sizda hali suhbatlar yo'q</Text>
+                      <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', marginTop: 16 }}>{fmt.noChats}</Text>
                     </View>
                   ) : (
                     recentChats.map((chat) => {
@@ -6296,7 +6311,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                             </View>
                           </View>
                           <Text style={{ color: hasUnread ? '#FFF' : '#9CA3AF', fontSize: 13, fontFamily: hasUnread ? 'Inter_600SemiBold' : 'Inter_400Regular', marginTop: 4 }} numberOfLines={1}>
-                            {chat.lastMessage ? chat.lastMessage.content : 'Chat boshlandi'}
+                            {chat.lastMessage ? chat.lastMessage.content : fmt.chatStarted}
                           </Text>
                         </View>
                         <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.2)" />
@@ -6344,7 +6359,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   </View>
                 )) : (
                   <View style={{ alignItems: 'center', marginTop: 40 }}>
-                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium' }}>Do'stlaringiz yo'q</Text>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium' }}>{fmt.noFriends}</Text>
                   </View>
                 )
               )}
