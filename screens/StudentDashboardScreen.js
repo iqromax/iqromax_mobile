@@ -2399,7 +2399,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
 
             {/* 3D Model Container */}
-            <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }], width: '100%', height: '100%' }} pointerEvents="auto">
+            <View style={{ position: 'absolute', top: Platform.OS === 'android' ? -30 : 0, bottom: 0, left: 0, right: 0, zIndex: 1, transform: [{ translateX: -20 }, { translateY: 30 }], width: '100%', height: '100%' }} pointerEvents="auto">
               {activeTab === 'home' && (
                 <Character3DViewer characterPath={activeCharacterPath} accessoryPath={equippedAccessory} topsPath={equippedTop} headwearPath={equippedHeadwear} pantsPath={equippedPants} shoesPath={equippedShoes} backpackPath={equippedBackpack} isBackView={activeTab === 'inventory' && kiyimKategoriya === 'ryukzak'} categoryName={kiyimKategoriya} />
               )}
