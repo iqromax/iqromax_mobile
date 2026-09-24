@@ -501,6 +501,8 @@ export default function BattleGameScreen({ navigation, route }) {
         )}
       </View>
 
+      <View style={{ flex: 1 }} />
+
       {waitingForOpponent ? (
         <View style={styles.waitingContainer}>
            <MaterialCommunityIcons name="timer-sand" size={64} color="#f97316" style={{ marginBottom: 20 }} />
@@ -782,8 +784,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     position: 'relative',
     paddingTop: 12,
-    flex: 1,
-    justifyContent: 'center',
   },
   tabBadge: {
     position: 'absolute',

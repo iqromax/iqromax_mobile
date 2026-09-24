@@ -44,7 +44,7 @@ export default function BattleSettingsScreen({ navigation, route }) {
         <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView nestedScrollEnabled={true} style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
         {/* NUMBER OF EXAMPLES SECTION */}
         <View style={styles.examplesContainer}>
@@ -70,6 +70,7 @@ export default function BattleSettingsScreen({ navigation, route }) {
           ) : (
             <View style={styles.examplesPickerExpanded}>
               <ScrollView 
+                nestedScrollEnabled={true}
                 style={styles.examplesPickerScroll} 
                 showsVerticalScrollIndicator={false}
                 snapToInterval={40}
@@ -255,6 +256,7 @@ export default function BattleSettingsScreen({ navigation, route }) {
           ) : (
             <View style={styles.examplesPickerExpanded}>
               <ScrollView 
+                nestedScrollEnabled={true}
                 style={styles.examplesPickerScroll} 
                 showsVerticalScrollIndicator={false}
                 snapToInterval={40}
@@ -315,6 +317,7 @@ export default function BattleSettingsScreen({ navigation, route }) {
           ) : (
             <View style={styles.examplesPickerExpanded}>
               <ScrollView 
+                nestedScrollEnabled={true}
                 style={styles.examplesPickerScroll} 
                 showsVerticalScrollIndicator={false}
                 snapToInterval={40}
