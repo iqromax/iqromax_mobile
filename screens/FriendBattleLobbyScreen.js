@@ -219,12 +219,17 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
                ...route.params.settings
            };
            try {
-             await fetch(`${API_URL}/battle/start`, {
+             alert("Sender calling API for target: " + route.params.targetId);
+             const r = await fetch(`${API_URL}/battle/start`, {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(payload)
              });
-           } catch(e) {}
+             const j = await r.json();
+             alert("Sender API response: " + JSON.stringify(j));
+           } catch(e) {
+             alert("Sender API error: " + e.message);
+           }
         }
       };
 
@@ -276,6 +281,7 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
             const notifs = await res.json();
             const startedNotif = notifs.find(n => n.type === 'BATTLE_STARTED');
             if (startedNotif) {
+              alert("Target polling found BATTLE_STARTED!");
               // Mark as read so we don't trigger it again
               fetch(`${API_URL}/notifications/${startedNotif.id}/status`, {
                 method: 'PATCH',
@@ -294,9 +300,16 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
                 setCountdownVal(1);
                 clearInterval(pollingInterval);
               }
+            } else if (notifs.length > 0) {
+              // Just to see what notifs it DOES find
+              console.log("TARGET FOUND OTHER NOTIFS: ", notifs.map(n => n.type));
             }
+          } else {
+             console.log("Polling res not ok", res.status);
           }
-        } catch(e) {}
+        } catch(e) {
+             console.log("Polling fetch error:", e.message);
+        }
       }, 3000);
     }
 
