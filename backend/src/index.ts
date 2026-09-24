@@ -2292,6 +2292,7 @@ const PORT = process.env.PORT || 5000;
 
 // --- SOCKET LOGIC ---
 const onlineUsers = new Map<string, string>(); // customId -> socket.id
+const randomMatchmakingQueue: any[] = []; // Queue for Oddiy Battle
 
 io.on('connection', (socket) => {
   console.log('New socket connected:', socket.id);
@@ -2432,6 +2433,39 @@ io.on('connection', (socket) => {
         onlineUsers.delete(key);
         break;
       }
+    }
+    
+    // Remove from random matchmaking queue if disconnects
+    const queueIndex = randomMatchmakingQueue.findIndex(p => p.socketId === socket.id);
+    if (queueIndex !== -1) {
+      randomMatchmakingQueue.splice(queueIndex, 1);
+    }
+  });
+
+  // Random Matchmaking Events
+  socket.on('join_random_battle', (data) => {
+    // data: { customId, name, avatar, equippedSkins, level, rating, settings }
+    const existingIndex = randomMatchmakingQueue.findIndex(p => p.socketId === socket.id || p.customId === data.customId);
+    if (existingIndex === -1) {
+      randomMatchmakingQueue.push({ ...data, socketId: socket.id });
+    }
+
+    // Try to match immediately if there are at least 2 players
+    if (randomMatchmakingQueue.length >= 2) {
+      const player1 = randomMatchmakingQueue.shift();
+      const player2 = randomMatchmakingQueue.shift();
+
+      if (player1 && player2) {
+        io.to(player1.socketId).emit('random_match_found', { opponent: player2, isHost: true });
+        io.to(player2.socketId).emit('random_match_found', { opponent: player1, isHost: false });
+      }
+    }
+  });
+
+  socket.on('leave_random_battle', () => {
+    const index = randomMatchmakingQueue.findIndex(p => p.socketId === socket.id);
+    if (index !== -1) {
+      randomMatchmakingQueue.splice(index, 1);
     }
   });
 });
