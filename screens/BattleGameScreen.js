@@ -332,13 +332,17 @@ export default function BattleGameScreen({ navigation, route }) {
         DeviceEventEmitter.emit('send_battle_answer', {
           targetId: route.params.targetId,
           senderId: userData?.customId || '',
+          senderName: userData?.name || 'Player',
+          senderAvatar: userData?.character || null,
+          level: userLevel,
+          xp: userData?.xp || 0,
           ...resultObj
         });
       } else {
         navigation.replace('BattleResult', {
            correct: finalCorrect,
            incorrect: finalIncorrect,
-           avgTime: avgTime.toFixed(1),
+           avgTime: timeForThisQuestion.toFixed(1),
            maxCombo: finalMaxCombo,
            xp: xp,
            coins: coins,
@@ -349,8 +353,15 @@ export default function BattleGameScreen({ navigation, route }) {
            oppName: t.opponent,
            actualAnswer: currentQ.answer,
            userAnswer: inputValue,
+           oppAnswer: isCorrect ? (parseInt(inputValue) + 1).toString() : currentQ.answer.toString(),
            examplesCount,
-           language
+           language,
+           oppData: {
+             name: 'Bot',
+             avatar: 'Alex',
+             level: userLevel,
+             xp: 500
+           }
         });
       }
     }
@@ -377,22 +388,28 @@ export default function BattleGameScreen({ navigation, route }) {
        navigation.replace('BattleResult', {
          correct: myResult.correct,
          incorrect: myResult.incorrect,
-         avgTime: myResult.avgTime,
+         avgTime: myResult.time.toFixed(1),
          maxCombo: myResult.maxCombo,
          xp: myResult.xp,
          coins: myResult.coins,
          oppCorrect: opponentResult.correct,
          oppIncorrect: opponentResult.incorrect,
-         oppAvgTime: opponentResult.avgTime,
+         oppAvgTime: opponentResult.time.toFixed(1),
          oppMaxCombo: opponentResult.maxCombo,
-         oppName: t.opponent,
          actualAnswer: questions[currentQIndex]?.answer,
          userAnswer: myResult.answer,
+         oppAnswer: opponentResult.answer,
          examplesCount,
          language,
          isFriendBattle: true,
          win: iWin,
-         lose: oppWin
+         lose: oppWin,
+         oppData: {
+           name: opponentResult.senderName || t.opponent,
+           avatar: opponentResult.senderAvatar || null,
+           level: opponentResult.level || 1,
+           xp: opponentResult.xp || 0
+         }
        });
     }
   }, [myResult, opponentResult, navigation]);

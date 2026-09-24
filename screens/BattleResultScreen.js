@@ -388,18 +388,13 @@ export default function BattleResultScreen({ navigation, route }) {
 
           <View style={styles.cardStats}>
             <View style={styles.statBox}>
-              <MaterialCommunityIcons name="check-circle-outline" size={20} color="#22c55e" />
-              <Text style={styles.statBoxLabel}>{t.correctAnswers}</Text>
-              <Text style={styles.statBoxValue}>{correct}</Text>
-            </View>
-            <View style={styles.statBox}>
-              <MaterialCommunityIcons name="close-circle-outline" size={20} color="#ef4444" />
-              <Text style={styles.statBoxLabel}>{t.wrongAnswers}</Text>
-              <Text style={styles.statBoxValue}>{incorrect}</Text>
+              <MaterialCommunityIcons name="pencil" size={20} color="#22c55e" />
+              <Text style={styles.statBoxLabel}>{t.yourAnswer || 'Javobi'}</Text>
+              <Text style={styles.statBoxValue}>{route.params?.userAnswer || '?'}</Text>
             </View>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="timer-outline" size={20} color="#9ca3af" />
-              <Text style={styles.statBoxLabel}>{t.avgTime}</Text>
+              <Text style={styles.statBoxLabel}>{'Vaqti'}</Text>
               <Text style={styles.statBoxValue}>{avgTime}s</Text>
             </View>
             <View style={styles.statBox}>
@@ -429,16 +424,16 @@ export default function BattleResultScreen({ navigation, route }) {
           <View style={styles.cardHeader}>
             <View style={styles.cardInfo}>
               <View style={[styles.avatarGlow, { borderColor: oppColor }]}>
-                <Image source={require('../assets/avatar_david.jpg')} style={styles.avatarImage} />
+                <Image source={getAvatarImg({ character: route.params?.oppData?.avatar })} style={styles.avatarImage} />
               </View>
               <View style={styles.cardDetails}>
                 <View style={styles.nameRow}>
                   <Text style={styles.flag}>🇺🇿</Text>
-                  <Text style={styles.playerName}>{t.opponent}</Text>
+                  <Text style={styles.playerName}>{route.params?.oppData?.name || t.opponent}</Text>
                 </View>
                 <View style={styles.trophyRow}>
                   <MaterialCommunityIcons name="star" size={12} color="#facc15" />
-                  <Text style={styles.trophyText}>{t.level} 10</Text>
+                  <Text style={styles.trophyText}>{t.level} {route.params?.oppData?.level || 1}</Text>
                 </View>
                 <View style={styles.healthBarTrack}>
                   <View style={[styles.healthBarFill, { backgroundColor: oppColor, width: '100%' }]} />
@@ -452,18 +447,13 @@ export default function BattleResultScreen({ navigation, route }) {
 
           <View style={styles.cardStats}>
             <View style={styles.statBox}>
-              <MaterialCommunityIcons name="check-circle-outline" size={20} color="#22c55e" />
-              <Text style={styles.statBoxLabel}>{t.correctAnswers}</Text>
-              <Text style={styles.statBoxValue}>{oppCorrect}</Text>
-            </View>
-            <View style={styles.statBox}>
-              <MaterialCommunityIcons name="close-circle-outline" size={20} color="#ef4444" />
-              <Text style={styles.statBoxLabel}>{t.wrongAnswers}</Text>
-              <Text style={styles.statBoxValue}>{oppIncorrect}</Text>
+              <MaterialCommunityIcons name="pencil" size={20} color="#22c55e" />
+              <Text style={styles.statBoxLabel}>{t.yourAnswer || 'Javobi'}</Text>
+              <Text style={styles.statBoxValue}>{route.params?.oppAnswer || '?'}</Text>
             </View>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="timer-outline" size={20} color="#9ca3af" />
-              <Text style={styles.statBoxLabel}>{t.avgTime}</Text>
+              <Text style={styles.statBoxLabel}>{'Vaqti'}</Text>
               <Text style={styles.statBoxValue}>{oppAvgTime}s</Text>
             </View>
             <View style={styles.statBox}>
@@ -480,17 +470,6 @@ export default function BattleResultScreen({ navigation, route }) {
 
         {/* Actions - Pushed to bottom */}
         <View style={styles.bottomActions}>
-          <View style={styles.actionButtonsRow}>
-          <TouchableOpacity style={styles.chatBtn}>
-            <MaterialCommunityIcons name="chat-processing-outline" size={18} color="#d1d5db" />
-            <Text style={styles.chatBtnText}>{t.chat}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.playAgainBtn} onPress={() => navigation.navigate('BattleSettings', { language })}>
-            <Text style={styles.playAgainBtnText}>{t.playAgain}</Text>
-            <MaterialCommunityIcons name="refresh" size={18} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
           <TouchableOpacity style={styles.homeBtn} onPress={() => navigation.navigate('StudentDashboard', { initialTab: 'exercise', initialExerciseType: 'battle', language, updatedTimestamp: Date.now() })}>
             <MaterialCommunityIcons name="home" size={20} color="#fff" />
             <Text style={styles.homeBtnText}>{t.home}</Text>
