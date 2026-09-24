@@ -148,7 +148,8 @@ export default function BattleResultScreen({ navigation, route }) {
   } = route.params || {};
 
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
-  const isWin = route.params?.win !== undefined ? route.params.win : (correct >= oppCorrect);
+  const isWin = route.params?.win !== undefined ? route.params.win : (correct > oppCorrect);
+  const oppIsWin = route.params?.lose !== undefined ? route.params.lose : (oppCorrect > correct);
 
   useEffect(() => {
     async function fetchUserAndSaveXP() {
@@ -322,7 +323,7 @@ export default function BattleResultScreen({ navigation, route }) {
   const losePhrase = useRef(t.losePhrases[Math.floor(Math.random() * t.losePhrases.length)]).current;
 
   const playerFeedback = isWin ? winPhrase : losePhrase;
-  const oppFeedback = !isWin ? winPhrase : losePhrase;
+  const oppFeedback = oppIsWin ? winPhrase : losePhrase;
   
   const winnerColor = '#0ea5e9';
   const winnerBorder = 'rgba(14, 165, 233, 0.4)';
@@ -332,15 +333,24 @@ export default function BattleResultScreen({ navigation, route }) {
   const playerColor = isWin ? winnerColor : loserColor;
   const playerBorder = isWin ? winnerBorder : loserBorder;
 
-  const oppColor = !isWin ? winnerColor : loserColor;
-  const oppBorder = !isWin ? winnerBorder : loserBorder;
+  const oppColor = oppIsWin ? winnerColor : loserColor;
+  const oppBorder = oppIsWin ? winnerBorder : loserBorder;
   
   const userScore = (correct * 100) - (incorrect * 20) + (maxCombo * 5);
   const oppScore = (oppCorrect * 100) - (oppIncorrect * 20) + (oppMaxCombo * 5);
 
-  const mainColor = isWin ? '#f59e0b' : '#ef4444'; // Orange for Victory, Red for Defeat
-  const mainTitle = isWin ? t.winTitle : t.loseTitle;
-  const subTitle = isWin ? t.winSub : t.loseSub;
+  let mainColor = isWin ? '#f59e0b' : '#ef4444'; // Orange for Victory, Red for Defeat
+  let mainTitle = isWin ? t.winTitle : t.loseTitle;
+  let subTitle = isWin ? t.winSub : t.loseSub;
+
+  if (!isWin && !oppIsWin && correct === 0 && oppCorrect === 0) {
+      mainTitle = t.loseTitle || "MAG'LUBIYAT";
+      subTitle = "Ikkala tomon ham noto'g'ri javob berdi!";
+  } else if (!isWin && !oppIsWin) {
+      mainTitle = "DURANG";
+      mainColor = '#0ea5e9';
+      subTitle = "Ikkala tomon ham teng natija ko'rsatdi";
+  }
 
   return (
     <SafeAreaView style={styles.container}>
