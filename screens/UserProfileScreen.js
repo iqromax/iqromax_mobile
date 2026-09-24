@@ -34,8 +34,8 @@ const getRankInfo = (xp) => {
 };
 
 export default function UserProfileScreen({ route, navigation }) {
-  const { user, selectedUser, selectedUserSkins } = route.params;
-  const t = translations[user?.language] || translations['uz'];
+  const { user, selectedUser, selectedUserSkins, language } = route.params;
+  const t = translations[language] || translations[user?.language] || translations['uz'];
   const [activeTab, setActiveTab] = useState('statistika');
 
   const [alertVisible, setAlertVisible] = useState(false);

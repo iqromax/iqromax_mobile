@@ -1899,10 +1899,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
       if (skinsJson) {
         userSkins = JSON.parse(skinsJson);
       }
-      navigation.navigate('UserProfile', { user, selectedUser: userData, selectedUserSkins: userSkins });
+      navigation.navigate('UserProfile', { user, selectedUser: userData, selectedUserSkins: userSkins, language });
     } catch (e) {
       console.log('Error fetching user skins:', e);
-      navigation.navigate('UserProfile', { user, selectedUser: userData, selectedUserSkins: {} });
+      navigation.navigate('UserProfile', { user, selectedUser: userData, selectedUserSkins: {}, language });
     }
   };
 
