@@ -200,6 +200,7 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
 
   const [isCountingDown, setIsCountingDown] = useState(false);
   const [countdownVal, setCountdownVal] = useState(1);
+  const isCountingDownRef = useRef(false);
   const [battleData, setBattleData] = useState(null);
 
   const hasEmitted = useRef(false);
@@ -217,12 +218,16 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
         
         if (route.params?.isHost && route.params?.targetId && !hasEmitted.current) {
            hasEmitted.current = true;
-           socket.emit('start_friend_battle', {
+           const payload = {
                targetId: route.params.targetId,
                senderId: userData.customId,
                questions: route.params.questions,
                ...route.params.settings
-           });
+           };
+           socket.emit('start_friend_battle', payload);
+           // Fallback retries to ensure delivery even if target was momentarily disconnected
+           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 1000);
+           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 2500);
         }
       });
 
@@ -231,19 +236,25 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
         socket.emit('register', userData.customId);
         if (route.params?.isHost && route.params?.targetId && !hasEmitted.current) {
            hasEmitted.current = true;
-           socket.emit('start_friend_battle', {
+           const payload = {
                targetId: route.params.targetId,
                senderId: userData.customId,
                questions: route.params.questions,
                ...route.params.settings
-           });
+           };
+           socket.emit('start_friend_battle', payload);
+           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 1000);
+           setTimeout(() => { socket.emit('start_friend_battle', payload); }, 2500);
         }
       }
 
       socket.on('start_friend_battle', (settingsData) => {
-        setBattleData(settingsData);
-        setIsCountingDown(true);
-        setCountdownVal(1);
+        if (!isCountingDownRef.current) {
+          isCountingDownRef.current = true;
+          setBattleData(settingsData);
+          setIsCountingDown(true);
+          setCountdownVal(1);
+        }
       });
     }
 
@@ -255,9 +266,12 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
   useEffect(() => {
     const sub = DeviceEventEmitter.addListener('global_start_friend_battle', (settingsData) => {
       if (!route.params?.isHost) {
-        setBattleData(settingsData);
-        setIsCountingDown(true);
-        setCountdownVal(1);
+        if (!isCountingDownRef.current) {
+          isCountingDownRef.current = true;
+          setBattleData(settingsData);
+          setIsCountingDown(true);
+          setCountdownVal(1);
+        }
       }
     });
     return () => sub.remove();
@@ -265,8 +279,11 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
 
   useEffect(() => {
     if (route.params?.isHost) {
-      setIsCountingDown(true);
-      setCountdownVal(1);
+      if (!isCountingDownRef.current) {
+        isCountingDownRef.current = true;
+        setIsCountingDown(true);
+        setCountdownVal(1);
+      }
     }
   }, [route.params?.isHost]);
 
