@@ -3795,10 +3795,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
                             style={{ marginLeft: 12, backgroundColor: 'rgba(192, 132, 252, 0.1)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
                             onPress={(e) => {
                               e.stopPropagation();
-                              handleSendFriendRequest(item.customId);
+                              openUserProfile(item);
                             }}
                           >
-                            <Feather name="user-plus" size={15} color="#C084FC" />
+                            <Feather name="eye" size={15} color="#C084FC" />
                           </TouchableOpacity>
                         )}
                       </View>
