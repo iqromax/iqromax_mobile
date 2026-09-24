@@ -72,9 +72,9 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
   }, []);
 
   const getCharPath = (charName) => {
-    if (!charName) return null;
-    let avatarIndex = 0;
-    const lowerName = charName.toLowerCase();
+    let safeName = charName || 'maks';
+    let avatarIndex = 1;
+    const lowerName = safeName.toLowerCase();
     const boysChars = ["alex", "maks", "david", "kevin"];
     const girlsChars = ["lily", "maya", "emma", "sophia"];
     if (boysChars.includes(lowerName)) {
@@ -207,7 +207,11 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
                   backpackPath={myEquippedSkins?.backpacks}
                   disableRotation={true}
                 />
-              ) : null}
+              ) : (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                  <Image source={getAvatarImg(userData)} style={{ width: 120, height: 120, borderRadius: 60, borderWidth: 2, borderColor: 'rgba(255,255,255,0.2)' }} />
+                </View>
+              )}
             </View>
             <View style={styles.playerCard}>
               <Image source={getAvatarImg(userData)} style={styles.playerAvatar} />
