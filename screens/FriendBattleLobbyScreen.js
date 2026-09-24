@@ -218,13 +218,19 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
                questions: route.params.questions,
                ...route.params.settings
            };
+           // DEBUG SENDER
+           alert("SENDER STARTING BATTLE API FOR TARGET: " + route.params.targetId);
            try {
              await fetch(`${API_URL}/battle/start`, {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(payload)
              });
-           } catch(e) {}
+           } catch(e) {
+             alert("API FETCH ERROR: " + e.message);
+           }
+        } else if (route.params?.isHost && !route.params?.targetId) {
+           alert("CRITICAL ERROR: targetId is missing in Sender's params!");
         }
       };
 
@@ -264,7 +270,44 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
       });
     }
 
+    // --- FALLBACK POLLING FOR TARGET ---
+    let pollingInterval;
+    if (!route.params?.isHost && userData) {
+      pollingInterval = setInterval(async () => {
+        try {
+          let cleanId = String(userData.customId).trim();
+          if (!cleanId.startsWith('#')) cleanId = '#' + cleanId;
+          const res = await fetch(`${API_URL}/notifications/${encodeURIComponent(cleanId)}`);
+          if (res.ok) {
+            const notifs = await res.json();
+            const startedNotif = notifs.find(n => n.type === 'BATTLE_STARTED');
+            if (startedNotif) {
+              // Mark as read so we don't trigger it again
+              fetch(`${API_URL}/notifications/${startedNotif.id}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'READ' })
+              }).catch(()=>{});
+
+              let parsedData = startedNotif.message;
+              if (typeof parsedData === 'string') {
+                 try { parsedData = JSON.parse(parsedData); } catch(e){}
+              }
+              if (!isCountingDownRef.current) {
+                isCountingDownRef.current = true;
+                setBattleData(parsedData);
+                setIsCountingDown(true);
+                setCountdownVal(1);
+                clearInterval(pollingInterval);
+              }
+            }
+          }
+        } catch(e) {}
+      }, 3000);
+    }
+
     return () => {
+      if (pollingInterval) clearInterval(pollingInterval);
       if (socket) {
         if (socket.regInterval) clearInterval(socket.regInterval);
         socket.disconnect();
