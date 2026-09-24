@@ -191,6 +191,218 @@ export const FRIENDS_MODAL_TRANSLATIONS = {
   ur: { title: "دوست", requests: "درخواستیں", chats: "چیٹس", noRequests: "کوئی درخواست نہیں", noChats: "آپ کی کوئی چیٹ نہیں ہے", chatStarted: "چیٹ شروع ہوئی", noFriends: "آپ کے کوئی دوست نہیں ہیں" }
 };
 
+export const INVENTORY_TRANSLATIONS = {
+  uz: {
+    charsView: "Personajlarni ko'rish va almashtirish",
+    charsClose: "Yopish uchun bosing",
+    skinsView: "Kiyimlar va aksessuarlarni ko'rish",
+    headwearTitle: "BOSH KIYIM",
+    headwearDesc: "Personajingiz uchun bosh kiyim tanlang",
+    topwearTitle: "USTKI KIYIM",
+    topwearDesc: "Personajingiz uslubini tanlang",
+    tshirtTitle: "FUTBOLKA",
+    tshirtDesc: "Futbolka va qisqa yengli kiyimlar tanlang",
+    pantsTitle: "SHIM",
+    pantsDesc: "O'zingizga mos shim tanlang",
+    shoesTitle: "OYOQ KIYIM",
+    shoesDesc: "Qulay poyabzal tanlang",
+    accessoryTitle: "AKSESSUAR",
+    accessoryDesc: "Personajingizni bezang",
+    backpackTitle: "RYUKZAK",
+    backpackDesc: "Orqa sumkangizni tanlang"
+  },
+  en: {
+    charsView: "View and change characters",
+    charsClose: "Tap to close",
+    skinsView: "View clothes and accessories",
+    headwearTitle: "HEADWEAR",
+    headwearDesc: "Choose headwear for your character",
+    topwearTitle: "TOP WEAR",
+    topwearDesc: "Choose your character's style",
+    tshirtTitle: "T-SHIRT",
+    tshirtDesc: "Choose t-shirts and short sleeves",
+    pantsTitle: "PANTS",
+    pantsDesc: "Choose pants that suit you",
+    shoesTitle: "SHOES",
+    shoesDesc: "Choose comfortable shoes",
+    accessoryTitle: "ACCESSORY",
+    accessoryDesc: "Decorate your character",
+    backpackTitle: "BACKPACK",
+    backpackDesc: "Choose your backpack"
+  },
+  ru: {
+    charsView: "Просмотр и смена персонажей",
+    charsClose: "Нажмите, чтобы закрыть",
+    skinsView: "Просмотр одежды и аксессуаров",
+    headwearTitle: "ГОЛОВНОЙ УБОР",
+    headwearDesc: "Выберите головной убор для вашего персонажа",
+    topwearTitle: "ВЕРХНЯЯ ОДЕЖДА",
+    topwearDesc: "Выберите стиль вашего персонажа",
+    tshirtTitle: "ФУТБОЛКА",
+    tshirtDesc: "Выберите футболки и одежду с коротким рукавом",
+    pantsTitle: "ШТАНЫ",
+    pantsDesc: "Выберите подходящие штаны",
+    shoesTitle: "ОБУВЬ",
+    shoesDesc: "Выберите удобную обувь",
+    accessoryTitle: "АКСЕССУАР",
+    accessoryDesc: "Украсьте своего персонажа",
+    backpackTitle: "РЮКЗАК",
+    backpackDesc: "Выберите рюкзак"
+  },
+  ar: {
+    charsView: "عرض وتغيير الشخصيات",
+    charsClose: "اضغط للإغلاق",
+    skinsView: "عرض الملابس والإكسسوارات",
+    headwearTitle: "قبعات",
+    headwearDesc: "اختر قبعة لشخصيتك",
+    topwearTitle: "ملابس علوية",
+    topwearDesc: "اختر أسلوب شخصيتك",
+    tshirtTitle: "قميص",
+    tshirtDesc: "اختر القمصان والأكمام القصيرة",
+    pantsTitle: "سراويل",
+    pantsDesc: "اختر سراويل تناسبك",
+    shoesTitle: "أحذية",
+    shoesDesc: "اختر أحذية مريحة",
+    accessoryTitle: "إكسسوار",
+    accessoryDesc: "زيّن شخصيتك",
+    backpackTitle: "حقيبة ظهر",
+    backpackDesc: "اختر حقيبة الظهر الخاصة بك"
+  },
+  tr: {
+    charsView: "Karakterleri görüntüle ve değiştir",
+    charsClose: "Kapatmak için dokun",
+    skinsView: "Kıyafet ve aksesuarları görüntüle",
+    headwearTitle: "ŞAPKA",
+    headwearDesc: "Karakteriniz için şapka seçin",
+    topwearTitle: "ÜST GİYİM",
+    topwearDesc: "Karakterinizin tarzını seçin",
+    tshirtTitle: "TİŞÖRT",
+    tshirtDesc: "Tişört ve kısa kollu kıyafetler seçin",
+    pantsTitle: "PANTOLON",
+    pantsDesc: "Size uygun pantolon seçin",
+    shoesTitle: "AYAKKABI",
+    shoesDesc: "Rahat ayakkabılar seçin",
+    accessoryTitle: "AKSESUAR",
+    accessoryDesc: "Karakterinizi süsleyin",
+    backpackTitle: "SIRT ÇANTASI",
+    backpackDesc: "Sırt çantanızı seçin"
+  },
+  zh: {
+    charsView: "查看和更换角色",
+    charsClose: "点击关闭",
+    skinsView: "查看服装和配饰",
+    headwearTitle: "头饰",
+    headwearDesc: "为您的角色选择头饰",
+    topwearTitle: "上衣",
+    topwearDesc: "选择角色的风格",
+    tshirtTitle: "T恤",
+    tshirtDesc: "选择T恤和短袖",
+    pantsTitle: "裤子",
+    pantsDesc: "选择适合的裤子",
+    shoesTitle: "鞋子",
+    shoesDesc: "选择舒适的鞋子",
+    accessoryTitle: "配饰",
+    accessoryDesc: "装饰您的角色",
+    backpackTitle: "背包",
+    backpackDesc: "选择背包"
+  },
+  ky: {
+    charsView: "Персонаждарды көрүү жана алмаштыруу",
+    charsClose: "Жабуу үчүн басыңыз",
+    skinsView: "Кийимдерди жана аксессуарларды көрүү",
+    headwearTitle: "БАШ КИЙИМ",
+    headwearDesc: "Персонажыңыз үчүн баш кийим тандаңыз",
+    topwearTitle: "ҮСТҮҢКҮ КИЙИМ",
+    topwearDesc: "Персонажыңыздын стилин тандаңыз",
+    tshirtTitle: "ФУТБОЛКА",
+    tshirtDesc: "Футболка жана кыска жеңдүү кийимдерди тандаңыз",
+    pantsTitle: "ШЫМ",
+    pantsDesc: "Өзүңүзгө ылайыктуу шым тандаңыз",
+    shoesTitle: "БУТ КИЙИМ",
+    shoesDesc: "Ыңгайлуу бут кийим тандаңыз",
+    accessoryTitle: "АКСЕССУАР",
+    accessoryDesc: "Персонажыңызды кооздоңуз",
+    backpackTitle: "РЮКЗАК",
+    backpackDesc: "Рюкзагыңызды тандаңыз"
+  },
+  kk: {
+    charsView: "Кейіпкерлерді көру және ауыстыру",
+    charsClose: "Жабу үшін басыңыз",
+    skinsView: "Киімдер мен аксессуарларды көру",
+    headwearTitle: "БАС КИІМ",
+    headwearDesc: "Кейіпкеріңізге бас киім таңдаңыз",
+    topwearTitle: "ЖОҒАРҒЫ КИІМ",
+    topwearDesc: "Кейіпкеріңіздің стилін таңдаңыз",
+    tshirtTitle: "ФУТБОЛКА",
+    tshirtDesc: "Футболка мен қысқа жеңді киімдер таңдаңыз",
+    pantsTitle: "ШАЛБАР",
+    pantsDesc: "Өзіңізге сәйкес шалбар таңдаңыз",
+    shoesTitle: "АЯҚ КИІМ",
+    shoesDesc: "Ыңғайлы аяқ киім таңдаңыз",
+    accessoryTitle: "АКСЕССУАР",
+    accessoryDesc: "Кейіпкеріңізді безендіріңіз",
+    backpackTitle: "РЮКЗАК",
+    backpackDesc: "Рюкзагыңызды таңдаңыз"
+  },
+  tg: {
+    charsView: "Дидан ва иваз кардани персонажҳо",
+    charsClose: "Барои пӯшидан пахш кунед",
+    skinsView: "Дидани либос ва лавозимот",
+    headwearTitle: "САРПУШ",
+    headwearDesc: "Барои персонажи худ сарпӯш интихоб кунед",
+    topwearTitle: "ЛИБОСИ БОЛОӢ",
+    topwearDesc: "Услуби персонажи худро интихоб кунед",
+    tshirtTitle: "ФУТБОЛКА",
+    tshirtDesc: "Футболка ва либосҳои остин кӯтоҳ интихоб кунед",
+    pantsTitle: "ШИМ",
+    pantsDesc: "Барои худ шими мувофиқ интихоб кунед",
+    shoesTitle: "ПОЯФЗОЛ",
+    shoesDesc: "Пояфзоли бароҳат интихоб кунед",
+    accessoryTitle: "ЛАВОЗИМОТ",
+    accessoryDesc: "Персонажи худро оро диҳед",
+    backpackTitle: "ҶУЗВДОН",
+    backpackDesc: "Ҷузвдони худро интихоб кунед"
+  },
+  hi: {
+    charsView: "पात्रों को देखें और बदलें",
+    charsClose: "बंद करने के लिए टैप करें",
+    skinsView: "कपड़े और सामान देखें",
+    headwearTitle: "टोपी",
+    headwearDesc: "अपने पात्र के लिए टोपी चुनें",
+    topwearTitle: "ऊपरी कपड़े",
+    topwearDesc: "अपने पात्र की शैली चुनें",
+    tshirtTitle: "टी-शर्ट",
+    tshirtDesc: "टी-शर्ट और आधी बांह वाले कपड़े चुनें",
+    pantsTitle: "पैंट",
+    pantsDesc: "अपने लिए उपयुक्त पैंट चुनें",
+    shoesTitle: "जूते",
+    shoesDesc: "आरामदायक जूते चुनें",
+    accessoryTitle: "सामान",
+    accessoryDesc: "अपने पात्र को सजाएं",
+    backpackTitle: "बैकपैक",
+    backpackDesc: "अपना बैकपैक चुनें"
+  },
+  ur: {
+    charsView: "کرداروں کو دیکھیں اور تبدیل کریں",
+    charsClose: "بند کرنے کے لیے تھپتھپائیں",
+    skinsView: "کپڑے اور لوازمات دیکھیں",
+    headwearTitle: "ٹوپی",
+    headwearDesc: "اپنے کردار کے لیے ٹوپی کا انتخاب کریں",
+    topwearTitle: "اوپری لباس",
+    topwearDesc: "اپنے کردار کا انداز منتخب کریں",
+    tshirtTitle: "ٹی شرٹ",
+    tshirtDesc: "ٹی شرٹ اور آدھی آستین والے کپڑے منتخب کریں",
+    pantsTitle: "پتلون",
+    pantsDesc: "اپنے لیے موزوں پتلون منتخب کریں",
+    shoesTitle: "جوتے",
+    shoesDesc: "آرام دہ جوتے منتخب کریں",
+    accessoryTitle: "لوازمات",
+    accessoryDesc: "اپنے کردار کو سجائیں",
+    backpackTitle: "بیک پیک",
+    backpackDesc: "اپنا بیک پیک منتخب کریں"
+  }
+};
+
 export default function StudentDashboardScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { energy: currentEnergy, addEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
@@ -723,6 +935,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const coinText = COIN_TRANSLATIONS[language] || COIN_TRANSLATIONS['en'];
   const energyText = ENERGY_TRANSLATIONS[language] || ENERGY_TRANSLATIONS['uz'];
   const fmt = FRIENDS_MODAL_TRANSLATIONS[language] || FRIENDS_MODAL_TRANSLATIONS['uz'];
+  const invT = INVENTORY_TRANSLATIONS[language] || INVENTORY_TRANSLATIONS['uz'];
 
   const yutuqScrollRef = useRef(null);
   const [currentYutuqIndex, setCurrentYutuqIndex] = useState(0);
@@ -1559,13 +1772,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const renderKiyimScreen = () => {
     const headerTexts = {
-      'bosh_kiyim': { title: 'BOSH KIYIM', subtitle: 'Personajingiz uchun bosh kiyim tanlang' },
-      'ustki_kiyim': { title: 'USTKI KIYIM', subtitle: 'Personajingiz uslubini tanlang' },
-      'futbolka': { title: 'FUTBOLKA', subtitle: 'Futbolka va qisqa yengli kiyimlar tanlang' },
-      'shim': { title: 'SHIM', subtitle: 'O\'zingizga mos shim tanlang' },
-      'oyoq_kiyim': { title: 'OYOQ KIYIM', subtitle: 'Qulay poyabzal tanlang' },
-      'aksessuar': { title: 'AKSESSUAR', subtitle: 'Personajingizni bezang' },
-      'ryukzak': { title: 'RYUKZAK', subtitle: 'Orqa sumkangizni tanlang' }
+      'bosh_kiyim': { title: invT.headwearTitle, subtitle: invT.headwearDesc },
+      'ustki_kiyim': { title: invT.topwearTitle, subtitle: invT.topwearDesc },
+      'futbolka': { title: invT.tshirtTitle, subtitle: invT.tshirtDesc },
+      'shim': { title: invT.pantsTitle, subtitle: invT.pantsDesc },
+      'oyoq_kiyim': { title: invT.shoesTitle, subtitle: invT.shoesDesc },
+      'aksessuar': { title: invT.accessoryTitle, subtitle: invT.accessoryDesc },
+      'ryukzak': { title: invT.backpackTitle, subtitle: invT.backpackDesc }
     };
     const currentHeader = headerTexts[kiyimKategoriya] || headerTexts['ustki_kiyim'];
 
@@ -1587,13 +1800,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
             {/* Left Column: Vertical Categories */}
             <View style={{ width: 95, justifyContent: 'flex-start', gap: 6 }}>
               {[
-                { key: 'bosh_kiyim', label: 'BOSH KIYIM', icon: 'crown' },
-                { key: 'ustki_kiyim', label: 'USTKI KIYIM', icon: 'tshirt-crew' },
-                { key: 'futbolka', label: 'FUTBOLKA', icon: 'tshirt-v' },
-                { key: 'shim', label: 'SHIM', icon: 'human-handsdown' },
-                { key: 'oyoq_kiyim', label: 'OYOQ KIYIM', icon: 'shoe-sneaker' },
-                { key: 'aksessuar', label: 'AKSESSUAR', icon: 'glasses' },
-                { key: 'ryukzak', label: 'RYUKZAK', icon: 'bag-personal' },
+                { key: 'bosh_kiyim', label: invT.headwearTitle, icon: 'crown' },
+                { key: 'ustki_kiyim', label: invT.topwearTitle, icon: 'tshirt-crew' },
+                { key: 'futbolka', label: invT.tshirtTitle, icon: 'tshirt-v' },
+                { key: 'shim', label: invT.pantsTitle, icon: 'human-handsdown' },
+                { key: 'oyoq_kiyim', label: invT.shoesTitle, icon: 'shoe-sneaker' },
+                { key: 'aksessuar', label: invT.accessoryTitle, icon: 'glasses' },
+                { key: 'ryukzak', label: invT.backpackTitle, icon: 'bag-personal' },
               ].map((item) => {
                 const isActive = kiyimKategoriya === item.key;
                 return (
@@ -3265,16 +3478,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Ionicons name="information-circle-outline" size={14} color="#9CA3AF" />
                 </View>
 
-                {/* Right Absolute Overlay: Equipped items stack */}
-                <View style={{ position: 'absolute', top: 15, right: 15, gap: 8, zIndex: 3 }}>
-                  {/* Avatar card */}
-                  <View style={{ width: 68, height: 60, borderRadius: 10, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                    <View style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
-                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_700Bold', fontSize: 7, marginBottom: 2 }}>AVATAR</Text>
-                    <Image source={selectedAvatarObj ? selectedAvatarObj.img : require('../assets/opponent_1.png')} style={{ width: 22, height: 22, borderRadius: 11 }} />
-                    <Text style={{ color: '#10B981', fontFamily: 'Inter_500Medium', fontSize: 7, marginTop: 2 }}>Taqilgan</Text>
-                  </View>
-                </View>
+                {/* Right Absolute Overlay: Equipped items stack (Removed per user request) */}
+
 
                 {/* Bottom Left Absolute Overlay: Level Progress */}
                 <View style={{ position: 'absolute', bottom: 15, left: 15, backgroundColor: 'rgba(10, 15, 30, 0.75)', borderWidth: 1, borderColor: '#1E3A8A', borderRadius: 12, padding: 8, width: 120, zIndex: 3 }}>
@@ -3327,7 +3532,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       {t.characters || 'PERSONAJLAR'}
                     </Text>
                     <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }}>
-                      {isPersonajOpen ? "Yopish uchun bosing" : "Personajlarni ko'rish va almashtirish"}
+                      {isPersonajOpen ? invT.charsClose : invT.charsView}
                     </Text>
                   </View>
                 </View>
@@ -3449,7 +3654,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     {t.invSkins || 'SKINLAR'}
                   </Text>
                   <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 10, marginTop: 2 }} numberOfLines={1}>
-                    {isSkinlarOpen ? "Yopish uchun bosing" : "Kiyimlar va aksessuarlarni ko'rish"}
+                    {isSkinlarOpen ? invT.charsClose : invT.skinsView}
                   </Text>
                 </View>
               </View>
@@ -3481,13 +3686,13 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     };
 
                     return [
-                      { keyId: 'bosh_kiyim',  label: t.shopHeadwear || 'Bosh kiyim', icon: 'crown',           color: '#EC4899', bg: 'rgba(236,72,153,0.1)',  border: 'rgba(236,72,153,0.35)', count: getCountStr('bosh_kiyim') },
-                      { keyId: 'ustki_kiyim', label: t.invTopWear || 'Ustki kiyim',  icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: getCountStr('ustki_kiyim') },
-                      { keyId: 'futbolka', label: t.invFutbolka || 'Futbolka',  icon: 'tshirt-v',     color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.35)',  count: getCountStr('futbolka') },
-                      { keyId: 'shim',        label: t.invPants || 'Shim',           icon: 'human-handsdown', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.35)',  count: getCountStr('shim') },
-                      { keyId: 'oyoq_kiyim',  label: t.invShoes || 'Oyoq kiyim',     icon: 'shoe-sneaker',    color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.35)', count: getCountStr('oyoq_kiyim') },
-                      { keyId: 'aksessuar',   label: t.invAccessories || 'Aksessuarlar', icon: 'glasses',     color: '#EAB308', bg: 'rgba(234,179,8,0.1)',   border: 'rgba(234,179,8,0.35)',  count: getCountStr('aksessuar') },
-                      { keyId: 'ryukzak',     label: t.invBackpacks || 'Ryukzaklar', icon: 'bag-personal',    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.35)', count: getCountStr('ryukzak') },
+                      { keyId: 'bosh_kiyim',  label: invT.headwearTitle, icon: 'crown',           color: '#EC4899', bg: 'rgba(236,72,153,0.1)',  border: 'rgba(236,72,153,0.35)', count: getCountStr('bosh_kiyim') },
+                      { keyId: 'ustki_kiyim', label: invT.topwearTitle,  icon: 'tshirt-crew',     color: '#D97706', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.35)',  count: getCountStr('ustki_kiyim') },
+                      { keyId: 'futbolka', label: invT.tshirtTitle,  icon: 'tshirt-v',     color: '#EF4444', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.35)',  count: getCountStr('futbolka') },
+                      { keyId: 'shim',        label: invT.pantsTitle,           icon: 'human-handsdown', color: '#06B6D4', bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.35)',  count: getCountStr('shim') },
+                      { keyId: 'oyoq_kiyim',  label: invT.shoesTitle,     icon: 'shoe-sneaker',    color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.35)', count: getCountStr('oyoq_kiyim') },
+                      { keyId: 'aksessuar',   label: invT.accessoryTitle, icon: 'glasses',     color: '#EAB308', bg: 'rgba(234,179,8,0.1)',   border: 'rgba(234,179,8,0.35)',  count: getCountStr('aksessuar') },
+                      { keyId: 'ryukzak',     label: invT.backpackTitle, icon: 'bag-personal',    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.35)', count: getCountStr('ryukzak') },
                     ].map((item, i) => (
                       <TouchableOpacity
                         key={i}
