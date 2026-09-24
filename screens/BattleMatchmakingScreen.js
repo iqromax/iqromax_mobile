@@ -222,7 +222,11 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
                       shoesPath={opponent.equippedSkins?.shoes}
                       backpackPath={opponent.equippedSkins?.backpacks}
                     />
-                  ) : null}
+                  ) : (
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                      <Image source={getAvatarImg(opponent)} style={{ width: 120, height: 120, borderRadius: 60, borderWidth: 2, borderColor: 'rgba(255,255,255,0.2)' }} />
+                    </View>
+                  )}
                 </View>
                 <View style={styles.playerCard}>
                   <Image source={getAvatarImg(opponent)} style={styles.playerAvatar} />
