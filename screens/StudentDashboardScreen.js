@@ -885,8 +885,25 @@ export default function StudentDashboardScreen({ navigation, route }) {
       
       const merged = [...localList];
       serverList.forEach(sn => {
-        if (!merged.some(ln => ln.id === sn.id) && !dismissedNotifsRef.current.has(sn.id)) {
+        if (sn.type === 'BATTLE_STARTED' && !dismissedNotifsRef.current.has(sn.id)) {
+          dismissedNotifsRef.current.add(sn.id);
+          try {
+            const parsedData = typeof sn.message === 'string' ? JSON.parse(sn.message) : sn.message;
+            DeviceEventEmitter.emit('global_start_friend_battle', parsedData);
+          } catch(e) {}
+          // Mark as read in backend
+          fetch(`${API_URL}/notifications/${sn.id}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'READ' })
+          }).catch(()=>{});
+        } else if (!merged.some(ln => ln.id === sn.id) && !dismissedNotifsRef.current.has(sn.id)) {
           merged.push(sn);
+          // If it's a battle invite, we can also emit it globally just in case socket missed it
+          if (sn.type === 'BATTLE_INVITE' && !sn.isFallbackEmitted) {
+             sn.isFallbackEmitted = true;
+             DeviceEventEmitter.emit('global_receive_battle_invite', sn);
+          }
         }
       });
       setNotificationsList(merged);

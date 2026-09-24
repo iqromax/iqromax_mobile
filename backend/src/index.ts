@@ -2325,9 +2325,21 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('start_friend_battle', (data) => {
+  socket.on('start_friend_battle', async (data) => {
     console.log('Starting friend battle for target:', data.targetId);
     if (data.targetId) {
+      try {
+        // Create a notification for fallback polling
+        await prisma.notification.create({
+          data: {
+            type: 'BATTLE_STARTED',
+            senderId: data.senderId,
+            targetId: data.targetId,
+            message: JSON.stringify(data)
+          }
+        });
+      } catch(e) {}
+      
       const safeId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
       const targetSocketId = onlineUsers.get(safeId);
       if (targetSocketId) {
