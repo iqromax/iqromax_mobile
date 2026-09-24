@@ -1041,6 +1041,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
       DeviceEventEmitter.emit('global_receive_battle_invite', data);
     });
 
+    socket.on('battle_invite_response', (data) => {
+      DeviceEventEmitter.emit('global_battle_invite_response', data);
+    });
+
     socket.on('user_xp_updated', async (data) => {
       if (user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase()) {
         setUser(prev => ({ ...prev, xp: data.xp }));

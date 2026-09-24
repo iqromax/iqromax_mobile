@@ -10,6 +10,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   ActivityIndicator,
+  DeviceEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -250,31 +251,16 @@ const FriendInviteScreen = ({ navigation, route }) => {
   }, []);
 
   React.useEffect(() => {
-    let socket;
-    const connectSocket = async () => {
-      try {
-        const userDataStr = await AsyncStorage.getItem('user_data');
-        if (userDataStr) {
-          const userData = JSON.parse(userDataStr);
-          if (userData.customId) {
-            socket = io(SOCKET_URL, { path: '/api/socket.io', transports: ['websocket'] });
-            socket.emit('register', userData.customId);
-            
-            socket.on('battle_invite_response', (data) => {
-              if (data.status === 'ACCEPTED') {
-                setIsInviteAccepted(true);
-                setInviteRespData(data);
-              } else {
-                setIsInviteSent(false); // Enable resend if rejected
-              }
-            });
-          }
-        }
-      } catch (e) {}
-    };
-    connectSocket();
+    const respSub = DeviceEventEmitter.addListener('global_battle_invite_response', (data) => {
+      if (data.status === 'ACCEPTED') {
+        setIsInviteAccepted(true);
+        setInviteRespData(data);
+      } else {
+        setIsInviteSent(false); // Enable resend if rejected
+      }
+    });
     return () => {
-      if (socket) socket.disconnect();
+      respSub.remove();
     };
   }, []);
   
