@@ -162,9 +162,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
         {/* Header */}
         <SafeAreaView style={styles.headerSafeArea} edges={['top']}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
-              <Feather name="arrow-left" size={24} color="#FFF" />
-            </TouchableOpacity>
+            <View style={{ width: 40 }} />
             
             <View style={styles.headerTitleContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -174,9 +172,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
               <Text style={styles.headerSubtitle}>{t.subtitle}</Text>
             </View>
 
-            <TouchableOpacity style={styles.infoButton}>
-              <Feather name="info" size={20} color="#FFF" />
-            </TouchableOpacity>
+            <View style={{ width: 40 }} />
           </View>
         </SafeAreaView>
 
@@ -344,7 +340,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     opacity: 0.99,
     zIndex: 2,
-    transform: [{ scale: 1.15 }, { translateX: -10 }],
+    transform: [{ scale: 1.15 }, { translateX: -10 }, { translateY: -15 }],
   },
   playerCard: {
     backgroundColor: 'rgba(10, 15, 28, 0.7)',
