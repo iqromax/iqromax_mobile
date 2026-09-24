@@ -277,6 +277,7 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
   useEffect(() => {
     const sub = DeviceEventEmitter.addListener('global_start_friend_battle', (settingsData) => {
       if (!route.params?.isHost) {
+        alert("BATTLE STARTED EVENT RECEIVED");
         if (!isCountingDownRef.current) {
           isCountingDownRef.current = true;
           setBattleData(settingsData);
