@@ -2468,6 +2468,14 @@ io.on('connection', (socket) => {
       randomMatchmakingQueue.splice(index, 1);
     }
   });
+
+  socket.on('start_host_battle', (data) => {
+    // data: { opponentSocketId, settings }
+    if (data.opponentSocketId) {
+      io.to(data.opponentSocketId).emit('start_battle_countdown', data.settings);
+      socket.emit('start_battle_countdown', data.settings);
+    }
+  });
 });
 // ----------------------------------------------------
 
