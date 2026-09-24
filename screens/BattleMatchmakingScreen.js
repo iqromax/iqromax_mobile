@@ -195,7 +195,6 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
                   pantsPath={myEquippedSkins?.pants}
                   shoesPath={myEquippedSkins?.shoes}
                   backpackPath={myEquippedSkins?.backpacks}
-                  disableRotation={true}
                 />
               ) : (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -226,7 +225,6 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
                       pantsPath={opponent.equippedSkins?.pants}
                       shoesPath={opponent.equippedSkins?.shoes}
                       backpackPath={opponent.equippedSkins?.backpacks}
-                      disableRotation={true}
                     />
                   ) : null}
                 </View>
@@ -346,6 +344,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     opacity: 0.99,
     zIndex: 2,
+    transform: [{ scale: 1.15 }, { translateX: -10 }],
   },
   playerCard: {
     backgroundColor: 'rgba(10, 15, 28, 0.7)',
