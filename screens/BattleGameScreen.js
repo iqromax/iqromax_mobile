@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from '../src/utils/safeAudio';
-import { Video } from 'expo-av';
+import { WebView } from 'react-native-webview';
+import { VIDEO_DATA } from '../src/utils/videoData';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -473,14 +474,41 @@ export default function BattleGameScreen({ navigation, route }) {
 
         {phase === 'countdown' ? (
           <View style={[styles.gameArea, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316' }]}>
-            <Video
-              source={require('../assets/svetafor.mp4')}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode="cover"
-              shouldPlay
-              isLooping={false}
-              onPlaybackStatusUpdate={(status) => {
-                if (status.didJustFinish) {
+            <WebView
+              originWhitelist={['*']}
+              source={{ html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                  <style>
+                    body { margin: 0; padding: 0; background-color: transparent; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+                    video { width: 100%; height: 100%; object-fit: cover; }
+                  </style>
+                </head>
+                <body>
+                  <video id="v" autoplay playsinline muted>
+                    <source src="${VIDEO_DATA.svetafor}" type="video/mp4" />
+                  </video>
+                  <script>
+                    var vid = document.getElementById("v");
+                    vid.onended = function() {
+                      window.ReactNativeWebView.postMessage("finished");
+                    };
+                    vid.onerror = function() {
+                      window.ReactNativeWebView.postMessage("finished");
+                    };
+                    vid.play().catch(function(){});
+                  </script>
+                </body>
+                </html>
+              `}}
+              style={{ flex: 1, backgroundColor: 'transparent' }}
+              javaScriptEnabled={true}
+              allowsInlineMediaPlayback={true}
+              mediaPlaybackRequiresUserAction={false}
+              onMessage={(event) => {
+                if (event.nativeEvent.data === 'finished') {
                    playSound('tick', sequence[0]?.op || '+');
                    setPhase('flashing');
                    setQuestionStartTime(Date.now());
