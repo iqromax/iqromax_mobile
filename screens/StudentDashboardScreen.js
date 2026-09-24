@@ -883,8 +883,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
         }
       }
       
-      const merged = [...localList];
+      const merged = [...localList].filter(n => n.title !== 'Tizim Xabari' && n.title !== 'System Message');
       serverList.forEach(sn => {
+        if (sn.title === 'Tizim Xabari' || (sn.type === 'ADMIN' && !sn.title) || sn.message?.includes('Xush kelibsiz')) {
+          fetch(`${API_URL}/notifications/${sn.id}/respond`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'READ' })
+          }).catch(() => {});
+          return;
+        }
         if (sn.type === 'BATTLE_STARTED' && !dismissedNotifsRef.current.has(sn.id)) {
           dismissedNotifsRef.current.add(sn.id);
           try {
