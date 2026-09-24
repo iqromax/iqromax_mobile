@@ -279,6 +279,15 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
             </View>
           </View>
 
+          {opponent && isHost && !showLoading && (
+            <TouchableOpacity 
+              style={[styles.cancelBtn, { backgroundColor: '#10B981', marginBottom: 15 }]} 
+              onPress={() => setShowSettingsModal(true)}
+            >
+              <Text style={styles.cancelBtnText}>Battle sozlamalari</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Cancel Button */}
           <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel} activeOpacity={0.8}>
             <Feather name="x" size={20} color="#FFF" style={{ marginRight: 8 }} />
