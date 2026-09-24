@@ -231,8 +231,9 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
                 <View style={styles.playerCard}>
                   <Image source={getAvatarImg(opponent)} style={styles.playerAvatar} />
                   <View style={styles.playerInfo}>
-                    <Text style={styles.playerName} numberOfLines={1}>{opponent.name}</Text>
-                    <Text style={styles.playerId}>{opponent.customId}</Text>
+                    <Text style={styles.playerName} numberOfLines={1}>{opponent.name || 'Ism yoq'}</Text>
+                    <Text style={styles.playerId}>{opponent.customId || 'ID yoq'}</Text>
+                    <Text style={{color: 'red', fontSize: 8}}>{JSON.stringify(opponent).substring(0, 50)}</Text>
                   </View>
                 </View>
               </>
