@@ -509,6 +509,7 @@ export default function BattleGameScreen({ navigation, route }) {
               javaScriptEnabled={true}
               allowsInlineMediaPlayback={true}
               mediaPlaybackRequiresUserAction={false}
+              mixedContentMode="always"
               onMessage={(event) => {
                 if (event.nativeEvent.data === 'finished') {
                    playSound('tick', sequence[0]?.op || '+');
