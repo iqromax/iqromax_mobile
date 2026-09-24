@@ -574,13 +574,13 @@ export default function App() {
                   battleInvite?.senderAvatar?.startsWith('http') 
                   ? { uri: battleInvite.senderAvatar } 
                   : (
-                    battleInvite?.senderAvatar?.toLowerCase().includes('maks') ? require('./assets/avatar_maks.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('maks') ? require('./assets/avatar_maks.png') :
                     battleInvite?.senderAvatar?.toLowerCase().includes('david') ? require('./assets/avatar_david.jpg') :
-                    battleInvite?.senderAvatar?.toLowerCase().includes('kevin') ? require('./assets/avatar_kevin.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('kevin') ? require('./assets/avatar_kevin.png') :
                     battleInvite?.senderAvatar?.toLowerCase().includes('lily') ? require('./assets/avatar_lily.jpg') :
                     battleInvite?.senderAvatar?.toLowerCase().includes('maya') ? require('./assets/avatar_maya.jpg') :
                     battleInvite?.senderAvatar?.toLowerCase().includes('emma') ? require('./assets/avatar_emma.jpg') :
-                    battleInvite?.senderAvatar?.toLowerCase().includes('sophia') ? require('./assets/avatar_sophia.jpg') :
+                    battleInvite?.senderAvatar?.toLowerCase().includes('sophia') ? require('./assets/avatar_sophia.png') :
                     require('./assets/avatar_alex.jpg')
                   )
                 } 
