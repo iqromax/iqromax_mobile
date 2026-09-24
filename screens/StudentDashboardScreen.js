@@ -917,7 +917,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
           }
         }
       });
-      setNotificationsList(merged);
+      setNotificationsList(merged.filter(n => n.type !== 'BATTLE_STARTED'));
     } catch (e) {
       // Silently fall back if storage fails
     }
