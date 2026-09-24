@@ -7821,11 +7821,7 @@ const styles = StyleSheet.create({
   },
   battleModeCardActive: {
     borderColor: '#A855F7',
-    backgroundColor: 'rgba(168, 85, 247, 0.05)',
-    shadowColor: '#A855F7',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    backgroundColor: 'rgba(168, 85, 247, 0.1)',
   },
   battleModeIcon: {
     width: 35,
