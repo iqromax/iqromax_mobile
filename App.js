@@ -1,7 +1,22 @@
 import './src/utils/safeWeakMap';
 import React, { useState, useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
+
+const originalFetch = global.fetch;
+global.fetch = async (url, options = {}) => {
+  if (url && url.toString().includes('iqromax.net')) {
+    options.headers = options.headers || {};
+    if (!options.headers['Accept']) {
+      options.headers['Accept'] = 'application/json, text/plain, */*';
+    }
+    if (Platform.OS === 'ios') {
+      options.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1';
+    }
+  }
+  return originalFetch(url, options);
+};
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking, Platform, LogBox } from 'react-native';
+import { View, Image, ActivityIndicator, Modal, Text, TouchableOpacity, StyleSheet, Animated, DeviceEventEmitter, Linking, LogBox } from 'react-native';
 
 LogBox.ignoreLogs([
   'PushNotificationIOS has been extracted from react-native core',
