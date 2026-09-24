@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from '../src/utils/safeAudio';
+import { Video } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -237,20 +238,6 @@ export default function BattleGameScreen({ navigation, route }) {
     }
   }, [currentQIndex, questions]);
 
-  useEffect(() => {
-    if (phase === 'countdown') {
-      if (startCountdown > 0) {
-        const timer = setTimeout(() => {
-          setStartCountdown(prev => prev - 1);
-        }, 1000);
-        return () => clearTimeout(timer);
-      } else {
-        playSound('tick', sequence[0]?.op || '+');
-        setPhase('flashing');
-        setQuestionStartTime(Date.now());
-      }
-    }
-  }, [phase, startCountdown]);
 
   useEffect(() => {
     let timeout;
@@ -485,11 +472,21 @@ export default function BattleGameScreen({ navigation, route }) {
       <View style={[styles.gameAreaWrapper, { justifyContent: phase === 'input' ? 'flex-end' : 'center', paddingBottom: phase === 'input' ? 20 : 0 }]}>
 
         {phase === 'countdown' ? (
-          <View style={styles.gameArea}>
-            <Text style={{ fontSize: 120, color: '#f97316', fontFamily: 'Inter_800ExtraBold', textShadowColor: 'rgba(249, 115, 22, 0.5)', textShadowRadius: 20 }}>
-              {startCountdown}
-            </Text>
-            <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.getReady}</Text>
+          <View style={[styles.gameArea, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316' }]}>
+            <Video
+              source={require('../assets/svetafor.mp4')}
+              style={{ width: '100%', height: '100%' }}
+              resizeMode="cover"
+              shouldPlay
+              isLooping={false}
+              onPlaybackStatusUpdate={(status) => {
+                if (status.didJustFinish) {
+                   playSound('tick', sequence[0]?.op || '+');
+                   setPhase('flashing');
+                   setQuestionStartTime(Date.now());
+                }
+              }}
+            />
           </View>
         ) : phase === 'flashing' ? (
           <View style={styles.gameArea}>
