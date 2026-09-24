@@ -81,7 +81,8 @@ export function SoundPlayerBridge() {
           try {
             initAudio();
             const buffer = soundBuffers[name];
-            if (buffer && audioCtx) {
+            // Only use AudioContext if it is ACTUALLY running. If suspended, fallback to new Audio()
+            if (buffer && audioCtx && audioCtx.state === 'running') {
               const source = audioCtx.createBufferSource();
               source.buffer = buffer;
               source.playbackRate.value = rate || 1.0;
@@ -90,6 +91,7 @@ export function SoundPlayerBridge() {
               return;
             }
 
+            // Fallback for iOS when AudioContext is suspended due to lack of touch
             const base64 = base64Sounds[name];
             if (base64) {
               const a = new Audio(base64);
