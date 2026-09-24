@@ -148,6 +148,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           operation: settings.operation,
           speed: settings.speed,
           digits: settings.digits,
+          questions: settings.questions,
           language,
           opponentData: opponentRef.current
         });
