@@ -501,8 +501,6 @@ export default function BattleGameScreen({ navigation, route }) {
         )}
       </View>
 
-      <View style={{ flex: 1 }} />
-
       {waitingForOpponent ? (
         <View style={styles.waitingContainer}>
            <MaterialCommunityIcons name="timer-sand" size={64} color="#f97316" style={{ marginBottom: 20 }} />
@@ -535,19 +533,7 @@ export default function BattleGameScreen({ navigation, route }) {
             </View>
           ))}
         </View>
-      ) : (
-        <View style={styles.bottomPanel}>
-          <View style={styles.actionsRow}>
-            <TouchableOpacity style={styles.chatBtn}>
-              <MaterialCommunityIcons name="chat-processing-outline" size={20} color="#d1d5db" />
-              <Text style={styles.chatBtnText}>{t.chat}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.leaveBtn} onPress={() => setIsExitModalVisible(true)}>
-              <MaterialCommunityIcons name="exit-to-app" size={20} color="#ef4444" />
-              <Text style={styles.leaveBtnText}>{t.leaveBtn}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <View style={{ height: 60 }} />
       )}
 
       {/* Exit Modal */}
@@ -581,7 +567,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#050510',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   header: {
     flexDirection: 'row',
@@ -784,6 +769,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     position: 'relative',
     paddingTop: 12,
+    flex: 1,
+    justifyContent: 'flex-start',
   },
   tabBadge: {
     position: 'absolute',
