@@ -327,11 +327,17 @@ export default function BattleSettingsScreen({ navigation, route }) {
           style={styles.startBtn}
           onPress={async () => {
             if (route.params?.isFromMatchmaking) {
+              const { MentalMathGenerator } = require('../src/lib/mathGenerator');
+              const questions = [];
+              for (let i = 0; i < 1; i++) {
+                questions.push(MentalMathGenerator.generate(selectedOperation, selectedDigits, selectedExamples));
+              }
               const settings = {
                 examplesCount: selectedExamples,
                 operation: selectedOperation,
                 speed: selectedSpeed,
-                digits: selectedDigits
+                digits: selectedDigits,
+                questions: questions
               };
               DeviceEventEmitter.emit('trigger_start_host_battle', settings);
               navigation.goBack();

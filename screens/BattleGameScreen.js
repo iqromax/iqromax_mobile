@@ -143,7 +143,7 @@ export default function BattleGameScreen({ navigation, route }) {
           const parsed = JSON.parse(data);
           setUserData(parsed);
           
-          if (route.params?.isFriendBattle) {
+          if (route.params?.targetId) {
             answerSub = DeviceEventEmitter.addListener('global_battle_answer_submitted', (data) => {
                setOpponentResult(data);
             });
@@ -315,7 +315,7 @@ export default function BattleGameScreen({ navigation, route }) {
       const avgTime = (totalTime + timeForThisQuestion) / totalQuestions;
       const finalMaxCombo = isCorrect ? Math.max(newMaxCombo, newCombo) : newMaxCombo;
       
-      if (route.params?.isFriendBattle && route.params?.targetId) {
+      if (route.params?.targetId) {
         const resultObj = {
           correct: finalCorrect,
           incorrect: finalIncorrect,
