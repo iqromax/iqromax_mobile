@@ -280,6 +280,12 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
         </SafeAreaView>
 
       </ImageBackground>
+      {/* DEBUG BOX */}
+      <View style={{ position: 'absolute', top: 50, left: 10, backgroundColor: 'red', padding: 5, zIndex: 100 }}>
+        <Text style={{ color: 'white', fontSize: 10 }}>Chars len: {dynamicCharacters.length}</Text>
+        <Text style={{ color: 'white', fontSize: 10 }}>myCharPath: {myCharPath ? myCharPath : 'null'}</Text>
+        <Text style={{ color: 'white', fontSize: 10 }}>userData char: {userData?.character}</Text>
+      </View>
     </View>
   );
 }
