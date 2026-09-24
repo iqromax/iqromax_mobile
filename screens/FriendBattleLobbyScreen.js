@@ -216,6 +216,14 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
       socket.on('connect', () => {
         socket.emit('register', userData.customId);
         
+        // Continuous registration to fix backend socket overwrite/disconnect race conditions
+        const regInterval = setInterval(() => {
+          if (socket && socket.connected) {
+             socket.emit('register', userData.customId);
+          }
+        }, 1000);
+        socket.regInterval = regInterval;
+        
         if (route.params?.isHost && route.params?.targetId && !hasEmitted.current) {
            hasEmitted.current = true;
            const payload = {
@@ -259,7 +267,10 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
     }
 
     return () => {
-      if (socket) socket.disconnect();
+      if (socket) {
+        if (socket.regInterval) clearInterval(socket.regInterval);
+        socket.disconnect();
+      }
     };
   }, [userData, route.params]);
 
