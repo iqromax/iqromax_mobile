@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Modal, StatusBar, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, Modal, StatusBar, Animated, DeviceEventEmitter } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
@@ -137,6 +137,7 @@ export default function BattleGameScreen({ navigation, route }) {
 
   useEffect(() => {
     let activeSocket = null;
+    let answerSub = null;
     async function fetchUser() {
       try {
         const data = await AsyncStorage.getItem('user_data');
@@ -148,9 +149,10 @@ export default function BattleGameScreen({ navigation, route }) {
             const io = require('socket.io-client');
             const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL || 'https://iqromax-production.up.railway.app';
             activeSocket = io(SOCKET_URL, { path: '/api/socket.io', transports: ['websocket'] });
-            activeSocket.emit('register', parsed.customId);
             
-            activeSocket.on('battle_answer_submitted', (data) => {
+            // Do not emit register here to avoid stealing ownership from StudentDashboardScreen
+            // Instead, we rely on StudentDashboardScreen to receive the event and relay it globally.
+            answerSub = DeviceEventEmitter.addListener('global_battle_answer_submitted', (data) => {
                setOpponentResult(data);
             });
             setSocket(activeSocket);
@@ -161,6 +163,7 @@ export default function BattleGameScreen({ navigation, route }) {
     fetchUser();
     
     return () => {
+      if (answerSub) answerSub.remove();
       if (activeSocket) activeSocket.disconnect();
     }
   }, []);
