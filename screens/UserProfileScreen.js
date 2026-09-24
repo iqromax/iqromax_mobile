@@ -9,6 +9,20 @@ import io from 'socket.io-client';
 
 const { width } = Dimensions.get('window');
 
+const translations = {
+  uz: { title: "REYTING", subtitle: "Eng kuchli matematiklar", quote1: "\"Doim oldinga! 💪\"", streak: "Seriya", accuracy: "Aniqlik", wins: "G'alabalar", totalGames: "Jami o'yinlar", chat: "Chat", pending: "Kutilmoqda", follow: "Follow", levelProgress: "Daraja rivojlanishi", playStyle: "O'yin uslubi", logic: "Mantiq", speed: "Tezlik", strategy: "Strategiya", memory: "Xotira", bestResult: "Eng yaxshi natija", noData: "Ma'lumot yo'q", currentStreak: "Hozirgi seriya", games: "o'yin", record: "Rekord:", quote2: "\"Har kuni biroz yaxshiroq bo'l!\"", gotIt: "Tushunarli", error: "Xatolik", networkError: "Tarmoq xatosi", reqSent: "Do'stlik so'rovi yuborildi!", success: "Muvaffaqiyat" },
+  en: { title: "RANKING", subtitle: "The strongest mathematicians", quote1: "\"Always forward! 💪\"", streak: "Streak", accuracy: "Accuracy", wins: "Victories", totalGames: "Total games", chat: "Chat", pending: "Pending", follow: "Follow", levelProgress: "Level progress", playStyle: "Play style", logic: "Logic", speed: "Speed", strategy: "Strategy", memory: "Memory", bestResult: "Best result", noData: "No data", currentStreak: "Current streak", games: "games", record: "Record:", quote2: "\"Be a little better every day!\"", gotIt: "Got it", error: "Error", networkError: "Network error", reqSent: "Friend request sent!", success: "Success" },
+  ru: { title: "РЕЙТИНГ", subtitle: "Сильнейшие математики", quote1: "\"Только вперед! 💪\"", streak: "Серия", accuracy: "Точность", wins: "Победы", totalGames: "Всего игр", chat: "Чат", pending: "В ожидании", follow: "Подписаться", levelProgress: "Прогресс уровня", playStyle: "Стиль игры", logic: "Логика", speed: "Скорость", strategy: "Стратегия", memory: "Память", bestResult: "Лучший результат", noData: "Нет данных", currentStreak: "Текущая серия", games: "игр", record: "Рекорд:", quote2: "\"Становись лучше каждый день!\"", gotIt: "Понятно", error: "Ошибка", networkError: "Ошибка сети", reqSent: "Запрос отправлен!", success: "Успех" },
+  ar: { title: "التصنيف", subtitle: "أقوى علماء الرياضيات", quote1: "\"دائماً إلى الأمام! 💪\"", streak: "سلسلة", accuracy: "الدقة", wins: "انتصارات", totalGames: "إجمالي الألعاب", chat: "دردشة", pending: "قيد الانتظار", follow: "متابعة", levelProgress: "تقدم المستوى", playStyle: "أسلوب اللعب", logic: "المنطق", speed: "السرعة", strategy: "استراتيجية", memory: "الذاكرة", bestResult: "أفضل نتيجة", noData: "لا توجد بيانات", currentStreak: "السلسلة الحالية", games: "ألعاب", record: "رقم قياسي:", quote2: "\"كن أفضل قليلاً كل يوم!\"", gotIt: "مفهوم", error: "خطأ", networkError: "خطأ في الشبكة", reqSent: "تم الإرسال!", success: "نجاح" },
+  tr: { title: "SIRALAMA", subtitle: "En güçlü matematikçiler", quote1: "\"Daima ileri! 💪\"", streak: "Seri", accuracy: "Doğruluk", wins: "Zaferler", totalGames: "Toplam oyun", chat: "Sohbet", pending: "Bekliyor", follow: "Takip Et", levelProgress: "Seviye ilerlemesi", playStyle: "Oyun stili", logic: "Mantık", speed: "Hız", strategy: "Strateji", memory: "Hafıza", bestResult: "En iyi sonuç", noData: "Veri yok", currentStreak: "Mevcut seri", games: "oyun", record: "Rekor:", quote2: "\"Her gün biraz daha iyi ol!\"", gotIt: "Anladım", error: "Hata", networkError: "Ağ hatası", reqSent: "İstek gönderildi!", success: "Başarı" },
+  zh: { title: "排名", subtitle: "最强的数学家", quote1: "\"永远向前！💪\"", streak: "连胜", accuracy: "准确率", wins: "胜利", totalGames: "总游戏数", chat: "聊天", pending: "等待中", follow: "关注", levelProgress: "等级进度", playStyle: "游戏风格", logic: "逻辑", speed: "速度", strategy: "策略", memory: "记忆", bestResult: "最佳结果", noData: "暂无数据", currentStreak: "当前连胜", games: "场游戏", record: "纪录:", quote2: "\"每天进步一点点！\"", gotIt: "明白了", error: "错误", networkError: "网络错误", reqSent: "已发送！", success: "成功" },
+  ky: { title: "РЕЙТИНГ", subtitle: "Эң күчтүү математиктер", quote1: "\"Дайыма алдыга! 💪\"", streak: "Серия", accuracy: "Тактык", wins: "Жеңиштер", totalGames: "Жалпы оюндар", chat: "Чат", pending: "Күтүлүүдө", follow: "Жазылуу", levelProgress: "Деңгээлдин өсүшү", playStyle: "Оюн стили", logic: "Логика", speed: "Ылдамдык", strategy: "Стратегия", memory: "Эс тутум", bestResult: "Эң жакшы натыйжа", noData: "Маалымат жок", currentStreak: "Учурдагы серия", games: "оюн", record: "Рекорд:", quote2: "\"Күн сайын бир аз жакшыраак бол!\"", gotIt: "Түшүнүктүү", error: "Ката", networkError: "Тармак катасы", reqSent: "Сурам жөнөтүлдү!", success: "Ийгилик" },
+  kk: { title: "РЕЙТИНГ", subtitle: "Ең мықты математиктер", quote1: "\"Әрдайым алға! 💪\"", streak: "Серия", accuracy: "Дәлдік", wins: "Жеңістер", totalGames: "Жалпы ойындар", chat: "Чат", pending: "Күтілуде", follow: "Жазылу", levelProgress: "Деңгейдің өсуі", playStyle: "Ойын стилі", logic: "Логика", speed: "Жылдамдық", strategy: "Стратегия", memory: "Жад", bestResult: "Ең жақсы нәтиже", noData: "Мәлімет жоқ", currentStreak: "Ағымдағы серия", games: "ойын", record: "Рекорд:", quote2: "\"Күн сайын сәл жақсырақ бол!\"", gotIt: "Түсінікті", error: "Қате", networkError: "Желі қатесі", reqSent: "Сұраныс жіберілді!", success: "Сәттілік" },
+  tg: { title: "РЕЙТИНГ", subtitle: "Қавитарин риёзидонон", quote1: "\"Ҳамеша ба пеш! 💪\"", streak: "Силсила", accuracy: "Дақиқият", wins: "Ғалабаҳо", totalGames: "Ҳамаи бозиҳо", chat: "Чат", pending: "Дар интизорӣ", follow: "Пайравӣ кардан", levelProgress: "Пешрафти сатҳ", playStyle: "Услуби бозӣ", logic: "Мантиқ", speed: "Суръат", strategy: "Стратегия", memory: "Хотира", bestResult: "Беҳтарин натиҷа", noData: "Маълумот нест", currentStreak: "Силсилаи ҷорӣ", games: "бозӣ", record: "Рекорд:", quote2: "\"Ҳар рӯз каме беҳтар шав!\"", gotIt: "Фаҳмо", error: "Хатогӣ", networkError: "Хатогии шабака", reqSent: "Дархост фиристода шуд!", success: "Муваффақият" },
+  hi: { title: "रैंकिंग", subtitle: "सबसे मजबूत गणितज्ञ", quote1: "\"हमेशा आगे! 💪\"", streak: "लगातार", accuracy: "सटीकता", wins: "जीत", totalGames: "कुल खेल", chat: "चैट", pending: "लंबित", follow: "फ़ॉलो करें", levelProgress: "स्तर की प्रगति", playStyle: "खेलने की शैली", logic: "तर्क", speed: "गति", strategy: "रणनीति", memory: "स्मृति", bestResult: "सर्वश्रेष्ठ परिणाम", noData: "कोई डेटा नहीं", currentStreak: "वर्तमान स्ट्रीक", games: "खेल", record: "रिकॉर्ड:", quote2: "\"हर दिन थोड़ा बेहतर बनें!\"", gotIt: "समझ गया", error: "त्रुटि", networkError: "नेटवर्क त्रुटि", reqSent: "अनुरोध भेजा गया!", success: "सफलता" },
+  ur: { title: "رینکنگ", subtitle: "سب سے مضبوط ریاضی دان", quote1: "\"ہمیشہ آگے! 💪\"", streak: "مسلسل", accuracy: "درستگی", wins: "فتوحات", totalGames: "کل کھیل", chat: "چیٹ", pending: "زیر التواء", follow: "فالو کریں", levelProgress: "سطح کی ترقی", playStyle: "کھیلنے کا انداز", logic: "منطق", speed: "رفتار", strategy: "حکمت عملی", memory: "یادداشت", bestResult: "بہترین نتیجہ", noData: "کوئی ڈیٹا نہیں", currentStreak: "موجودہ سلسلہ", games: "کھیل", record: "ریکارڈ:", quote2: "\"ہر دن تھوڑا بہتر بنیں!\"", gotIt: "سمجھ گیا", error: "غلطی", networkError: "خرابی", reqSent: "درخواست بھیجی گئی!", success: "کامیابی" }
+};
+
 // Helper to determine rank based on XP
 const getRankInfo = (xp) => {
   if (xp >= 10000) return { name: 'CHAMPION', color: '#F59E0B', stars: 3, icon: 'shield-crown' };
@@ -21,6 +35,7 @@ const getRankInfo = (xp) => {
 
 export default function UserProfileScreen({ route, navigation }) {
   const { user, selectedUser, selectedUserSkins } = route.params;
+  const t = translations[user?.language] || translations['uz'];
   const [activeTab, setActiveTab] = useState('statistika');
 
   const [alertVisible, setAlertVisible] = useState(false);
@@ -153,12 +168,12 @@ export default function UserProfileScreen({ route, navigation }) {
         if (data.error && data.error.toLowerCase().includes('rad etgan')) {
           setFollowState('pending');
         } else {
-          showCustomAlert('Xatolik', data.error || 'Xatolik yuz berdi', 'error');
+          showCustomAlert(t.error, data.error || t.error, 'error');
         }
       }
     } catch (e) {
       console.error(e);
-      showCustomAlert('Xatolik', 'Tarmoq xatosi', 'error');
+      showCustomAlert(t.error, t.networkError, 'error');
     }
   };
 
@@ -197,9 +212,9 @@ export default function UserProfileScreen({ route, navigation }) {
         <View style={styles.headerCenter}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <MaterialCommunityIcons name="trophy" size={20} color="#F59E0B" />
-            <Text style={styles.headerTitle}>REYTING</Text>
+            <Text style={styles.headerTitle}>{t.title}</Text>
           </View>
-          <Text style={styles.headerSubtitle}>Eng kuchli matematiklar</Text>
+          <Text style={styles.headerSubtitle}>{t.subtitle}</Text>
         </View>
         <View style={{ width: 40 }} />
       </View>
@@ -239,7 +254,7 @@ export default function UserProfileScreen({ route, navigation }) {
           <View style={styles.infoArea}>
             <Text style={styles.userName} numberOfLines={1}>{selectedUser.name}</Text>
             <Text style={styles.userHandle}>{selectedUser.customId}</Text>
-            <Text style={styles.userQuote}>"Doim oldinga! 💪"</Text>
+            <Text style={styles.userQuote}>{t.quote1}</Text>
 
             {/* Rank Card */}
             <View style={styles.rankCard}>
@@ -268,28 +283,28 @@ export default function UserProfileScreen({ route, navigation }) {
                 <MaterialCommunityIcons name="fire" size={20} color="#EF4444" />
                 <View style={{ marginLeft: 6 }}>
                   <Text style={styles.statBoxValue}>{userStreak}</Text>
-                  <Text style={styles.statBoxLabel}>Seriya</Text>
+                  <Text style={styles.statBoxLabel}>{t.streak}</Text>
                 </View>
               </View>
               <View style={styles.statBox}>
                 <MaterialCommunityIcons name="bullseye-arrow" size={20} color="#EF4444" />
                 <View style={{ marginLeft: 6 }}>
                   <Text style={styles.statBoxValue}>{userAccuracy}%</Text>
-                  <Text style={styles.statBoxLabel}>Aniqlik</Text>
+                  <Text style={styles.statBoxLabel}>{t.accuracy}</Text>
                 </View>
               </View>
               <View style={styles.statBox}>
                 <MaterialCommunityIcons name="trophy" size={20} color="#F59E0B" />
                 <View style={{ marginLeft: 6 }}>
                   <Text style={styles.statBoxValue}>{userWins}</Text>
-                  <Text style={styles.statBoxLabel}>G'alabalar</Text>
+                  <Text style={styles.statBoxLabel}>{t.wins}</Text>
                 </View>
               </View>
               <View style={styles.statBox}>
                 <MaterialCommunityIcons name="chart-bar" size={20} color="#3B82F6" />
                 <View style={{ marginLeft: 6 }}>
                   <Text style={styles.statBoxValue}>{userTotalGames}</Text>
-                  <Text style={styles.statBoxLabel} numberOfLines={1} adjustsFontSizeToFit>Jami o'yinlar</Text>
+                  <Text style={styles.statBoxLabel} numberOfLines={1} adjustsFontSizeToFit>{t.totalGames}</Text>
                 </View>
               </View>
             </View>
@@ -305,7 +320,7 @@ export default function UserProfileScreen({ route, navigation }) {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
               <MaterialCommunityIcons name="chat-processing-outline" size={20} color="#FFF" style={{ marginRight: 8 }} />
-              <Text style={styles.chatButtonText}>Chat</Text>
+              <Text style={styles.chatButtonText}>{t.chat}</Text>
             </View>
           </TouchableOpacity>
           
@@ -332,7 +347,7 @@ export default function UserProfileScreen({ route, navigation }) {
                   style={{ marginRight: 8 }} 
                 />
                 <Text style={[styles.chatButtonText, followState === 'pending' && { color: '#94A3B8' }]}>
-                  {followState === 'pending' ? 'Kutilmoqda' : 'Follow'}
+                  {followState === 'pending' ? t.pending : t.follow}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -349,7 +364,7 @@ export default function UserProfileScreen({ route, navigation }) {
               <View style={styles.chartCard}>
                 <View style={styles.chartHeader}>
                   <MaterialCommunityIcons name="chart-line-variant" size={18} color="#D8B4FE" />
-                  <Text style={styles.chartTitle}>Daraja rivojlanishi</Text>
+                  <Text style={styles.chartTitle}>{t.levelProgress}</Text>
                 </View>
                 <View style={styles.lineChartArea}>
                   {/* Fake XP Tag */}
@@ -402,7 +417,7 @@ export default function UserProfileScreen({ route, navigation }) {
               <View style={styles.chartCard}>
                 <View style={styles.chartHeader}>
                   <MaterialCommunityIcons name="target" size={18} color="#D8B4FE" />
-                  <Text style={styles.chartTitle}>O'yin uslubi</Text>
+                  <Text style={styles.chartTitle}>{t.playStyle}</Text>
                 </View>
                 <View style={styles.radarChartArea}>
                   <Svg width="120" height="120" viewBox="0 0 160 160">
@@ -421,11 +436,11 @@ export default function UserProfileScreen({ route, navigation }) {
                     <Polygon points={radarPoints} fill="rgba(168, 85, 247, 0.4)" stroke="#A855F7" strokeWidth="1.5" strokeLinejoin="round" />
                     
                     {/* Labels */}
-                    <SvgText x="80" y="5" fill="#94A3B8" fontSize="10" textAnchor="middle">Mantiq</SvgText>
-                    <SvgText x="155" y="55" fill="#94A3B8" fontSize="10" textAnchor="end">Tezlik</SvgText>
-                    <SvgText x="135" y="148" fill="#94A3B8" fontSize="10" textAnchor="end">Aniqlik</SvgText>
-                    <SvgText x="25" y="148" fill="#94A3B8" fontSize="10" textAnchor="start">Strategiya</SvgText>
-                    <SvgText x="5" y="55" fill="#94A3B8" fontSize="10" textAnchor="start">Xotira</SvgText>
+                    <SvgText x="80" y="5" fill="#94A3B8" fontSize="10" textAnchor="middle">{t.logic}</SvgText>
+                    <SvgText x="155" y="55" fill="#94A3B8" fontSize="10" textAnchor="end">{t.speed}</SvgText>
+                    <SvgText x="135" y="148" fill="#94A3B8" fontSize="10" textAnchor="end">{t.accuracyStr}</SvgText>
+                    <SvgText x="25" y="148" fill="#94A3B8" fontSize="10" textAnchor="start">{t.strategy}</SvgText>
+                    <SvgText x="5" y="55" fill="#94A3B8" fontSize="10" textAnchor="start">{t.memory}</SvgText>
                   </Svg>
                 </View>
               </View>
@@ -438,9 +453,9 @@ export default function UserProfileScreen({ route, navigation }) {
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
                   <MaterialCommunityIcons name="trophy" size={32} color="#F59E0B" style={{ marginRight: 10 }} />
                   <View>
-                    <Text style={styles.bottomCardTitle}>Eng yaxshi natija</Text>
+                    <Text style={styles.bottomCardTitle}>{t.bestResult}</Text>
                     <Text style={styles.bottomCardValueGold}>+{selectedUser.bestResultXp || 0} XP</Text>
-                    <Text style={styles.bottomCardSub}>{selectedUser.bestResultDate || "Ma'lumot yo'q"}</Text>
+                    <Text style={styles.bottomCardSub}>{selectedUser.bestResultDate || t.noData}</Text>
                   </View>
                 </View>
                 <MaterialCommunityIcons name="target-account" size={60} color="rgba(245, 158, 11, 0.1)" style={{ position: 'absolute', right: -10, bottom: -10 }} />
@@ -451,12 +466,12 @@ export default function UserProfileScreen({ route, navigation }) {
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
                   <MaterialCommunityIcons name="fire" size={32} color="#EF4444" style={{ marginRight: 10 }} />
                   <View>
-                    <Text style={styles.bottomCardTitle}>Hozirgi seriya</Text>
+                    <Text style={styles.bottomCardTitle}>{t.currentStreak}</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
                       <Text style={styles.bottomCardValueRed}>{selectedUser.streak || 0}</Text>
-                      <Text style={{ color: '#94A3B8', fontSize: 10, marginLeft: 4 }}>o'yin</Text>
+                      <Text style={{ color: '#94A3B8', fontSize: 10, marginLeft: 4 }}>{t.games}</Text>
                     </View>
-                    <Text style={styles.bottomCardSub}>Rekord: {selectedUser.bestStreak || 0}</Text>
+                    <Text style={styles.bottomCardSub}>{t.record} {selectedUser.bestStreak || 0}</Text>
                   </View>
                 </View>
                 <MaterialCommunityIcons name="fire" size={60} color="rgba(239, 68, 68, 0.1)" style={{ position: 'absolute', right: -10, bottom: -10 }} />
@@ -466,7 +481,7 @@ export default function UserProfileScreen({ route, navigation }) {
             {/* Bottom Quote Block */}
             <View style={styles.quoteBlock}>
               <MaterialCommunityIcons name="format-quote-open" size={24} color="#6366F1" style={{ position: 'absolute', left: 16, top: 16 }} />
-              <Text style={styles.quoteBlockText}>"Har kuni biroz yaxshiroq bo'l!"</Text>
+              <Text style={styles.quoteBlockText}>{t.quote2}</Text>
               <Text style={styles.quoteBlockAuthor}>— {selectedUser.name}</Text>
               <MaterialCommunityIcons name="format-quote-close" size={24} color="#6366F1" style={{ position: 'absolute', right: 16, bottom: 16 }} />
             </View>
@@ -484,7 +499,7 @@ export default function UserProfileScreen({ route, navigation }) {
             <Text style={styles.alertTitle}>{alertMessage.title}</Text>
             <Text style={styles.alertText}>{alertMessage.message}</Text>
             <TouchableOpacity style={[styles.alertButton, { backgroundColor: alertMessage.type === 'success' ? '#3B82F6' : '#EF4444' }]} onPress={() => setAlertVisible(false)}>
-              <Text style={styles.alertButtonText}>Tushunarli</Text>
+              <Text style={styles.alertButtonText}>{t.gotIt}</Text>
             </TouchableOpacity>
           </View>
         </View>
