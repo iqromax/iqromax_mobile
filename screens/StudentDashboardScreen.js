@@ -1063,7 +1063,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
     });
 
     socket.on('start_friend_battle', (data) => {
-      alert("GLOBAL EVENT BATTLE STARTED FIRED");
       DeviceEventEmitter.emit('global_start_friend_battle', data);
     });
 
