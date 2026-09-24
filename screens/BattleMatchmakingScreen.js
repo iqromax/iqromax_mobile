@@ -7,8 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
 import { Character3DViewer } from '../components/Character3DViewer';
 
-const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL || 'https://iqromax-production.up.railway.app';
-const API_URL = `${SOCKET_URL}/api`;
+import { SOCKET_URL, API_URL } from '../src/config/api';
 
 const { width, height } = Dimensions.get('window');
 
