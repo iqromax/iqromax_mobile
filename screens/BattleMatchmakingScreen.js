@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ImageBackground, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Dimensions, ImageBackground, ActivityIndicator, Platform, Modal, ScrollView } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
@@ -22,11 +22,23 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
   const { language = 'uz', examplesCount = 10, operation = 'oddiy', speed = 1, digits = 1, battleMode = 'oddiy', myCharPath, myEquippedSkins, dynamicCharacters = [] } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
 
+  
   const [userData, setUserData] = useState(null);
   const [opponent, setOpponent] = useState(null);
+  const [isHost, setIsHost] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
+
+  const [localExamplesCount, setLocalExamplesCount] = useState(examplesCount);
+  const [localOperation, setLocalOperation] = useState(operation);
+  const [localSpeed, setLocalSpeed] = useState(speed);
+  const [localDigits, setLocalDigits] = useState(digits);
   
   const socketRef = useRef(null);
   const timeoutRef = useRef(null);
+  const opponentRef = useRef(null);
+  const isHostRef = useRef(false);
+
 
   const baseAvatarsList = [
     { id: 0, name: 'Alex', img: require('../assets/avatar_alex.jpg') },
@@ -103,26 +115,34 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
       });
     });
 
+    
     socketRef.current.on('random_match_found', (data) => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setOpponent(data.opponent);
-      
-      // Auto-navigate after 5 seconds showing the opponent
+      setIsHost(data.isHost);
+      opponentRef.current = data.opponent;
+      isHostRef.current = data.isHost;
+    });
+
+    socketRef.current.on('start_battle_countdown', (settings) => {
+      setShowSettingsModal(false);
+      setShowLoading(true);
       setTimeout(() => {
         if (socketRef.current) socketRef.current.disconnect();
         navigation.replace('BattleGame', {
           mode: 'battle',
-          isHost: data.isHost,
-          targetId: data.opponent.customId,
-          examplesCount,
-          operation,
-          speed,
-          digits,
+          isHost: isHostRef.current,
+          targetId: opponentRef.current?.customId,
+          examplesCount: settings.examplesCount,
+          operation: settings.operation,
+          speed: settings.speed,
+          digits: settings.digits,
           language,
-          opponentData: data.opponent
+          opponentData: opponentRef.current
         });
-      }, 5000);
+      }, 3000);
     });
+
 
     // 5-minute timeout (300,000 ms)
     timeoutRef.current = setTimeout(() => {
@@ -210,7 +230,7 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           <View style={[styles.playerContainer, { right: 0 }]}>
             {opponent ? (
               <>
-                <View style={styles.modelWrapper}>
+                <View style={[styles.modelWrapper, { transform: [{ translateX: 15 }, { translateY: 10 }] }]}>
                   {opponentCharPath ? (
                     <Character3DViewer 
                       characterPath={opponentCharPath}
@@ -232,7 +252,6 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
                   <View style={styles.playerInfo}>
                     <Text style={styles.playerName} numberOfLines={1}>{opponent.name || 'Ism yoq'}</Text>
                     <Text style={styles.playerId}>{opponent.customId || 'ID yoq'}</Text>
-                    <Text style={{color: 'red', fontSize: 8}}>{JSON.stringify(opponent).substring(0, 50)}</Text>
                   </View>
                 </View>
               </>
@@ -267,7 +286,72 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
           </TouchableOpacity>
         </SafeAreaView>
 
-      </ImageBackground>
+      
+      {showLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#10B981" />
+          <Text style={styles.loadingText}>O'yin boshlanmoqda...</Text>
+        </View>
+      )}
+
+      <Modal visible={showSettingsModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Battle Sozlamalari</Text>
+
+            <Text style={styles.modalLabel}>Misollar soni: {localExamplesCount}</Text>
+            <View style={styles.modalRow}>
+              {[5, 10, 15, 20].map(val => (
+                <TouchableOpacity key={val} style={[styles.modalBtn, localExamplesCount === val && styles.modalBtnActive]} onPress={() => setLocalExamplesCount(val)}>
+                  <Text style={[styles.modalBtnText, localExamplesCount === val && styles.modalBtnTextActive]}>{val}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.modalLabel}>Tezlik (soniya): {localSpeed}</Text>
+            <View style={styles.modalRow}>
+              {[0.5, 1, 1.5, 2].map(val => (
+                <TouchableOpacity key={val} style={[styles.modalBtn, localSpeed === val && styles.modalBtnActive]} onPress={() => setLocalSpeed(val)}>
+                  <Text style={[styles.modalBtnText, localSpeed === val && styles.modalBtnTextActive]}>{val}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.modalLabel}>Xonalar soni: {localDigits}</Text>
+            <View style={styles.modalRow}>
+              {[1, 2, 3].map(val => (
+                <TouchableOpacity key={val} style={[styles.modalBtn, localDigits === val && styles.modalBtnActive]} onPress={() => setLocalDigits(val)}>
+                  <Text style={[styles.modalBtnText, localDigits === val && styles.modalBtnTextActive]}>{val}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity 
+              style={styles.startBtn}
+              onPress={() => {
+                socketRef.current?.emit('start_host_battle', {
+                  opponentSocketId: opponentRef.current?.socketId,
+                  settings: {
+                    examplesCount: localExamplesCount,
+                    operation: localOperation,
+                    speed: localSpeed,
+                    digits: localDigits
+                  }
+                });
+              }}
+            >
+              <Text style={styles.startBtnText}>Battle Boshlash</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={[styles.startBtn, { backgroundColor: '#EF4444', marginTop: 10 }]} onPress={() => setShowSettingsModal(false)}>
+              <Text style={styles.startBtnText}>{t.cancel}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+    </ImageBackground>
+
     </View>
   );
 }
