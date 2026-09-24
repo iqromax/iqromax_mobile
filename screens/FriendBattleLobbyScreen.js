@@ -218,21 +218,20 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
                questions: route.params.questions,
                ...route.params.settings
            };
-           // DEBUG SENDER
-           alert("SENDER STARTING BATTLE API FOR TARGET: " + route.params.targetId);
            try {
              await fetch(`${API_URL}/battle/start`, {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify(payload)
              });
-           } catch(e) {
-             alert("API FETCH ERROR: " + e.message);
-           }
-        } else if (route.params?.isHost && !route.params?.targetId) {
-           alert("CRITICAL ERROR: targetId is missing in Sender's params!");
+           } catch(e) {}
         }
       };
+
+      // Call it immediately without waiting for socket
+      if (route.params?.isHost && route.params?.targetId) {
+         sendStartAPI();
+      }
 
       socket = io(SOCKET_URL, { 
         path: '/api/socket.io',
@@ -249,15 +248,10 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
           }
         }, 1000);
         socket.regInterval = regInterval;
-        
-        if (route.params?.isHost && route.params?.targetId && !hasEmitted.current) {
-           sendStartAPI();
-        }
       });
 
       if (socket.connected) {
         socket.emit('register', userData.customId);
-        sendStartAPI();
       }
 
       socket.on('start_friend_battle', (settingsData) => {
