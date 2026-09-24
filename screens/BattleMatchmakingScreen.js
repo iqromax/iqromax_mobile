@@ -59,10 +59,10 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
         if (uDataStr) setUserData(JSON.parse(uDataStr));
         if (equippedStr) setMyEquippedSkins(JSON.parse(equippedStr));
 
-        const charsRes = await fetch(`${API_URL}/inventory/characters`);
+        const charsRes = await fetch(`${API_URL}/inventory-skins`);
         if (charsRes.ok) {
           const charsData = await charsRes.json();
-          setDynamicCharacters(charsData);
+          setDynamicCharacters(charsData.filter(s => s.category === 'personajlar'));
         }
       } catch (e) {
         console.error(e);
@@ -341,14 +341,17 @@ const styles = StyleSheet.create({
   },
   playerContainer: {
     position: 'absolute',
-    bottom: height * 0.22,
+    bottom: height * 0.05,
     width: '45%',
     alignItems: 'center',
   },
   modelWrapper: {
-    width: 150,
-    height: 250,
-    marginBottom: 20,
+    width: 200,
+    height: 350,
+    marginBottom: 10,
+    backgroundColor: 'transparent',
+    opacity: 0.99,
+    zIndex: 2,
   },
   playerCard: {
     backgroundColor: 'rgba(10, 15, 28, 0.7)',
@@ -367,6 +370,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(59, 130, 246, 0.3)',
     width: 170,
     paddingVertical: 20,
+    transform: [{ translateY: 40 }],
   },
   playerAvatar: {
     width: 40,
