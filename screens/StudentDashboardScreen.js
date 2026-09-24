@@ -2290,6 +2290,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
             mode: 'math',
             examplesCount: selectedAbacusExamples,
             digits: selectedAbacusDigits,
+            operation: selectedOperation,
             language
           });
         } else {

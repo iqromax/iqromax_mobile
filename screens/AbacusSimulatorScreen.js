@@ -245,6 +245,7 @@ export default function AbacusSimulatorScreen() {
   const mode = route.params?.mode || 'classic'; // 'classic' | 'math'
   const examplesCount = route.params?.examplesCount || 7;
   const digits = route.params?.digits || 1;
+  const operation = route.params?.operation || 'oddiy';
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
 
   const [resetFlag, setResetFlag] = useState(0);
@@ -304,7 +305,7 @@ export default function AbacusSimulatorScreen() {
   // Initialize Math Problem for 'math' mode
   const initMathProblem = () => {
     try {
-      const q = MentalMathGenerator.generate('aralash', digits, examplesCount);
+      const q = MentalMathGenerator.generate(operation, digits, examplesCount);
       let parts = q.display.split(' ');
       let steps = [];
       let currentSum = 0;
@@ -344,7 +345,7 @@ export default function AbacusSimulatorScreen() {
     if (mode === 'math') {
       initMathProblem();
     }
-  }, [mode, digits, examplesCount]);
+  }, [mode, digits, examplesCount, operation]);
 
   // Live Timer for Math mode
   useEffect(() => {
