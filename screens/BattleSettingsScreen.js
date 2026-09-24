@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   examplesContainer: {
-    marginTop: 15,
+    marginTop: 8,
     backgroundColor: '#070710',
     borderRadius: 16,
     padding: 16,
@@ -552,6 +552,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#070710',
     borderRadius: 16,
     padding: 16,
+    paddingBottom: 8,
     width: '100%',
     borderWidth: 1,
     borderColor: '#1A103C',
