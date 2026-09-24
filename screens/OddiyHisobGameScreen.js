@@ -303,7 +303,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         }
       });
     }
-  }, [phase, countdown, isLastAnswerCorrect]);
+  }, [phase, isLastAnswerCorrect]);
 
   // Handle sequence parsing and flashing
   useEffect(() => {
