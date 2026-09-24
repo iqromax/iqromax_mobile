@@ -38,7 +38,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const [phase, setPhase] = useState('countdown');
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
   const [speedResults, setSpeedResults] = useState([]);
-  const [countdown, setCountdown] = useState(3);
+  const [lightState, setLightState] = useState(0);
   
   // Game states
   const [questions, setQuestions] = useState([]);
@@ -238,14 +238,27 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   // Countdown Logic
   useEffect(() => {
     if (phase === 'countdown') {
-      if (countdown > 0) {
-        const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-        return () => clearTimeout(timer);
-      } else {
-        setStartTime(Date.now()); // reset timer at start of flashing
-        playSound('tick', sequence[0]?.op || '+');
-        setPhase('flashing');
-      }
+      let step = 1;
+      setLightState(1); // Red
+      playSound('tick', '+');
+      
+      const interval = setInterval(() => {
+        step++;
+        if (step === 2) {
+          setLightState(2); // Yellow
+          playSound('tick', '+');
+        } else if (step === 3) {
+          setLightState(3); // Green
+          playSound('tick', '+');
+        } else if (step > 3) {
+          clearInterval(interval);
+          setStartTime(Date.now()); // reset timer at start of flashing
+          playSound('tick', sequence[0]?.op || '+');
+          setPhase('flashing');
+        }
+      }, 1000);
+      
+      return () => clearInterval(interval);
     } else if (phase === 'feedback') {
       fadeAnim.setValue(0);
       scaleAnim.setValue(0.5);
@@ -316,7 +329,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       } else {
         if (currentQIndex === 0) {
           setPhase('countdown');
-          setCountdown(3);
+          setLightState(0);
         } else {
           setPhase('flashing');
         }
@@ -656,7 +669,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                 setInputValue('');
                 setSeqIndex(0);
                 setPhase('countdown');
-                setCountdown(3);
+                setLightState(0);
               }
             }} 
           >
@@ -690,10 +703,15 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const renderFlashingArea = () => {
     if (phase === 'countdown') {
       return (
-        <View style={styles.flashingCard}>
-          <Text style={{color: '#FBBF24', fontFamily: 'Inter_700Bold', fontSize: 32, textAlign: 'center'}}>
-            {countdown === 3 ? t.countdown3 : countdown === 2 ? t.countdown2 : t.countdown1}
-          </Text>
+        <View style={[styles.flashingCard, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316', justifyContent: 'center', alignItems: 'center' }]}>
+          <View style={{ width: 120, height: 320, backgroundColor: '#1a1a1a', borderRadius: 20, borderWidth: 4, borderColor: '#333', justifyContent: 'space-evenly', alignItems: 'center', paddingVertical: 10 }}>
+            {/* Red Light */}
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 1 ? '#ff3333' : '#4a1111', borderWidth: 2, borderColor: '#111', shadowColor: '#ff0000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 1 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 1 ? 10 : 0 }} />
+            {/* Yellow Light */}
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 2 ? '#ffcc00' : '#4a3b00', borderWidth: 2, borderColor: '#111', shadowColor: '#ffcc00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 2 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 2 ? 10 : 0 }} />
+            {/* Green Light */}
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 3 ? '#33ff33' : '#114a11', borderWidth: 2, borderColor: '#111', shadowColor: '#00ff00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 3 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 3 ? 10 : 0 }} />
+          </View>
         </View>
       );
     }
@@ -1026,7 +1044,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                     setCurrentQIndex(0);
                     setSequence([]);
                     setPhase('countdown');
-                    setCountdown(3);
+                    setLightState(0);
                     const generated = [];
                     const numQuestions = isSpeedMode ? examplesCount : 10;
                     const terms = isSpeedMode ? 2 : examplesCount;
