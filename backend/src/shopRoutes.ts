@@ -2,10 +2,10 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
+
 import fs from 'fs';
 
-const __filename = fileURLToPath(import.meta.url);
+
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
@@ -122,7 +122,7 @@ router.put('/admin/shop-items/:id', uploadFields, async (req, res) => {
 
     // @ts-ignore
     const updated = await prisma.shopItem.update({
-      where: { id },
+      where: { id: id as string },
       data: {
         category: category || existing.category,
         subcategory: subcategory !== undefined ? subcategory : existing.subcategory,

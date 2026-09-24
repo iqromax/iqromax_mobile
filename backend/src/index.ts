@@ -8,10 +8,10 @@ import http from 'http';
 import path from 'path';
 import fs from 'fs';
 import { Server } from 'socket.io';
-import { fileURLToPath } from 'url';
+
 import adVideoRoutes from './adVideoRoutes.js';
 
-const __filename = fileURLToPath(import.meta.url);
+
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -1397,8 +1397,8 @@ app.post('/api/teacher/send-message', async (req, res) => {
         where: {
           OR: [
             ...(studentId ? [{ id: studentId }, { customId: studentId }, { customId: `#${studentId.replace(/^#+/, '')}` }] : []),
-            ...(studentEmail ? [{ email: { equals: studentEmail, mode: 'insensitive' } }] : []),
-            ...(studentName ? [{ name: { equals: studentName, mode: 'insensitive' } }] : [])
+            ...(studentEmail ? [{ email: { equals: studentEmail, mode: 'insensitive' as const } }] : []),
+            ...(studentName ? [{ name: { equals: studentName, mode: 'insensitive' as const } }] : [])
           ]
         }
       });
@@ -2276,7 +2276,7 @@ app.post('/api/battle/start', async (req, res) => {
       }
     }
     res.json({ success: true });
-  } catch(e) {
+  } catch(e: any) {
     res.status(500).json({ error: e.message });
   }
 });

@@ -2,13 +2,13 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
+
 import fs from 'fs';
 
 import { NodeIO } from '@gltf-transform/core';
 import sharp from 'sharp';
 
-const __filename = fileURLToPath(import.meta.url);
+
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
@@ -263,7 +263,7 @@ router.put('/admin/inventory-skins/:id', uploadFields, async (req, res) => {
 
       // @ts-ignore
       updatedSkin = await prisma.inventorySkin.update({
-        where: { id },
+        where: { id: id as string },
         data: updateData
       });
 

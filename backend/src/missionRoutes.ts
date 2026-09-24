@@ -2,11 +2,11 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
 import path from 'path';
-import { fileURLToPath } from 'url';
+
 import fs from 'fs';
 import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url);
+
 const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
