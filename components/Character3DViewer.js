@@ -24,9 +24,14 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
       if (localUri) {
         const info = await FileSystem.getInfoAsync(localUri);
         if (info.exists) {
-          // iOS WKWebView now has allowingReadAccessToURL={FileSystem.cacheDirectory}
-          // so we can fetch file:// safely without converting to a huge Base64 string!
-          return setter(localUri.split('/').pop());
+          if (Platform.OS === 'ios') {
+            // WKWebView strictly blocks fetch() on file:// URIs due to CORS.
+            // Using the remote URL allows the webview's native HTTP cache to handle it efficiently!
+            return setter(remoteUrl);
+          } else {
+            // Android allows file:// fetches when configured properly.
+            return setter(localUri.split('/').pop());
+          }
         }
       }
       setter(remoteUrl);
