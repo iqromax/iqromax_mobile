@@ -34,6 +34,7 @@ import FriendBattleLobbyScreen from './screens/FriendBattleLobbyScreen';
 import BattleResultScreen from './screens/BattleResultScreen';
 import MysteryBoxScreen from './screens/MysteryBoxScreen';
 import ChatScreen from './screens/ChatScreen';
+import UserProfileScreen from './screens/UserProfileScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 import { SoundPlayerBridge } from './src/utils/soundPlayer';
 import { ModelPreloader } from './src/utils/ModelPreloader';
@@ -500,6 +501,7 @@ export default function App() {
           <Stack.Screen name="BattleResult" component={BattleResultScreen} />
           <Stack.Screen name="MysteryBox" component={MysteryBoxScreen} />
           <Stack.Screen name="ChatScreen" component={ChatScreen} />
+          <Stack.Screen name="UserProfile" component={UserProfileScreen} />
         </Stack.Navigator>
 
         {/* Global Admin Action (Delete/Block) Alert Modal */}

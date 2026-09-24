@@ -5,7 +5,7 @@ import { WebView } from 'react-native-webview';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Video, Audio } from '../src/utils/safeAudio';
 import { API_URL, SOCKET_URL } from '../src/config/api';
-import { io } from 'socket.io-client';
+import io from 'socket.io-client';
 import { Image } from 'expo-image';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';

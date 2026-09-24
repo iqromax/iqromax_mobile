@@ -3,12 +3,12 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Keyboard
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { io } from 'socket.io-client';
+import io from 'socket.io-client';
 import { API_URL, SOCKET_URL } from '../src/config/api';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const getAvatarByName = (name) => {
-  if (!name) return require('../assets/avatar_maks.png');
+  if (!name || typeof name !== 'string') return require('../assets/avatar_maks.png');
   const lower = name.toLowerCase();
   if (lower.includes('alex')) return require('../assets/avatar_alex.jpg');
   if (lower.includes('maks')) return require('../assets/avatar_maks.png');
@@ -22,8 +22,8 @@ const getAvatarByName = (name) => {
 };
 
 export default function ChatScreen({ route, navigation }) {
-  const insets = useSafeAreaInsets();
-  const { friend } = route.params;
+  const insets = (typeof useSafeAreaInsets === 'function') ? useSafeAreaInsets() : { top: 40, bottom: 20, left: 0, right: 0 };
+  const { friend } = route?.params || {};
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
@@ -49,15 +49,17 @@ export default function ChatScreen({ route, navigation }) {
           }
 
           // Connect Socket
-          socket = io(SOCKET_URL, { 
-            path: '/api/socket.io',
-            transports: ['websocket'] 
-          });
-          socketRef.current = socket;
+          if (typeof io === 'function') {
+            socket = io(SOCKET_URL, { 
+              path: '/api/socket.io',
+              transports: ['websocket'] 
+            });
+            socketRef.current = socket;
 
-          socket.on('connect', () => {
-            socket.emit('register', u.customId);
-          });
+            socket.on('connect', () => {
+              socket.emit('register', u.customId);
+            });
+          }
 
           socket.on('chat_message_received', (msg) => {
             if (

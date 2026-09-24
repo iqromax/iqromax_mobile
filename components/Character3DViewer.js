@@ -24,14 +24,9 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
       if (localUri) {
         const info = await FileSystem.getInfoAsync(localUri);
         if (info.exists) {
-          if (Platform.OS === 'ios') {
-            // iOS WKWebView blocks file:// fetches. Read as base64 instead.
-            const b64 = await FileSystem.readAsStringAsync(localUri, { encoding: 'base64' });
-            return setter('base64:' + b64);
-          } else {
-            // Android allows file:// fetches when configured properly.
-            return setter(localUri.split('/').pop());
-          }
+          // iOS WKWebView now has allowingReadAccessToURL={FileSystem.cacheDirectory}
+          // so we can fetch file:// safely without converting to a huge Base64 string!
+          return setter(localUri.split('/').pop());
         }
       }
       setter(remoteUrl);
@@ -49,74 +44,22 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
   useEffect(() => { resolveModelUrl(shoesPath, setShoesFilename); }, [shoesPath]);
   useEffect(() => { resolveModelUrl(backpackPath, setBackpackFilename); }, [backpackPath]);
 
-  // Dynamically update parts when their props change
+  // Batched dynamic updates to prevent WebView from dropping messages
   useEffect(() => {
     if (!webViewRef.current) return;
-    if (charFilename) {
-      webViewRef.current.injectJavaScript(`if (window.updateCharacter) { window.updateCharacter('${charFilename}'); } true;`);
-    } else {
-      webViewRef.current.injectJavaScript(`if (window.updateCharacter) { window.updateCharacter(null); } true;`);
-    }
-  }, [charFilename]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (headwearFilename) {
-      webViewRef.current.injectJavaScript(`if (window.updateHeadwear) { window.updateHeadwear('${headwearFilename}'); } true;`);
-    } else {
-      webViewRef.current.injectJavaScript(`if (window.updateHeadwear) { window.updateHeadwear(null); } true;`);
-    }
-  }, [headwearFilename]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (accessoryFilename) {
-      webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory('${accessoryFilename}'); } true;`);
-    } else {
-      webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory(null); } true;`);
-    }
-  }, [accessoryFilename]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (topsFilename) {
-      webViewRef.current.injectJavaScript(`if (window.updateTops) { window.updateTops('${topsFilename}'); } true;`);
-    } else {
-      webViewRef.current.injectJavaScript(`if (window.updateTops) { window.updateTops(null); } true;`);
-    }
-  }, [topsFilename]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (pantsFilename) {
-      webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants('${pantsFilename}'); } true;`);
-    } else {
-      webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants(null); } true;`);
-    }
-  }, [pantsFilename]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (shoesFilename) {
-      webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes('${shoesFilename}'); } true;`);
-    } else {
-      webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes(null); } true;`);
-    }
-  }, [shoesFilename]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    if (backpackFilename) {
-      webViewRef.current.injectJavaScript(`if (window.updateBackpack) { window.updateBackpack('${backpackFilename}'); } true;`);
-    } else {
-      webViewRef.current.injectJavaScript(`if (window.updateBackpack) { window.updateBackpack(null); } true;`);
-    }
-  }, [backpackFilename]);
-
-  useEffect(() => {
-    if (!webViewRef.current) return;
-    webViewRef.current.injectJavaScript(`if (window.setBackView) { window.setBackView(${isBackView}); } true;`);
-  }, [isBackView]);
+    const script = `
+      if (window.updateCharacter) { window.updateCharacter(${charFilename ? `'${charFilename}'` : 'null'}); }
+      if (window.updateHeadwear) { window.updateHeadwear(${headwearFilename ? `'${headwearFilename}'` : 'null'}); }
+      if (window.updateAccessory) { window.updateAccessory(${accessoryFilename ? `'${accessoryFilename}'` : 'null'}); }
+      if (window.updateTops) { window.updateTops(${topsFilename ? `'${topsFilename}'` : 'null'}); }
+      if (window.updatePants) { window.updatePants(${pantsFilename ? `'${pantsFilename}'` : 'null'}); }
+      if (window.updateShoes) { window.updateShoes(${shoesFilename ? `'${shoesFilename}'` : 'null'}); }
+      if (window.updateBackpack) { window.updateBackpack(${backpackFilename ? `'${backpackFilename}'` : 'null'}); }
+      if (window.setBackView) { window.setBackView(${isBackView}); }
+      true;
+    `;
+    webViewRef.current.injectJavaScript(script);
+  }, [charFilename, headwearFilename, accessoryFilename, topsFilename, pantsFilename, shoesFilename, backpackFilename, isBackView]);
 
   useEffect(() => {
     if (!webViewRef.current) return;
@@ -125,15 +68,18 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
 
   const handleWebViewLoadEnd = () => {
     if (webViewRef.current) {
-      if (charFilename) webViewRef.current.injectJavaScript(`if (window.updateCharacter) { window.updateCharacter('${charFilename}'); } true;`);
-      if (headwearFilename) webViewRef.current.injectJavaScript(`if (window.updateHeadwear) { window.updateHeadwear('${headwearFilename}'); } true;`);
-      if (accessoryFilename) webViewRef.current.injectJavaScript(`if (window.updateAccessory) { window.updateAccessory('${accessoryFilename}'); } true;`);
-      if (topsFilename) webViewRef.current.injectJavaScript(`if (window.updateTops) { window.updateTops('${topsFilename}'); } true;`);
-      if (pantsFilename) webViewRef.current.injectJavaScript(`if (window.updatePants) { window.updatePants('${pantsFilename}'); } true;`);
-      if (shoesFilename) webViewRef.current.injectJavaScript(`if (window.updateShoes) { window.updateShoes('${shoesFilename}'); } true;`);
-      if (backpackFilename) webViewRef.current.injectJavaScript(`if (window.updateBackpack) { window.updateBackpack('${backpackFilename}'); } true;`);
-      
-      webViewRef.current.injectJavaScript(`if (window.setBackView) { window.setBackView(${isBackView}); } true;`);
+      const script = `
+        if (window.updateCharacter) { window.updateCharacter(${charFilename ? `'${charFilename}'` : 'null'}); }
+        if (window.updateHeadwear) { window.updateHeadwear(${headwearFilename ? `'${headwearFilename}'` : 'null'}); }
+        if (window.updateAccessory) { window.updateAccessory(${accessoryFilename ? `'${accessoryFilename}'` : 'null'}); }
+        if (window.updateTops) { window.updateTops(${topsFilename ? `'${topsFilename}'` : 'null'}); }
+        if (window.updatePants) { window.updatePants(${pantsFilename ? `'${pantsFilename}'` : 'null'}); }
+        if (window.updateShoes) { window.updateShoes(${shoesFilename ? `'${shoesFilename}'` : 'null'}); }
+        if (window.updateBackpack) { window.updateBackpack(${backpackFilename ? `'${backpackFilename}'` : 'null'}); }
+        if (window.setBackView) { window.setBackView(${isBackView}); }
+        true;
+      `;
+      webViewRef.current.injectJavaScript(script);
     }
   };
 
@@ -179,9 +125,10 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
           camera.position.set(0, 1.2, 3.5);
 
-          const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+          const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, premultipliedAlpha: false });
           renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
           renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.setClearColor(0x000000, 0);
           renderer.shadowMap.enabled = true;
           renderer.shadowMap.type = THREE.PCFSoftShadowMap;
           renderer.outputEncoding = THREE.sRGBEncoding;
@@ -233,6 +180,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           window.pantsModel = null;
           window.shoesModel = null;
           window.backpackModel = null;
+          
+          window.currentFiles = {};
 
           let targetRotationY = 0;
           let currentRotationY = 0;
@@ -260,22 +209,6 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
 
           function loadModelIntoScene(dataOrUrl, onSuccess) {
             showLoading();
-            if (dataOrUrl.startsWith('base64:')) {
-              try {
-                const b64 = dataOrUrl.substring(7);
-                const buffer = base64ToArrayBuffer(b64);
-                gltfLoader.parse(buffer, '', function(gltf) {
-                  onSuccess(gltf);
-                  hideLoading();
-                }, function(e) {
-                  console.error('Base64 Parse Error:', e);
-                  hideLoading();
-                });
-              } catch(e) {
-                console.error('Base64 Buffer Error:', e);
-                hideLoading();
-              }
-            } else {
               gltfLoader.load(dataOrUrl, function(gltf) {
                 onSuccess(gltf);
                 hideLoading();
@@ -283,10 +216,11 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
                 console.error('URL Load Error:', e);
                 hideLoading();
               });
-            }
           }
 
           window.updateCharacter = function(filename) {
+            if (window.currentFiles['character'] === filename) return;
+            window.currentFiles['character'] = filename;
             if (!filename) {
               if (window.characterModel) {
                 scene.remove(window.characterModel);
@@ -306,7 +240,7 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
               newChar.traverse(function(child) {
                 processMaterial(child);
                 if (child.isMesh && child.material) {
-                  child.material.color.setHex(0x666666);
+                  // child.material.color.setHex(0x666666); // Removed to keep original colors
                 }
               });
 
@@ -356,6 +290,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           };
 
           window.updateHeadwear = function(filename) {
+            if (window.currentFiles['headwear'] === filename) return;
+            window.currentFiles['headwear'] = filename;
             if (!filename) {
               if (window.headwearModel) {
                 scene.remove(window.headwearModel);
@@ -384,6 +320,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           };
 
           window.updateAccessory = function(filename) {
+            if (window.currentFiles['accessory'] === filename) return;
+            window.currentFiles['accessory'] = filename;
             if (!filename) {
               if (window.accessoryModel) {
                 scene.remove(window.accessoryModel);
@@ -412,6 +350,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           };
 
           window.updateTops = function(filename) {
+            if (window.currentFiles['tops'] === filename) return;
+            window.currentFiles['tops'] = filename;
             if (!filename) {
               if (window.topsModel) {
                 scene.remove(window.topsModel);
@@ -440,6 +380,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           };
 
           window.updatePants = function(filename) {
+            if (window.currentFiles['pants'] === filename) return;
+            window.currentFiles['pants'] = filename;
             if (!filename) {
               if (window.pantsModel) {
                 scene.remove(window.pantsModel);
@@ -468,6 +410,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           };
 
           window.updateShoes = function(filename) {
+            if (window.currentFiles['shoes'] === filename) return;
+            window.currentFiles['shoes'] = filename;
             if (!filename) {
               if (window.shoesModel) {
                 scene.remove(window.shoesModel);
@@ -496,6 +440,8 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
           };
 
           window.updateBackpack = function(filename) {
+            if (window.currentFiles['backpack'] === filename) return;
+            window.currentFiles['backpack'] = filename;
             if (!filename) {
               if (window.backpackModel) {
                 scene.remove(window.backpackModel);
@@ -577,7 +523,9 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         javaScriptEnabled={true}
         domStorageEnabled={true}
         allowFileAccess={true}
+        allowFileAccessFromFileURLs={true}
         allowUniversalAccessFromFileURLs={true}
+        allowingReadAccessToURL={FileSystem.cacheDirectory}
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         scrollEnabled={false}

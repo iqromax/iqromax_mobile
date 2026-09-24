@@ -15,6 +15,7 @@ import io from 'socket.io-client';
 import { SOCKET_URL, API_URL, getShopImageUrl } from '../src/config/api';
 import { Character3DViewer } from '../components/Character3DViewer';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Polygon, Line, Circle, Text as SvgText, Path, G } from 'react-native-svg';
 import { calculateUserRank } from '../src/utils/rankUtils';
 import { useEnergy } from '../src/hooks/useEnergy';
 import { MYSTERY_TRANSLATIONS } from './MysteryBoxScreen';
@@ -480,6 +481,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isOpeningBox, setIsOpeningBox] = useState(false);
   const [boxReward, setBoxReward] = useState(null);
   
+  // User Profile Modal (Leaderboard)
+  const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
+  const [selectedUserProfile, setSelectedUserProfile] = useState(null);
+  const [selectedUserSkins, setSelectedUserSkins] = useState({});
+  const [userProfileTab, setUserProfileTab] = useState('stats'); // 'stats', 'achievements', 'about'
+
   const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false);
   const [friendsActiveTab, setFriendsActiveTab] = useState('friends');
   const [hasUnreadFriendRequests, setHasUnreadFriendRequests] = useState(false);
@@ -503,6 +510,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, [hasAnyUnread]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [friendsList, setFriendsList] = useState([]);
+  const [recentChats, setRecentChats] = useState([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -663,7 +671,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 Alert.alert('Ogohlantirish', 'Backend bo\'sh ro\'yxat qaytardi!');
               }
               const rankedData = data.map((u, index) => ({
-                customId: u.id,
+                ...u,
+                customId: u.id || u.customId,
                 rank: index + 1,
                 name: u.name || '---',
                 xp: u.xp || 0,
@@ -1792,6 +1801,36 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }
   };
 
+  const fetchRecentChats = async () => {
+    if (!user?.customId) return;
+    try {
+      const res = await fetch(`${API_URL}/chat/recent/${encodeURIComponent(user.customId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setRecentChats(data);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const openUserProfile = async (userData) => {
+    if (!userData || !userData.customId) return;
+    if (user && userData.customId === user.customId) return;
+    
+    try {
+      const skinsJson = await AsyncStorage.getItem(`user_equipped_skins_${userData.customId}`);
+      let userSkins = {};
+      if (skinsJson) {
+        userSkins = JSON.parse(skinsJson);
+      }
+      navigation.navigate('UserProfile', { user, selectedUser: userData, selectedUserSkins: userSkins });
+    } catch (e) {
+      console.log('Error fetching user skins:', e);
+      navigation.navigate('UserProfile', { user, selectedUser: userData, selectedUserSkins: {} });
+    }
+  };
+
   const handleSendFriendRequest = async (targetId) => {
     if (!user?.customId || targetId === user.customId) return;
     try {
@@ -1879,8 +1918,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
     });
 
     socket.on('chat_message_received', (msg) => {
-      if (msg.receiverId === user.customId) {
+      const myId = (user.customId || '').replace(/^#+/, '').toUpperCase();
+      const rId = (msg.receiverId || '').replace(/^#+/, '').toUpperCase();
+      if (rId === myId) {
         setUnreadChatFriends((prev) => ({ ...prev, [msg.senderId]: true }));
+        fetchRecentChats();
       }
     });
 
@@ -3644,40 +3686,49 @@ export default function StudentDashboardScreen({ navigation, route }) {
             <View style={[styles.leaderboardContainer, { marginTop: 0 }]}>
               {filteredLeaderboard.length > 0 ? (
                 filteredLeaderboard.map((item, index) => (
-                  <Animated.View key={item.customId || index} style={[
-                    styles.leaderboardRow, 
-                    (index !== filteredLeaderboard.length - 1 && item.customId !== highlightedUserId) && styles.leaderboardRowBorder,
-                    item.customId === highlightedUserId && {
-                      backgroundColor: highlightAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['rgba(192, 132, 252, 0.05)', 'rgba(192, 132, 252, 0.4)']
-                      }),
-                      borderColor: highlightAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['rgba(192, 132, 252, 0.3)', 'rgba(192, 132, 252, 1)']
-                      }),
-                      borderWidth: 2,
-                      borderBottomWidth: 2, 
-                      borderRadius: 12,
-                      zIndex: 10,
-                      elevation: 10,
-                    }
-                  ]}>
-                    <Text style={styles.leaderboardRank}>{item.rank}</Text>
-                    <Image source={item.avatar} style={styles.leaderboardAvatar} />
-                    <Text style={styles.leaderboardName} numberOfLines={1}>{item.name}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Text style={styles.leaderboardXp}>{item.xp} XP</Text>
-                      {item.customId !== user?.customId && (
-                        <TouchableOpacity 
-                          style={{ marginLeft: 12, backgroundColor: 'rgba(192, 132, 252, 0.1)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
-                          onPress={() => handleSendFriendRequest(item.customId)}
-                        >
-                          <Feather name="user-plus" size={15} color="#C084FC" />
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  </Animated.View>
+                  <TouchableOpacity 
+                    key={item.customId || index} 
+                    activeOpacity={0.7}
+                    onPress={() => openUserProfile(item)}
+                  >
+                    <Animated.View style={[
+                      styles.leaderboardRow, 
+                      (index !== filteredLeaderboard.length - 1 && item.customId !== highlightedUserId) && styles.leaderboardRowBorder,
+                      item.customId === highlightedUserId && {
+                        backgroundColor: highlightAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['rgba(192, 132, 252, 0.05)', 'rgba(192, 132, 252, 0.4)']
+                        }),
+                        borderColor: highlightAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['rgba(192, 132, 252, 0.3)', 'rgba(192, 132, 252, 1)']
+                        }),
+                        borderWidth: 2,
+                        borderBottomWidth: 2, 
+                        borderRadius: 12,
+                        zIndex: 10,
+                        elevation: 10,
+                      }
+                    ]}>
+                      <Text style={styles.leaderboardRank}>{item.rank}</Text>
+                      <Image source={item.avatar} style={styles.leaderboardAvatar} />
+                      <Text style={styles.leaderboardName} numberOfLines={1}>{item.name}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text style={styles.leaderboardXp}>{item.xp} XP</Text>
+                        {item.customId !== user?.customId && (
+                          <TouchableOpacity 
+                            style={{ marginLeft: 12, backgroundColor: 'rgba(192, 132, 252, 0.1)', width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
+                            onPress={(e) => {
+                              e.stopPropagation();
+                              handleSendFriendRequest(item.customId);
+                            }}
+                          >
+                            <Feather name="user-plus" size={15} color="#C084FC" />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </Animated.View>
+                  </TouchableOpacity>
                 ))
               ) : (
                 <View style={styles.leaderboardNoResult}>
@@ -4253,6 +4304,266 @@ export default function StudentDashboardScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+      </Modal>
+
+      {/* User Profile Modal */}
+      <Modal visible={isUserProfileModalOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <ScrollView contentContainerStyle={{ paddingVertical: 40, alignItems: 'center' }} style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+            <View style={[styles.modalContent, { backgroundColor: '#0B0F19', padding: 0, width: '90%', borderRadius: 24, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.3)' }]}>
+              {/* Header bg */}
+              <View style={{ backgroundColor: '#1E1B4B', width: '100%', height: 100, position: 'absolute', top: 0, left: 0 }} />
+              
+              <TouchableOpacity 
+                style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 15, padding: 6 }}
+                onPress={() => setIsUserProfileModalOpen(false)}
+              >
+                <Feather name="x" size={20} color="#FFF" />
+              </TouchableOpacity>
+
+              {selectedUserProfile && (() => {
+                const xp = selectedUserProfile.xp || 0;
+                const lvl = selectedUserProfile.level || Math.max(1, Math.floor(xp / 100));
+                const userAccuracy = selectedUserProfile.accuracy || selectedUserProfile.stats?.accuracy || Math.min(100, Math.max(65, 80 + Math.floor(xp % 20)));
+                const userWins = selectedUserProfile.wins || selectedUserProfile.stats?.wins || Math.floor(xp / 50);
+                const userTotalGames = selectedUserProfile.totalGames || selectedUserProfile.stats?.totalGames || (userWins + Math.floor(xp / 30) + 10);
+
+                const logic = selectedUserProfile.logic || Math.min(100, 60 + (xp % 40));
+                const speed = selectedUserProfile.speed || Math.min(100, 50 + (xp % 50));
+                const memory = selectedUserProfile.memory || Math.min(100, 70 + (xp % 30));
+                const focus = selectedUserProfile.focus || Math.min(100, 65 + (xp % 35));
+
+                const p1 = `${80},${80 - 70 * (logic / 100)}`;
+                const p2 = `${80 + 70 * 0.951 * (speed / 100)},${80 - 70 * 0.309 * (speed / 100)}`;
+                const p3 = `${80 + 70 * 0.588 * (memory / 100)},${80 + 70 * 0.809 * (memory / 100)}`;
+                const p4 = `${80 - 70 * 0.588 * (userAccuracy / 100)},${80 + 70 * 0.809 * (userAccuracy / 100)}`;
+                const p5 = `${80 - 70 * 0.951 * (focus / 100)},${80 - 70 * 0.309 * (focus / 100)}`;
+                const radarPoints = `${p1} ${p2} ${p3} ${p4} ${p5}`;
+
+                return (
+                <View style={{ alignItems: 'center', width: '100%', padding: 20, paddingTop: 30 }}>
+                  
+                  {/* Pedestal & Avatar Viewer */}
+                  <View style={{ alignItems: 'center', marginBottom: 20, marginTop: 10 }}>
+                    <View style={{ width: 220, height: 260, zIndex: 2, alignItems: 'center', justifyContent: 'flex-end' }}>
+                      {Object.keys(selectedUserSkins).length > 0 ? (
+                        <View style={{ width: 300, height: 320, position: 'absolute', bottom: -30 }}>
+                          <Character3DViewer 
+                            characterPath={selectedUserSkins.character || "model.glb"} 
+                            accessoryPath={selectedUserSkins.accessory} 
+                            topsPath={selectedUserSkins.tops} 
+                            headwearPath={selectedUserSkins.headwear} 
+                            pantsPath={selectedUserSkins.pants} 
+                            shoesPath={selectedUserSkins.shoes} 
+                            backpackPath={selectedUserSkins.backpack}
+                          />
+                        </View>
+                      ) : (
+                        <Image 
+                          source={selectedUserProfile.avatar?.uri ? { uri: selectedUserProfile.avatar.uri } : (typeof selectedUserProfile.avatar === 'string' && selectedUserProfile.avatar.startsWith('http') ? { uri: selectedUserProfile.avatar } : selectedUserProfile.avatar)} 
+                          style={{ width: 140, height: 140, borderRadius: 70, marginBottom: 20, borderWidth: 2, borderColor: '#A855F7' }} 
+                        />
+                      )}
+                    </View>
+                    
+                    {/* Pedestal Effect */}
+                    <View style={{ alignItems: 'center', marginTop: -40 }}>
+                      <View style={{ width: 160, height: 40, backgroundColor: '#A855F7', borderRadius: 100, opacity: 0.3, transform: [{ scaleY: 0.4 }], zIndex: 1, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 20 }} />
+                      <View style={{ width: 180, height: 50, backgroundColor: '#1E1B4B', borderRadius: 100, marginTop: -35, borderWidth: 2, borderColor: '#A855F7', transform: [{ scaleY: 0.4 }], zIndex: 0 }} />
+                      <View style={{ width: 200, height: 60, backgroundColor: 'rgba(168, 85, 247, 0.1)', borderRadius: 100, marginTop: -45, borderWidth: 1, borderColor: 'rgba(168, 85, 247, 0.3)', transform: [{ scaleY: 0.4 }], zIndex: -1 }} />
+                    </View>
+                  </View>
+
+                  {/* Info: Name, Level, ID */}
+                  <Text style={{ color: '#FFF', fontSize: 24, fontFamily: 'Inter_800ExtraBold', marginBottom: 6, textAlign: 'center' }}>
+                    {selectedUserProfile.name}
+                  </Text>
+                  
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                    <View style={{ backgroundColor: 'rgba(168, 85, 247, 0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 }}>
+                      <Text style={{ color: '#C084FC', fontFamily: 'Inter_700Bold', fontSize: 13 }}>
+                        LVL {lvl}
+                      </Text>
+                    </View>
+                    <View style={{ backgroundColor: 'rgba(56, 189, 248, 0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, flexDirection: 'row', alignItems: 'center' }}>
+                      <MaterialCommunityIcons name="email-outline" size={14} color="#38BDF8" style={{ marginRight: 4 }} />
+                      <Text style={{ color: '#38BDF8', fontFamily: 'Inter_700Bold', fontSize: 13 }}>
+                        ID: {String(selectedUserProfile.customId || '0000').replace(/^#+/, '')}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* 3 Stats: Accuracy, Wins, Total Games */}
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', backgroundColor: '#1E293B', borderRadius: 16, padding: 16, marginBottom: 20 }}>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ color: '#10B981', fontSize: 20, fontFamily: 'Inter_800ExtraBold' }}>
+                        {userAccuracy}%
+                      </Text>
+                      <Text style={{ color: '#94A3B8', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>
+                        Aniqlik
+                      </Text>
+                    </View>
+                    <View style={{ width: 1, backgroundColor: '#334155' }} />
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ color: '#F59E0B', fontSize: 20, fontFamily: 'Inter_800ExtraBold' }}>
+                        {userWins}
+                      </Text>
+                      <Text style={{ color: '#94A3B8', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 4 }}>
+                        G'alabalar
+                      </Text>
+                    </View>
+                    <View style={{ width: 1, backgroundColor: '#334155' }} />
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ color: '#38BDF8', fontSize: 20, fontFamily: 'Inter_800ExtraBold' }}>
+                        {userTotalGames}
+                      </Text>
+                      <Text style={{ color: '#94A3B8', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginTop: 4, textAlign: 'center' }}>
+                        Jami o'yinlar
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Charts Container */}
+                  <View style={{ width: '100%', gap: 16 }}>
+                    
+                    {/* Level Progression Line Chart */}
+                    <View style={{ backgroundColor: '#1E293B', borderRadius: 16, padding: 16, alignItems: 'center' }}>
+                      <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold', alignSelf: 'flex-start', marginBottom: 16 }}>
+                        Daraja rivojlanishi
+                      </Text>
+                      <View style={{ width: '100%', height: 100, alignItems: 'center', justifyContent: 'flex-end', flexDirection: 'row' }}>
+                        <Svg width="100%" height="100" viewBox="0 0 220 100" preserveAspectRatio="xMidYMid meet">
+                          {/* Grid lines */}
+                          <Line x1="0" y1="20" x2="220" y2="20" stroke="#334155" strokeWidth="1" strokeDasharray="4" />
+                          <Line x1="0" y1="50" x2="220" y2="50" stroke="#334155" strokeWidth="1" strokeDasharray="4" />
+                          <Line x1="0" y1="80" x2="220" y2="80" stroke="#334155" strokeWidth="1" />
+                          
+                          {/* Line Chart */}
+                          {(() => {
+                            const history = selectedUserProfile.history || selectedUserProfile.stats?.history || [
+                              Math.max(0, xp - 400),
+                              Math.max(0, xp - 250),
+                              Math.max(0, xp - 100),
+                              Math.max(0, xp - 30),
+                              xp
+                            ];
+                            const maxVal = Math.max(100, ...history);
+                            const points = history.map((val, i) => {
+                              const x = 10 + i * 50;
+                              const y = 80 - 60 * (val / maxVal);
+                              return {x, y, val};
+                            });
+                            const pathD = `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ');
+                            
+                            return (
+                              <>
+                                <Path 
+                                  d={pathD} 
+                                  fill="none" 
+                                  stroke="#A855F7" 
+                                  strokeWidth="3" 
+                                  strokeLinejoin="round"
+                                />
+                                {points.map((p, i) => (
+                                  <Circle 
+                                    key={`point-${i}`} 
+                                    cx={p.x} 
+                                    cy={p.y} 
+                                    r="4" 
+                                    fill={i === points.length - 1 ? "#FFF" : "#A855F7"} 
+                                    stroke={i === points.length - 1 ? "#A855F7" : "none"} 
+                                    strokeWidth={i === points.length - 1 ? "2" : "0"} 
+                                  />
+                                ))}
+                              </>
+                            );
+                          })()}
+                        </Svg>
+                      </View>
+                    </View>
+
+                    {/* Game Style Radar Chart */}
+                    <View style={{ backgroundColor: '#1E293B', borderRadius: 16, padding: 16, alignItems: 'center' }}>
+                      <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold', alignSelf: 'flex-start', marginBottom: 16 }}>
+                        O'yin uslubi
+                      </Text>
+                      <View style={{ width: 160, height: 160, alignItems: 'center', justifyContent: 'center' }}>
+                        <Svg width="160" height="160" viewBox="0 0 160 160">
+                          {/* Radar Web - Full (100%) */}
+                          <Polygon points="80,10 146.5,58.3 121.1,136.6 38.8,136.6 13.4,58.3" fill="none" stroke="#334155" strokeWidth="1" />
+                          {/* Radar Web - 75% */}
+                          <Polygon points="80,27.5 129.9,63.7 110.8,122.4 49.1,122.4 30,63.7" fill="none" stroke="#334155" strokeWidth="1" />
+                          {/* Radar Web - 50% */}
+                          <Polygon points="80,45 113.3,69.1 100.5,108.3 59.4,108.3 46.6,69.1" fill="none" stroke="#334155" strokeWidth="1" />
+                          
+                          <Line x1="80" y1="80" x2="80" y2="10" stroke="#334155" strokeWidth="1" />
+                          <Line x1="80" y1="80" x2="146.5" y2="58.3" stroke="#334155" strokeWidth="1" />
+                          <Line x1="80" y1="80" x2="121.1" y2="136.6" stroke="#334155" strokeWidth="1" />
+                          <Line x1="80" y1="80" x2="38.8" y2="136.6" stroke="#334155" strokeWidth="1" />
+                          <Line x1="80" y1="80" x2="13.4" y2="58.3" stroke="#334155" strokeWidth="1" />
+                          
+                          {/* Data Polygon */}
+                          <Polygon points={radarPoints} fill="rgba(56, 189, 248, 0.4)" stroke="#38BDF8" strokeWidth="2" strokeLinejoin="round" />
+                          
+                          {/* Labels */}
+                          <SvgText x="80" y="5" fill="#94A3B8" fontSize="10" textAnchor="middle">Mantiq</SvgText>
+                          <SvgText x="155" y="55" fill="#94A3B8" fontSize="10" textAnchor="end">Tezlik</SvgText>
+                          <SvgText x="135" y="148" fill="#94A3B8" fontSize="10" textAnchor="end">Xotira</SvgText>
+                          <SvgText x="25" y="148" fill="#94A3B8" fontSize="10" textAnchor="start">Aniqlik</SvgText>
+                          <SvgText x="5" y="55" fill="#94A3B8" fontSize="10" textAnchor="start">Fokus</SvgText>
+                        </Svg>
+                      </View>
+                    </View>
+                    
+                  </View>
+
+                  {/* Chat Input & Add Friend */}
+                  <View style={{ flexDirection: 'column', gap: 12, width: '100%', marginTop: 24 }}>
+                    {selectedUserProfile.customId !== user?.customId && (
+                      <TouchableOpacity 
+                        style={[styles.modalBtn, { backgroundColor: '#10B981', width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
+                        onPress={() => {
+                          handleSendFriendRequest(selectedUserProfile.customId);
+                          setIsUserProfileModalOpen(false);
+                          showCustomAlert("So'rov yuborildi", "Do'stlik so'rovi muvaffaqiyatli yuborildi", "success");
+                        }}
+                      >
+                        <Feather name="user-plus" size={18} color="#FFF" style={{ marginRight: 8 }} />
+                        <Text style={styles.modalBtnPrimaryText}>Do'stlik so'rovini yuborish</Text>
+                      </TouchableOpacity>
+                    )}
+
+                    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', backgroundColor: '#1E293B', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 4, borderWidth: 1, borderColor: '#334155' }}>
+                      <TextInput 
+                        style={{ flex: 1, color: '#FFF', fontFamily: 'Inter_500Medium', fontSize: 14, paddingVertical: 10 }}
+                        placeholder="Xabar yozish..."
+                        placeholderTextColor="#94A3B8"
+                        onSubmitEditing={(e) => {
+                          const msg = e.nativeEvent.text;
+                          if (msg.trim()) {
+                            setIsUserProfileModalOpen(false);
+                            navigation.navigate('ChatScreen', { friend: selectedUserProfile });
+                          }
+                        }}
+                      />
+                      <TouchableOpacity 
+                        style={{ backgroundColor: '#A855F7', padding: 10, borderRadius: 8, marginLeft: 8 }}
+                        onPress={() => {
+                          setIsUserProfileModalOpen(false);
+                          navigation.navigate('ChatScreen', { friend: selectedUserProfile });
+                        }}
+                      >
+                        <Feather name="send" size={16} color="#FFF" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                </View>
+                );
+              })()}
+            </View>
+          </ScrollView>
         </View>
       </Modal>
 
@@ -5805,9 +6116,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ color: friendsActiveTab === 'friends' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Do'stlar</Text>
-                  {Object.keys(unreadChatFriends).length > 0 && (
-                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
-                  )}
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
@@ -5820,6 +6128,20 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ color: friendsActiveTab === 'requests' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Arizalar</Text>
                   {hasUnreadFriendRequests && (
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
+                  )}
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flex: 1, paddingVertical: 10, alignItems: 'center', backgroundColor: friendsActiveTab === 'chats' ? '#C084FC' : 'transparent', borderRadius: 10 }}
+                onPress={() => {
+                  setFriendsActiveTab('chats');
+                  setUnreadChatFriends({}); // Clear unread on open
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ color: friendsActiveTab === 'chats' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>Chatlar</Text>
+                  {Object.keys(unreadChatFriends).length > 0 && (
                     <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
                   )}
                 </View>
@@ -5858,6 +6180,57 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 )
               )}
 
+              {friendsActiveTab === 'chats' && (
+                <View>
+                  {recentChats.length === 0 ? (
+                    <View style={{ alignItems: 'center', marginTop: 40 }}>
+                      <MaterialCommunityIcons name="chat-outline" size={64} color="rgba(255,255,255,0.1)" />
+                      <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', marginTop: 16 }}>Sizda hali suhbatlar yo'q</Text>
+                    </View>
+                  ) : (
+                    recentChats.map((chat) => {
+                      const hasUnread = unreadChatFriends[chat.customId] || unreadChatFriends[`#${chat.customId}`];
+                      return (
+                      <TouchableOpacity 
+                        key={chat.customId} 
+                        style={{ flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, marginBottom: 12 }}
+                        onPress={() => {
+                          setIsFriendsModalOpen(false);
+                          // Clear unread for this specific chat
+                          setUnreadChatFriends(prev => {
+                            const next = { ...prev };
+                            delete next[chat.customId];
+                            delete next[`#${chat.customId}`];
+                            return next;
+                          });
+                          navigation.navigate('ChatScreen', { friend: chat });
+                        }}
+                      >
+                        <View style={{ position: 'relative' }}>
+                          <Image source={chat.avatar ? (chat.avatar.startsWith('http') ? { uri: chat.avatar } : getAvatarByName(chat.avatar)) : getAvatarByName('maks')} style={{ width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: 'rgba(168, 85, 247, 0.3)' }} />
+                          {hasUnread && (
+                            <View style={{ position: 'absolute', top: 0, right: 0, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EF4444', borderWidth: 2, borderColor: '#05050C' }} />
+                          )}
+                        </View>
+                        <View style={{ flex: 1, marginLeft: 16 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>{chat.name}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(192, 132, 252, 0.2)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 }}>
+                              <MaterialCommunityIcons name="star-four-points" size={12} color="#C084FC" />
+                              <Text style={{ color: '#C084FC', fontSize: 11, fontFamily: 'Inter_700Bold', marginLeft: 4 }}>{chat.xp}</Text>
+                            </View>
+                          </View>
+                          <Text style={{ color: hasUnread ? '#FFF' : '#9CA3AF', fontSize: 13, fontFamily: hasUnread ? 'Inter_600SemiBold' : 'Inter_400Regular', marginTop: 4 }} numberOfLines={1}>
+                            {chat.lastMessage ? chat.lastMessage.content : 'Chat boshlandi'}
+                          </Text>
+                        </View>
+                        <MaterialCommunityIcons name="chevron-right" size={24} color="rgba(255,255,255,0.2)" />
+                      </TouchableOpacity>
+                    )})
+                  )}
+                </View>
+              )}
+              
               {friendsActiveTab === 'friends' && (
                 friendsList.length > 0 ? friendsList.map(friend => (
                   <View key={friend.customId} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 16, marginBottom: 12 }}>

@@ -73,15 +73,28 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
     // Build friend equipped skins - sender is the one who sent the invite (Ergashboy)
     const senderSkins = parsed?.senderEquippedSkins || inviteData.senderEquippedSkins || {};
     const targetSkins = parsed?.targetEquippedSkins || inviteData.targetEquippedSkins || {};
-    // In the lobby, the friend is the sender (the one who invited us)
-    const resolvedSkins = (senderSkins && Object.keys(senderSkins).length > 0) ? senderSkins : targetSkins;
+    
+    // If we are the host, the friend is the target. If we are the guest, the friend is the sender.
+    let resolvedSkins = {};
+    if (route.params?.isHost) {
+      resolvedSkins = (targetSkins && Object.keys(targetSkins).length > 0) ? targetSkins : {};
+    } else {
+      resolvedSkins = (senderSkins && Object.keys(senderSkins).length > 0) ? senderSkins : targetSkins;
+    }
     setFriendEquippedSkinsState(resolvedSkins);
 
     // Parse friend char name
     const senderAvatar = parsed?.senderAvatar || inviteData.senderAvatar;
     const targetAvatar = parsed?.targetAvatar || inviteData.targetAvatar;
-    setFriendCharNameState(senderAvatar || targetAvatar || null);
-  }, [inviteData]);
+    
+    let resolvedAvatar = null;
+    if (route.params?.isHost) {
+      resolvedAvatar = targetAvatar;
+    } else {
+      resolvedAvatar = senderAvatar || targetAvatar;
+    }
+    setFriendCharNameState(resolvedAvatar || null);
+  }, [inviteData, route.params?.isHost]);
 
   useEffect(() => {
     async function fetchMySkins() {
@@ -120,6 +133,9 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
   // Animations
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
+  const countdownScale = useRef(new Animated.Value(0.5)).current;
+  const countdownOpacity = useRef(new Animated.Value(0)).current;
+  const loadingProgress = useRef(new Animated.Value(0)).current;
 
   // Resolve avatars
   const baseAvatarsList = [
@@ -237,16 +253,14 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
   }, [userData, route.params]);
 
   useEffect(() => {
-    import('react-native').then(({ DeviceEventEmitter }) => {
-      const sub = DeviceEventEmitter.addListener('global_start_friend_battle', (settingsData) => {
-        if (!route.params?.isHost) {
-          setBattleData(settingsData);
-          setIsCountingDown(true);
-          setCountdownVal(1);
-        }
-      });
-      return () => sub.remove();
+    const sub = DeviceEventEmitter.addListener('global_start_friend_battle', (settingsData) => {
+      if (!route.params?.isHost) {
+        setBattleData(settingsData);
+        setIsCountingDown(true);
+        setCountdownVal(1);
+      }
     });
+    return () => sub.remove();
   }, [route.params?.isHost]);
 
   useEffect(() => {
@@ -258,6 +272,14 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
 
   useEffect(() => {
     if (isCountingDown) {
+      // We will handle the progress bar animation below.
+      // Set progress smoothly to (countdownVal / 10)
+      Animated.timing(loadingProgress, {
+        toValue: countdownVal / 10,
+        duration: 1000,
+        useNativeDriver: false
+      }).start();
+
       if (countdownVal < 10) {
         const timer = setTimeout(() => {
           setCountdownVal(prev => prev + 1);
@@ -349,16 +371,25 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
         <SafeAreaView style={styles.container}>
         {/* Header Section */}
         <View style={styles.header}>
-          <View style={styles.headerButton} />
           <View style={styles.headerTitleContainer}>
-            <MaterialCommunityIcons name="clock-outline" size={24} color="#A855F7" style={{ marginRight: 8, marginTop: -20, position: 'absolute', opacity: 0 }} />
             <Text style={styles.headerTitle}>KUTISH <Text style={{ color: '#A855F7' }}>ZALI</Text></Text>
             <Text style={styles.headerSubtitle}>{t.waitingText}</Text>
           </View>
-          <TouchableOpacity style={styles.headerButton} activeOpacity={0.8}>
-            <MaterialCommunityIcons name="cog" size={24} color="#FFF" />
-          </TouchableOpacity>
         </View>
+
+        {isCountingDown && (
+          <View style={styles.loadingContainer}>
+            <View style={styles.loadingTrack}>
+               <Animated.View style={[styles.loadingFill, {
+                 width: loadingProgress.interpolate({
+                   inputRange: [0, 1],
+                   outputRange: ['0%', '100%']
+                 })
+               }]} />
+            </View>
+            <Text style={styles.loadingText}>O'yin tayyorlanmoqda...</Text>
+          </View>
+        )}
 
 
 
@@ -519,14 +550,7 @@ export default function FriendBattleLobbyScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Fullscreen Countdown Overlay */}
-        {isCountingDown && (
-          <Animated.View style={[styles.countdownOverlay, { opacity: countdownOpacity }]}>
-            <Animated.Text style={[styles.countdownText, { transform: [{ scale: countdownScale }] }]}>
-              {countdownVal}
-            </Animated.Text>
-          </Animated.View>
-        )}
+        {/* Fullscreen Countdown Removed */}
       </SafeAreaView>
       </ImageBackground>
     </View>
@@ -553,16 +577,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     marginBottom: 20,
   },
-  headerButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   headerTitleContainer: {
     alignItems: 'center',
+    width: '100%',
   },
   headerTitle: {
     color: '#FFF',
@@ -881,5 +898,29 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(168, 85, 247, 0.8)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 30,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+    zIndex: 10,
+  },
+  loadingTrack: {
+    width: 200,
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  loadingFill: {
+    height: '100%',
+    backgroundColor: '#A855F7',
+    borderRadius: 3,
+  },
+  loadingText: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
   }
 });

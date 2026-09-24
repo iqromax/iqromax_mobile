@@ -2329,10 +2329,8 @@ io.on('connection', (socket) => {
     console.log('Starting friend battle for target:', data.targetId);
     if (data.targetId) {
       const safeId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
-      const targetSocketId = onlineUsers.get(safeId);
-      if (targetSocketId) {
-        io.to(targetSocketId).emit('start_friend_battle', data);
-      }
+      // Emit to the user's room to reach all of their connected socket instances
+      io.to(safeId).emit('start_friend_battle', data);
     }
   });
 

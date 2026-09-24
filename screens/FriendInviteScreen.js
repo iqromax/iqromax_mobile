@@ -18,14 +18,15 @@ import { API_URL, SOCKET_URL } from '../src/config/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { calculateUserRank } from '../src/utils/rankUtils';
+import { getAvatarByName } from '../src/utils/avatars';
 
 const TRANSLATIONS = {
   uz: {
     headerTitle: "Do'st bilan battle",
-    step1: "ID orqali taklif",
+    step1: "Taklif",
     step2: "Do'st qabul qildi",
-    step3: "Battle boshlash",
-    mainTitle: "Do'stingizni ID orqali taklif qiling",
+    step3: "Battle sozlamalari",
+    mainTitle: "Do'stingizni battle ga taklif qiling",
     subTitle: "Do'stingizning IQROMAX ID sini kiriting\nva battle taklifini yuboring!",
     inputLabel: "Do'stingizning ID sini kiriting",
     inputPlaceholder: "ID ni kiriting",
@@ -39,7 +40,7 @@ const TRANSLATIONS = {
   },
   en: {
     headerTitle: "Battle with a Friend",
-    step1: "Invite via ID",
+    step1: "Invite",
     step2: "Friend accepted",
     step3: "Start Battle",
     mainTitle: "Invite your friend via ID",
@@ -56,7 +57,7 @@ const TRANSLATIONS = {
   },
   ru: {
     headerTitle: "Баттл с другом",
-    step1: "Пригласить по ID",
+    step1: "Пригласить",
     step2: "Друг принял",
     step3: "Начать баттл",
     mainTitle: "Пригласите друга по ID",
@@ -73,7 +74,7 @@ const TRANSLATIONS = {
   },
   ar: {
     headerTitle: "معركة مع صديق",
-    step1: "دعوة عبر ID",
+    step1: "دعوة",
     step2: "صديق قبل",
     step3: "بدء المعركة",
     mainTitle: "ادعُ صديقك عبر الـ ID",
@@ -90,7 +91,7 @@ const TRANSLATIONS = {
   },
   tr: {
     headerTitle: "Arkadaşla Savaş",
-    step1: "ID ile Davet Et",
+    step1: "Davet Et",
     step2: "Arkadaş kabul etti",
     step3: "Savaşı Başlat",
     mainTitle: "Arkadaşınızı ID ile davet edin",
@@ -107,7 +108,7 @@ const TRANSLATIONS = {
   },
   zh: {
     headerTitle: "与朋友对战",
-    step1: "通过ID邀请",
+    step1: "邀请",
     step2: "朋友已接受",
     step3: "开始对战",
     mainTitle: "通过ID邀请您的朋友",
@@ -124,7 +125,7 @@ const TRANSLATIONS = {
   },
   ky: {
     headerTitle: "Дос менен баттл",
-    step1: "ID аркылуу чакыруу",
+    step1: "Чакыруу",
     step2: "Дос кабыл алды",
     step3: "Баттлды баштоо",
     mainTitle: "Досуңузду ID аркылуу чакырыңыз",
@@ -141,7 +142,7 @@ const TRANSLATIONS = {
   },
   kk: {
     headerTitle: "Доспен баттл",
-    step1: "ID арқылы шақыру",
+    step1: "Шақыру",
     step2: "Дос қабылдады",
     step3: "Баттлды бастау",
     mainTitle: "Досыңызды ID арқылы шақырыңыз",
@@ -158,9 +159,9 @@ const TRANSLATIONS = {
   },
   tg: {
     headerTitle: "Баттл бо дӯст",
-    step1: "Даъват тавассути ID",
+    step1: "Даъват",
     step2: "Дӯст қабул кард",
-    step3: "Оғози баттл",
+    step3: "Танзимоти баттл",
     mainTitle: "Дӯсти худро бо ID даъват кунед",
     subTitle: "ID IQROMAX-и дӯсти худро ворид кунед\nва даъвати баттл фиристед!",
     inputLabel: "ID-и дӯстатонро ворид кунед",
@@ -175,9 +176,9 @@ const TRANSLATIONS = {
   },
   ja: {
     headerTitle: "友達とのバトル",
-    step1: "IDで招待",
+    step1: "招待",
     step2: "友達が承認",
-    step3: "バトル開始",
+    step3: "バトル設定",
     mainTitle: "IDで友達を招待",
     subTitle: "友達のIQROMAX IDを入力して\nバトルの招待を送ろう！",
     inputLabel: "友達のIDを入力",
@@ -192,9 +193,9 @@ const TRANSLATIONS = {
   },
   ko: {
     headerTitle: "친구와 배틀",
-    step1: "ID로 초대",
+    step1: "초대",
     step2: "친구 수락함",
-    step3: "배틀 시작",
+    step3: "배틀 설정",
     mainTitle: "ID로 친구 초대",
     subTitle: "친구의 IQROMAX ID를 입력하고\n배틀 초대를 보내세요!",
     inputLabel: "친구 ID 입력",
@@ -210,6 +211,10 @@ const TRANSLATIONS = {
 };
 
 const FriendInviteScreen = ({ navigation, route }) => {
+  const [friends, setFriends] = useState([]);
+  const [isLoadingFriends, setIsLoadingFriends] = useState(true);
+  const [currentUserData, setCurrentUserData] = useState(null);
+  const [sentInvites, setSentInvites] = useState({});
   const [friendId, setFriendId] = useState('');
   const [isInfoExpanded, setIsInfoExpanded] = useState(false);
   const [foundUser, setFoundUser] = useState(null);
@@ -219,6 +224,31 @@ const FriendInviteScreen = ({ navigation, route }) => {
   const [inviteRespData, setInviteRespData] = useState(null);
   const inviteLink = 'iqromax.app/battle/invite/IQX567890';
   
+
+  React.useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        const userDataStr = await AsyncStorage.getItem('user_data');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          setCurrentUserData(userData);
+          if (userData.customId) {
+            const res = await fetch(`${API_URL}/user/friends/${encodeURIComponent(userData.customId)}`);
+            if (res.ok) {
+              const data = await res.json();
+              setFriends(data);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching friends:', e);
+      } finally {
+        setIsLoadingFriends(false);
+      }
+    };
+    fetchFriends();
+  }, []);
+
   React.useEffect(() => {
     let socket;
     const connectSocket = async () => {
@@ -316,231 +346,121 @@ const FriendInviteScreen = ({ navigation, route }) => {
             <Text style={styles.subTitle}>{t.subTitle}</Text>
           </View>
 
-          {/* Input Section */}
-          <View style={styles.inputSection}>
-            <Text style={styles.inputLabel}>{t.inputLabel}</Text>
-            <View style={styles.inputRow}>
-              <View style={styles.inputContainer}>
-                <View style={styles.inputIconWrapper}>
-                  <MaterialCommunityIcons name="account" size={20} color="#FFF" />
-                </View>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder={t.inputPlaceholder}
-                  placeholderTextColor="#6B7280"
-                  keyboardType="default"
-                  autoCapitalize="characters"
-                  value={friendId}
-                  onFocus={() => {
-                    if (friendId.length === 0 || friendId === '') {
-                      setFriendId('#');
-                    }
-                  }}
-                  onChangeText={async (text) => {
-                    setIsInviteSent(false);
-                    const cleaned = text.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                    const formatted = cleaned.length > 0 ? `#${cleaned}` : '#';
-                    setFriendId(formatted);
-                    if (formatted.length >= 5 && cleaned.length >= 4) {
-                      setIsSearching(true);
-                      try {
-                        const encodedText = encodeURIComponent(formatted);
-                        const res = await fetch(`${API_URL}/users/search/${encodedText}`);
-                        if (res.ok) {
-                          const text = await res.text();
-                          if (!text || !text.trim().startsWith('{')) {
-                            setFoundUser(null);
-                            return;
-                          }
-                          const data = JSON.parse(text);
-                          const userDataStr = await AsyncStorage.getItem('user_data');
-                          const currentUser = userDataStr ? JSON.parse(userDataStr) : null;
-                          const myId = String(currentUser?.id || '').trim();
-                          const myCustomId = String(currentUser?.customId || '').replace(/^#+/, '').trim().toUpperCase();
-                          const foundId = String(data?.id || '').trim();
-                          const foundCustomId = String(data?.customId || '').replace(/^#+/, '').trim().toUpperCase();
-
-                          if ((myId && foundId && myId === foundId) || (myCustomId && foundCustomId && myCustomId === foundCustomId)) {
-                            setFoundUser(null);
-                          } else {
-                            const foundXp = data.xp || 0;
-                            const foundRank = calculateUserRank(foundXp);
-                            setFoundUser({
-                              id: data.id,
-                              name: data.name,
-                              level: foundRank.levelNumber,
-                              rating: data.rating || 1000,
-                              xp: foundXp,
-                              avatar: data.avatar && data.avatar.startsWith('http') ? { uri: data.avatar } : require('../assets/avatar_alex.jpg'),
-                            });
-                          }
-                        } else {
-                          setFoundUser(null);
-                        }
-                      } catch (error) {
-                        console.error('Search error:', error);
-                        setFoundUser(null);
-                      } finally {
-                        setIsSearching(false);
-                      }
-                    } else {
-                      setFoundUser(null);
-                      setIsSearching(false);
-                    }
-                  }}
-                />
-                {friendId.length > 0 && friendId !== '#' && (
-                  <TouchableOpacity onPress={() => { setFriendId(''); setFoundUser(null); setIsInviteSent(false); }}>
-                    <MaterialCommunityIcons name="close-circle" size={20} color="#6B7280" />
-                  </TouchableOpacity>
-                )}
+          {/* Friends List Section */}
+          <View style={{ marginBottom: 40 }}>
+            {isLoadingFriends ? (
+              <View style={{ alignItems: 'center', marginTop: 40 }}>
+                <ActivityIndicator size="large" color="#A855F7" />
+                <Text style={{ color: '#9CA3AF', marginTop: 10 }}>Yuklanmoqda...</Text>
               </View>
-              <TouchableOpacity style={styles.sendLinkBtn}>
-                <MaterialCommunityIcons name="send" size={24} color="#FFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Search State / User Card */}
-          {isSearching ? (
-            <View style={styles.searchStateCard}>
-              <ActivityIndicator size="large" color="#A855F7" style={{ marginBottom: 15 }} />
-              <Text style={styles.searchStateTitle}>{t.searching}</Text>
-            </View>
-          ) : foundUser ? (
-            <View style={styles.userCard}>
-              <View style={styles.userInfoRow}>
-                <Image source={foundUser.avatar} style={styles.userAvatar} contentFit="cover" />
-                <View style={styles.userDetails}>
-                  <Text style={styles.userName}>{foundUser.name}</Text>
-                  <Text style={styles.userIdText}>ID: #{String(foundUser?.id || '0000').replace(/^#+/, '')}</Text>
-                  <View style={styles.userStatsRow}>
-                    <View style={styles.statBadge}>
+            ) : friends.length === 0 ? (
+              <View style={{ alignItems: 'center', marginTop: 40 }}>
+                <MaterialCommunityIcons name="account-group" size={64} color="rgba(255,255,255,0.1)" />
+                <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', marginTop: 16 }}>Sizda hali do'stlar yo'q</Text>
+              </View>
+            ) : (
+              friends.map(friend => (
+                <View key={friend.customId} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', padding: 16, borderRadius: 16, marginBottom: 12 }}>
+                  <Image 
+                    source={friend.avatar ? (friend.avatar.startsWith('http') ? { uri: friend.avatar } : getAvatarByName(friend.avatar)) : require('../assets/avatar_alex.jpg')} 
+                    style={{ width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: 'rgba(168, 85, 247, 0.3)' }} 
+                  />
+                  <View style={{ flex: 1, marginLeft: 16 }}>
+                    <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>{friend.name}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
                       <MaterialCommunityIcons name="star" size={14} color="#FBBF24" />
-                      <Text style={styles.statText}>{foundUser.level} lvl</Text>
-                    </View>
-                    <View style={[styles.statBadge, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
-                      <MaterialCommunityIcons name="trophy" size={14} color="#3B82F6" />
-                      <Text style={[styles.statText, { color: '#3B82F6' }]}>{foundUser.rating}</Text>
+                      <Text style={{ color: '#FBBF24', fontSize: 13, fontFamily: 'Inter_600SemiBold', marginLeft: 4 }}>
+                        {calculateUserRank(friend.xp || 0).levelNumber} lvl
+                      </Text>
                     </View>
                   </View>
-                </View>
-              </View>
-              {isInviteAccepted ? (
-                <TouchableOpacity 
-                  style={[styles.inviteButton, { backgroundColor: '#A855F7' }]}
-                  onPress={() => {
-                    navigation.navigate('BattleSettings', { 
-                      language, 
-                      battleMode: 'dost', 
-                      isFriendBattle: true, 
-                      inviteData: inviteRespData,
-                      foundUser: foundUser,
-                      targetId: foundUser.id
-                    });
-                  }}
-                >
-                  <Text style={styles.inviteButtonText}>O'yinni sozlash</Text>
-                  <MaterialCommunityIcons name="cog" size={18} color="#FFF" style={{ marginLeft: 8 }} />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity 
-                  style={[styles.inviteButton, isInviteSent && { backgroundColor: '#4B5563', shadowOpacity: 0 }]} 
-                  disabled={isInviteSent}
-                  onPress={async () => {
-                  const userDataStr = await AsyncStorage.getItem('user_data');
-                  const userData = userDataStr ? JSON.parse(userDataStr) : null;
-                  
-                  const socket = io(SOCKET_URL, { 
-                    path: '/api/socket.io',
-                    transports: ['websocket'] 
-                  });
-                  const userXp = userData?.xp || 0;
-                  const rankInfo = calculateUserRank(userXp);
-
-                  // Fetch equipped skins
-                  let equippedSkins = {};
-                  try {
-                    const userIdKey = userData?.customId || userData?.id || 'guest';
-                    const skinsStr = await AsyncStorage.getItem(`user_equipped_skins_${userIdKey}`);
-                    if (skinsStr) {
-                      const parsedSkins = JSON.parse(skinsStr);
-                      // Calculate active avatar index based on character
-                      let activeAvatarIndex = 0;
-                      if (userData?.character) {
-                        const lowerChar = userData.character.toLowerCase();
-                        const boysChars = ["alex", "maks", "david", "kevin"];
-                        const girlsChars = ["lily", "maya", "emma", "sophia"];
-                        if (boysChars.includes(lowerChar)) {
-                          activeAvatarIndex = boysChars.indexOf(lowerChar);
-                        } else if (girlsChars.includes(lowerChar)) {
-                          activeAvatarIndex = girlsChars.indexOf(lowerChar) + 4;
-                        }
-                      }
-                      
-                      equippedSkins = {
-                        accessories: parsedSkins.accessories?.[activeAvatarIndex] || null,
-                        tops: parsedSkins.tops?.[activeAvatarIndex] || null,
-                        headwears: parsedSkins.headwears?.[activeAvatarIndex] || null,
-                        pants: parsedSkins.pants?.[activeAvatarIndex] || null,
-                        shoes: parsedSkins.shoes?.[activeAvatarIndex] || null,
-                        backpacks: parsedSkins.backpacks?.[activeAvatarIndex] || null,
-                      };
-                    }
-                  } catch (e) {
-                    console.error('Error fetching equipped skins', e);
-                  }
-
-                  socket.emit('send_battle_invite', {
-                    senderId: userData?.customId || 'NOMA\'LUM',
-                    targetId: foundUser.id,
-                    senderName: userData?.name || 'Foydalanuvchi',
-                    senderAvatar: userData?.character || null,
-                    senderEquippedSkins: equippedSkins,
-                    level: rankInfo.levelNumber,
-                    xp: userXp,
-                    rating: userXp
-                  });
-                  setIsInviteSent(true);
-                }}>
-                  <Text style={styles.inviteButtonText}>{isInviteSent ? t.inviteSent : t.sendInvite}</Text>
-                  {!isInviteSent ? (
-                    <MaterialCommunityIcons name="sword-cross" size={18} color="#FFF" style={{ marginLeft: 8 }} />
+                  {isInviteAccepted && inviteRespData?.userId && (inviteRespData.userId.toUpperCase() === String(friend.customId).toUpperCase() || inviteRespData.userId.replace(/^#+/, '').toUpperCase() === String(friend.customId).replace(/^#+/, '').toUpperCase()) ? (
+                    <TouchableOpacity 
+                      style={{ backgroundColor: '#A855F7', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, flexDirection: 'row', alignItems: 'center' }}
+                      onPress={() => {
+                        navigation.navigate('BattleSettings', { 
+                          language, 
+                          battleMode: 'dost', 
+                          isFriendBattle: true, 
+                          inviteData: inviteRespData,
+                          foundUser: friend,
+                          targetId: friend.customId
+                        });
+                      }}
+                    >
+                      <Text style={{ color: '#FFF', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>Battle sozlamalari</Text>
+                      <MaterialCommunityIcons name="cog" size={16} color="#FFF" style={{ marginLeft: 6 }} />
+                    </TouchableOpacity>
                   ) : (
-                    <MaterialCommunityIcons name="check-circle" size={18} color="#10B981" style={{ marginLeft: 8 }} />
-                  )}
-                </TouchableOpacity>
-              )}
-            </View>
-          ) : (
-            <View style={styles.searchStateCard}>
-              <MaterialCommunityIcons name="magnify" size={60} color="rgba(255, 255, 255, 0.2)" />
-              <Text style={styles.searchStateTitle}>{t.searchFriend}</Text>
-              <Text style={styles.searchStateSub}>{t.searchSub}</Text>
-            </View>
-          )}
+                    <TouchableOpacity 
+                      style={{ 
+                        backgroundColor: sentInvites[friend.customId] ? '#4B5563' : 'rgba(168, 85, 247, 0.2)', 
+                        paddingHorizontal: sentInvites[friend.customId] ? 12 : 16, 
+                        paddingVertical: 10, 
+                        borderRadius: 12,
+                        flexDirection: 'row',
+                        alignItems: 'center'
+                      }}
+                      disabled={sentInvites[friend.customId]}
+                      onPress={async () => {
+                        const socket = io(SOCKET_URL, { path: '/api/socket.io', transports: ['websocket'] });
+                        const userXp = currentUserData?.xp || 0;
+                        const rankInfo = calculateUserRank(userXp);
+                        
+                        let equippedSkins = {};
+                        try {
+                          const userIdKey = currentUserData?.customId || currentUserData?.id || 'guest';
+                          const skinsStr = await AsyncStorage.getItem(`user_equipped_skins_${userIdKey}`);
+                          if (skinsStr) {
+                            const parsedSkins = JSON.parse(skinsStr);
+                            let activeAvatarIndex = 0;
+                            if (currentUserData?.character) {
+                              const lowerChar = currentUserData.character.toLowerCase();
+                              const boysChars = ["alex", "maks", "david", "kevin"];
+                              const girlsChars = ["lily", "maya", "emma", "sophia"];
+                              if (boysChars.includes(lowerChar)) {
+                                activeAvatarIndex = boysChars.indexOf(lowerChar);
+                              } else if (girlsChars.includes(lowerChar)) {
+                                activeAvatarIndex = girlsChars.indexOf(lowerChar) + 4;
+                              }
+                            }
+                            equippedSkins = {
+                              accessories: parsedSkins.accessories?.[activeAvatarIndex] || null,
+                              tops: parsedSkins.tops?.[activeAvatarIndex] || null,
+                              headwears: parsedSkins.headwears?.[activeAvatarIndex] || null,
+                              pants: parsedSkins.pants?.[activeAvatarIndex] || null,
+                              shoes: parsedSkins.shoes?.[activeAvatarIndex] || null,
+                              backpacks: parsedSkins.backpacks?.[activeAvatarIndex] || null,
+                            };
+                          }
+                        } catch (e) {}
 
-          {/* Bottom Info Card */}
-          <TouchableOpacity 
-            style={styles.infoCard}
-            onPress={() => setIsInfoExpanded(!isInfoExpanded)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.infoIconBox}>
-              <MaterialCommunityIcons name="lightbulb-on" size={24} color="#A855F7" />
-            </View>
-            <View style={styles.infoContent}>
-              <Text style={styles.infoTitle}>{t.infoTitle}</Text>
-              {isInfoExpanded && (
-                <Text style={styles.infoDesc}>{t.infoDesc}</Text>
-              )}
-            </View>
-            <MaterialCommunityIcons 
-              name={isInfoExpanded ? "chevron-up" : "chevron-down"} 
-              size={24} 
-              color="#A855F7" 
-            />
-          </TouchableOpacity>
+                        socket.emit('send_battle_invite', {
+                          senderId: currentUserData?.customId || "NOMA'LUM",
+                          targetId: friend.customId,
+                          senderName: currentUserData?.name || 'Foydalanuvchi',
+                          senderAvatar: currentUserData?.character || null,
+                          senderEquippedSkins: equippedSkins,
+                          level: rankInfo.levelNumber,
+                          xp: userXp,
+                          rating: userXp
+                        });
+                        
+                        setSentInvites(prev => ({ ...prev, [friend.customId]: true }));
+                      }}
+                    >
+                      <Text style={{ color: sentInvites[friend.customId] ? '#D1D5DB' : '#A855F7', fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>
+                        {sentInvites[friend.customId] ? 'Yuborildi' : 'Taklif'}
+                      </Text>
+                      {!sentInvites[friend.customId] && (
+                        <MaterialCommunityIcons name="sword-cross" size={16} color="#A855F7" style={{ marginLeft: 6 }} />
+                      )}
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))
+            )}
+          </View>
 
         </ScrollView>
       </KeyboardAvoidingView>

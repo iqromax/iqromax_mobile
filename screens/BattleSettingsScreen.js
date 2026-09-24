@@ -372,9 +372,9 @@ export default function BattleSettingsScreen({ navigation, route }) {
                 questions.push(MentalMathGenerator.generate(selectedOperation, selectedDigits, selectedExamples));
               }
 
-              const friendAvatar = route.params.foundUser?.avatar?.uri 
-                ? route.params.foundUser.avatar.uri 
-                : route.params.foundUser?.avatar;
+              const friendAvatar = route.params.foundUser?.character 
+                ? route.params.foundUser.character 
+                : (route.params.foundUser?.avatar?.uri ? route.params.foundUser.avatar.uri : route.params.foundUser?.avatar);
 
               // Load host's own equipped skins from AsyncStorage
               let myEquippedSkins = {};
@@ -412,9 +412,9 @@ export default function BattleSettingsScreen({ navigation, route }) {
               navigation.replace('FriendBattleLobby', {
                 language,
                 inviteData: { 
-                   senderName: route.params.foundUser?.name || route.params.inviteData?.targetName,
-                   senderAvatar: friendAvatar,
-                   senderEquippedSkins: route.params.inviteData?.targetEquippedSkins || {},
+                   targetName: route.params.foundUser?.name || route.params.inviteData?.targetName || route.params.inviteData?.senderName,
+                   targetAvatar: friendAvatar,
+                   targetEquippedSkins: route.params.inviteData?.targetEquippedSkins || {},
                    myEquippedSkins: myEquippedSkins,
                    level: route.params.foundUser?.level || 1,
                    xp: route.params.foundUser?.xp !== undefined ? route.params.foundUser.xp : (route.params.foundUser?.rating || 0),
