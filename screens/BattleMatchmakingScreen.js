@@ -137,7 +137,6 @@ export default function BattleMatchmakingScreen({ navigation, route }) {
     });
 
     socketRef.current.on('start_battle_countdown', (settings) => {
-      setShowSettingsModal(false);
       setShowLoading(true);
       setTimeout(() => {
         if (socketRef.current) socketRef.current.disconnect();
