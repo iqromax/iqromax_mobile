@@ -2832,6 +2832,90 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     </View>
                   )}
                 </View>
+
+                {/* AMALLAR SECTION */}
+                <View style={[styles.opsContainer, { marginTop: 15 }]}>
+                  <View style={styles.opsHeader}>
+                    <View style={styles.opsIconBox}>
+                      <MaterialCommunityIcons name="calculator-variant" size={24} color="#A855F7" />
+                    </View>
+                    <View style={styles.opsHeaderTextContainer}>
+                      <Text style={styles.opsTitle}>{t.opsTitle}</Text>
+                      <Text style={styles.opsSubtitle}>{t.opsSubtitle}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.opsRow}>
+                    {/* Oddiy */}
+                    <TouchableOpacity 
+                      style={[styles.opsCard, selectedOperation === 'oddiy' && styles.opsCardSelected]}
+                      onPress={() => setSelectedOperation('oddiy')}
+                      activeOpacity={0.8}
+                    >
+                      {selectedOperation === 'oddiy' && (
+                        <View style={styles.opsCheckmarkBadge}>
+                          <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                        </View>
+                      )}
+                      <View style={styles.opsCardIconWrapper}>
+                        <MaterialCommunityIcons name="plus" size={32} color={selectedOperation === 'oddiy' ? '#A855F7' : '#9CA3AF'} />
+                      </View>
+                      <Text style={[styles.opsCardTitle, selectedOperation === 'oddiy' && styles.opsCardTitleSelected]}>{t.opsOddiy}</Text>
+                    </TouchableOpacity>
+
+                    {/* Formula 5 */}
+                    <TouchableOpacity 
+                      style={[styles.opsCard, selectedOperation === 'f5' && styles.opsCardSelected]}
+                      onPress={() => setSelectedOperation('f5')}
+                      activeOpacity={0.8}
+                    >
+                      {selectedOperation === 'f5' && (
+                        <View style={styles.opsCheckmarkBadge}>
+                          <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                        </View>
+                      )}
+                      <View style={styles.opsCardIconWrapper}>
+                        <Text style={[styles.opsFormulaIcon, selectedOperation === 'f5' && styles.opsFormulaIconSelected]}>f(x)</Text>
+                      </View>
+                      <Text style={[styles.opsCardTitle, selectedOperation === 'f5' && styles.opsCardTitleSelected]}>{t.opsF5}</Text>
+                    </TouchableOpacity>
+
+                    {/* Formula 10 */}
+                    <TouchableOpacity 
+                      style={[styles.opsCard, selectedOperation === 'f10' && styles.opsCardSelected]}
+                      onPress={() => setSelectedOperation('f10')}
+                      activeOpacity={0.8}
+                    >
+                      {selectedOperation === 'f10' && (
+                        <View style={styles.opsCheckmarkBadge}>
+                          <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                        </View>
+                      )}
+                      <View style={styles.opsCardIconWrapper}>
+                        <Text style={[styles.opsFormulaIcon, selectedOperation === 'f10' && styles.opsFormulaIconSelected]}>f(x)</Text>
+                      </View>
+                      <Text style={[styles.opsCardTitle, selectedOperation === 'f10' && styles.opsCardTitleSelected]}>{t.opsF10}</Text>
+                    </TouchableOpacity>
+
+                    {/* Aralash */}
+                    <TouchableOpacity 
+                      style={[styles.opsCard, selectedOperation === 'aralash' && styles.opsCardSelected]}
+                      onPress={() => setSelectedOperation('aralash')}
+                      activeOpacity={0.8}
+                    >
+                      {selectedOperation === 'aralash' && (
+                        <View style={styles.opsCheckmarkBadge}>
+                          <MaterialCommunityIcons name="check-bold" size={12} color="#fff" />
+                        </View>
+                      )}
+                      <View style={styles.opsCardIconWrapper}>
+                        <MaterialCommunityIcons name="shuffle-variant" size={28} color={selectedOperation === 'aralash' ? '#A855F7' : '#9CA3AF'} />
+                      </View>
+                      <Text style={[styles.opsCardTitle, selectedOperation === 'aralash' && styles.opsCardTitleSelected]}>{t.opsAralash}</Text>
+                    </TouchableOpacity>
+
+                  </View>
+                </View>
               </>
             )}
           </View>
