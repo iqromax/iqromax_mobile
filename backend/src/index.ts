@@ -2252,6 +2252,35 @@ app.get('/api/chat/recent/:customId', async (req, res) => {
   }
 });
 
+app.post('/api/battle/start', async (req, res) => {
+  try {
+    const data = req.body;
+    if (data.targetId) {
+      try {
+        await prisma.notification.create({
+          data: {
+            type: 'BATTLE_STARTED',
+            senderId: data.senderId,
+            userId: data.targetId,
+            message: JSON.stringify(data)
+          }
+        });
+      } catch(e) {
+        console.error("Battle start db save error:", e);
+      }
+      
+      const safeId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
+      const targetSocketId = onlineUsers.get(safeId);
+      if (targetSocketId) {
+        io.to(targetSocketId).emit('start_friend_battle', data);
+      }
+    }
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Fallback to admin panel for unhandled routes
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, '../admin_panel/dist/index.html'));
@@ -2406,37 +2435,6 @@ io.on('connection', (socket) => {
     }
   });
 });
-// ----------------------------------------------------
-
-app.post('/api/battle/start', async (req, res) => {
-  try {
-    const data = req.body;
-    if (data.targetId) {
-      try {
-        await prisma.notification.create({
-          data: {
-            type: 'BATTLE_STARTED',
-            senderId: data.senderId,
-            userId: data.targetId,
-            message: JSON.stringify(data)
-          }
-        });
-      } catch(e) {
-        console.error("Battle start db save error:", e);
-      }
-      
-      const safeId = data.targetId.replace(/^#+/, '').trim().toUpperCase();
-      const targetSocketId = onlineUsers.get(safeId);
-      if (targetSocketId) {
-        io.to(targetSocketId).emit('start_friend_battle', data);
-      }
-    }
-    res.json({ success: true });
-  } catch(e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
 // ----------------------------------------------------
 
 server.listen(PORT, () => {
