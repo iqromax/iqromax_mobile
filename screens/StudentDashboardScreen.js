@@ -182,6 +182,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const { energy: currentEnergy, addEnergy, consumeEnergy, formattedTime, isPremium, checkPremiumActive } = useEnergy();
   const [user, setUser] = useState(route.params?.user);
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
+  const [requiredEnergyAlert, setRequiredEnergyAlert] = useState(2);
   const { language = 'uz', selectedChar = 0 } = route.params || {};
   const [activeTab, setActiveTab] = useState('home');
   const getCharIndexFromUser = (u, defaultIdx = 0) => {
