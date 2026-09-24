@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from '../src/utils/safeAudio';
-import { Video, ResizeMode } from 'expo-av';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateUserRank } from '../src/utils/rankUtils';
@@ -240,6 +239,33 @@ export default function BattleGameScreen({ navigation, route }) {
   }, [currentQIndex, questions]);
 
 
+  const [lightState, setLightState] = useState(0); // 0=none, 1=red, 2=yellow, 3=green
+
+  useEffect(() => {
+    if (phase === 'countdown') {
+      let step = 1;
+      setLightState(1); // Red
+      playSound('tick', '+');
+      
+      const interval = setInterval(() => {
+        step++;
+        if (step === 2) {
+          setLightState(2); // Yellow
+          playSound('tick', '+');
+        } else if (step === 3) {
+          setLightState(3); // Green
+          playSound('tick', '+');
+        } else if (step > 3) {
+          clearInterval(interval);
+          setPhase('flashing');
+          setQuestionStartTime(Date.now());
+        }
+      }, 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [phase]);
+
   useEffect(() => {
     let timeout;
     if (phase === 'flashing' && sequence.length > 0) {
@@ -473,22 +499,15 @@ export default function BattleGameScreen({ navigation, route }) {
       <View style={[styles.gameAreaWrapper, { justifyContent: phase === 'input' ? 'flex-end' : 'center', paddingBottom: phase === 'input' ? 20 : 0 }]}>
 
         {phase === 'countdown' ? (
-          <View style={[styles.gameArea, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316' }]}>
-            <Video
-              source={require('../assets/svetafor.mp4')}
-              style={{ width: '100%', height: '100%' }}
-              resizeMode={ResizeMode.COVER}
-              shouldPlay={true}
-              isLooping={false}
-              useNativeControls={false}
-              onPlaybackStatusUpdate={(status) => {
-                if (status.didJustFinish) {
-                   playSound('tick', sequence[0]?.op || '+');
-                   setPhase('flashing');
-                   setQuestionStartTime(Date.now());
-                }
-              }}
-            />
+          <View style={[styles.gameArea, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316', justifyContent: 'center', alignItems: 'center' }]}>
+            <View style={{ width: 120, height: 320, backgroundColor: '#1a1a1a', borderRadius: 20, borderWidth: 4, borderColor: '#333', justifyContent: 'space-evenly', alignItems: 'center', paddingVertical: 10 }}>
+              {/* Red Light */}
+              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 1 ? '#ff3333' : '#4a1111', borderWidth: 2, borderColor: '#111', shadowColor: '#ff0000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 1 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 1 ? 10 : 0 }} />
+              {/* Yellow Light */}
+              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 2 ? '#ffcc00' : '#4a3b00', borderWidth: 2, borderColor: '#111', shadowColor: '#ffcc00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 2 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 2 ? 10 : 0 }} />
+              {/* Green Light */}
+              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 3 ? '#33ff33' : '#114a11', borderWidth: 2, borderColor: '#111', shadowColor: '#00ff00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 3 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 3 ? 10 : 0 }} />
+            </View>
           </View>
         ) : phase === 'flashing' ? (
           <View style={styles.gameArea}>
