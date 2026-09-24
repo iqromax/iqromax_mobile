@@ -1148,7 +1148,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
       setBackendSkins(prev => prev.filter(s => s.id !== deletedId));
     });
 
+    const sendAnswerSub = DeviceEventEmitter.addListener('send_battle_answer', (data) => {
+      if (socket && socket.connected) {
+        socket.emit('battle_answer_submitted', data);
+      }
+    });
+
     return () => {
+      sendAnswerSub.remove();
       if (socket) {
         if (socket.regInterval) clearInterval(socket.regInterval);
         socket.disconnect();

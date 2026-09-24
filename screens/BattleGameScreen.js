@@ -108,7 +108,6 @@ export default function BattleGameScreen({ navigation, route }) {
   const [userData, setUserData] = useState(null);
   
   // Multiplayer states
-  const [socket, setSocket] = useState(null);
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
   const [opponentResult, setOpponentResult] = useState(null);
   const [myResult, setMyResult] = useState(null);
@@ -136,7 +135,6 @@ export default function BattleGameScreen({ navigation, route }) {
   const userLevel = userData ? calculateUserRank(userData.xp || 0).levelNumber : 1;
 
   useEffect(() => {
-    let activeSocket = null;
     let answerSub = null;
     async function fetchUser() {
       try {
@@ -146,16 +144,9 @@ export default function BattleGameScreen({ navigation, route }) {
           setUserData(parsed);
           
           if (route.params?.isFriendBattle) {
-            const io = require('socket.io-client');
-            const SOCKET_URL = process.env.EXPO_PUBLIC_API_URL || 'https://iqromax-production.up.railway.app';
-            activeSocket = io(SOCKET_URL, { path: '/api/socket.io', transports: ['websocket'] });
-            
-            // Do not emit register here to avoid stealing ownership from StudentDashboardScreen
-            // Instead, we rely on StudentDashboardScreen to receive the event and relay it globally.
             answerSub = DeviceEventEmitter.addListener('global_battle_answer_submitted', (data) => {
                setOpponentResult(data);
             });
-            setSocket(activeSocket);
           }
         }
       } catch (e) {}
@@ -164,7 +155,6 @@ export default function BattleGameScreen({ navigation, route }) {
     
     return () => {
       if (answerSub) answerSub.remove();
-      if (activeSocket) activeSocket.disconnect();
     }
   }, []);
 
@@ -339,13 +329,11 @@ export default function BattleGameScreen({ navigation, route }) {
         setMyResult(resultObj);
         setWaitingForOpponent(true);
         
-        if (socket) {
-          socket.emit('battle_answer_submitted', {
-            targetId: route.params.targetId,
-            senderId: userData?.customId || '',
-            ...resultObj
-          });
-        }
+        DeviceEventEmitter.emit('send_battle_answer', {
+          targetId: route.params.targetId,
+          senderId: userData?.customId || '',
+          ...resultObj
+        });
       } else {
         navigation.replace('BattleResult', {
            correct: finalCorrect,
@@ -477,7 +465,7 @@ export default function BattleGameScreen({ navigation, route }) {
       </View>
 
       {/* Main Game Area */}
-      <View style={styles.gameAreaWrapper}>
+      <View style={[styles.gameAreaWrapper, { justifyContent: phase === 'input' ? 'flex-end' : 'center', paddingBottom: phase === 'input' ? 20 : 0 }]}>
 
         {phase === 'countdown' ? (
           <View style={styles.gameArea}>
@@ -494,9 +482,9 @@ export default function BattleGameScreen({ navigation, route }) {
             </View>
           </View>
         ) : (
-          <View style={styles.gameArea}>
-            <Text style={styles.mainNumber}>{inputValue || '?'}</Text>
-            <Text style={[styles.operator, { fontSize: 24, marginTop: 10, color: '#9ca3af' }]}>{t.enterAnswer}</Text>
+          <View style={{ alignItems: 'center' }}>
+            <Text style={[styles.mainNumber, { fontSize: 72, color: '#facc15', textShadowColor: 'rgba(250, 204, 21, 0.4)', textShadowRadius: 15 }]}>{inputValue || '?'}</Text>
+            <Text style={[styles.operator, { fontSize: 20, marginTop: 8, color: '#9ca3af', textShadowRadius: 0 }]}>{t.enterAnswer}</Text>
           </View>
         )}
       </View>
@@ -771,7 +759,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     paddingTop: 12,
     flex: 1,
-    justifyContent: 'flex-start',
   },
   tabBadge: {
     position: 'absolute',
