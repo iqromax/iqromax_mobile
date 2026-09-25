@@ -87,7 +87,7 @@ export default function BattleGameScreen({ navigation, route }) {
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
   
   const totalQuestions = 1;
-  const [phase, setPhase] = useState('countdown'); // 'countdown' | 'flashing' | 'input'
+  const [phase, setPhase] = useState('init'); // 'init' | 'countdown' | 'flashing' | 'input'
   const [startCountdown, setStartCountdown] = useState(3);
   const [questions, setQuestions] = useState([]);
   const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -162,13 +162,16 @@ export default function BattleGameScreen({ navigation, route }) {
   const tickSound = useRef(null);
 
   useEffect(() => {
-    let s1;
+    let s1, s2;
     async function loadSounds() {
       try {
         await Audio.setAudioModeAsync({ playsInSilentModeIOS: true, allowsRecordingIOS: false, staysActiveInBackground: false });
         const { sound: sound1 } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
         tickSound.current = sound1;
         s1 = sound1;
+        
+        const { sound: sound2 } = await Audio.Sound.createAsync(require('../assets/sounds/traffic_light.mp3'));
+        s2 = sound2;
       } catch (e) {
         console.log('Error loading sounds:', e);
       }
@@ -176,6 +179,7 @@ export default function BattleGameScreen({ navigation, route }) {
     loadSounds();
     return () => {
       if (s1) s1.unloadAsync();
+      if (s2) s2.unloadAsync();
     };
   }, []);
 
@@ -188,6 +192,8 @@ export default function BattleGameScreen({ navigation, route }) {
           await tickSound.current.setRateAsync(1.6, true);
         }
         await tickSound.current.replayAsync();
+      } else if (type === 'traffic_light') {
+        await Audio.Sound.createAsync(require('../assets/sounds/traffic_light.mp3'), { shouldPlay: true });
       }
     } catch (e) {}
   };
@@ -245,16 +251,14 @@ export default function BattleGameScreen({ navigation, route }) {
     if (phase === 'countdown') {
       let step = 1;
       setLightState(1); // Red
-      playSound('tick', '+');
+      playSound('traffic_light');
       
       const interval = setInterval(() => {
         step++;
         if (step === 2) {
           setLightState(2); // Yellow
-          playSound('tick', '+');
         } else if (step === 3) {
           setLightState(3); // Green
-          playSound('tick', '+');
         } else if (step > 3) {
           clearInterval(interval);
           setPhase('flashing');

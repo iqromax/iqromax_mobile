@@ -42,6 +42,7 @@ export function SoundPlayerBridge() {
         let audioCtx = null;
         const soundBuffers = {};
         const base64Sounds = {
+          traffic_light: '${SOUND_DATA.traffic_light}',
           tick: '${SOUND_DATA.tick}',
           correct: '${SOUND_DATA.correct}',
           wrong: '${SOUND_DATA.wrong}'

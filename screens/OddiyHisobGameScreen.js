@@ -34,8 +34,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const { examplesCount = 3, operation = 'oddiy', speed = 1, digits = 1, language = 'uz', isSpeedMode = false, isTeacher = false } = route.params || {};
   const t = TRANSLATIONS[language] || TRANSLATIONS['uz'];
 
-  // Game phases: 'countdown' | 'flashing' | 'input' | 'feedback'
-  const [phase, setPhase] = useState('countdown');
+  // Game phases: 'init' | 'countdown' | 'flashing' | 'input' | 'feedback'
+  const [phase, setPhase] = useState('init');
   const [isEnergyAlertVisible, setIsEnergyAlertVisible] = useState(false);
   const [speedResults, setSpeedResults] = useState([]);
   const [lightState, setLightState] = useState(0);
@@ -82,7 +82,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const wrongSound = useRef(null);
 
   useEffect(() => {
-    let s1, s2, s3;
+    let s1, s2, s3, s4;
     async function loadSounds() {
       try {
         const { sound: sound1 } = await Audio.Sound.createAsync(require('../assets/sounds/tick.wav'));
@@ -96,6 +96,9 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         const { sound: sound3 } = await Audio.Sound.createAsync(require('../assets/sounds/wrong.wav'));
         wrongSound.current = sound3;
         s3 = sound3;
+        
+        const { sound: sound4 } = await Audio.Sound.createAsync(require('../assets/sounds/traffic_light.mp3'));
+        s4 = sound4;
       } catch (e) {
         console.log('Error loading sounds:', e);
       }
@@ -106,6 +109,7 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
       if (s1) s1.unloadAsync();
       if (s2) s2.unloadAsync();
       if (s3) s3.unloadAsync();
+      if (s4) s4.unloadAsync();
     };
   }, []);
 
@@ -136,6 +140,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
           const { sound } = await Audio.Sound.createAsync(require('../assets/sounds/wrong.wav'), { shouldPlay: true });
           wrongSound.current = sound;
         }
+      } else if (type === 'traffic_light') {
+        await Audio.Sound.createAsync(require('../assets/sounds/traffic_light.mp3'), { shouldPlay: true });
       }
     } catch (e) {
       console.log('Error playing sound', e);
@@ -240,16 +246,14 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     if (phase === 'countdown') {
       let step = 1;
       setLightState(1); // Red
-      playSound('tick', '+');
+      playSound('traffic_light');
       
       const interval = setInterval(() => {
         step++;
         if (step === 2) {
           setLightState(2); // Yellow
-          playSound('tick', '+');
         } else if (step === 3) {
           setLightState(3); // Green
-          playSound('tick', '+');
         } else if (step > 3) {
           clearInterval(interval);
           setStartTime(Date.now()); // reset timer at start of flashing

@@ -44,6 +44,7 @@ const Audio = {
           const uri = resolved?.uri || '';
           if (uri.includes('correct')) soundKey = 'correct';
           else if (uri.includes('wrong')) soundKey = 'wrong';
+          else if (uri.includes('traffic_light')) soundKey = 'traffic_light';
           else if (uri.includes('tick')) soundKey = 'tick';
         }
       } catch (e) {}
