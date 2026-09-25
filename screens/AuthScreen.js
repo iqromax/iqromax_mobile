@@ -292,6 +292,7 @@ export default function AuthScreen({ navigation, route }) {
           body: JSON.stringify({
             phone: loginIdentifier,
             username: loginIdentifier,
+            email: loginIdentifier,
             password: password.trim(),
             language
           })
@@ -477,10 +478,11 @@ export default function AuthScreen({ navigation, route }) {
           ) : (
             <>
               <CustomAnimatedInput
-                icon={<Feather name="phone" size={18} color="#888899" style={styles.inputIcon} />}
-                placeholder={t.phone}
+                icon={<Feather name="user" size={18} color="#888899" style={styles.inputIcon} />}
+                placeholder="Email yoki Telefon raqami"
                 placeholderTextColor="#555566"
-                keyboardType="phone-pad"
+                keyboardType="default"
+                autoCapitalize="none"
                 value={phone}
                 onChangeText={setPhone}
                 onFocus={handleInputFocus}

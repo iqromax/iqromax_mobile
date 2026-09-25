@@ -393,6 +393,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
         body: JSON.stringify({
           phone: loginIdent,
           username: loginIdent,
+          email: loginIdent,
           password: authPassword.trim(),
           language
         })
