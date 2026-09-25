@@ -26,8 +26,15 @@ export function Character3DViewer({ characterPath = null, accessoryPath = null, 
         if (info.exists) {
           if (Platform.OS === 'ios') {
             // WKWebView strictly blocks fetch() on file:// URIs due to CORS.
-            // Using the remote URL allows the webview's native HTTP cache to handle it efficiently!
-            return setter(remoteUrl);
+            // Using a Data URI allows us to bypass the network entirely on iOS!
+            try {
+              const base64 = await FileSystem.readAsStringAsync(localUri, { encoding: FileSystem.EncodingType.Base64 });
+              const dataUri = `data:model/gltf-binary;base64,${base64}`;
+              return setter(dataUri);
+            } catch (err) {
+              console.warn('Failed to read base64 on iOS', err);
+              return setter(remoteUrl);
+            }
           } else {
             // Android allows file:// fetches when configured properly.
             return setter(localUri.split('/').pop());
