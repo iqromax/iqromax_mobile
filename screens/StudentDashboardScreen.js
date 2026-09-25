@@ -3880,6 +3880,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 onPress={() => {
                   fetchFriendRequests();
                   fetchFriends();
+                  fetchRecentChats();
                   setFriendsActiveTab('friends');
                   setIsFriendsModalOpen(true);
                 }}

@@ -2229,11 +2229,27 @@ app.get('/api/chat/recent/:customId', async (req, res) => {
     }
 
     const partnerIds = Array.from(recentMap.keys());
+    
+    // Normalize partner IDs (remove #) to match users in DB correctly
+    const cleanPartnerIds = partnerIds.map(pid => pid.replace(/^#+/, '').trim());
+    const hashPartnerIds = cleanPartnerIds.map(pid => '#' + pid);
+
     const users = await prisma.user.findMany({
-      where: { customId: { in: partnerIds } }
+      where: { 
+        OR: [
+          { customId: { in: cleanPartnerIds } },
+          { customId: { in: hashPartnerIds } }
+        ]
+      }
     });
 
-    const userMap = new Map(users.map((u: any) => [u.customId, u]));
+    const userMap = new Map();
+    for (const u of users) {
+      // Map both with and without hash to be safe
+      const cid = u.customId.replace(/^#+/, '').trim();
+      userMap.set(cid, u);
+      userMap.set('#' + cid, u);
+    }
     const result = partnerIds.map(pid => {
       const u = userMap.get(pid);
       return {
