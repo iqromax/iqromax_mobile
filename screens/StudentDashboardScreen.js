@@ -3889,7 +3889,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   <Feather name="users" size={20} color={hasAnyUnread ? "#EF4444" : "#FFF"} />
                 </Animated.View>
                 {hasAnyUnread && (
-                  <View style={{ position: 'absolute', top: 10, right: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#EF4444', borderWidth: 2, borderColor: '#12121D' }} />
+                  <Animated.View style={{ position: 'absolute', top: 10, right: 10, width: 10, height: 10, borderRadius: 5, backgroundColor: '#EF4444', borderWidth: 2, borderColor: '#12121D', transform: [{ scale: friendIconPulseAnim }] }} />
                 )}
               </TouchableOpacity>
             </View>
@@ -6560,7 +6560,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ color: friendsActiveTab === 'chats' ? '#FFF' : '#9CA3AF', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>{fmt.chats}</Text>
                   {Object.keys(unreadChatFriends).length > 0 && (
-                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6 }} />
+                    <Animated.View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#EF4444', marginLeft: 6, transform: [{ scale: friendIconPulseAnim }] }} />
                   )}
                 </View>
               </TouchableOpacity>
@@ -6627,7 +6627,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         <View style={{ position: 'relative' }}>
                           <Image source={chat.avatar ? (chat.avatar.startsWith('http') ? { uri: chat.avatar } : getAvatarByName(chat.avatar)) : getAvatarByName('maks')} style={{ width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: 'rgba(168, 85, 247, 0.3)' }} />
                           {hasUnread && (
-                            <View style={{ position: 'absolute', top: 0, right: 0, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EF4444', borderWidth: 2, borderColor: '#05050C' }} />
+                            <Animated.View style={{ position: 'absolute', top: 0, right: 0, width: 14, height: 14, borderRadius: 7, backgroundColor: '#EF4444', borderWidth: 2, borderColor: '#05050C', transform: [{ scale: friendIconPulseAnim }] }} />
                           )}
                         </View>
                         <View style={{ flex: 1, marginLeft: 16 }}>
