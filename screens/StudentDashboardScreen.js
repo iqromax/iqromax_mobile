@@ -1443,7 +1443,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [isExamplesPickerOpen, setIsExamplesPickerOpen] = useState(false);
   const [selectedExamples, setSelectedExamples] = useState(15);
   const [selectedOperation, setSelectedOperation] = useState('oddiy');
-  const exampleNumbers = [2, ...Array.from({ length: 19 }, (_, i) => i + 7)];
+  const exampleNumbers = Array.from({ length: 19 }, (_, i) => i + 7);
   const speedExampleNumbers = [2, 5, 10];
   
   const [isSpeedPickerOpen, setIsSpeedPickerOpen] = useState(false);

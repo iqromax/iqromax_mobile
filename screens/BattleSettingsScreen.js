@@ -26,7 +26,7 @@ export default function BattleSettingsScreen({ navigation, route }) {
   const [isDigitsPickerOpen, setIsDigitsPickerOpen] = useState(false);
 
   // Arrays
-  const exampleNumbers = Array.from({ length: 24 }, (_, i) => i + 2); // 2 to 25
+  const exampleNumbers = Array.from({ length: 19 }, (_, i) => i + 7); // 7 to 25
   const speedOptions = [0.5, 0.7, 1.0, 1.5, 2.0];
   const digitsOptions = [1, 2, 3, 4];
 
