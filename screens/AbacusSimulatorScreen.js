@@ -57,35 +57,36 @@ const playBeadSound = async () => {
 
 const TopBead = ({ onValueChange, resetFlag }) => {
   const panY = useRef(new Animated.Value(0)).current; // 0 = UP (rest), TOP_SLIDE_DISTANCE = DOWN (active)
-  const isDown = useRef(false);
+  const currentY = useRef(0);
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
     Animated.spring(panY, { toValue: 0, useNativeDriver: true }).start();
-    isDown.current = false;
+    currentY.current = 0;
     setIsActive(false);
     onValueChange(0);
   }, [resetFlag]);
 
   const handleRelease = (gesture) => {
     const isTapped = Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5;
-    let newY = isDown.current ? TOP_SLIDE_DISTANCE + gesture.dy : gesture.dy;
+    let newY = currentY.current + gesture.dy;
     newY = Math.max(0, Math.min(TOP_SLIDE_DISTANCE, newY));
 
-    let shouldBeDown = isDown.current;
+    let shouldBeDown;
     if (isTapped) {
-      shouldBeDown = !isDown.current;
+      shouldBeDown = newY <= TOP_SLIDE_DISTANCE / 2;
+      newY = shouldBeDown ? TOP_SLIDE_DISTANCE : 0;
+      Animated.spring(panY, { toValue: newY, useNativeDriver: true }).start();
     } else {
       shouldBeDown = newY > TOP_SLIDE_DISTANCE / 2;
     }
 
-    if (shouldBeDown !== isDown.current || isTapped) {
+    if (shouldBeDown !== (currentY.current > TOP_SLIDE_DISTANCE / 2) || isTapped) {
       playBeadSound();
     }
 
-    isDown.current = shouldBeDown;
+    currentY.current = newY;
     setIsActive(shouldBeDown);
-    Animated.spring(panY, { toValue: shouldBeDown ? TOP_SLIDE_DISTANCE : 0, useNativeDriver: true }).start();
     onValueChange(shouldBeDown ? 5 : 0);
   };
 
@@ -98,7 +99,7 @@ const TopBead = ({ onValueChange, resetFlag }) => {
       onPanResponderTerminationRequest: () => false,
       onPanResponderGrant: () => {},
       onPanResponderMove: (_, gesture) => {
-        let newY = isDown.current ? TOP_SLIDE_DISTANCE + gesture.dy : gesture.dy;
+        let newY = currentY.current + gesture.dy;
         newY = Math.max(0, Math.min(TOP_SLIDE_DISTANCE, newY));
         panY.setValue(newY);
       },
@@ -146,22 +147,11 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
     new Animated.Value(0)
   ]).current;
   
-  const beadStates = useRef([false, false, false, false]); // true = UP, false = DOWN
+  const beadYs = useRef([0, 0, 0, 0]); // start at 0
   const [activeStates, setActiveStates] = useState([false, false, false, false]);
 
-  const updateBeads = (newStates) => {
-    beadStates.current = newStates;
-    setActiveStates([...newStates]);
-    playBeadSound();
-    const val = newStates.filter(s => s).length;
-    onValueChange(val);
-    newStates.forEach((state, i) => {
-      Animated.spring(beadAnims[i], { toValue: state ? -BOTTOM_SLIDE_DISTANCE : 0, useNativeDriver: true }).start();
-    });
-  };
-
   useEffect(() => {
-    beadStates.current = [false, false, false, false];
+    beadYs.current = [0, 0, 0, 0];
     setActiveStates([false, false, false, false]);
     onValueChange(0);
     [0, 1, 2, 3].forEach(i => {
@@ -171,45 +161,47 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
 
   const handleRelease = (index, gesture) => {
     const isTapped = Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5;
-    let newStates = [...beadStates.current];
     let changed = false;
 
     if (isTapped) {
-      if (!beadStates.current[index]) {
-        for (let i = 0; i <= index; i++) newStates[i] = true;
-      } else {
-        for (let i = index; i < 4; i++) newStates[i] = false;
+      const wasActive = beadYs.current[index] < -BOTTOM_SLIDE_DISTANCE / 2;
+      for (let i = 0; i < 4; i++) {
+        if (!wasActive && i <= index) {
+          beadYs.current[i] = -BOTTOM_SLIDE_DISTANCE;
+        } else if (wasActive && i >= index) {
+          beadYs.current[i] = 0;
+        }
+        Animated.spring(beadAnims[i], { toValue: beadYs.current[i], useNativeDriver: true }).start();
       }
       changed = true;
     } else {
       for (let i = 0; i < 4; i++) {
-        let iStartY = beadStates.current[i] ? -BOTTOM_SLIDE_DISTANCE : 0;
+        let iStartY = beadYs.current[i];
         let iNewY = iStartY;
-        if (gesture.dy < 0 && i <= index && !beadStates.current[i]) {
-          iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, iStartY + gesture.dy);
-        } else if (gesture.dy > 0 && i >= index && beadStates.current[i]) {
-          iNewY = Math.min(0, iStartY + gesture.dy);
+        if (gesture.dy < 0 && i <= index) {
+          iNewY = iStartY + gesture.dy;
+        } else if (gesture.dy > 0 && i >= index) {
+          iNewY = iStartY + gesture.dy;
         }
         
-        if (iNewY < -BOTTOM_SLIDE_DISTANCE / 2) {
-          if (!newStates[i]) changed = true;
-          newStates[i] = true;
-        } else {
-          if (newStates[i]) changed = true;
-          newStates[i] = false;
-        }
+        iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
+        if (beadYs.current[i] !== iNewY) changed = true;
+        beadYs.current[i] = iNewY;
       }
     }
 
     if (changed) playBeadSound();
     
-    beadStates.current = newStates;
-    setActiveStates([...newStates]);
-    const val = newStates.filter(s => s).length;
+    let newStates = [false, false, false, false];
+    let val = 0;
+    for (let i = 0; i < 4; i++) {
+      if (beadYs.current[i] < -BOTTOM_SLIDE_DISTANCE / 2) {
+        newStates[i] = true;
+        val++;
+      }
+    }
+    setActiveStates(newStates);
     onValueChange(val);
-    newStates.forEach((state, i) => {
-      Animated.spring(beadAnims[i], { toValue: state ? -BOTTOM_SLIDE_DISTANCE : 0, useNativeDriver: true }).start();
-    });
   };
 
   const responders = useRef([0, 1, 2, 3].map(index => 
@@ -222,13 +214,13 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
       onPanResponderGrant: () => {},
       onPanResponderMove: (_, gesture) => {
         for (let i = 0; i < 4; i++) {
-          let iStartY = beadStates.current[i] ? -BOTTOM_SLIDE_DISTANCE : 0;
+          let iStartY = beadYs.current[i];
           let iNewY = iStartY;
           
           if (gesture.dy < 0 && i <= index) {
-            if (!beadStates.current[i]) iNewY = iStartY + gesture.dy;
+            iNewY = iStartY + gesture.dy;
           } else if (gesture.dy > 0 && i >= index) {
-            if (beadStates.current[i]) iNewY = iStartY + gesture.dy;
+            iNewY = iStartY + gesture.dy;
           }
           
           iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
