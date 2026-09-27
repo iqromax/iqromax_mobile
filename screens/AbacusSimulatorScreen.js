@@ -28,7 +28,7 @@ const TRANSLATIONS = {
 const BEAD_WIDTH = 62;
 const BEAD_HEIGHT = 36;
 const ROD_WIDTH = 8;
-const TOP_SLIDE_DISTANCE = 34;
+const TOP_SLIDE_DISTANCE = 36;
 const BOTTOM_SLIDE_DISTANCE = 52;
 
 let globalTickSound = null;
