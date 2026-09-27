@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, PanResponder, Platf
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Svg, { Polygon, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { Image } from 'expo-image';
 import { Audio } from '../src/utils/safeAudio';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -112,7 +113,22 @@ const TopBead = ({ onValueChange, resetFlag }) => {
 
   return (
     <Animated.View style={[styles.beadWrapper, { transform: [{ translateY: panY }] }]} {...panResponder.panHandlers}>
-      <LinearGradient colors={beadColors} locations={[0, 0.35, 0.75, 1]} style={[styles.bead, { borderColor: beadBorderColor }]} />
+      <Svg width="100%" height="100%" viewBox={`0 0 ${BEAD_WIDTH} ${BEAD_HEIGHT - 2}`}>
+        <Defs>
+          <SvgGradient id="gradTop" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
+            <Stop offset="0.35" stopColor={beadColors[1]} stopOpacity="1" />
+            <Stop offset="0.75" stopColor={beadColors[2]} stopOpacity="1" />
+            <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
+          </SvgGradient>
+        </Defs>
+        <Polygon
+          points={`12,0 50,0 62,17 50,34 12,34 0,17`}
+          fill="url(#gradTop)"
+          stroke={beadBorderColor}
+          strokeWidth="1.5"
+        />
+      </Svg>
     </Animated.View>
   );
 };
@@ -197,7 +213,22 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
 
         return (
           <Animated.View key={i} style={[styles.beadWrapper, { transform: [{ translateY: beadAnims[i] }] }]} {...responders[i].panHandlers}>
-            <LinearGradient colors={beadColors} locations={[0, 0.35, 0.75, 1]} style={[styles.bead, { borderColor: beadBorderColor }]} />
+            <Svg width="100%" height="100%" viewBox={`0 0 ${BEAD_WIDTH} ${BEAD_HEIGHT - 2}`}>
+              <Defs>
+                <SvgGradient id={`gradBottom${i}`} x1="0" y1="0" x2="0" y2="1">
+                  <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
+                  <Stop offset="0.35" stopColor={beadColors[1]} stopOpacity="1" />
+                  <Stop offset="0.75" stopColor={beadColors[2]} stopOpacity="1" />
+                  <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
+                </SvgGradient>
+              </Defs>
+              <Polygon
+                points={`12,0 50,0 62,17 50,34 12,34 0,17`}
+                fill={`url(#gradBottom${i})`}
+                stroke={beadBorderColor}
+                strokeWidth="1.5"
+              />
+            </Svg>
           </Animated.View>
         );
       })}
@@ -803,17 +834,14 @@ const styles = StyleSheet.create({
     width: BEAD_WIDTH,
     height: BEAD_HEIGHT,
     paddingVertical: 1,
-  },
-  bead: {
-    flex: 1,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#FEF08A',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.6,
     shadowRadius: 4,
     elevation: 6,
+  },
+  bead: {
+    display: 'none',
   },
   bottomControls: {
     flexDirection: 'row',
