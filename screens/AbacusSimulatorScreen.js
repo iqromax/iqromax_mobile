@@ -82,7 +82,14 @@ const TopBead = ({ onValueChange, resetFlag }) => {
       shouldBeDown = newY >= TOP_SLIDE_DISTANCE - 1;
     }
 
-    if (shouldBeDown !== (currentY.current >= TOP_SLIDE_DISTANCE - 1) || isTapped) {
+    const isAtBottom = newY >= TOP_SLIDE_DISTANCE - 1;
+    const isAtTop = newY <= 1;
+    
+    if (isTapped) {
+      playBeadSound();
+    } else if (isAtBottom && currentY.current < TOP_SLIDE_DISTANCE - 1) {
+      playBeadSound();
+    } else if (isAtTop && currentY.current > 1) {
       playBeadSound();
     }
 
@@ -174,8 +181,9 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
         }
         Animated.spring(beadAnims[i], { toValue: beadYs.current[i], useNativeDriver: true }).start();
       }
-      changed = true;
+      playBeadSound();
     } else {
+      let hitEndpoint = false;
       for (let i = 0; i < 4; i++) {
         let iStartY = beadYs.current[i];
         let iNewY = iStartY;
@@ -186,12 +194,17 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
         }
         
         iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
-        if (beadYs.current[i] !== iNewY) changed = true;
+        
+        const isAtBottom = iNewY >= -1;
+        const isAtTop = iNewY <= -BOTTOM_SLIDE_DISTANCE + 1;
+        
+        if (isAtTop && iStartY > -BOTTOM_SLIDE_DISTANCE + 1) hitEndpoint = true;
+        if (isAtBottom && iStartY < -1) hitEndpoint = true;
+
         beadYs.current[i] = iNewY;
       }
+      if (hitEndpoint) playBeadSound();
     }
-
-    if (changed) playBeadSound();
     
     let newStates = [false, false, false, false];
     let val = 0;
