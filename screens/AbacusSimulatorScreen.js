@@ -117,8 +117,8 @@ const TopBead = ({ onValueChange, resetFlag }) => {
         <Defs>
           <SvgGradient id="gradTop" x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
-            <Stop offset="0.35" stopColor={beadColors[1]} stopOpacity="1" />
-            <Stop offset="0.75" stopColor={beadColors[2]} stopOpacity="1" />
+            <Stop offset="0.5" stopColor={beadColors[1]} stopOpacity="1" />
+            <Stop offset="0.5" stopColor={beadColors[2]} stopOpacity="1" />
             <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
           </SvgGradient>
         </Defs>
@@ -217,8 +217,8 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
               <Defs>
                 <SvgGradient id={`gradBottom${i}`} x1="0" y1="0" x2="0" y2="1">
                   <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
-                  <Stop offset="0.35" stopColor={beadColors[1]} stopOpacity="1" />
-                  <Stop offset="0.75" stopColor={beadColors[2]} stopOpacity="1" />
+                  <Stop offset="0.5" stopColor={beadColors[1]} stopOpacity="1" />
+                  <Stop offset="0.5" stopColor={beadColors[2]} stopOpacity="1" />
                   <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
                 </SvgGradient>
               </Defs>
