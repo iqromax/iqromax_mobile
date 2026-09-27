@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Polygon, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { Image } from 'expo-image';
+import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import { Audio } from '../src/utils/safeAudio';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -88,27 +89,17 @@ const TopBead = ({ onValueChange, resetFlag }) => {
     onValueChange(shouldBeDown ? 5 : 0);
   };
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => false,
-      onMoveShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponderCapture: () => false,
-      onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: () => {},
-      onPanResponderMove: (_, gesture) => {
-        let newY = currentY.current + gesture.dy;
-        newY = Math.max(0, Math.min(TOP_SLIDE_DISTANCE, newY));
-        panY.setValue(newY);
-      },
-      onPanResponderRelease: (_, gesture) => {
-        handleRelease(gesture);
-      },
-      onPanResponderTerminate: (_, gesture) => {
-        handleRelease(gesture);
-      }
-    })
-  ).current;
+  const handleGestureEvent = (e) => {
+    let newY = currentY.current + e.nativeEvent.translationY;
+    newY = Math.max(0, Math.min(TOP_SLIDE_DISTANCE, newY));
+    panY.setValue(newY);
+  };
+
+  const handleStateChange = (e) => {
+    if (e.nativeEvent.state === State.END || e.nativeEvent.state === State.CANCELLED) {
+      handleRelease({ dy: e.nativeEvent.translationY, dx: e.nativeEvent.translationX });
+    }
+  };
 
   const beadColors = isActive 
     ? ['#D97706', '#B45309', '#78350F', '#451A03'] 
@@ -116,24 +107,29 @@ const TopBead = ({ onValueChange, resetFlag }) => {
   const beadBorderColor = isActive ? '#B45309' : '#FEF08A';
 
   return (
-    <Animated.View style={[styles.beadWrapper, { transform: [{ translateY: panY }] }]} {...panResponder.panHandlers}>
-      <Svg width="100%" height="100%" viewBox={`0 0 ${BEAD_WIDTH} ${BEAD_HEIGHT - 2}`}>
-        <Defs>
-          <SvgGradient id="gradTop" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
-            <Stop offset="0.5" stopColor={beadColors[1]} stopOpacity="1" />
-            <Stop offset="0.5" stopColor={beadColors[2]} stopOpacity="1" />
-            <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
-          </SvgGradient>
-        </Defs>
-        <Polygon
-          points={`12,0 50,0 62,17 50,34 12,34 0,17`}
-          fill="url(#gradTop)"
-          stroke={beadBorderColor}
-          strokeWidth="1.5"
-        />
-      </Svg>
-    </Animated.View>
+    <PanGestureHandler
+      onGestureEvent={handleGestureEvent}
+      onHandlerStateChange={handleStateChange}
+    >
+      <Animated.View style={[styles.beadWrapper, { transform: [{ translateY: panY }] }]}>
+        <Svg width="100%" height="100%" viewBox={`0 0 ${BEAD_WIDTH} ${BEAD_HEIGHT - 2}`}>
+          <Defs>
+            <SvgGradient id="gradTop" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
+              <Stop offset="0.5" stopColor={beadColors[1]} stopOpacity="1" />
+              <Stop offset="0.5" stopColor={beadColors[2]} stopOpacity="1" />
+              <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
+            </SvgGradient>
+          </Defs>
+          <Polygon
+            points={`12,0 50,0 62,17 50,34 12,34 0,17`}
+            fill="url(#gradTop)"
+            stroke={beadBorderColor}
+            strokeWidth="1.5"
+          />
+        </Svg>
+      </Animated.View>
+    </PanGestureHandler>
   );
 };
 
@@ -193,37 +189,29 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
     onValueChange(val);
   };
 
-  const responders = useRef([0, 1, 2, 3].map(index => 
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => false,
-      onMoveShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponderCapture: () => false,
-      onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: () => {},
-      onPanResponderMove: (_, gesture) => {
-        for (let i = 0; i < 4; i++) {
-          let iStartY = beadYs.current[i];
-          let iNewY = iStartY;
-          
-          if (gesture.dy < 0 && i <= index) {
-            iNewY = iStartY + gesture.dy;
-          } else if (gesture.dy > 0 && i >= index) {
-            iNewY = iStartY + gesture.dy;
-          }
-          
-          iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
-          beadAnims[i].setValue(iNewY);
-        }
-      },
-      onPanResponderRelease: (_, gesture) => {
-        handleRelease(index, gesture);
-      },
-      onPanResponderTerminate: (_, gesture) => {
-        handleRelease(index, gesture);
+  const handleGestureEvent = (index, e) => {
+    const gesture = e.nativeEvent;
+    for (let i = 0; i < 4; i++) {
+      let iStartY = beadYs.current[i];
+      let iNewY = iStartY;
+      
+      if (gesture.translationY < 0 && i <= index) {
+        iNewY = iStartY + gesture.translationY;
+      } else if (gesture.translationY > 0 && i >= index) {
+        iNewY = iStartY + gesture.translationY;
       }
-    })
-  )).current;
+      
+      iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
+      beadAnims[i].setValue(iNewY);
+    }
+  };
+
+  const handleStateChange = (index, e) => {
+    const gesture = e.nativeEvent;
+    if (gesture.state === State.END || gesture.state === State.CANCELLED) {
+      handleRelease(index, { dy: gesture.translationY, dx: gesture.translationX });
+    }
+  };
 
   return (
     <View style={styles.bottomBeadsContainer}>
@@ -235,24 +223,30 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
         const beadBorderColor = isActive ? '#B45309' : '#FEF08A';
 
         return (
-          <Animated.View key={i} style={[styles.beadWrapper, { transform: [{ translateY: beadAnims[i] }] }]} {...responders[i].panHandlers}>
-            <Svg width="100%" height="100%" viewBox={`0 0 ${BEAD_WIDTH} ${BEAD_HEIGHT - 2}`}>
-              <Defs>
-                <SvgGradient id={`gradBottom${i}`} x1="0" y1="0" x2="0" y2="1">
-                  <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
-                  <Stop offset="0.5" stopColor={beadColors[1]} stopOpacity="1" />
-                  <Stop offset="0.5" stopColor={beadColors[2]} stopOpacity="1" />
-                  <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
-                </SvgGradient>
-              </Defs>
-              <Polygon
-                points={`12,0 50,0 62,17 50,34 12,34 0,17`}
-                fill={`url(#gradBottom${i})`}
-                stroke={beadBorderColor}
-                strokeWidth="1.5"
-              />
-            </Svg>
-          </Animated.View>
+          <PanGestureHandler
+            key={i}
+            onGestureEvent={(e) => handleGestureEvent(i, e)}
+            onHandlerStateChange={(e) => handleStateChange(i, e)}
+          >
+            <Animated.View style={[styles.beadWrapper, { transform: [{ translateY: beadAnims[i] }] }]}>
+              <Svg width="100%" height="100%" viewBox={`0 0 ${BEAD_WIDTH} ${BEAD_HEIGHT - 2}`}>
+                <Defs>
+                  <SvgGradient id={`gradBottom${i}`} x1="0" y1="0" x2="0" y2="1">
+                    <Stop offset="0" stopColor={beadColors[0]} stopOpacity="1" />
+                    <Stop offset="0.5" stopColor={beadColors[1]} stopOpacity="1" />
+                    <Stop offset="0.5" stopColor={beadColors[2]} stopOpacity="1" />
+                    <Stop offset="1" stopColor={beadColors[3]} stopOpacity="1" />
+                  </SvgGradient>
+                </Defs>
+                <Polygon
+                  points={`12,0 50,0 62,17 50,34 12,34 0,17`}
+                  fill={`url(#gradBottom${i})`}
+                  stroke={beadBorderColor}
+                  strokeWidth="1.5"
+                />
+              </Svg>
+            </Animated.View>
+          </PanGestureHandler>
         );
       })}
     </View>
@@ -469,8 +463,9 @@ export default function AbacusSimulatorScreen() {
   const currentStepData = sequence[stepIndex];
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#0B0D17' }}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
@@ -623,6 +618,7 @@ export default function AbacusSimulatorScreen() {
 
       </View>
     </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
