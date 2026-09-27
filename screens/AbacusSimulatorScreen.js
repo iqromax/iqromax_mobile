@@ -67,24 +67,26 @@ const TopBead = ({ onValueChange, resetFlag }) => {
     onValueChange(0);
   }, [resetFlag]);
 
-  const handleToggle = (gesture) => {
-    const swipedDown = gesture.dy > 10;
-    const swipedUp = gesture.dy < -10;
-    const tapped = Math.abs(gesture.dy) <= 10;
+  const handleRelease = (gesture) => {
+    const isTapped = Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5;
+    let newY = isDown.current ? TOP_SLIDE_DISTANCE + gesture.dy : gesture.dy;
+    newY = Math.max(0, Math.min(TOP_SLIDE_DISTANCE, newY));
 
-    if (swipedDown || (tapped && !isDown.current)) {
-      isDown.current = true;
-      setIsActive(true);
-      playBeadSound();
-      Animated.spring(panY, { toValue: TOP_SLIDE_DISTANCE, useNativeDriver: true }).start();
-      onValueChange(5);
-    } else if (swipedUp || (tapped && isDown.current)) {
-      isDown.current = false;
-      setIsActive(false);
-      playBeadSound();
-      Animated.spring(panY, { toValue: 0, useNativeDriver: true }).start();
-      onValueChange(0);
+    let shouldBeDown = isDown.current;
+    if (isTapped) {
+      shouldBeDown = !isDown.current;
+    } else {
+      shouldBeDown = newY > TOP_SLIDE_DISTANCE / 2;
     }
+
+    if (shouldBeDown !== isDown.current || isTapped) {
+      playBeadSound();
+    }
+
+    isDown.current = shouldBeDown;
+    setIsActive(shouldBeDown);
+    Animated.spring(panY, { toValue: shouldBeDown ? TOP_SLIDE_DISTANCE : 0, useNativeDriver: true }).start();
+    onValueChange(shouldBeDown ? 5 : 0);
   };
 
   const panResponder = useRef(
@@ -94,14 +96,17 @@ const TopBead = ({ onValueChange, resetFlag }) => {
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => false,
       onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: () => {
-        playBeadSound();
+      onPanResponderGrant: () => {},
+      onPanResponderMove: (_, gesture) => {
+        let newY = isDown.current ? TOP_SLIDE_DISTANCE + gesture.dy : gesture.dy;
+        newY = Math.max(0, Math.min(TOP_SLIDE_DISTANCE, newY));
+        panY.setValue(newY);
       },
       onPanResponderRelease: (_, gesture) => {
-        handleToggle(gesture);
+        handleRelease(gesture);
       },
       onPanResponderTerminate: (_, gesture) => {
-        handleToggle(gesture);
+        handleRelease(gesture);
       }
     })
   ).current;
@@ -164,23 +169,47 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
     });
   }, [resetFlag]);
 
-  const handleBeadToggle = (index, gesture) => {
-    const swipedUp = gesture.dy < -10;
-    const swipedDown = gesture.dy > 10;
-    const tapped = Math.abs(gesture.dy) <= 10;
-
+  const handleRelease = (index, gesture) => {
+    const isTapped = Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5;
     let newStates = [...beadStates.current];
+    let changed = false;
 
-    if (swipedUp || (tapped && !beadStates.current[index])) {
-      for (let i = 0; i <= index; i++) {
-        newStates[i] = true;
+    if (isTapped) {
+      if (!beadStates.current[index]) {
+        for (let i = 0; i <= index; i++) newStates[i] = true;
+      } else {
+        for (let i = index; i < 4; i++) newStates[i] = false;
       }
-    } else if (swipedDown || (tapped && beadStates.current[index])) {
-      for (let i = index; i < 4; i++) {
-        newStates[i] = false;
+      changed = true;
+    } else {
+      for (let i = 0; i < 4; i++) {
+        let iStartY = beadStates.current[i] ? -BOTTOM_SLIDE_DISTANCE : 0;
+        let iNewY = iStartY;
+        if (gesture.dy < 0 && i <= index && !beadStates.current[i]) {
+          iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, iStartY + gesture.dy);
+        } else if (gesture.dy > 0 && i >= index && beadStates.current[i]) {
+          iNewY = Math.min(0, iStartY + gesture.dy);
+        }
+        
+        if (iNewY < -BOTTOM_SLIDE_DISTANCE / 2) {
+          if (!newStates[i]) changed = true;
+          newStates[i] = true;
+        } else {
+          if (newStates[i]) changed = true;
+          newStates[i] = false;
+        }
       }
     }
-    updateBeads(newStates);
+
+    if (changed) playBeadSound();
+    
+    beadStates.current = newStates;
+    setActiveStates([...newStates]);
+    const val = newStates.filter(s => s).length;
+    onValueChange(val);
+    newStates.forEach((state, i) => {
+      Animated.spring(beadAnims[i], { toValue: state ? -BOTTOM_SLIDE_DISTANCE : 0, useNativeDriver: true }).start();
+    });
   };
 
   const responders = useRef([0, 1, 2, 3].map(index => 
@@ -190,14 +219,27 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
       onMoveShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponderCapture: () => false,
       onPanResponderTerminationRequest: () => false,
-      onPanResponderGrant: () => {
-        playBeadSound();
+      onPanResponderGrant: () => {},
+      onPanResponderMove: (_, gesture) => {
+        for (let i = 0; i < 4; i++) {
+          let iStartY = beadStates.current[i] ? -BOTTOM_SLIDE_DISTANCE : 0;
+          let iNewY = iStartY;
+          
+          if (gesture.dy < 0 && i <= index) {
+            if (!beadStates.current[i]) iNewY = iStartY + gesture.dy;
+          } else if (gesture.dy > 0 && i >= index) {
+            if (beadStates.current[i]) iNewY = iStartY + gesture.dy;
+          }
+          
+          iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
+          beadAnims[i].setValue(iNewY);
+        }
       },
       onPanResponderRelease: (_, gesture) => {
-        handleBeadToggle(index, gesture);
+        handleRelease(index, gesture);
       },
       onPanResponderTerminate: (_, gesture) => {
-        handleBeadToggle(index, gesture);
+        handleRelease(index, gesture);
       }
     })
   )).current;
