@@ -68,26 +68,16 @@ const TopBead = ({ onValueChange, resetFlag }) => {
   }, [resetFlag]);
 
   const handleRelease = (gesture) => {
-    const isTapped = Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5;
     let newY = currentY.current + gesture.dy;
     newY = Math.max(0, Math.min(TOP_SLIDE_DISTANCE, newY));
 
-    let shouldBeDown;
-    if (isTapped) {
-      shouldBeDown = newY <= TOP_SLIDE_DISTANCE / 2;
-      newY = shouldBeDown ? TOP_SLIDE_DISTANCE : 0;
-      Animated.spring(panY, { toValue: newY, useNativeDriver: true }).start();
-    } else {
-      // Must fully touch the beam to change color and value
-      shouldBeDown = newY >= TOP_SLIDE_DISTANCE - 1;
-    }
+    // Must fully touch the beam to change color and value
+    let shouldBeDown = newY >= TOP_SLIDE_DISTANCE - 1;
 
     const isAtBottom = newY >= TOP_SLIDE_DISTANCE - 1;
     const isAtTop = newY <= 1;
     
-    if (isTapped) {
-      playBeadSound();
-    } else if (isAtBottom && currentY.current < TOP_SLIDE_DISTANCE - 1) {
+    if (isAtBottom && currentY.current < TOP_SLIDE_DISTANCE - 1) {
       playBeadSound();
     } else if (isAtTop && currentY.current > 1) {
       playBeadSound();
@@ -168,43 +158,27 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
   }, [resetFlag]);
 
   const handleRelease = (index, gesture) => {
-    const isTapped = Math.abs(gesture.dx) < 5 && Math.abs(gesture.dy) < 5;
-    let changed = false;
-
-    if (isTapped) {
-      const wasActive = beadYs.current[index] <= -BOTTOM_SLIDE_DISTANCE + 1;
-      for (let i = 0; i < 4; i++) {
-        if (!wasActive && i <= index) {
-          beadYs.current[i] = -BOTTOM_SLIDE_DISTANCE;
-        } else if (wasActive && i >= index) {
-          beadYs.current[i] = 0;
-        }
-        Animated.spring(beadAnims[i], { toValue: beadYs.current[i], useNativeDriver: true }).start();
+    let hitEndpoint = false;
+    for (let i = 0; i < 4; i++) {
+      let iStartY = beadYs.current[i];
+      let iNewY = iStartY;
+      if (gesture.dy < 0 && i <= index) {
+        iNewY = iStartY + gesture.dy;
+      } else if (gesture.dy > 0 && i >= index) {
+        iNewY = iStartY + gesture.dy;
       }
-      playBeadSound();
-    } else {
-      let hitEndpoint = false;
-      for (let i = 0; i < 4; i++) {
-        let iStartY = beadYs.current[i];
-        let iNewY = iStartY;
-        if (gesture.dy < 0 && i <= index) {
-          iNewY = iStartY + gesture.dy;
-        } else if (gesture.dy > 0 && i >= index) {
-          iNewY = iStartY + gesture.dy;
-        }
-        
-        iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
-        
-        const isAtBottom = iNewY >= -1;
-        const isAtTop = iNewY <= -BOTTOM_SLIDE_DISTANCE + 1;
-        
-        if (isAtTop && iStartY > -BOTTOM_SLIDE_DISTANCE + 1) hitEndpoint = true;
-        if (isAtBottom && iStartY < -1) hitEndpoint = true;
+      
+      iNewY = Math.max(-BOTTOM_SLIDE_DISTANCE, Math.min(0, iNewY));
+      
+      const isAtBottom = iNewY >= -1;
+      const isAtTop = iNewY <= -BOTTOM_SLIDE_DISTANCE + 1;
+      
+      if (isAtTop && iStartY > -BOTTOM_SLIDE_DISTANCE + 1) hitEndpoint = true;
+      if (isAtBottom && iStartY < -1) hitEndpoint = true;
 
-        beadYs.current[i] = iNewY;
-      }
-      if (hitEndpoint) playBeadSound();
+      beadYs.current[i] = iNewY;
     }
+    if (hitEndpoint) playBeadSound();
     
     let newStates = [false, false, false, false];
     let val = 0;
