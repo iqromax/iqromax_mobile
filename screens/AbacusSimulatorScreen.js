@@ -78,10 +78,11 @@ const TopBead = ({ onValueChange, resetFlag }) => {
       newY = shouldBeDown ? TOP_SLIDE_DISTANCE : 0;
       Animated.spring(panY, { toValue: newY, useNativeDriver: true }).start();
     } else {
-      shouldBeDown = newY > TOP_SLIDE_DISTANCE / 2;
+      // Must fully touch the beam to change color and value
+      shouldBeDown = newY >= TOP_SLIDE_DISTANCE - 1;
     }
 
-    if (shouldBeDown !== (currentY.current > TOP_SLIDE_DISTANCE / 2) || isTapped) {
+    if (shouldBeDown !== (currentY.current >= TOP_SLIDE_DISTANCE - 1) || isTapped) {
       playBeadSound();
     }
 
@@ -164,7 +165,7 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
     let changed = false;
 
     if (isTapped) {
-      const wasActive = beadYs.current[index] < -BOTTOM_SLIDE_DISTANCE / 2;
+      const wasActive = beadYs.current[index] <= -BOTTOM_SLIDE_DISTANCE + 1;
       for (let i = 0; i < 4; i++) {
         if (!wasActive && i <= index) {
           beadYs.current[i] = -BOTTOM_SLIDE_DISTANCE;
@@ -195,7 +196,8 @@ const BottomBeads = ({ onValueChange, resetFlag }) => {
     let newStates = [false, false, false, false];
     let val = 0;
     for (let i = 0; i < 4; i++) {
-      if (beadYs.current[i] < -BOTTOM_SLIDE_DISTANCE / 2) {
+      // Must fully touch the beam to change color and value
+      if (beadYs.current[i] <= -BOTTOM_SLIDE_DISTANCE + 1) {
         newStates[i] = true;
         val++;
       }
