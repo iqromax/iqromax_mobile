@@ -826,6 +826,30 @@ export default function TeacherDashboardScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
 
+            {/* O'QITUVCHILIKKA TAYYORLOV KURSI */}
+            <TouchableOpacity 
+              style={{ marginHorizontal: 20, marginBottom: 20, borderRadius: 20, overflow: 'hidden', elevation: 8, shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.5)' }}
+              activeOpacity={0.9}
+              onPress={() => {}}
+            >
+              <LinearGradient
+                colors={['#1E3A8A', '#2563EB', '#3B82F6']}
+                start={{x:0, y:0}} end={{x:1, y:1}}
+                style={{ padding: 22, flexDirection: 'row', alignItems: 'center' }}
+              >
+                <View style={{ flex: 1, paddingRight: 10 }}>
+                  <View style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: 10 }}>
+                    <Text style={{ color: '#E0E7FF', fontSize: 10, fontFamily: 'Inter_700Bold', textTransform: 'uppercase', letterSpacing: 1 }}>Yangi Imkoniyat</Text>
+                  </View>
+                  <Text style={{ color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_800ExtraBold', marginBottom: 6 }}>O'qituvchilikka tayyorlov kursi</Text>
+                  <Text style={{ color: '#BFDBFE', fontSize: 12, fontFamily: 'Inter_500Medium', lineHeight: 18 }}>Maxsus metodika va o'qitish sirlarini o'rganing. Tajribali ustozlardan mukammal darslar.</Text>
+                </View>
+                <View style={{ width: 64, height: 64, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 32, justifyContent: 'center', alignItems: 'center', marginLeft: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' }}>
+                  <MaterialCommunityIcons name="school" size={32} color="#FFFFFF" />
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+
             {/* TEACHER INFO BOX */}
             <View style={styles.infoBanner}>
               <MaterialCommunityIcons name="shield-check" size={24} color="#10B981" style={{ marginRight: 12 }} />
