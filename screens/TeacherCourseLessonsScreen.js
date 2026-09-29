@@ -8,17 +8,17 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const COURSE_MODULES = [
+const INITIAL_MODULES = [
   { 
     id: 1, 
     title: "1-Modul: Iqromax metodikasi",
     lessons: [
       { id: '1-1', type: 'video', title: "Iqromax tizimi nima?", duration: "15 daq", locked: false },
       { id: '1-2', type: 'video', title: "Tizimli yondashuv asoslari", duration: "20 daq", locked: false },
-      { id: '1-3', type: 'test_theory', title: "Nazariy test (Asosiy qoidalar)", questions: "10 ta savol", locked: false },
+      { id: '1-3', type: 'test_theory', title: "Nazariy test (Asosiy qoidalar)", questions: "10 ta savol", locked: false, history: [] },
       { id: '1-4', type: 'video', title: "Dars o'tish texnikasi", duration: "15 daq", locked: false },
       { id: '1-5', type: 'video', title: "O'quvchilarni baholash usullari", duration: "10 daq", locked: false },
-      { id: '1-6', type: 'test_practical', title: "Amaliy test (Keys yechish)", questions: "5 ta vazifa", locked: false },
+      { id: '1-6', type: 'test_practical', title: "Amaliy test (Keys yechish)", questions: "5 ta vazifa", locked: false, history: [] },
     ]
   },
   { 
@@ -27,9 +27,9 @@ const COURSE_MODULES = [
     lessons: [
       { id: '2-1', type: 'video', title: "Yoshi va fe'l-atvoriga ko'ra yondashuv", duration: "20 daq", locked: true },
       { id: '2-2', type: 'video', title: "Diqqatni jamlash usullari", duration: "18 daq", locked: true },
-      { id: '2-3', type: 'test_theory', title: "Psixologik holat bo'yicha test", questions: "12 ta savol", locked: true },
+      { id: '2-3', type: 'test_theory', title: "Psixologik holat bo'yicha test", questions: "12 ta savol", locked: true, history: [] },
       { id: '2-4', type: 'video', title: "Motivatsiya berish sirlari", duration: "25 daq", locked: true },
-      { id: '2-5', type: 'test_practical', title: "Vaziyatni tahlil qilish", questions: "3 ta vazifa", locked: true },
+      { id: '2-5', type: 'test_practical', title: "Vaziyatni tahlil qilish", questions: "3 ta vazifa", locked: true, history: [] },
     ]
   },
   { 
@@ -38,7 +38,7 @@ const COURSE_MODULES = [
     lessons: [
       { id: '3-1', type: 'video', title: "Samarali dars strukturasi", duration: "25 daq", locked: true },
       { id: '3-2', type: 'video', title: "Dars rejasi namunasi", duration: "15 daq", locked: true },
-      { id: '3-3', type: 'test_theory', title: "Rejalashtirish bo'yicha test", questions: "8 ta savol", locked: true },
+      { id: '3-3', type: 'test_theory', title: "Rejalashtirish bo'yicha test", questions: "8 ta savol", locked: true, history: [] },
     ]
   },
   { 
@@ -47,20 +47,21 @@ const COURSE_MODULES = [
     lessons: [
       { id: '4-1', type: 'video', title: "Real dars namunasi", duration: "45 daq", locked: true },
       { id: '4-2', type: 'video', title: "Xatolarni tahlil qilish", duration: "20 daq", locked: true },
-      { id: '4-3', type: 'test_practical', title: "Amaliyot va xulosa", questions: "1 ta loyiha", locked: true },
+      { id: '4-3', type: 'test_practical', title: "Amaliyot va xulosa", questions: "1 ta loyiha", locked: true, history: [] },
     ]
   },
   { 
     id: 5, 
     title: "5-Modul: Sertifikatlash",
     lessons: [
-      { id: '5-1', type: 'test_practical', title: "Yakuniy imtihon", questions: "20 ta savol", locked: true },
+      { id: '5-1', type: 'test_practical', title: "Yakuniy imtihon", questions: "20 ta savol", locked: true, history: [] },
       { id: '5-2', type: 'certificate', title: "Sertifikatni yuklab olish", duration: "", locked: true },
     ]
   },
 ];
 
 export default function TeacherCourseLessonsScreen({ navigation }) {
+  const [modules, setModules] = useState(INITIAL_MODULES);
   // State 0 index is open by default
   const [expandedIndex, setExpandedIndex] = useState(0);
 
@@ -116,7 +117,7 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
           </View>
 
           <View style={styles.modulesContainer}>
-            {COURSE_MODULES.map((mod, index) => {
+            {modules.map((mod, index) => {
               const isExpanded = expandedIndex === index;
               return (
                 <View key={mod.id} style={styles.moduleCard}>
@@ -141,21 +142,60 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
                   {isExpanded && (
                     <View style={styles.moduleBody}>
                       {mod.lessons.map((lesson, idx) => {
-                        const iconData = getIconData(lesson.type, lesson.locked);
+                        let iconData = getIconData(lesson.type, lesson.locked);
+                        let isFailed = false;
+                        let isPassed = false;
+                        
+                        if (lesson.history && lesson.history.length > 0) {
+                          const lastScore = lesson.history[lesson.history.length - 1].score;
+                          if (lastScore < 60) {
+                            isFailed = true;
+                            iconData = { name: "close-circle", color: "#EF4444", bg: "rgba(239, 68, 68, 0.15)" };
+                          } else {
+                            isPassed = true;
+                            iconData = { name: "check-circle", color: "#10B981", bg: "rgba(16, 185, 129, 0.15)" };
+                          }
+                        }
+
                         return (
                           <TouchableOpacity 
                             key={lesson.id} 
                             activeOpacity={lesson.locked ? 1 : 0.7}
+                            onPress={() => {
+                              if (!lesson.locked) {
+                                if (lesson.type === 'video') {
+                                  navigation.navigate('TeacherCourseVideo');
+                                } else if (lesson.type === 'test_theory') {
+                                  navigation.navigate('TeacherCourseTheoryTest', {
+                                    lessonId: lesson.id,
+                                    history: lesson.history,
+                                    onFinishTest: (result) => {
+                                      const newModules = [...modules];
+                                      const mIndex = newModules.findIndex(m => m.id === mod.id);
+                                      const lIndex = newModules[mIndex].lessons.findIndex(l => l.id === lesson.id);
+                                      newModules[mIndex].lessons[lIndex].history.push(result);
+                                      setModules(newModules);
+                                    }
+                                  });
+                                }
+                              }
+                            }}
                             style={[
                               styles.lessonItem, 
-                              idx === mod.lessons.length - 1 && { borderBottomWidth: 0 }
+                              idx === mod.lessons.length - 1 && { borderBottomWidth: 0 },
+                              isFailed && { backgroundColor: 'rgba(239, 68, 68, 0.05)', borderRadius: 12, paddingHorizontal: 12, marginVertical: 2, borderBottomWidth: 0 }
                             ]}
                           >
                             <View style={[styles.lessonIconBox, { backgroundColor: iconData.bg }]}>
                               <MaterialCommunityIcons name={iconData.name} size={18} color={iconData.color} />
                             </View>
                             <View style={styles.lessonInfo}>
-                              <Text style={[styles.lessonTitle, lesson.locked && { color: '#6B7280' }]}>
+                              <Text style={[
+                                styles.lessonTitle, 
+                                lesson.locked && { color: '#6B7280' },
+                                isFailed && { color: '#EF4444' },
+                                isPassed && { color: '#10B981' }
+                              ]}>
                                 {lesson.title}
                               </Text>
                               {lesson.type === 'video' && (
@@ -166,9 +206,16 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
                                   </Text>
                                 </View>
                               )}
+                              {lesson.history && lesson.history.length > 0 && (
+                                <View style={styles.lessonMeta}>
+                                  <Text style={[styles.lessonDuration, { marginLeft: 0, color: isFailed ? '#F87171' : '#34D399' }]}>
+                                    Oxirgi natija: {lesson.history[lesson.history.length - 1].score}%
+                                  </Text>
+                                </View>
+                              )}
                             </View>
                             {!lesson.locked && (
-                              <MaterialCommunityIcons name="chevron-right" size={20} color="#374151" />
+                              <MaterialCommunityIcons name="chevron-right" size={20} color={isFailed ? "#EF4444" : "#374151"} />
                             )}
                           </TouchableOpacity>
                         );
