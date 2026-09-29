@@ -48,13 +48,17 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
       <style>
-        body, html { margin: 0; padding: 0; background: #000; width: 100%; height: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        body, html { margin: 0; padding: 0; background: #000; width: 100%; height: 100%; overflow: hidden; }
         iframe { width: 100% !important; height: 100% !important; border: none; }
-        #player { width: 100%; height: 100%; }
       </style>
     </head>
     <body>
-      <div id="player"></div>
+      <iframe id="player" 
+              src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&playsinline=1&controls=0&disablekb=1&fs=0&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3" 
+              frameborder="0" 
+              allow="autoplay; encrypted-media" 
+              allowfullscreen>
+      </iframe>
       <script>
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -66,19 +70,6 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
 
         function onYouTubeIframeAPIReady() {
           player = new YT.Player('player', {
-            height: '100%',
-            width: '100%',
-            videoId: '${ytId}',
-            playerVars: {
-              'playsinline': 1,
-              'controls': 0,
-              'disablekb': 1,
-              'fs': 0,
-              'rel': 0,
-              'modestbranding': 1,
-              'showinfo': 0,
-              'iv_load_policy': 3
-            },
             events: {
               'onReady': onPlayerReady,
               'onStateChange': onPlayerStateChange
