@@ -66,6 +66,7 @@ import { FAQManager } from '@/components/FAQManager';
 import { FeedbackManager } from '@/components/FeedbackManager';
 import { CourseApplicationsManager } from '@/components/CourseApplicationsManager';
 import { ParentsManager } from '@/components/ParentsManager';
+import { TeacherTrainingAdmin } from '@/components/TeacherTrainingAdmin';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -258,6 +259,14 @@ const AdminDashboard = () => {
     { id: 'parents', label: 'Ota-onalar', icon: Users, path: '/parents' },
     { id: 'feedback', label: 'Izoh yoki taklif', icon: MessageSquare },
     { id: 'applications', label: 'Kursga arizalar', icon: BookOpen },
+    { 
+      id: 'courses', 
+      label: 'Kurslar', 
+      icon: BookOpen,
+      subItems: [
+        { id: 'teacher_training', label: "O'qituvchilikka tayyorlov", icon: BookOpen }
+      ]
+    },
   ];
 
   const handleLogout = () => {
@@ -701,6 +710,9 @@ const AdminDashboard = () => {
   };
 
   const renderContent = () => {
+    if (activeTab === 'teacher_training') {
+      return <TeacherTrainingAdmin />;
+    }
     if (activeTab === 'parents') {
       return <ParentsManager />;
     }
