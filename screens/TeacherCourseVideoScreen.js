@@ -37,7 +37,8 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
       <style>
         body, html { margin: 0; padding: 0; background: #000; width: 100%; height: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; }
-        iframe { width: 100vw; height: 100vh; pointer-events: none; border: none; }
+        iframe { width: 100% !important; height: 100% !important; border: none; }
+        #player { width: 100%; height: 100%; }
       </style>
     </head>
     <body>
@@ -175,8 +176,9 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
         {ytId ? (
           <WebView
             ref={webviewRef}
-            source={{ html: htmlContent, baseUrl: 'https://youtube.com' }}
-            style={{ width: '100%', height: '100%', backgroundColor: '#000' }}
+            source={{ html: htmlContent, baseUrl: 'https://iqromax.net' }}
+            style={{ flex: 1, backgroundColor: '#000', opacity: 0.99 }}
+            androidLayerType="hardware"
             allowsInlineMediaPlayback={true}
             mediaPlaybackRequiresUserAction={false}
             scrollEnabled={false}
