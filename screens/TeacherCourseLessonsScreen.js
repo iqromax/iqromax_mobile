@@ -8,62 +8,70 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const INITIAL_MODULES = [
-  { 
-    id: 1, 
-    title: "1-Modul: Iqromax metodikasi",
-    lessons: [
-      { id: '1-1', type: 'video', title: "Iqromax tizimi nima?", duration: "15 daq", locked: false },
-      { id: '1-2', type: 'video', title: "Tizimli yondashuv asoslari", duration: "20 daq", locked: false },
-      { id: '1-3', type: 'test_theory', title: "Nazariy test (Asosiy qoidalar)", questions: "10 ta savol", locked: false, history: [] },
-      { id: '1-4', type: 'video', title: "Dars o'tish texnikasi", duration: "15 daq", locked: false },
-      { id: '1-5', type: 'video', title: "O'quvchilarni baholash usullari", duration: "10 daq", locked: false },
-      { id: '1-6', type: 'test_practical', title: "Amaliy test (Keys yechish)", questions: "5 ta vazifa", locked: false, history: [] },
-    ]
-  },
-  { 
-    id: 2, 
-    title: "2-Modul: Bolalar psixologiyasi",
-    lessons: [
-      { id: '2-1', type: 'video', title: "Yoshi va fe'l-atvoriga ko'ra yondashuv", duration: "20 daq", locked: true },
-      { id: '2-2', type: 'video', title: "Diqqatni jamlash usullari", duration: "18 daq", locked: true },
-      { id: '2-3', type: 'test_theory', title: "Psixologik holat bo'yicha test", questions: "12 ta savol", locked: true, history: [] },
-      { id: '2-4', type: 'video', title: "Motivatsiya berish sirlari", duration: "25 daq", locked: true },
-      { id: '2-5', type: 'test_practical', title: "Vaziyatni tahlil qilish", questions: "3 ta vazifa", locked: true, history: [] },
-    ]
-  },
-  { 
-    id: 3, 
-    title: "3-Modul: Darsni tashkil qilish",
-    lessons: [
-      { id: '3-1', type: 'video', title: "Samarali dars strukturasi", duration: "25 daq", locked: true },
-      { id: '3-2', type: 'video', title: "Dars rejasi namunasi", duration: "15 daq", locked: true },
-      { id: '3-3', type: 'test_theory', title: "Rejalashtirish bo'yicha test", questions: "8 ta savol", locked: true, history: [] },
-    ]
-  },
-  { 
-    id: 4, 
-    title: "4-Modul: Amaliy mashg'ulotlar",
-    lessons: [
-      { id: '4-1', type: 'video', title: "Real dars namunasi", duration: "45 daq", locked: true },
-      { id: '4-2', type: 'video', title: "Xatolarni tahlil qilish", duration: "20 daq", locked: true },
-      { id: '4-3', type: 'test_practical', title: "Amaliyot va xulosa", questions: "1 ta loyiha", locked: true, history: [] },
-    ]
-  },
-  { 
-    id: 5, 
-    title: "5-Modul: Sertifikatlash",
-    lessons: [
-      { id: '5-1', type: 'test_practical', title: "Yakuniy imtihon", questions: "20 ta savol", locked: true, history: [] },
-      { id: '5-2', type: 'certificate', title: "Sertifikatni yuklab olish", duration: "", locked: true },
-    ]
-  },
-];
+import { API_URL } from '../src/config/api';
+
+const INITIAL_MODULES = [];
 
 export default function TeacherCourseLessonsScreen({ navigation }) {
   const [modules, setModules] = useState(INITIAL_MODULES);
-  // State 0 index is open by default
   const [expandedIndex, setExpandedIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    fetchModules();
+  }, []);
+
+  const fetchModules = async () => {
+    try {
+      const res = await fetch(`${API_URL}/courses/modules`);
+      const data = await res.json();
+      
+      const formatted = data.map((mod, index) => {
+        let lessons = [];
+        
+        if (mod.videos) {
+          mod.videos.forEach(v => {
+            lessons.push({
+              id: `v-${v.id}`,
+              type: 'video',
+              title: v.name,
+              duration: v.duration || 'N/A',
+              locked: false, // Make dynamic later based on progress
+              videoUrl: v.videoUrl,
+              pdfUrl: v.pdfUrl,
+              description: v.description
+            });
+          });
+        }
+        
+        if (mod.tests) {
+          mod.tests.forEach(t => {
+            lessons.push({
+              id: `t-${t.id}`,
+              testId: t.id,
+              type: 'test_theory',
+              title: t.title,
+              questions: (t.questions?.length || 0) + ' ta savol',
+              locked: false,
+              history: []
+            });
+          });
+        }
+
+        return {
+          id: mod.id,
+          title: `${index + 1}-Modul: ${mod.name}`,
+          lessons
+        };
+      });
+
+      setModules(formatted);
+    } catch (error) {
+      console.error('Fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleDropdown = (index) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -117,6 +125,8 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
           </View>
 
           <View style={styles.modulesContainer}>
+            {loading && <Text style={{color: '#9CA3AF', textAlign: 'center', marginTop: 20}}>Yuklanmoqda...</Text>}
+            {!loading && modules.length === 0 && <Text style={{color: '#9CA3AF', textAlign: 'center', marginTop: 20}}>Hali darslar qo'shilmagan</Text>}
             {modules.map((mod, index) => {
               const isExpanded = expandedIndex === index;
               return (
@@ -164,10 +174,17 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
                             onPress={() => {
                               if (!lesson.locked) {
                                 if (lesson.type === 'video') {
-                                  navigation.navigate('TeacherCourseVideo');
+                                  navigation.navigate('TeacherCourseVideo', {
+                                    title: lesson.title,
+                                    duration: lesson.duration,
+                                    description: lesson.description,
+                                    pdfUrl: lesson.pdfUrl,
+                                    videoUrl: lesson.videoUrl
+                                  });
                                 } else if (lesson.type === 'test_theory') {
                                   navigation.navigate('TeacherCourseTheoryTest', {
                                     lessonId: lesson.id,
+                                    testId: lesson.testId,
                                     history: lesson.history,
                                     onFinishTest: (result) => {
                                       const newModules = [...modules];

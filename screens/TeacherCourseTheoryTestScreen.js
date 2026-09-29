@@ -4,70 +4,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { API_URL } from '../src/config/api';
+
 const { width } = Dimensions.get('window');
 
-const QUESTIONS = [
-  {
-    id: 1,
-    question: "Iqromax tizimining eng asosiy va birlamchi maqsadi nima?",
-    options: [
-      "O'quvchilarga faqat nazariy bilimlarni yodlatish",
-      "Qisqa vaqt ichida sifatli va natijaviy ta'lim berish",
-      "Faqat iqtidorli o'quvchilar bilan ishlash",
-      "Ota-onalarni dars jarayoniga jalb qilmaslik"
-    ],
-    correctIndex: 1
-  },
-  {
-    id: 2,
-    question: "O'qituvchi dars davomida qaysi qoidaga qat'iy amal qilishi kerak?",
-    options: [
-      "Vaqtni to'g'ri taqsimlash va barchaga teng e'tibor berish",
-      "Faqat bitta o'quvchi bilan ishlash",
-      "Darsdan tashqari mavzularga ko'p chalg'ish",
-      "Uy vazifalarini tekshirmasdan yangi mavzuga o'tish"
-    ],
-    correctIndex: 0
-  },
-  {
-    id: 3,
-    question: "O'quvchida motivatsiya pasayganini sezganda o'qituvchi nima qilishi kerak?",
-    options: [
-      "E'tibor bermaslik va darsni davom ettirish",
-      "O'quvchini boshqalar oldida jazolash",
-      "Ruhlantiruvchi o'yinlar yoki qiziqarli yondashuv qo'llash",
-      "Darhol ota-onasiga shikoyat qilish"
-    ],
-    correctIndex: 2
-  },
-  {
-    id: 4,
-    question: "Test natijalariga ko'ra o'quvchi past baho olsa, qanday yo'l tutiladi?",
-    options: [
-      "O'quvchini kursdan chetlashtirish",
-      "Xatolar ustida alohida ishlash va qayta tushuntirish",
-      "Faqat yuqori baho olganlar bilan ishlash",
-      "Baho haqida umuman gapirmaslik"
-    ],
-    correctIndex: 1
-  },
-  {
-    id: 5,
-    question: "Tizimli yondashuv deganda nima tushuniladi?",
-    options: [
-      "Darslarni tartibsiz, xohlagan mavzudan o'tish",
-      "Faqat kitobdan o'qib berish",
-      "Ketma-ketlikka asoslangan, aniq reja va metodikaga ega ta'lim",
-      "O'quvchilarga erkin mavzu tanlash imkonini berish"
-    ],
-    correctIndex: 2
-  }
-];
-
-const TEST_DURATION_SECONDS = 10 * 60; // 10 minutes
+const TEST_DURATION_SECONDS = 10 * 60; // Default 10 minutes
 
 export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
   const history = route?.params?.history || [];
+  const testId = route?.params?.testId;
   const [showHistory, setShowHistory] = useState(history.length > 0);
   
   const [hasStarted, setHasStarted] = useState(false);
@@ -75,6 +20,42 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({}); // { 0: 1, 1: 0, ... }
   const [isFinished, setIsFinished] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTest();
+  }, [testId]);
+
+  const fetchTest = async () => {
+    if (!testId) {
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/courses/tests/${testId}`);
+      const data = await res.json();
+      if (data && data.questions) {
+        const formatted = data.questions.map((q) => {
+          const correctIdx = q.options.findIndex(o => o.isCorrect);
+          return {
+            id: q.id,
+            question: q.text,
+            options: q.options.map(o => o.text),
+            correctIndex: correctIdx >= 0 ? correctIdx : 0
+          };
+        });
+        setQuestions(formatted);
+        if (data.duration) {
+          setTimeLeft(parseInt(data.duration) * 60);
+        }
+      }
+    } catch (error) {
+      console.error('Fetch test error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let timer;
@@ -88,8 +69,8 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
     return () => clearInterval(timer);
   }, [hasStarted, isFinished, timeLeft]);
 
-  const currentQuestion = QUESTIONS[currentIndex];
-  const totalQuestions = QUESTIONS.length;
+  const currentQuestion = questions[currentIndex];
+  const totalQuestions = questions.length;
   const currentSelected = selectedAnswers[currentIndex];
   const isLastQuestion = currentIndex === totalQuestions - 1;
 
@@ -118,7 +99,7 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
 
   const calculateScore = () => {
     let correctCount = 0;
-    QUESTIONS.forEach((q, idx) => {
+    questions.forEach((q, idx) => {
       if (selectedAnswers[idx] === q.correctIndex) {
         correctCount++;
       }
@@ -161,7 +142,7 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
             <Text style={styles.reviewTitle}>Batafsil tahlil</Text>
 
             {/* Questions Review */}
-            {QUESTIONS.map((q, idx) => {
+            {questions.map((q, idx) => {
               const userAnswer = selectedAnswers[idx];
               const isCorrect = userAnswer === q.correctIndex;
               

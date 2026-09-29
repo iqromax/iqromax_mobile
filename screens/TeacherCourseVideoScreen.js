@@ -3,12 +3,13 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function TeacherCourseVideoScreen({ navigation }) {
+export default function TeacherCourseVideoScreen({ route, navigation }) {
+  const { title, description, duration, pdfUrl } = route?.params || {};
+
   const videoData = {
-    title: "Iqromax tizimi nima? Asosiy qoidalar",
-    description: "Ushbu video darslik orqali siz Iqromax tizimining asl mohiyati, o'qituvchi oldidagi vazifalar va asosiy qoidalar bilan batafsil tanishib chiqasiz. Diqqat bilan eshiting va kerakli joylarini yozib oling.",
-    duration: "15:24",
-    module: "1-Modul"
+    title: title || "Video topilmadi",
+    description: description || "Ushbu video uchun tafsif kiritilmagan.",
+    duration: duration || "",
   };
 
   return (
@@ -43,17 +44,21 @@ export default function TeacherCourseVideoScreen({ navigation }) {
       <ScrollView style={styles.contentScroll} showsVerticalScrollIndicator={false}>
         <View style={styles.contentBox}>
           <Text style={styles.titleText}>{videoData.title}</Text>
-          <Text style={styles.metaText}>{videoData.module} • {videoData.duration}</Text>
+          {!!videoData.duration && <Text style={styles.metaText}>{videoData.duration}</Text>}
           
           <Text style={styles.descText}>{videoData.description}</Text>
 
           {/* Simple Resources */}
-          <Text style={styles.sectionTitle}>Materiallar</Text>
-          <TouchableOpacity activeOpacity={0.7} style={styles.resourceRow}>
-            <MaterialCommunityIcons name="file-pdf-box" size={24} color="#EF4444" />
-            <Text style={styles.resourceTitle}>Dars taqdimoti.pdf</Text>
-            <MaterialCommunityIcons name="download" size={20} color="#6B7280" />
-          </TouchableOpacity>
+          {!!pdfUrl && (
+            <>
+              <Text style={styles.sectionTitle}>Materiallar</Text>
+              <TouchableOpacity activeOpacity={0.7} style={styles.resourceRow}>
+                <MaterialCommunityIcons name="file-pdf-box" size={24} color="#EF4444" />
+                <Text style={styles.resourceTitle}>Dars materialini yuklab olish</Text>
+                <MaterialCommunityIcons name="download" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </ScrollView>
 

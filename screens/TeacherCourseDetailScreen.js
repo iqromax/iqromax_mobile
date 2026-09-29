@@ -1,57 +1,63 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-const COURSE_MODULES = [
-  { 
-    num: 1, 
-    title: "Iqromax metodikasi asoslari",
-    content: [
-      { type: 'video', label: "Iqromax tizimi nima? (15 daq)" },
-      { type: 'file-document', label: "O'qituvchi uchun qo'llanma (PDF)" },
-      { type: 'clipboard-check', label: "Asosiy qoidalar bo'yicha test" },
-      { type: 'video', label: "Tizimli yondashuv asoslari (20 daq)" },
-      { type: 'file-document', label: "Amaliy topshiriqlar to'plami" },
-      { type: 'file-document', label: "O'qituvchi uchun qo'llanma (PDF)" },
-      { type: 'clipboard-check', label: "Asosiy qoidalar bo'yicha test" },
-      { type: 'video', label: "Tizimli yondashuv asoslari (20 daq)" },
-      { type: 'file-document', label: "Amaliy topshiriqlar to'plami" }
-    ]
-  },
-  { 
-    num: 2, 
-    title: "Bolalar psixologiyasi",
-    content: [
-      { type: 'video', label: "Yoshi va fe'l-atvoriga ko'ra yondashuv (20 daq)" },
-      { type: 'video', label: "Diqqatni jamlash usullari (18 daq)" },
-      { type: 'clipboard-check', label: "Psixologik keyslar yechimi" },
-      { type: 'video', label: "Motivatsiya berish sirlari (25 daq)" }
-    ]
-  },
-  { 
-    num: 3, 
-    title: "Darsni tashkil qilish sirlari",
-    content: [
-      { type: 'video', label: "Samarali dars strukturasi (25 daq)" },
-      { type: 'file-document', label: "Dars rejasi namunasi" },
-      { type: 'video', label: "Vaqtni to'g'ri taqsimlash (15 daq)" }
-    ]
-  },
-  { 
-    num: 4, 
-    title: "Amaliy mashg'ulotlar",
-    content: [
-      { type: 'video', label: "Real dars namunasi (45 daq)" },
-      { type: 'account-supervisor', label: "O'quvchilar xatolarini tahlil qilish" },
-      { type: 'video', label: "Qiyin vaziyatlarni boshqarish (30 daq)" }
-    ]
-  },
-];
+import { API_URL } from '../src/config/api';
 
 export default function TeacherCourseDetailScreen({ navigation }) {
   const [selectedModule, setSelectedModule] = useState(null);
+  const [modules, setModules] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchModules();
+  }, []);
+
+  const fetchModules = async () => {
+    try {
+      const res = await fetch(`${API_URL}/courses/modules`);
+      const data = await res.json();
+      
+      // Format to UI structure
+      const formatted = data.map((mod, index) => {
+        let content = [];
+        
+        // Add videos
+        if (mod.videos) {
+          mod.videos.forEach(v => {
+            content.push({ type: 'video', label: `${v.name} ${v.duration ? '('+v.duration+')' : ''}` });
+            if (v.pdfUrl) {
+              content.push({ type: 'file-document', label: `${v.name} uchun material (PDF)` });
+            }
+          });
+        }
+        
+        // Add tests
+        if (mod.tests) {
+          mod.tests.forEach(t => {
+            content.push({ type: 'clipboard-check', label: t.title });
+          });
+        }
+
+        return {
+          id: mod.id,
+          num: index + 1,
+          title: mod.name,
+          content
+        };
+      });
+
+      setModules(formatted);
+    } catch (error) {
+      console.error('Fetch modules error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate total lessons
+  const totalLessons = modules.reduce((acc, mod) => acc + mod.content.length, 0);
 
   return (
     <View style={styles.container}>
@@ -89,7 +95,7 @@ export default function TeacherCourseDetailScreen({ navigation }) {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="clock-outline" size={22} color="#A855F7" style={{ marginBottom: 4 }} />
-              <Text style={styles.statValue}>15 ta</Text>
+              <Text style={styles.statValue}>{totalLessons} ta</Text>
               <Text style={styles.statLabel}>Dars</Text>
             </View>
             <View style={styles.statBox}>
@@ -109,20 +115,30 @@ export default function TeacherCourseDetailScreen({ navigation }) {
             <Text style={styles.sectionTitle}>Kurs dasturi</Text>
             
             <ScrollView style={{ maxHeight: 300 }} nestedScrollEnabled showsVerticalScrollIndicator={false}>
-              {COURSE_MODULES.map((item, index) => (
-                <TouchableOpacity 
-                  key={index}
-                  style={styles.moduleItem} 
-                  activeOpacity={0.7}
-                  onPress={() => setSelectedModule(item)}
-                >
-                  <View style={styles.moduleNumBox}>
-                    <Text style={styles.moduleNum}>{item.num}</Text>
-                  </View>
-                  <Text style={styles.moduleTitle}>{item.title}</Text>
-                  <MaterialCommunityIcons name="chevron-right" size={20} color="#6B7280" />
-                </TouchableOpacity>
-              ))}
+              {loading ? (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <ActivityIndicator color="#A855F7" />
+                </View>
+              ) : modules.length === 0 ? (
+                <View style={{ padding: 20, alignItems: 'center' }}>
+                  <Text style={{ color: '#9CA3AF' }}>Hali modullar qo'shilmagan</Text>
+                </View>
+              ) : (
+                modules.map((item, index) => (
+                  <TouchableOpacity 
+                    key={index}
+                    style={styles.moduleItem} 
+                    activeOpacity={0.7}
+                    onPress={() => setSelectedModule(item)}
+                  >
+                    <View style={styles.moduleNumBox}>
+                      <Text style={styles.moduleNum}>{item.num}</Text>
+                    </View>
+                    <Text style={styles.moduleTitle}>{item.title}</Text>
+                    <MaterialCommunityIcons name="chevron-right" size={20} color="#6B7280" />
+                  </TouchableOpacity>
+                ))
+              )}
             </ScrollView>
           </View>
         </ScrollView>
