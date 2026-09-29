@@ -24,8 +24,8 @@ export default function TeacherTrainingAdmin() {
     { id: '1', name: "1-Modul: Iqromax metodikasi" },
     { id: '2', name: "2-Modul: Bolalar psixologiyasi" }
   ]);
-  const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number}[]>([
-    { id: '1', moduleId: '1', name: "Iqromax tizimi nima?", order: 1 }
+  const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([
+    { id: '1', moduleId: '1', name: "Iqromax tizimi nima?", order: 1, duration: "12:30" }
   ]);
   const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([
     { id: '1', moduleId: '1', duration: "10", order: 3, qCount: 10 }
@@ -50,6 +50,7 @@ export default function TeacherTrainingAdmin() {
   const [selectedModuleForVideo, setSelectedModuleForVideo] = useState("");
   const [videoOrder, setVideoOrder] = useState("");
   const [videoName, setVideoName] = useState("");
+  const [videoDuration, setVideoDuration] = useState("");
 
   // FORM STATES: Test
   const [selectedModuleForTest, setSelectedModuleForTest] = useState("");
@@ -81,17 +82,20 @@ export default function TeacherTrainingAdmin() {
     e.preventDefault();
     if (!selectedModuleForVideo) return showToast("Modulni tanlang", 'error');
     if (!videoName.trim()) return showToast("Video nomini kiriting", 'error');
+    if (!videoDuration.trim()) return showToast("Davomiyligini kiriting", 'error');
     if (!videoOrder.trim()) return showToast("Tartib raqamini kiriting", 'error');
     
     setVideos([...videos, {
       id: Date.now().toString(),
       moduleId: selectedModuleForVideo,
       name: videoName,
+      duration: videoDuration,
       order: parseInt(videoOrder)
     }]);
     
     setSelectedModuleForVideo("");
     setVideoName("");
+    setVideoDuration("");
     setVideoOrder("");
     setIsVideoModalOpen(false);
     showToast("Video muvaffaqiyatli yuklandi!");
@@ -278,7 +282,7 @@ export default function TeacherTrainingAdmin() {
                       <Video className="w-6 h-6" />
                     </div>
                     <div>
-                      <span className="font-semibold text-lg text-white block">{vid.name}</span>
+                      <span className="font-semibold text-lg text-white block">{vid.name} ({vid.duration})</span>
                       <span className="text-sm text-indigo-200/60">Tartib: {vid.order} • Modul: {modules.find(m => m.id === vid.moduleId)?.name}</span>
                     </div>
                   </div>
@@ -462,6 +466,17 @@ export default function TeacherTrainingAdmin() {
                   placeholder="Darslik nomi" 
                   value={videoName} 
                   onChange={e => setVideoName(e.target.value)} 
+                  className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-cyan-500 transition-colors"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-indigo-200/60 uppercase">Davomiyligi</label>
+                <input 
+                  type="text" 
+                  placeholder="Masalan: 12:30 yoki 12 minut" 
+                  value={videoDuration} 
+                  onChange={e => setVideoDuration(e.target.value)} 
                   className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-cyan-500 transition-colors"
                 />
               </div>
