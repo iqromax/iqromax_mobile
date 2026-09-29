@@ -19,8 +19,8 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
   const [progress, setProgress] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
-  const fullVideoUrl = videoUrl ? `${API_URL.replace('/api', '')}${videoUrl}` : null;
-  const fullPdfUrl = pdfUrl ? `${API_URL.replace('/api', '')}${pdfUrl}` : null;
+  const fullVideoUrl = videoUrl ? `${API_URL}${videoUrl}` : null;
+  const fullPdfUrl = pdfUrl ? `${API_URL}${pdfUrl}` : null;
 
   const htmlContent = `
     <!DOCTYPE html>
