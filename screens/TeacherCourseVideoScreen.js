@@ -21,9 +21,21 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
 
   const extractYoutubeId = (url) => {
     if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : url;
+    const srcMatch = url.match(/src=["'](.*?)["']/);
+    const targetStr = srcMatch ? srcMatch[1] : url;
+
+    const regExp = /(?:youtube(?:-nocookie)?\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const match = targetStr.match(regExp);
+    
+    if (match && match[1].length === 11) {
+      return match[1];
+    }
+    
+    if (url.trim().length === 11) {
+      return url.trim();
+    }
+    
+    return url;
   };
   const ytId = extractYoutubeId(videoUrl);
   const fullPdfUrl = pdfUrl ? `${API_URL}${pdfUrl}` : null;

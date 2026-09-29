@@ -608,10 +608,10 @@ export default function TeacherTrainingAdmin() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-indigo-200/60 uppercase">YouTube Link yoki ID</label>
+                <label className="text-xs font-semibold text-indigo-200/60 uppercase">YouTube Link, Iframe yoki ID</label>
                 <input 
                   type="text" 
-                  placeholder="Masalan: dQw4w9WgXcQ"
+                  placeholder='Masalan: https://youtu.be/... yoki <iframe...>'
                   value={videoLink}
                   onChange={e => setVideoLink(e.target.value)}
                   className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-cyan-500 transition-colors"
