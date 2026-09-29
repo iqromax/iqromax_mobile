@@ -172,3 +172,81 @@ model Message {
   deletedBy  String[] @default([]) // Array of customIds who deleted this message
   createdAt  DateTime @default(now())
 }
+
+// =======================
+// TEACHER TRAINING COURSE
+// =======================
+
+model CourseModule {
+  id        String   @id @default(uuid())
+  name      String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  videos    CourseVideo[]
+  tests     CourseTest[]
+}
+
+model CourseVideo {
+  id          String   @id @default(uuid())
+  moduleId    String
+  module      CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  duration    String?
+  order       Int      @default(0)
+  videoUrl    String?
+  pdfUrl      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CourseTest {
+  id        String   @id @default(uuid())
+  moduleId  String
+  module    CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title     String
+  duration  String?
+  order     Int      @default(0)
+  questions CourseTestQuestion[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourseTestQuestion {
+  id        String   @id @default(uuid())
+  testId    String
+  test      CourseTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+  text      String
+  options   CourseTestOption[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourseTestOption {
+  id         String   @id @default(uuid())
+  questionId String
+  question   CourseTestQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String
+  isCorrect  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model CourseExam {
+  id        String   @id @default(uuid())
+  title     String
+  duration  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourseGraduate {
+  id        String   @id @default(uuid())
+  userId    String   // customId of the user
+  name      String
+  score     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
