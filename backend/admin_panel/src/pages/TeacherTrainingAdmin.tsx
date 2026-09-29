@@ -23,8 +23,8 @@ export default function TeacherTrainingAdmin() {
   const [modules, setModules] = useState<{id: string, name: string}[]>([]);
   const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([]);
   const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([]);
-  const [exams, setExams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
-  const [graduates, setGraduates] = useState<{id: string, name: string, score: string, date: string}[]>([]);
+  const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
+  const [graduates] = useState<{id: string, name: string, score: string, date: string}[]>([]);
 
   // MODAL STATES
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
