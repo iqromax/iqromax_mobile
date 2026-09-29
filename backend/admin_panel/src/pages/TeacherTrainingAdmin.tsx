@@ -21,6 +21,20 @@ export default function TeacherTrainingAdmin() {
 
   // MOCK DATA STATES
   const [modules, setModules] = useState<{id: string, name: string}[]>([]);
+
+  React.useEffect(() => {
+    fetchModules();
+  }, []);
+
+  const fetchModules = async () => {
+    try {
+      const res = await fetch('/api/courses/modules');
+      const data = await res.json();
+      setModules(data);
+    } catch (error) {
+      console.error('Error fetching modules:', error);
+    }
+  };
   const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([]);
   const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([]);
   const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
@@ -56,13 +70,38 @@ export default function TeacherTrainingAdmin() {
   };
 
   // HANDLERS: Module
-  const handleAddModule = (e: React.FormEvent) => {
+  const handleAddModule = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!moduleName.trim()) return showToast("Modul nomini kiriting", 'error');
-    setModules([...modules, { id: Date.now().toString(), name: moduleName }]);
-    setModuleName("");
-    setIsModuleModalOpen(false);
-    showToast("Modul muvaffaqiyatli qo'shildi!");
+    
+    try {
+      const res = await fetch('/api/admin/courses/modules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: moduleName, order: modules.length + 1 })
+      });
+      if (!res.ok) throw new Error('Xatolik');
+      
+      const newMod = await res.json();
+      setModules([...modules, newMod]);
+      setModuleName("");
+      setIsModuleModalOpen(false);
+      showToast("Modul muvaffaqiyatli qo'shildi!");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
+  };
+
+  const handleDeleteModule = async (id: string) => {
+    if (!window.confirm('Rostdan ham o\'chirmoqchimisiz?')) return;
+    try {
+      const res = await fetch(`/api/admin/courses/modules/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Xatolik');
+      setModules(modules.filter(m => m.id !== id));
+      showToast("Modul o'chirildi");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
   };
 
   // HANDLERS: Video
@@ -240,7 +279,7 @@ export default function TeacherTrainingAdmin() {
                     </div>
                     <span className="font-semibold text-lg text-white">{mod.name}</span>
                   </div>
-                  <button className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                  <button onClick={() => handleDeleteModule(mod.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
