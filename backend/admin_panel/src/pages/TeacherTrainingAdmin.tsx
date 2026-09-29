@@ -31,6 +31,15 @@ export default function TeacherTrainingAdmin() {
       const res = await fetch('/api/courses/modules');
       const data = await res.json();
       setModules(data);
+      
+      const allVideos: any[] = [];
+      const allTests: any[] = [];
+      data.forEach((m: any) => {
+        if (m.videos) allVideos.push(...m.videos);
+        if (m.tests) allTests.push(...m.tests);
+      });
+      setVideos(allVideos);
+      setTests(allTests);
     } catch (error) {
       console.error('Error fetching modules:', error);
     }
@@ -53,6 +62,9 @@ export default function TeacherTrainingAdmin() {
   const [videoOrder, setVideoOrder] = useState("");
   const [videoName, setVideoName] = useState("");
   const [videoDuration, setVideoDuration] = useState("");
+  const [videoDescription, setVideoDescription] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   // FORM STATES: Test
   const [selectedModuleForTest, setSelectedModuleForTest] = useState("");
@@ -105,27 +117,55 @@ export default function TeacherTrainingAdmin() {
   };
 
   // HANDLERS: Video
-  const handleAddVideo = (e: React.FormEvent) => {
+  const handleAddVideo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedModuleForVideo) return showToast("Modulni tanlang", 'error');
     if (!videoName.trim()) return showToast("Video nomini kiriting", 'error');
     if (!videoDuration.trim()) return showToast("Davomiyligini kiriting", 'error');
     if (!videoOrder.trim()) return showToast("Tartib raqamini kiriting", 'error');
     
-    setVideos([...videos, {
-      id: Date.now().toString(),
-      moduleId: selectedModuleForVideo,
-      name: videoName,
-      duration: videoDuration,
-      order: parseInt(videoOrder)
-    }]);
-    
-    setSelectedModuleForVideo("");
-    setVideoName("");
-    setVideoDuration("");
-    setVideoOrder("");
-    setIsVideoModalOpen(false);
-    showToast("Video muvaffaqiyatli yuklandi!");
+    const formData = new FormData();
+    formData.append('moduleId', selectedModuleForVideo);
+    formData.append('name', videoName);
+    formData.append('duration', videoDuration);
+    formData.append('order', videoOrder);
+    formData.append('description', videoDescription);
+    if (videoFile) formData.append('videoFile', videoFile);
+    if (pdfFile) formData.append('pdfFile', pdfFile);
+
+    try {
+      const res = await fetch('/api/admin/courses/videos', {
+        method: 'POST',
+        body: formData
+      });
+      if (!res.ok) throw new Error('Xatolik');
+      const newVideo = await res.json();
+      
+      setVideos([...videos, newVideo]);
+      setSelectedModuleForVideo("");
+      setVideoName("");
+      setVideoDuration("");
+      setVideoOrder("");
+      setVideoDescription("");
+      setVideoFile(null);
+      setPdfFile(null);
+      setIsVideoModalOpen(false);
+      showToast("Video muvaffaqiyatli yuklandi!");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
+  };
+
+  const handleDeleteVideo = async (id: string) => {
+    if (!window.confirm('Rostdan ham o\'chirmoqchimisiz?')) return;
+    try {
+      const res = await fetch(`/api/admin/courses/videos/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Xatolik');
+      setVideos(videos.filter(v => v.id !== id));
+      showToast("Video o'chirildi");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
   };
 
   // HANDLERS: Test
@@ -185,7 +225,7 @@ export default function TeacherTrainingAdmin() {
     setQuestions(questions.map(q => q.id === qId ? { ...q, correctOptionId: optId } : q));
   };
 
-  const handleAddTest = (e: React.FormEvent) => {
+  const handleAddTest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedModuleForTest) return showToast("Modulni tanlang", 'error');
     if (!testTitle.trim()) return showToast("Test nomini kiriting", 'error');
@@ -199,21 +239,59 @@ export default function TeacherTrainingAdmin() {
       }
     }
 
-    setTests([...tests, {
-      id: Date.now().toString(),
+    const payload = {
       moduleId: selectedModuleForTest,
+      title: testTitle,
       duration: testDuration,
       order: parseInt(testOrder),
-      qCount: questions.length
-    }]);
+      questions: questions.map(q => ({
+        text: q.text,
+        options: q.options.map(o => ({
+          text: o.text,
+          isCorrect: o.id === q.correctOptionId
+        }))
+      }))
+    };
 
-    setSelectedModuleForTest("");
-    setTestTitle("");
-    setTestOrder("");
-    setTestDuration("");
-    setQuestions([{ id: Date.now(), text: "", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }], correctOptionId: Date.now() + 1 }]);
-    setIsTestModalOpen(false);
-    showToast("Test muvaffaqiyatli qo'shildi!");
+    try {
+      const res = await fetch('/api/admin/courses/tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Xatolik');
+      const newTest = await res.json();
+      
+      setTests([...tests, {
+        id: newTest.id,
+        moduleId: newTest.moduleId,
+        duration: newTest.duration,
+        order: newTest.order,
+        qCount: questions.length
+      }]);
+
+      setSelectedModuleForTest("");
+      setTestTitle("");
+      setTestOrder("");
+      setTestDuration("");
+      setQuestions([{ id: Date.now(), text: "", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }], correctOptionId: Date.now() + 1 }]);
+      setIsTestModalOpen(false);
+      showToast("Test muvaffaqiyatli qo'shildi!");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
+  };
+
+  const handleDeleteTest = async (id: string) => {
+    if (!window.confirm('Rostdan ham o\'chirmoqchimisiz?')) return;
+    try {
+      const res = await fetch(`/api/admin/courses/tests/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Xatolik');
+      setTests(tests.filter(t => t.id !== id));
+      showToast("Test o'chirildi");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
   };
 
   return (
@@ -313,7 +391,7 @@ export default function TeacherTrainingAdmin() {
                       <span className="text-sm text-indigo-200/60">Tartib: {vid.order} • Modul: {modules.find(m => m.id === vid.moduleId)?.name}</span>
                     </div>
                   </div>
-                  <button className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                  <button onClick={() => handleDeleteVideo(vid.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
@@ -347,7 +425,7 @@ export default function TeacherTrainingAdmin() {
                       <span className="text-sm text-indigo-200/60">Tartib: {test.order} • Modul: {modules.find(m => m.id === test.moduleId)?.name} • {test.qCount} ta savol</span>
                     </div>
                   </div>
-                  <button className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                  <button onClick={() => handleDeleteTest(test.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
@@ -509,6 +587,16 @@ export default function TeacherTrainingAdmin() {
               </div>
 
               <div className="space-y-2">
+                <label className="text-xs font-semibold text-indigo-200/60 uppercase">Tafsif</label>
+                <textarea 
+                  placeholder="Video tafsifi" 
+                  value={videoDescription} 
+                  onChange={e => setVideoDescription(e.target.value)} 
+                  className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl h-24 p-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-cyan-500 transition-colors resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <label className="text-xs font-semibold text-indigo-200/60 uppercase">Tartib raqami</label>
                 <input 
                   type="number" 
@@ -524,6 +612,17 @@ export default function TeacherTrainingAdmin() {
                 <input 
                   type="file" 
                   accept="video/*" 
+                  onChange={e => setVideoFile(e.target.files?.[0] || null)}
+                  className="w-full text-indigo-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer text-sm"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-indigo-200/60 uppercase">PDF Material (Ixtiyoriy)</label>
+                <input 
+                  type="file" 
+                  accept="application/pdf" 
+                  onChange={e => setPdfFile(e.target.files?.[0] || null)}
                   className="w-full text-indigo-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer text-sm"
                 />
               </div>
