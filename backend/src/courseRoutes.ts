@@ -117,6 +117,10 @@ router.post('/admin/courses/modules', async (req, res) => {
     const newModule = await prisma.courseModule.create({
       data: { name, order: parseInt(order) || 0 }
     });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
     res.status(201).json(newModule);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -127,6 +131,10 @@ router.post('/admin/courses/modules', async (req, res) => {
 router.delete('/admin/courses/modules/:id', async (req, res) => {
   try {
     await prisma.courseModule.delete({ where: { id: req.params.id } });
+    
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
     res.json({ message: 'Modul o\'chirildi' });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -167,6 +175,9 @@ router.post(
       }
     });
 
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
     res.status(201).json(newVideo);
   } catch (error) {
     console.error('Error adding video:', error);
@@ -178,6 +189,10 @@ router.post(
 router.delete('/admin/courses/videos/:id', async (req, res) => {
   try {
     await prisma.courseVideo.delete({ where: { id: req.params.id } });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
     res.json({ message: 'Video o\'chirildi' });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -221,6 +236,9 @@ router.post('/admin/courses/tests', async (req, res) => {
       }
     });
 
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
     res.status(201).json(newTest);
   } catch (error) {
     console.error('Error adding test:', error);
@@ -232,6 +250,10 @@ router.post('/admin/courses/tests', async (req, res) => {
 router.delete('/admin/courses/tests/:id', async (req, res) => {
   try {
     await prisma.courseTest.delete({ where: { id: req.params.id } });
+    
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
     res.json({ message: 'Test o\'chirildi' });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

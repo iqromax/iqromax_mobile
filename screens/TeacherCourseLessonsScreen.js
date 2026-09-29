@@ -8,6 +8,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+import io from 'socket.io-client';
 import { API_URL } from '../src/config/api';
 
 const INITIAL_MODULES = [];
@@ -19,6 +20,21 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
 
   React.useEffect(() => {
     fetchModules();
+
+    const SOCKET_URL = API_URL.replace('/api', '');
+    const socket = io(SOCKET_URL, {
+      path: '/api/socket.io',
+      transports: ['websocket']
+    });
+
+    socket.on('courses-updated', () => {
+      console.log('Real-time update received: courses-updated');
+      fetchModules();
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const fetchModules = async () => {
