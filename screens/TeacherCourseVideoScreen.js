@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Video, ResizeMode } from 'expo-av';
+import { WebView } from 'react-native-webview';
 import { API_URL } from '../src/config/api';
 
 export default function TeacherCourseVideoScreen({ route, navigation }) {
@@ -14,7 +14,6 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
     duration: duration || "",
   };
 
-  const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
@@ -22,30 +21,70 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
   const fullVideoUrl = videoUrl ? `${API_URL.replace('/api', '')}${videoUrl}` : null;
   const fullPdfUrl = pdfUrl ? `${API_URL.replace('/api', '')}${pdfUrl}` : null;
 
-  const handlePlaybackStatusUpdate = (status) => {
-    if (status.isLoaded) {
-      setIsPlaying(status.isPlaying);
-      if (status.durationMillis) {
-        setProgress(status.positionMillis / status.durationMillis);
-      }
-      if (status.didJustFinish && !isFinished) {
-        setIsFinished(true);
-      }
-    }
-  };
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      <style>
+        body, html { margin: 0; padding: 0; background: #000; width: 100%; height: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        video { width: 100%; height: 100%; object-fit: contain; }
+      </style>
+    </head>
+    <body>
+      <video id="vid" controls controlsList="nodownload nofullscreen" playsinline preload="metadata">
+        <source src="${fullVideoUrl}" type="video/mp4">
+      </video>
+      <script>
+        const vid = document.getElementById('vid');
+        let supposedCurrentTime = 0;
+        
+        vid.addEventListener('timeupdate', function() {
+          if (!vid.seeking) {
+            supposedCurrentTime = vid.currentTime;
+          }
+          let pct = vid.duration ? (vid.currentTime / vid.duration) : 0;
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'progress', progress: pct }));
+        });
+        
+        vid.addEventListener('seeking', function() {
+          var delta = vid.currentTime - supposedCurrentTime;
+          if (delta > 0.5) {
+            vid.currentTime = supposedCurrentTime;
+          }
+        });
 
-  const togglePlayPause = async () => {
-    if (!videoRef.current) return;
-    if (isPlaying) {
-      await videoRef.current.pauseAsync();
-    } else {
-      if (isFinished) {
-        await videoRef.current.replayAsync();
-        setIsFinished(false);
-      } else {
-        await videoRef.current.playAsync();
+        vid.addEventListener('play', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'play' }));
+        });
+
+        vid.addEventListener('pause', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'pause' }));
+        });
+
+        vid.addEventListener('ended', function() {
+          window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ended' }));
+        });
+      </script>
+    </body>
+    </html>
+  `;
+
+  const handleMessage = (event) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      if (data.type === 'progress') {
+        setProgress(data.progress);
+      } else if (data.type === 'ended') {
+        setIsFinished(true);
+        setIsPlaying(false);
+        setProgress(1);
+      } else if (data.type === 'play') {
+        setIsPlaying(true);
+      } else if (data.type === 'pause') {
+        setIsPlaying(false);
       }
-    }
+    } catch (e) {}
   };
 
   const handleNextLesson = () => {
@@ -62,12 +101,14 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       {/* Real Video Player */}
       <View style={styles.videoPlayer}>
         {fullVideoUrl ? (
-          <Video
-            ref={videoRef}
-            style={StyleSheet.absoluteFill}
-            source={{ uri: fullVideoUrl }}
-            resizeMode={ResizeMode.CONTAIN}
-            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+          <WebView
+            source={{ html: htmlContent }}
+            style={{ width: '100%', height: '100%', backgroundColor: '#000' }}
+            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
+            scrollEnabled={false}
+            bounces={false}
+            onMessage={handleMessage}
           />
         ) : (
           <Text style={{ color: '#6B7280' }}>Video topilmadi</Text>
@@ -79,20 +120,6 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
-
-        {/* Play/Pause Button Overlay */}
-        <TouchableOpacity style={styles.playBtnOverlay} activeOpacity={1} onPress={togglePlayPause}>
-          {!isPlaying && fullVideoUrl && (
-            <View style={styles.playCircle}>
-              <MaterialCommunityIcons 
-                name={isFinished ? "replay" : "play"} 
-                size={32} 
-                color="#FFF" 
-                style={!isFinished ? { marginLeft: 4 } : {}} 
-              />
-            </View>
-          )}
-        </TouchableOpacity>
 
         {/* Unseekable Progress Bar */}
         <View style={styles.progressContainer}>
