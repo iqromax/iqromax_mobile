@@ -20,23 +20,11 @@ export default function TeacherTrainingAdmin() {
   const [activeTab, setActiveTab] = useState<'modules' | 'videos' | 'tests' | 'exams' | 'graduates'>('modules');
 
   // MOCK DATA STATES
-  const [modules, setModules] = useState<{id: string, name: string}[]>([
-    { id: '1', name: "1-Modul: Iqromax metodikasi" },
-    { id: '2', name: "2-Modul: Bolalar psixologiyasi" }
-  ]);
-  const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([
-    { id: '1', moduleId: '1', name: "Iqromax tizimi nima?", order: 1, duration: "12:30" }
-  ]);
-  const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([
-    { id: '1', moduleId: '1', duration: "10", order: 3, qCount: 10 }
-  ]);
-  const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([
-    { id: '1', title: 'Yakuniy Imtihon', duration: '60', qCount: 30 }
-  ]);
-  const [graduates] = useState<{id: string, name: string, score: string, date: string}[]>([
-    { id: '1', name: 'Alisher Oripov', score: '95%', date: '2023-10-15' },
-    { id: '2', name: 'Malika Karimova', score: '88%', date: '2023-10-18' }
-  ]);
+  const [modules, setModules] = useState<{id: string, name: string}[]>([]);
+  const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([]);
+  const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([]);
+  const [exams, setExams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
+  const [graduates, setGraduates] = useState<{id: string, name: string, score: string, date: string}[]>([]);
 
   // MODAL STATES
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
