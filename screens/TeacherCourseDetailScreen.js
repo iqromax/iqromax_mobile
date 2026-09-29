@@ -67,7 +67,7 @@ export default function TeacherCourseDetailScreen({ navigation }) {
           <View style={{ width: 40 }} />
         </View>
 
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+        <ScrollView nestedScrollEnabled style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           {/* Main Hero Card */}
           <LinearGradient
             colors={['#1E1B4B', '#2E1065', '#4C1D95']}
@@ -108,20 +108,22 @@ export default function TeacherCourseDetailScreen({ navigation }) {
           <View style={styles.sectionBox}>
             <Text style={styles.sectionTitle}>Kurs dasturi</Text>
             
-            {COURSE_MODULES.map((item, index) => (
-              <TouchableOpacity 
-                key={index}
-                style={styles.moduleItem} 
-                activeOpacity={0.7}
-                onPress={() => setSelectedModule(item)}
-              >
-                <View style={styles.moduleNumBox}>
-                  <Text style={styles.moduleNum}>{item.num}</Text>
-                </View>
-                <Text style={styles.moduleTitle}>{item.title}</Text>
-                <MaterialCommunityIcons name="chevron-right" size={20} color="#6B7280" />
-              </TouchableOpacity>
-            ))}
+            <ScrollView style={{ maxHeight: 300 }} nestedScrollEnabled showsVerticalScrollIndicator={false}>
+              {COURSE_MODULES.map((item, index) => (
+                <TouchableOpacity 
+                  key={index}
+                  style={styles.moduleItem} 
+                  activeOpacity={0.7}
+                  onPress={() => setSelectedModule(item)}
+                >
+                  <View style={styles.moduleNumBox}>
+                    <Text style={styles.moduleNum}>{item.num}</Text>
+                  </View>
+                  <Text style={styles.moduleTitle}>{item.title}</Text>
+                  <MaterialCommunityIcons name="chevron-right" size={20} color="#6B7280" />
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
         </ScrollView>
       </SafeAreaView>
