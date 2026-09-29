@@ -62,6 +62,7 @@ export const navigationRef = createNavigationContainerRef();
 
 import TeacherDashboardScreen from './screens/TeacherDashboardScreen';
 import TeacherCourseDetailScreen from './screens/TeacherCourseDetailScreen';
+import TeacherCourseLessonsScreen from './screens/TeacherCourseLessonsScreen';
 import ParentDashboardScreen from './screens/ParentDashboardScreen';
 import AuthScreen from './screens/AuthScreen';
 import OtpScreen from './screens/OtpScreen';
@@ -556,6 +557,7 @@ export default function App() {
           <Stack.Screen name="StudentDashboard" component={StudentDashboardScreen} initialParams={initialRoute === 'StudentDashboard' ? initialParams : undefined} />
           <Stack.Screen name="TeacherDashboard" component={TeacherDashboardScreen} initialParams={initialRoute === 'TeacherDashboard' ? initialParams : undefined} />
           <Stack.Screen name="TeacherCourseDetail" component={TeacherCourseDetailScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="TeacherCourseLessons" component={TeacherCourseLessonsScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ParentDashboard" component={ParentDashboardScreen} initialParams={initialRoute === 'ParentDashboard' ? initialParams : undefined} />
           <Stack.Screen name="EnergyCenter" component={EnergyCenterScreen} />
         <Stack.Screen name="ReferralScreen" component={ReferralScreen} />

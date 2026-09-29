@@ -130,7 +130,7 @@ export default function TeacherCourseDetailScreen({ navigation }) {
 
       {/* Clean Floating Button */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity activeOpacity={0.9} style={{ width: '100%' }}>
+        <TouchableOpacity activeOpacity={0.9} style={{ width: '100%' }} onPress={() => navigation.navigate('TeacherCourseLessons')}>
           <LinearGradient
             colors={['#8B5CF6', '#D946EF']}
             start={{x:0, y:0}} end={{x:1, y:0}}
