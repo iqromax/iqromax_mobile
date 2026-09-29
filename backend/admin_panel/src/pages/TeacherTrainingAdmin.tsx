@@ -9,12 +9,15 @@ import {
   CheckCircle2, 
   Clock, 
   ListOrdered,
-  X
+  X,
+  CheckSquare,
+  GraduationCap,
+  Award
 } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function TeacherTrainingAdmin() {
-  const [activeTab, setActiveTab] = useState<'modules' | 'videos' | 'tests'>('modules');
+  const [activeTab, setActiveTab] = useState<'modules' | 'videos' | 'tests' | 'exams' | 'graduates'>('modules');
 
   // MOCK DATA STATES
   const [modules, setModules] = useState<{id: string, name: string}[]>([
@@ -26,6 +29,13 @@ export default function TeacherTrainingAdmin() {
   ]);
   const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([
     { id: '1', moduleId: '1', duration: "10", order: 3, qCount: 10 }
+  ]);
+  const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([
+    { id: '1', title: 'Yakuniy Imtihon', duration: '60', qCount: 30 }
+  ]);
+  const [graduates] = useState<{id: string, name: string, score: string, date: string}[]>([
+    { id: '1', name: 'Alisher Oripov', score: '95%', date: '2023-10-15' },
+    { id: '2', name: 'Malika Karimova', score: '88%', date: '2023-10-18' }
   ]);
 
   // MODAL STATES
@@ -203,6 +213,18 @@ export default function TeacherTrainingAdmin() {
           >
             <FileText className="w-4 h-4" /> Testlar
           </button>
+          <button 
+            onClick={() => setActiveTab('exams')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all text-sm ${activeTab === 'exams' ? 'bg-[#1A1A2F] text-amber-400' : 'text-indigo-200/60 hover:text-white hover:bg-[#121223]'}`}
+          >
+            <CheckSquare className="w-4 h-4" /> Imtihon
+          </button>
+          <button 
+            onClick={() => setActiveTab('graduates')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all text-sm ${activeTab === 'graduates' ? 'bg-[#1A1A2F] text-blue-400' : 'text-indigo-200/60 hover:text-white hover:bg-[#121223]'}`}
+          >
+            <GraduationCap className="w-4 h-4" /> Tugallagan ustozlar
+          </button>
         </div>
 
         {/* CONTENT: MODULES */}
@@ -300,6 +322,83 @@ export default function TeacherTrainingAdmin() {
                 </div>
               ))}
               {tests.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Testlar mavjud emas</div>}
+            </div>
+          </div>
+        )}
+
+        {/* CONTENT: EXAMS */}
+        {activeTab === 'exams' && (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <button 
+                onClick={() => showToast("Tez orada imtihon yaratish moduli qo'shiladi", 'success')}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(217,119,6,0.3)]"
+              >
+                <Plus className="w-4 h-4" /> Yangi imtihon
+              </button>
+            </div>
+
+            <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
+              {exams.map(exam => (
+                <div key={exam.id} className="flex items-center justify-between p-5 border-b border-[#1A1A2F] last:border-0 hover:bg-[#121223] transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20">
+                      <CheckSquare className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-lg text-white block">{exam.title} ({exam.duration} daqiqa)</span>
+                      <span className="text-sm text-indigo-200/60">{exam.qCount} ta savol</span>
+                    </div>
+                  </div>
+                  <button className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+              {exams.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Imtihonlar mavjud emas</div>}
+            </div>
+          </div>
+        )}
+
+        {/* CONTENT: GRADUATES */}
+        {activeTab === 'graduates' && (
+          <div className="space-y-4">
+            <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
+              <div className="p-5 border-b border-[#1A1A2F] bg-[#121223]/50">
+                <h3 className="font-semibold text-lg text-white flex items-center gap-2">
+                  <Award className="w-5 h-5 text-blue-400" /> Sertifikat olgan o'qituvchilar
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#1A1A2F] text-xs uppercase text-indigo-200/50 bg-[#121223]/30">
+                      <th className="p-4 font-semibold">Ism va familiya</th>
+                      <th className="p-4 font-semibold">Natija (To'plagan ball)</th>
+                      <th className="p-4 font-semibold">Sertifikat sanasi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {graduates.map(grad => (
+                      <tr key={grad.id} className="border-b border-[#1A1A2F] last:border-0 hover:bg-[#121223] transition-colors text-sm">
+                        <td className="p-4 font-medium text-white flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs border border-blue-500/30">
+                            {grad.name.charAt(0)}
+                          </div>
+                          {grad.name}
+                        </td>
+                        <td className="p-4 text-emerald-400 font-semibold">{grad.score}</td>
+                        <td className="p-4 text-indigo-200/80">{grad.date}</td>
+                      </tr>
+                    ))}
+                    {graduates.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="p-12 text-center text-indigo-200/50 font-medium">Hozircha bitiruvchilar yo'q</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
