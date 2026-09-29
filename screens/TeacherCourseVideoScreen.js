@@ -122,6 +122,9 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
             mediaPlaybackRequiresUserAction={false}
             scrollEnabled={false}
             bounces={false}
+            javaScriptEnabled={true}
+            originWhitelist={['*']}
+            mixedContentMode="always"
             onMessage={handleMessage}
           />
         ) : (
