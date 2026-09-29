@@ -9,6 +9,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 import io from 'socket.io-client';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
 
 const INITIAL_MODULES = [];
@@ -42,35 +43,47 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
       const res = await fetch(`${API_URL}/courses/modules`);
       const data = await res.json();
       
+      const savedCompleted = await AsyncStorage.getItem('teacher_course_completed');
+      let completedLessonIds = [];
+      if (savedCompleted) {
+        completedLessonIds = JSON.parse(savedCompleted);
+      }
+
+      let allLessonIds = [];
+      
       const formatted = data.map((mod, index) => {
         let lessons = [];
         
         if (mod.videos) {
           mod.videos.forEach(v => {
+            const lId = `v-${v.id}`;
             lessons.push({
-              id: `v-${v.id}`,
+              id: lId,
               type: 'video',
               title: v.name,
               duration: v.duration || 'N/A',
-              locked: false, // Make dynamic later based on progress
               videoUrl: v.videoUrl,
               pdfUrl: v.pdfUrl,
-              description: v.description
+              description: v.description,
+              globalIndex: allLessonIds.length
             });
+            allLessonIds.push(lId);
           });
         }
         
         if (mod.tests) {
           mod.tests.forEach(t => {
+            const lId = `t-${t.id}`;
             lessons.push({
-              id: `t-${t.id}`,
+              id: lId,
               testId: t.id,
               type: 'test_theory',
               title: t.title,
               questions: (t.questions?.length || 0) + ' ta savol',
-              locked: false,
-              history: []
+              history: [],
+              globalIndex: allLessonIds.length
             });
+            allLessonIds.push(lId);
           });
         }
 
@@ -79,6 +92,17 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
           title: `${index + 1}-Modul: ${mod.name}`,
           lessons
         };
+      });
+
+      formatted.forEach(mod => {
+        mod.lessons.forEach(lesson => {
+          if (lesson.globalIndex === 0) {
+            lesson.locked = false;
+          } else {
+            const prevLessonId = allLessonIds[lesson.globalIndex - 1];
+            lesson.locked = !completedLessonIds.includes(prevLessonId);
+          }
+        });
       });
 
       setModules(formatted);
@@ -92,6 +116,20 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
   const toggleDropdown = (index) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedIndex(expandedIndex === index ? null : index);
+  };
+
+  const handleLessonComplete = async (lessonId) => {
+    try {
+      const savedCompleted = await AsyncStorage.getItem('teacher_course_completed');
+      let completedLessonIds = savedCompleted ? JSON.parse(savedCompleted) : [];
+      if (!completedLessonIds.includes(lessonId)) {
+        completedLessonIds.push(lessonId);
+        await AsyncStorage.setItem('teacher_course_completed', JSON.stringify(completedLessonIds));
+        fetchModules();
+      }
+    } catch(err) {
+      console.log('Error saving lesson progress:', err);
+    }
   };
 
   const getIconData = (type, locked) => {
@@ -191,11 +229,13 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
                               if (!lesson.locked) {
                                 if (lesson.type === 'video') {
                                   navigation.navigate('TeacherCourseVideo', {
+                                    lessonId: lesson.id,
                                     title: lesson.title,
                                     duration: lesson.duration,
                                     description: lesson.description,
                                     pdfUrl: lesson.pdfUrl,
-                                    videoUrl: lesson.videoUrl
+                                    videoUrl: lesson.videoUrl,
+                                    onFinishVideo: () => handleLessonComplete(lesson.id)
                                   });
                                 } else if (lesson.type === 'test_theory') {
                                   navigation.navigate('TeacherCourseTheoryTest', {
@@ -203,6 +243,10 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
                                     testId: lesson.testId,
                                     history: lesson.history,
                                     onFinishTest: (result) => {
+                                      if (result.score >= 60) {
+                                        handleLessonComplete(lesson.id);
+                                      }
+                                      // Continue adding history to local state if needed
                                       const newModules = [...modules];
                                       const mIndex = newModules.findIndex(m => m.id === mod.id);
                                       const lIndex = newModules[mIndex].lessons.findIndex(l => l.id === lesson.id);

@@ -1,10 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Video, ResizeMode } from 'expo-av';
+import { API_URL } from '../src/config/api';
 
 export default function TeacherCourseVideoScreen({ route, navigation }) {
-  const { title, description, duration, pdfUrl } = route?.params || {};
+  const { title, description, duration, pdfUrl, videoUrl, onFinishVideo } = route?.params || {};
 
   const videoData = {
     title: title || "Video topilmadi",
@@ -12,30 +14,90 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
     duration: duration || "",
   };
 
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isFinished, setIsFinished] = useState(false);
+
+  const fullVideoUrl = videoUrl ? `${API_URL.replace('/api', '')}${videoUrl}` : null;
+  const fullPdfUrl = pdfUrl ? `${API_URL.replace('/api', '')}${pdfUrl}` : null;
+
+  const handlePlaybackStatusUpdate = (status) => {
+    if (status.isLoaded) {
+      setIsPlaying(status.isPlaying);
+      if (status.durationMillis) {
+        setProgress(status.positionMillis / status.durationMillis);
+      }
+      if (status.didJustFinish && !isFinished) {
+        setIsFinished(true);
+      }
+    }
+  };
+
+  const togglePlayPause = async () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      await videoRef.current.pauseAsync();
+    } else {
+      if (isFinished) {
+        await videoRef.current.replayAsync();
+        setIsFinished(false);
+      } else {
+        await videoRef.current.playAsync();
+      }
+    }
+  };
+
+  const handleNextLesson = () => {
+    if (onFinishVideo) {
+      onFinishVideo();
+    }
+    navigation.goBack();
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#000" translucent={false} />
       
-      {/* Minimalist Video Player */}
+      {/* Real Video Player */}
       <View style={styles.videoPlayer}>
-        {/* Simple Header inside Video */}
+        {fullVideoUrl ? (
+          <Video
+            ref={videoRef}
+            style={StyleSheet.absoluteFill}
+            source={{ uri: fullVideoUrl }}
+            resizeMode={ResizeMode.CONTAIN}
+            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+          />
+        ) : (
+          <Text style={{ color: '#6B7280' }}>Video topilmadi</Text>
+        )}
+
+        {/* Header Overlay */}
         <View style={styles.videoHeader}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
 
-        {/* Clean Play Button */}
-        <TouchableOpacity style={styles.playBtn} activeOpacity={0.8}>
-          <View style={styles.playCircle}>
-            <MaterialCommunityIcons name="play" size={32} color="#FFF" style={{ marginLeft: 4 }} />
-          </View>
+        {/* Play/Pause Button Overlay */}
+        <TouchableOpacity style={styles.playBtnOverlay} activeOpacity={1} onPress={togglePlayPause}>
+          {!isPlaying && fullVideoUrl && (
+            <View style={styles.playCircle}>
+              <MaterialCommunityIcons 
+                name={isFinished ? "replay" : "play"} 
+                size={32} 
+                color="#FFF" 
+                style={!isFinished ? { marginLeft: 4 } : {}} 
+              />
+            </View>
+          )}
         </TouchableOpacity>
 
-        {/* Thin Progress Bar */}
+        {/* Unseekable Progress Bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBg}>
-            <View style={styles.progressFill} />
+            <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
           </View>
         </View>
       </View>
@@ -52,9 +114,13 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
           {!!pdfUrl && (
             <>
               <Text style={styles.sectionTitle}>Materiallar</Text>
-              <TouchableOpacity activeOpacity={0.7} style={styles.resourceRow}>
+              <TouchableOpacity 
+                activeOpacity={0.7} 
+                style={styles.resourceRow}
+                onPress={() => Linking.openURL(fullPdfUrl)}
+              >
                 <MaterialCommunityIcons name="file-pdf-box" size={24} color="#EF4444" />
-                <Text style={styles.resourceTitle}>Dars materialini yuklab olish</Text>
+                <Text style={styles.resourceTitle}>Dars materialini ko'rish</Text>
                 <MaterialCommunityIcons name="download" size={20} color="#6B7280" />
               </TouchableOpacity>
             </>
@@ -68,7 +134,11 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
           <MaterialCommunityIcons name="chevron-left" size={20} color="#9CA3AF" />
           <Text style={styles.navBtnText}>Oldingi</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navBtnNext}>
+        <TouchableOpacity 
+          style={[styles.navBtnNext, !isFinished && { opacity: 0.5 }]} 
+          disabled={!isFinished}
+          onPress={handleNextLesson}
+        >
           <LinearGradient
             colors={['#8B5CF6', '#D946EF']}
             start={{x:0, y:0}} end={{x:1, y:0}}
@@ -112,9 +182,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  playBtn: {
+  playBtnOverlay: {
+    ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 5,
   },
   playCircle: {
     width: 64,
