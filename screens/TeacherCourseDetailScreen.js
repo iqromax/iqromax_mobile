@@ -1,20 +1,57 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+const COURSE_MODULES = [
+  { 
+    num: 1, 
+    title: "Iqromax metodikasi asoslari",
+    content: [
+      { type: 'video', label: "Iqromax tizimi nima? (15 daq)" },
+      { type: 'file-document', label: "O'qituvchi uchun qo'llanma (PDF)" },
+      { type: 'clipboard-check', label: "Asosiy qoidalar bo'yicha test" },
+      { type: 'video', label: "Tizimli yondashuv asoslari (20 daq)" },
+      { type: 'file-document', label: "Amaliy topshiriqlar to'plami" },
+      { type: 'file-document', label: "O'qituvchi uchun qo'llanma (PDF)" },
+      { type: 'clipboard-check', label: "Asosiy qoidalar bo'yicha test" },
+      { type: 'video', label: "Tizimli yondashuv asoslari (20 daq)" },
+      { type: 'file-document', label: "Amaliy topshiriqlar to'plami" }
+    ]
+  },
+  { 
+    num: 2, 
+    title: "Bolalar psixologiyasi",
+    content: [
+      { type: 'video', label: "Yoshi va fe'l-atvoriga ko'ra yondashuv (20 daq)" },
+      { type: 'video', label: "Diqqatni jamlash usullari (18 daq)" },
+      { type: 'clipboard-check', label: "Psixologik keyslar yechimi" },
+      { type: 'video', label: "Motivatsiya berish sirlari (25 daq)" }
+    ]
+  },
+  { 
+    num: 3, 
+    title: "Darsni tashkil qilish sirlari",
+    content: [
+      { type: 'video', label: "Samarali dars strukturasi (25 daq)" },
+      { type: 'file-document', label: "Dars rejasi namunasi" },
+      { type: 'video', label: "Vaqtni to'g'ri taqsimlash (15 daq)" }
+    ]
+  },
+  { 
+    num: 4, 
+    title: "Amaliy mashg'ulotlar",
+    content: [
+      { type: 'video', label: "Real dars namunasi (45 daq)" },
+      { type: 'account-supervisor', label: "O'quvchilar xatolarini tahlil qilish" },
+      { type: 'video', label: "Qiyin vaziyatlarni boshqarish (30 daq)" }
+    ]
+  },
+];
 
 export default function TeacherCourseDetailScreen({ navigation }) {
-  const [expandedIndex, setExpandedIndex] = useState(null);
-
-  const toggleDropdown = (index) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
+  const [selectedModule, setSelectedModule] = useState(null);
 
   return (
     <View style={styles.container}>
@@ -71,74 +108,20 @@ export default function TeacherCourseDetailScreen({ navigation }) {
           <View style={styles.sectionBox}>
             <Text style={styles.sectionTitle}>Kurs dasturi</Text>
             
-            {[
-              { 
-                num: 1, 
-                title: "Iqromax metodikasi asoslari",
-                content: [
-                  { type: 'video', label: "Iqromax tizimi nima? (15 daq)" },
-                  { type: 'file-document', label: "O'qituvchi uchun qo'llanma (PDF)" },
-                  { type: 'clipboard-check', label: "Asosiy qoidalar bo'yicha test" }
-                ]
-              },
-              { 
-                num: 2, 
-                title: "Bolalar psixologiyasi",
-                content: [
-                  { type: 'video', label: "Yoshi va fe'l-atvoriga ko'ra yondashuv (20 daq)" },
-                  { type: 'video', label: "Diqqatni jamlash usullari (18 daq)" },
-                  { type: 'clipboard-check', label: "Psixologik keyslar yechimi" }
-                ]
-              },
-              { 
-                num: 3, 
-                title: "Darsni tashkil qilish sirlari",
-                content: [
-                  { type: 'video', label: "Samarali dars strukturasi (25 daq)" },
-                  { type: 'file-document', label: "Dars rejasi namunasi" }
-                ]
-              },
-              { 
-                num: 4, 
-                title: "Amaliy mashg'ulotlar",
-                content: [
-                  { type: 'video', label: "Real dars namunasi (45 daq)" },
-                  { type: 'account-supervisor', label: "O'quvchilar xatolarini tahlil qilish" }
-                ]
-              },
-            ].map((item, index) => {
-              const isExpanded = expandedIndex === index;
-              return (
-                <View key={index}>
-                  <TouchableOpacity 
-                    style={[styles.moduleItem, isExpanded && { borderBottomWidth: 0, paddingBottom: 8 }]} 
-                    activeOpacity={0.7}
-                    onPress={() => toggleDropdown(index)}
-                  >
-                    <View style={styles.moduleNumBox}>
-                      <Text style={styles.moduleNum}>{item.num}</Text>
-                    </View>
-                    <Text style={styles.moduleTitle}>{item.title}</Text>
-                    <MaterialCommunityIcons 
-                      name={isExpanded ? "chevron-up" : "chevron-down"} 
-                      size={20} 
-                      color="#6B7280" 
-                    />
-                  </TouchableOpacity>
-                  
-                  {isExpanded && (
-                    <TouchableOpacity activeOpacity={1} style={styles.dropdownContent}>
-                      {item.content.map((child, i) => (
-                        <View key={i} style={styles.dropdownRow}>
-                          <MaterialCommunityIcons name={child.type} size={16} color="#A855F7" />
-                          <Text style={styles.dropdownText}>{child.label}</Text>
-                        </View>
-                      ))}
-                    </TouchableOpacity>
-                  )}
+            {COURSE_MODULES.map((item, index) => (
+              <TouchableOpacity 
+                key={index}
+                style={styles.moduleItem} 
+                activeOpacity={0.7}
+                onPress={() => setSelectedModule(item)}
+              >
+                <View style={styles.moduleNumBox}>
+                  <Text style={styles.moduleNum}>{item.num}</Text>
                 </View>
-              );
-            })}
+                <Text style={styles.moduleTitle}>{item.title}</Text>
+                <MaterialCommunityIcons name="chevron-right" size={20} color="#6B7280" />
+              </TouchableOpacity>
+            ))}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -156,6 +139,39 @@ export default function TeacherCourseDetailScreen({ navigation }) {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+
+      {/* Module Content Modal */}
+      <Modal visible={!!selectedModule} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setSelectedModule(null)}>
+          <TouchableOpacity activeOpacity={1} style={styles.modalCard}>
+            {selectedModule && (
+              <>
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalNumBox}>
+                    <Text style={styles.modalNumText}>{selectedModule.num}</Text>
+                  </View>
+                  <Text style={styles.modalTitle}>{selectedModule.title}</Text>
+                  <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setSelectedModule(null)}>
+                    <MaterialCommunityIcons name="close" size={22} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+                  <Text style={styles.modalSectionTitle}>Ushbu bo'limdagi darslar:</Text>
+                  {selectedModule.content.map((child, i) => (
+                    <TouchableOpacity activeOpacity={1} key={i} style={styles.modalLessonRow}>
+                      <View style={styles.modalIconCircle}>
+                        <MaterialCommunityIcons name={child.type} size={18} color="#D946EF" />
+                      </View>
+                      <Text style={styles.modalLessonText}>{child.label}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </>
+            )}
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -322,22 +338,87 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     marginRight: 8,
   },
-  dropdownContent: {
-    paddingLeft: 40,
-    paddingRight: 10,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
   },
-  dropdownRow: {
+  modalCard: {
+    backgroundColor: '#121228',
+    borderRadius: 24,
+    paddingTop: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    maxHeight: '80%',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  dropdownText: {
+  modalNumBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(217, 70, 239, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  modalNumText: {
+    color: '#D946EF',
+    fontSize: 14,
+    fontFamily: 'Inter_800ExtraBold',
+  },
+  modalTitle: {
+    flex: 1,
+    color: '#FFF',
+    fontSize: 16,
+    fontFamily: 'Inter_700Bold',
+  },
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalScroll: {
+    marginTop: 10,
+  },
+  modalSectionTitle: {
     color: '#9CA3AF',
     fontSize: 12,
-    fontFamily: 'Inter_400Regular',
-    marginLeft: 8,
+    fontFamily: 'Inter_500Medium',
+    marginBottom: 16,
   },
+  modalLessonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.02)',
+  },
+  modalIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(217, 70, 239, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  modalLessonText: {
+    flex: 1,
+    color: '#E5E7EB',
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+  }
 });
