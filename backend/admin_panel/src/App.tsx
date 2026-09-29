@@ -11,8 +11,8 @@ import MysteryBoxAdmin from './pages/MysteryBoxAdmin';
 import ShopAdmin from './pages/ShopAdmin';
 import InventoryAdmin from './pages/InventoryAdmin';
 import AppDownloadingAdmin from './pages/AppDownloadingAdmin';
-
 import AppDownloadLanding from './pages/AppDownloadLanding';
+import TeacherTrainingAdmin from './pages/TeacherTrainingAdmin';
 
 function App() {
   return (
@@ -22,6 +22,7 @@ function App() {
         <Route path="/downloading" element={<AppDownloadLanding />} />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/courses/teacher-training" element={<TeacherTrainingAdmin />} />
         <Route path="/app-downloading" element={<AppDownloadingAdmin />} />
         <Route path="/mystery-box" element={<MysteryBoxAdmin />} />
         <Route path="/shop" element={<ShopAdmin />} />

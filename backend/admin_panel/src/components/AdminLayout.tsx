@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle, Package, Download, ShoppingBag, Menu } from 'lucide-react';
+import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle, Package, Download, ShoppingBag, Menu, BookOpen } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isUsersMenuOpen, setIsUsersMenuOpen] = useState(false);
+  const [isCoursesMenuOpen, setIsCoursesMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -140,6 +141,49 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                   >
                     <UserPlus className="w-4 h-4" />
                     <span>Ota-Onalar</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <button 
+                onClick={() => {
+                  setIsCoursesMenuOpen(!isCoursesMenuOpen);
+                  if (!isSidebarOpen) setIsSidebarOpen(true);
+                }}
+                className={`w-full flex items-center justify-between ${isSidebarOpen ? 'px-4' : 'justify-center px-0'} py-3.5 rounded-xl transition-all ${
+                  ['/courses/teacher-training'].includes(location.pathname)
+                    ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                    : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <BookOpen className={`w-5 h-5 ${['/courses/teacher-training'].includes(location.pathname) ? 'text-purple-200' : ''}`} />
+                  {isSidebarOpen && <span>Kurslar</span>}
+                </div>
+                {isSidebarOpen && (
+                  <ChevronDown className={`w-4 h-4 text-indigo-300/50 transition-transform duration-300 ${isCoursesMenuOpen ? 'rotate-180' : ''}`} />
+                )}
+              </button>
+              
+              {/* Sub-menu */}
+              <div 
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  isSidebarOpen && isCoursesMenuOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="pl-11 pr-2 space-y-1 py-1">
+                  <Link 
+                    to="/courses/teacher-training" 
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                      location.pathname === '/courses/teacher-training' 
+                        ? 'text-white bg-[#1A1A2F]/80 font-medium' 
+                        : 'text-indigo-200/50 hover:text-white hover:bg-[#121223]'
+                    }`}
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>O'qituvchilikka tayyorlov</span>
                   </Link>
                 </div>
               </div>
