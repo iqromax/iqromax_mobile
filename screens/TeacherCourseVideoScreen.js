@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { WebView } from 'react-native-webview';
+import YoutubePlayer from 'react-native-youtube-iframe';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
 
@@ -40,92 +40,38 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
   const ytId = extractYoutubeId(videoUrl);
   const fullPdfUrl = pdfUrl ? `${API_URL}${pdfUrl}` : null;
 
-  const webviewRef = useRef(null);
+  const playerRef = useRef(null);
+  const supposedCurrentTime = useRef(0);
 
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-      <style>
-        body, html { margin: 0; padding: 0; background: #000; width: 100%; height: 100%; overflow: hidden; }
-        iframe { width: 100% !important; height: 100% !important; border: none; }
-      </style>
-    </head>
-    <body>
-      <iframe id="player" 
-              src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&playsinline=1&controls=0&disablekb=1&fs=0&rel=0&modestbranding=1&showinfo=0&iv_load_policy=3" 
-              frameborder="0" 
-              allow="autoplay; encrypted-media" 
-              allowfullscreen>
-      </iframe>
-      <script>
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        var player;
-        var supposedCurrentTime = 0;
-
-        function onYouTubeIframeAPIReady() {
-          player = new YT.Player('player', {
-            events: {
-              'onReady': onPlayerReady,
-              'onStateChange': onPlayerStateChange
-            }
-          });
-        }
-
-        function onPlayerReady(event) {
-           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ready' }));
-        }
-
-        function onPlayerStateChange(event) {
-          if (event.data == YT.PlayerState.PLAYING) {
-             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'play' }));
-          } else if (event.data == YT.PlayerState.PAUSED) {
-             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'pause' }));
-          } else if (event.data == YT.PlayerState.ENDED) {
-             window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'ended' }));
-          }
-        }
-
-        window.toggleVideo = function() {
-          if(player && player.getPlayerState) {
-            var state = player.getPlayerState();
-            if(state === YT.PlayerState.PLAYING) {
-              player.pauseVideo();
-            } else {
-              player.playVideo();
-            }
-          }
-        };
-
-        setInterval(function() {
-          if (player && player.getCurrentTime) {
-            var currentTime = player.getCurrentTime();
-            var duration = player.getDuration();
+  useEffect(() => {
+    let interval = null;
+    if (isPlaying && ytId) {
+      interval = setInterval(async () => {
+        if (playerRef.current) {
+          try {
+            const currentTime = await playerRef.current.getCurrentTime();
+            const duration = await playerRef.current.getDuration();
+            
             if (duration > 0) {
-              window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'progress', progress: currentTime / duration }));
+              setProgress(currentTime / duration);
             }
             
-            if (player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) return;
-            
-            var delta = currentTime - supposedCurrentTime;
+            const delta = currentTime - supposedCurrentTime.current;
             if (delta > 1.5) {
-              player.seekTo(supposedCurrentTime);
+              playerRef.current.seekTo(supposedCurrentTime.current);
             } else if (delta < -1.5) {
-              supposedCurrentTime = currentTime; 
+              supposedCurrentTime.current = currentTime;
             } else {
-              supposedCurrentTime = currentTime;
+              supposedCurrentTime.current = currentTime;
             }
-          }
-        }, 1000);
-      </script>
-    </body>
-    </html>
-  `;
+          } catch (e) {}
+        }
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPlaying, ytId]);
 
   const saveProgress = async () => {
     try {
@@ -142,22 +88,17 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
     }
   };
 
-  const handleMessage = (event) => {
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'progress') {
-        setProgress(data.progress);
-      } else if (data.type === 'ended') {
-        setIsFinished(true);
-        setIsPlaying(false);
-        setProgress(1);
-        saveProgress();
-      } else if (data.type === 'play') {
-        setIsPlaying(true);
-      } else if (data.type === 'pause') {
-        setIsPlaying(false);
-      }
-    } catch (e) {}
+  const onStateChange = (state) => {
+    if (state === 'playing') {
+      setIsPlaying(true);
+    } else if (state === 'paused') {
+      setIsPlaying(false);
+    } else if (state === 'ended') {
+      setIsFinished(true);
+      setIsPlaying(false);
+      setProgress(1);
+      saveProgress();
+    }
   };
 
   const handleNextLesson = () => {
@@ -165,9 +106,7 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
   };
 
   const togglePlayPause = () => {
-    if (webviewRef.current) {
-      webviewRef.current.injectJavaScript('window.toggleVideo(); true;');
-    }
+    setIsPlaying((prev) => !prev);
   };
 
   return (
@@ -177,19 +116,19 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       {/* Real Video Player */}
       <View style={styles.videoPlayer}>
         {ytId ? (
-          <WebView
-            ref={webviewRef}
-            source={{ html: htmlContent, baseUrl: 'https://iqromax.net' }}
-            style={{ flex: 1, backgroundColor: '#000', opacity: 0.99 }}
-            androidLayerType="hardware"
-            allowsInlineMediaPlayback={true}
-            mediaPlaybackRequiresUserAction={false}
-            scrollEnabled={false}
-            bounces={false}
-            javaScriptEnabled={true}
-            originWhitelist={['*']}
-            mixedContentMode="always"
-            onMessage={handleMessage}
+          <YoutubePlayer
+            ref={playerRef}
+            height={240}
+            play={isPlaying}
+            videoId={ytId}
+            onChangeState={onStateChange}
+            initialPlayerParams={{
+              controls: false,
+              preventFullScreen: true,
+              showClosedCaptions: false,
+              rel: false,
+              modestbranding: true,
+            }}
           />
         ) : (
           <Text style={{ color: '#6B7280' }}>Video topilmadi</Text>
