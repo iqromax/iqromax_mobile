@@ -824,11 +824,13 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                   <Text style={styles.actionDesc}>{t.studentsListDesc || "O'quvchilar ro'yxati"}</Text>
                 </LinearGradient>
               </TouchableOpacity>
+            </View>
+            
             {/* O'QITUVCHILIKKA TAYYORLOV KURSI (PREMIUM CARD) */}
             <TouchableOpacity 
-              style={{ marginHorizontal: 20, marginBottom: 24, borderRadius: 24, elevation: 12, shadowColor: '#D946EF', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16 }}
+              style={{ marginBottom: 24, borderRadius: 24, elevation: 12, shadowColor: '#D946EF', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.4, shadowRadius: 16 }}
               activeOpacity={0.9}
-              onPress={() => {}}
+              onPress={() => navigation.navigate('TeacherCourseDetail')}
             >
               <LinearGradient
                 colors={['#4C1D95', '#701A75', '#831843']}
@@ -839,36 +841,38 @@ export default function TeacherDashboardScreen({ navigation, route }) {
                 <LinearGradient
                   colors={['#1E1B4B', '#2E1065', '#4C1D95']}
                   start={{x:0, y:0}} end={{x:1, y:1}}
-                  style={{ borderRadius: 22, padding: 24, position: 'relative', overflow: 'hidden' }}
+                  style={{ borderRadius: 22, padding: 16, position: 'relative', overflow: 'hidden' }}
                 >
                   {/* Decorative blurred circles for background */}
-                  <View style={{ position: 'absolute', top: -30, right: -20, width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(217, 70, 239, 0.2)', opacity: 0.8 }} />
-                  <View style={{ position: 'absolute', bottom: -40, left: -40, width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(59, 130, 246, 0.2)', opacity: 0.6 }} />
+                  <View style={{ position: 'absolute', top: -20, right: -10, width: 90, height: 90, borderRadius: 45, backgroundColor: 'rgba(217, 70, 239, 0.2)', opacity: 0.8 }} />
+                  <View style={{ position: 'absolute', bottom: -30, left: -20, width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(59, 130, 246, 0.2)', opacity: 0.6 }} />
 
-                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', zIndex: 2 }}>
-                    <View style={{ flex: 1, paddingRight: 15 }}>
-                      <View style={{ backgroundColor: 'rgba(217, 70, 239, 0.15)', alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10, marginBottom: 12, borderWidth: 1, borderColor: 'rgba(217, 70, 239, 0.4)' }}>
-                        <Text style={{ color: '#FDF4FF', fontSize: 10, fontFamily: 'Inter_800ExtraBold', textTransform: 'uppercase', letterSpacing: 1.2 }}>⭐ Yangi Imkoniyat</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', zIndex: 2 }}>
+                    <View style={{ flex: 1, paddingRight: 10 }}>
+                      <View style={{ backgroundColor: 'rgba(217, 70, 239, 0.15)', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: 8, borderWidth: 1, borderColor: 'rgba(217, 70, 239, 0.4)' }}>
+                        <Text style={{ color: '#FDF4FF', fontSize: 9, fontFamily: 'Inter_800ExtraBold', textTransform: 'uppercase', letterSpacing: 1 }}>⭐ Yangi Imkoniyat</Text>
                       </View>
-                      <Text style={{ color: '#FFFFFF', fontSize: 22, fontFamily: 'Inter_900Black', marginBottom: 8, lineHeight: 28 }}>O'qituvchilikka tayyorlov kursi</Text>
-                      <Text style={{ color: '#C4B5FD', fontSize: 13, fontFamily: 'Inter_500Medium', lineHeight: 20 }}>Iqromax metodikasi, o'qitish sirlari va psixologiyasi. Professional ustozlardan master-klasslar.</Text>
+                      <Text style={{ color: '#FFFFFF', fontSize: 18, fontFamily: 'Inter_900Black', marginBottom: 4, lineHeight: 22 }}>O'qituvchilikka tayyorlov</Text>
+                      <Text style={{ color: '#C4B5FD', fontSize: 11, fontFamily: 'Inter_500Medium', lineHeight: 16 }} numberOfLines={2}>
+                        Iqromax metodikasi va o'qitish sirlari. Professional ustozlardan darslar.
+                      </Text>
                       
                       {/* Action Button */}
-                      <View style={{ marginTop: 20, alignSelf: 'flex-start' }}>
+                      <View style={{ marginTop: 12, alignSelf: 'flex-start' }}>
                         <LinearGradient
                           colors={['#D946EF', '#8B5CF6']}
                           start={{x:0, y:0}} end={{x:1, y:0}}
-                          style={{ paddingHorizontal: 20, paddingVertical: 10, borderRadius: 12, flexDirection: 'row', alignItems: 'center' }}
+                          style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10, flexDirection: 'row', alignItems: 'center' }}
                         >
-                          <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 13, marginRight: 8 }}>Batafsil ko'rish</Text>
-                          <MaterialCommunityIcons name="arrow-right" size={16} color="#FFF" />
+                          <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 12, marginRight: 6 }}>Ko'rish</Text>
+                          <MaterialCommunityIcons name="arrow-right" size={14} color="#FFF" />
                         </LinearGradient>
                       </View>
                     </View>
 
                     {/* Right Icon Area */}
-                    <View style={{ width: 80, height: 80, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 24, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', transform: [{ rotate: '5deg' }] }}>
-                      <MaterialCommunityIcons name="school-outline" size={44} color="#FBCFE8" style={{ textShadowColor: '#D946EF', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10 }} />
+                    <View style={{ width: 64, height: 64, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 20, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)', transform: [{ rotate: '5deg' }] }}>
+                      <MaterialCommunityIcons name="school-outline" size={34} color="#FBCFE8" style={{ textShadowColor: '#D946EF', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 }} />
                     </View>
                   </View>
                 </LinearGradient>
