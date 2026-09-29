@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Dimens
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
 
 const { width } = Dimensions.get('window');
@@ -197,9 +197,16 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
             <TouchableOpacity 
               activeOpacity={0.9} 
               style={{ width: '100%' }}
-              onPress={() => {
-                if (route?.params?.onFinishTest) {
-                  route.params.onFinishTest({ score: percent });
+              onPress={async () => {
+                if (percent >= 60 && route?.params?.lessonId) {
+                  try {
+                    const saved = await AsyncStorage.getItem('teacher_course_completed');
+                    let completedLessonIds = saved ? JSON.parse(saved) : [];
+                    if (!completedLessonIds.includes(route.params.lessonId)) {
+                      completedLessonIds.push(route.params.lessonId);
+                      await AsyncStorage.setItem('teacher_course_completed', JSON.stringify(completedLessonIds));
+                    }
+                  } catch (e) { console.log(e); }
                 }
                 navigation.goBack();
               }}

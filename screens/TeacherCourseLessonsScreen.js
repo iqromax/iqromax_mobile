@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Layout
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 
@@ -17,8 +18,13 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchModules();
+    }, [])
+  );
+
   React.useEffect(() => {
-    fetchModules();
 
     const SOCKET_URL = API_URL.replace('/api', '');
     const socket = io(SOCKET_URL, {
@@ -232,25 +238,13 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
                                     duration: lesson.duration,
                                     description: lesson.description,
                                     pdfUrl: lesson.pdfUrl,
-                                    videoUrl: lesson.videoUrl,
-                                    onFinishVideo: () => handleLessonComplete(lesson.id)
+                                    videoUrl: lesson.videoUrl
                                   });
                                 } else if (lesson.type === 'test_theory') {
                                   navigation.navigate('TeacherCourseTheoryTest', {
                                     lessonId: lesson.id,
                                     testId: lesson.testId,
-                                    history: lesson.history,
-                                    onFinishTest: (result) => {
-                                      if (result.score >= 60) {
-                                        handleLessonComplete(lesson.id);
-                                      }
-                                      // Continue adding history to local state if needed
-                                      const newModules = [...modules];
-                                      const mIndex = newModules.findIndex(m => m.id === mod.id);
-                                      const lIndex = newModules[mIndex].lessons.findIndex(l => l.id === lesson.id);
-                                      newModules[mIndex].lessons[lIndex].history.push(result);
-                                      setModules(newModules);
-                                    }
+                                    history: lesson.history
                                   });
                                 }
                               }

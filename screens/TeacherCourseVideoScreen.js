@@ -3,10 +3,11 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linkin
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { WebView } from 'react-native-webview';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
 
 export default function TeacherCourseVideoScreen({ route, navigation }) {
-  const { title, description, duration, pdfUrl, videoUrl, onFinishVideo } = route?.params || {};
+  const { lessonId, title, description, duration, pdfUrl, videoUrl } = route?.params || {};
 
   const videoData = {
     title: title || "Video topilmadi",
@@ -70,6 +71,21 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
     </html>
   `;
 
+  const saveProgress = async () => {
+    try {
+      if (lessonId) {
+        const savedCompleted = await AsyncStorage.getItem('teacher_course_completed');
+        let completedLessonIds = savedCompleted ? JSON.parse(savedCompleted) : [];
+        if (!completedLessonIds.includes(lessonId)) {
+          completedLessonIds.push(lessonId);
+          await AsyncStorage.setItem('teacher_course_completed', JSON.stringify(completedLessonIds));
+        }
+      }
+    } catch (e) {
+      console.log('Error saving progress', e);
+    }
+  };
+
   const handleMessage = (event) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
@@ -79,6 +95,7 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
         setIsFinished(true);
         setIsPlaying(false);
         setProgress(1);
+        saveProgress();
       } else if (data.type === 'play') {
         setIsPlaying(true);
       } else if (data.type === 'pause') {
@@ -88,9 +105,6 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
   };
 
   const handleNextLesson = () => {
-    if (onFinishVideo) {
-      onFinishVideo();
-    }
     navigation.goBack();
   };
 
