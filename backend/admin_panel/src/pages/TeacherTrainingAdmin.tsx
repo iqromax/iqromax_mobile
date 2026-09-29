@@ -63,7 +63,7 @@ export default function TeacherTrainingAdmin() {
   const [videoName, setVideoName] = useState("");
   const [videoDuration, setVideoDuration] = useState("");
   const [videoDescription, setVideoDescription] = useState("");
-  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoLink, setVideoLink] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   // FORM STATES: Test
@@ -130,7 +130,7 @@ export default function TeacherTrainingAdmin() {
     formData.append('duration', videoDuration);
     formData.append('order', videoOrder);
     formData.append('description', videoDescription);
-    if (videoFile) formData.append('videoFile', videoFile);
+    if (videoLink) formData.append('videoUrl', videoLink);
     if (pdfFile) formData.append('pdfFile', pdfFile);
 
     try {
@@ -147,7 +147,7 @@ export default function TeacherTrainingAdmin() {
       setVideoDuration("");
       setVideoOrder("");
       setVideoDescription("");
-      setVideoFile(null);
+      setVideoLink("");
       setPdfFile(null);
       setIsVideoModalOpen(false);
       showToast("Video muvaffaqiyatli yuklandi!");
@@ -608,12 +608,13 @@ export default function TeacherTrainingAdmin() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-indigo-200/60 uppercase">Video Fayl (MP4)</label>
+                <label className="text-xs font-semibold text-indigo-200/60 uppercase">YouTube Link yoki ID</label>
                 <input 
-                  type="file" 
-                  accept="video/*" 
-                  onChange={e => setVideoFile(e.target.files?.[0] || null)}
-                  className="w-full text-indigo-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer text-sm"
+                  type="text" 
+                  placeholder="Masalan: dQw4w9WgXcQ"
+                  value={videoLink}
+                  onChange={e => setVideoLink(e.target.value)}
+                  className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-cyan-500 transition-colors"
                 />
               </div>
               

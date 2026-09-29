@@ -147,17 +147,12 @@ router.post(
   upload.fields([{ name: 'videoFile', maxCount: 1 }, { name: 'pdfFile', maxCount: 1 }]), 
   async (req, res) => {
   try {
-    const { moduleId, name, description, duration, order } = req.body;
+    const { moduleId, name, description, duration, order, videoUrl } = req.body;
     if (!moduleId || !name) return res.status(400).json({ error: 'Modul va nom kiritilishi shart' });
 
     // Extract paths if files exist
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     
-    let videoUrl = null;
-    if (files && files['videoFile'] && files['videoFile'].length > 0) {
-      videoUrl = `/uploads/courses/${files['videoFile'][0].filename}`;
-    }
-
     let pdfUrl = null;
     if (files && files['pdfFile'] && files['pdfFile'].length > 0) {
       pdfUrl = `/uploads/courses/${files['pdfFile'][0].filename}`;
