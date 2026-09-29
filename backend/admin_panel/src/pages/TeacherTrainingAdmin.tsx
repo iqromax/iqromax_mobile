@@ -38,7 +38,6 @@ export default function TeacherTrainingAdmin() {
 
   // FORM STATES: Video
   const [selectedModuleForVideo, setSelectedModuleForVideo] = useState("");
-  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoOrder, setVideoOrder] = useState("");
   const [videoName, setVideoName] = useState("");
 
@@ -82,7 +81,6 @@ export default function TeacherTrainingAdmin() {
     }]);
     
     setSelectedModuleForVideo("");
-    setVideoFile(null);
     setVideoName("");
     setVideoOrder("");
     setIsVideoModalOpen(false);
@@ -385,7 +383,6 @@ export default function TeacherTrainingAdmin() {
                 <input 
                   type="file" 
                   accept="video/*" 
-                  onChange={e => setVideoFile(e.target.files?.[0] || null)} 
                   className="w-full text-indigo-200 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer text-sm"
                 />
               </div>
