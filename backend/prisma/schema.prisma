@@ -262,3 +262,12 @@ model CourseGraduate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model CourseEnrollment {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  name      String
+  progress  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

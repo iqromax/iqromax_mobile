@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, LayoutAnimation, Platform, UIManager, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -18,6 +18,23 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
   const [completedIds, setCompletedIds] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  
+  const [showToast, setShowToast] = useState(false);
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    if (route.params?.showEnrollSuccess) {
+      setShowToast(true);
+      Animated.sequence([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.delay(2000),
+        Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true })
+      ]).start(() => {
+        setShowToast(false);
+        navigation.setParams({ showEnrollSuccess: undefined });
+      });
+    }
+  }, [route.params?.showEnrollSuccess]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -224,14 +241,65 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
     }
   };
 
+  let totalLessonsCount = 0;
+  let completedLessonsCount = 0;
+
+  modules.forEach(mod => {
+    mod.lessons.forEach(lesson => {
+      totalLessonsCount++;
+      if ((lesson.type === 'video' || lesson.type === 'guide') && completedIds.includes(lesson.id)) {
+        completedLessonsCount++;
+      } else if (lesson.type === 'test_theory' && lesson.history && lesson.history.length > 0) {
+        const hasPassed = lesson.history.some(h => h.score >= 60);
+        if (hasPassed) {
+          completedLessonsCount++;
+        }
+      }
+    });
+  });
+
+  const totalProgress = totalLessonsCount > 0 ? Math.min(100, Math.round((completedLessonsCount / totalLessonsCount) * 100)) : 0;
+
+  React.useEffect(() => {
+    if (modules.length > 0) {
+      syncProgress(totalProgress);
+    }
+  }, [totalProgress, modules.length]);
+
+  const syncProgress = async (progress) => {
+    try {
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      if (!userDataStr) return;
+      const userData = JSON.parse(userDataStr);
+      const userId = userData.customId || userData.id;
+      if (!userId) return;
+
+      await fetch(`${API_URL}/courses/progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, progress })
+      });
+    } catch (e) {
+      console.log('Sync progress error:', e);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#050510" translucent={false} />
       
       <SafeAreaView style={styles.safeArea}>
+        {/* Success Toast */}
+        {showToast && (
+          <Animated.View style={[styles.toastContainer, { opacity: fadeAnim }]}>
+            <MaterialCommunityIcons name="check-circle" size={24} color="#10B981" style={{ marginRight: 8 }} />
+            <Text style={styles.toastText}>Siz kursga muvaffaqiyatli yozildingiz!</Text>
+          </Animated.View>
+        )}
+        
         {/* Navbar */}
         <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate('TeacherCourseDetail')}>
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
           <View style={{ alignItems: 'center' }}>
@@ -243,21 +311,6 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
 
         <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 50, paddingTop: 10 }}>
           
-          <View style={styles.progressCard}>
-            <View style={styles.progressHeader}>
-              <Text style={styles.progressTitle}>Sizning natijangiz</Text>
-              <Text style={styles.progressPercent}>0%</Text>
-            </View>
-            <View style={styles.progressBarBg}>
-              <LinearGradient
-                colors={['#8B5CF6', '#D946EF']}
-                start={{x:0, y:0}} end={{x:1, y:0}}
-                style={styles.progressBarFill}
-              />
-            </View>
-            <Text style={styles.progressSub}>0 / 19 dars va testlar bajarildi</Text>
-          </View>
-
           <View style={styles.modulesContainer}>
             {loading && <Text style={{color: '#9CA3AF', textAlign: 'center', marginTop: 20}}>Yuklanmoqda...</Text>}
             {!loading && modules.length === 0 && <Text style={{color: '#9CA3AF', textAlign: 'center', marginTop: 20}}>Hali darslar qo'shilmagan</Text>}
@@ -291,13 +344,13 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
                         let isPassed = false;
                         const isCompleted = completedIds.includes(lesson.id);
                         
-                        if (isCompleted && lesson.type === 'video') {
+                        if (isCompleted && (lesson.type === 'video' || lesson.type === 'guide')) {
                           iconData = { name: "check-circle", color: "#10B981", bg: "rgba(16, 185, 129, 0.15)" };
                         }
 
                         if (lesson.history && lesson.history.length > 0) {
-                          const lastScore = lesson.history[lesson.history.length - 1].score;
-                          if (lastScore < 60) {
+                          const hasPassed = lesson.history.some(h => h.score >= 60);
+                          if (!hasPassed) {
                             isFailed = true;
                             iconData = { name: "close-circle", color: "#EF4444", bg: "rgba(239, 68, 68, 0.15)" };
                           } else {
@@ -549,4 +602,28 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     marginLeft: 4,
   },
+  toastContainer: {
+    position: 'absolute',
+    top: 60,
+    alignSelf: 'center',
+    backgroundColor: '#121223',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 100,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
+    zIndex: 999,
+  },
+  toastText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+  }
 });

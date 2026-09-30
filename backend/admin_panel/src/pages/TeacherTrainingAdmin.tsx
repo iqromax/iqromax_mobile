@@ -27,7 +27,18 @@ export default function TeacherTrainingAdmin() {
 
   React.useEffect(() => {
     fetchModules();
+    fetchEnrollments();
   }, []);
+
+  const fetchEnrollments = async () => {
+    try {
+      const res = await fetch('/api/admin/courses/enrollments');
+      const data = await res.json();
+      setEnrollments(data);
+    } catch (error) {
+      console.error('Error fetching enrollments:', error);
+    }
+  };
 
   const fetchModules = async () => {
     try {
@@ -54,7 +65,8 @@ export default function TeacherTrainingAdmin() {
   const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([]);
   const [guides, setGuides] = useState<{id: string, moduleId: string, title: string, order: number, content: string}[]>([]);
   const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
-  const [graduates] = useState<{id: string, name: string, score: string, date: string}[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [teachersSubTab, setTeachersSubTab] = useState<'in_progress' | 'completed'>('in_progress');
 
   // MODAL STATES
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
@@ -499,7 +511,7 @@ export default function TeacherTrainingAdmin() {
             onClick={() => setActiveTab('graduates')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all text-sm ${activeTab === 'graduates' ? 'bg-[#1A1A2F] text-blue-400' : 'text-indigo-200/60 hover:text-white hover:bg-[#121223]'}`}
           >
-            <GraduationCap className="w-4 h-4" /> Tugallagan ustozlar
+            <GraduationCap className="w-4 h-4" /> Ustozlar
           </button>
         </div>
 
@@ -720,13 +732,29 @@ export default function TeacherTrainingAdmin() {
           </div>
         )}
 
-        {/* CONTENT: GRADUATES */}
+        {/* CONTENT: TEACHERS */}
         {activeTab === 'graduates' && (
           <div className="space-y-4">
+            
+            <div className="flex gap-2 p-1 bg-[#0C0C18] border border-[#1A1A2F] rounded-xl w-fit">
+              <button 
+                onClick={() => setTeachersSubTab('in_progress')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${teachersSubTab === 'in_progress' ? 'bg-[#1A1A2F] text-blue-400' : 'text-indigo-200/60 hover:text-white'}`}
+              >
+                Ustozlar (Jarayonda)
+              </button>
+              <button 
+                onClick={() => setTeachersSubTab('completed')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${teachersSubTab === 'completed' ? 'bg-[#1A1A2F] text-emerald-400' : 'text-indigo-200/60 hover:text-white'}`}
+              >
+                Tugallagan ustozlar
+              </button>
+            </div>
+
             <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
               <div className="p-5 border-b border-[#1A1A2F] bg-[#121223]/50">
                 <h3 className="font-semibold text-lg text-white flex items-center gap-2">
-                  <Award className="w-5 h-5 text-blue-400" /> Sertifikat olgan o'qituvchilar
+                  <Award className="w-5 h-5 text-blue-400" /> {teachersSubTab === 'in_progress' ? 'Hozirda o\'qiyotganlar' : 'Sertifikat olgan o\'qituvchilar'}
                 </h3>
               </div>
               <div className="overflow-x-auto">
@@ -734,12 +762,12 @@ export default function TeacherTrainingAdmin() {
                   <thead>
                     <tr className="border-b border-[#1A1A2F] text-xs uppercase text-indigo-200/50 bg-[#121223]/30">
                       <th className="p-4 font-semibold">Ism va familiya</th>
-                      <th className="p-4 font-semibold">Natija (To'plagan ball)</th>
-                      <th className="p-4 font-semibold">Sertifikat sanasi</th>
+                      <th className="p-4 font-semibold">Natija (Progress)</th>
+                      <th className="p-4 font-semibold">Yozilgan sana</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {graduates.map(grad => (
+                    {enrollments.filter(e => teachersSubTab === 'in_progress' ? e.progress < 100 : e.progress >= 100).map(grad => (
                       <tr key={grad.id} className="border-b border-[#1A1A2F] last:border-0 hover:bg-[#121223] transition-colors text-sm">
                         <td className="p-4 font-medium text-white flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs border border-blue-500/30">
@@ -747,13 +775,13 @@ export default function TeacherTrainingAdmin() {
                           </div>
                           {grad.name}
                         </td>
-                        <td className="p-4 text-emerald-400 font-semibold">{grad.score}</td>
-                        <td className="p-4 text-indigo-200/80">{grad.date}</td>
+                        <td className="p-4 text-emerald-400 font-semibold">{grad.progress}%</td>
+                        <td className="p-4 text-indigo-200/80">{new Date(grad.createdAt).toLocaleDateString()}</td>
                       </tr>
                     ))}
-                    {graduates.length === 0 && (
+                    {enrollments.filter(e => teachersSubTab === 'in_progress' ? e.progress < 100 : e.progress >= 100).length === 0 && (
                       <tr>
-                        <td colSpan={3} className="p-12 text-center text-indigo-200/50 font-medium">Hozircha bitiruvchilar yo'q</td>
+                        <td colSpan={3} className="p-12 text-center text-indigo-200/50 font-medium">Hozircha ma'lumot yo'q</td>
                       </tr>
                     )}
                   </tbody>

@@ -108,8 +108,69 @@ router.get('/courses/graduates', async (req, res) => {
 
 
 // =======================
+// ENROLLMENT & PROGRESS ROUTES
+// =======================
+
+// Enroll a user in the teacher course
+router.post('/courses/enroll', async (req, res) => {
+  try {
+    const { userId, name } = req.body;
+    if (!userId || !name) return res.status(400).json({ error: 'userId and name required' });
+
+    const enrollment = await prisma.courseEnrollment.upsert({
+      where: { userId },
+      update: { name }, // update name just in case
+      create: { userId, name, progress: 0 }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('enrollments-updated');
+
+    res.json(enrollment);
+  } catch (error) {
+    console.error('Error enrolling user:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update progress for a user
+router.post('/courses/progress', async (req, res) => {
+  try {
+    const { userId, progress } = req.body;
+    if (!userId || progress === undefined) return res.status(400).json({ error: 'userId and progress required' });
+
+    const enrollment = await prisma.courseEnrollment.upsert({
+      where: { userId },
+      update: { progress: parseInt(progress) },
+      create: { userId, name: "Unknown", progress: parseInt(progress) }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('enrollments-updated');
+
+    res.json(enrollment);
+  } catch (error) {
+    console.error('Error updating progress:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// =======================
 // ADMIN CRUD ROUTES
 // =======================
+
+// Get enrollments (for admin panel)
+router.get('/admin/courses/enrollments', async (req, res) => {
+  try {
+    const enrollments = await prisma.courseEnrollment.findMany({
+      orderBy: { updatedAt: 'desc' }
+    });
+    res.json(enrollments);
+  } catch (error) {
+    console.error('Error fetching enrollments:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // Add a Module
 router.post('/admin/courses/modules', async (req, res) => {

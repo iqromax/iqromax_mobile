@@ -1,18 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
 
 export default function TeacherCourseDetailScreen({ navigation }) {
   const [selectedModule, setSelectedModule] = useState(null);
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
-  useEffect(() => {
-    fetchModules();
-  }, []);
+  const [completedCount, setCompletedCount] = useState(0);
+  const [totalLessonsCount, setTotalLessonsCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchModules();
+    }, [])
+  );
 
   const fetchModules = async () => {
     try {
@@ -56,6 +64,47 @@ export default function TeacherCourseDetailScreen({ navigation }) {
       });
 
       setModules(formatted);
+      
+      const savedCompleted = await AsyncStorage.getItem('teacher_course_completed');
+      let completedLessonIds = savedCompleted ? JSON.parse(savedCompleted) : [];
+
+      const savedHistoryStr = await AsyncStorage.getItem('teacher_course_test_history');
+      const testHistoryObj = savedHistoryStr ? JSON.parse(savedHistoryStr) : {};
+      
+      let count = 0;
+      let total = 0;
+      data.forEach(mod => {
+        if (mod.videos) {
+          mod.videos.forEach(v => {
+            total++;
+            if (completedLessonIds.includes(`v-${v.id}`)) count++;
+          });
+        }
+        if (mod.guides) {
+          mod.guides.forEach(g => {
+            total++;
+            if (completedLessonIds.includes(`g-${g.id}`)) count++;
+          });
+        }
+        if (mod.tests) {
+          mod.tests.forEach(t => {
+            total++;
+            const history = testHistoryObj[t.id] || [];
+            if (history && history.length > 0) {
+              const hasPassed = history.some(h => h.score >= 60);
+              if (hasPassed) count++;
+            }
+          });
+        }
+      });
+      setCompletedCount(count);
+      setTotalLessonsCount(total);
+
+      const enrolled = await AsyncStorage.getItem('teacher_course_enrolled');
+      if (enrolled === 'true') {
+        setIsEnrolled(true);
+      }
+
     } catch (error) {
       console.error('Fetch modules error:', error);
     } finally {
@@ -63,8 +112,38 @@ export default function TeacherCourseDetailScreen({ navigation }) {
     }
   };
 
-  // Calculate total lessons
-  const totalLessons = modules.reduce((acc, mod) => acc + mod.content.length, 0);
+  const handleEnroll = async () => {
+    try {
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      let userId = "unknown";
+      let userName = "Unknown";
+      
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        userId = userData.customId || userData.id || "unknown";
+        userName = userData.name || "Unknown";
+      }
+
+      await AsyncStorage.setItem('teacher_course_enrolled', 'true');
+      setIsEnrolled(true);
+
+      // Send enrollment to backend without blocking navigation
+      fetch(`${API_URL}/courses/enroll`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, name: userName })
+      }).catch(err => console.log('Enroll API error:', err));
+
+      navigation.navigate('TeacherCourseLessons', { showEnrollSuccess: true });
+    } catch (e) {
+      console.log('Enroll error:', e);
+    }
+  };
+
+  // Calculate progress using synced values
+  const progressPercent = totalLessonsCount > 0 ? Math.min(100, Math.round((completedCount / totalLessonsCount) * 100)) : 0;
+  // hasStarted is now based on enrollment
+  const hasStarted = isEnrolled;
 
   return (
     <View style={styles.container}>
@@ -102,7 +181,7 @@ export default function TeacherCourseDetailScreen({ navigation }) {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <MaterialCommunityIcons name="clock-outline" size={22} color="#A855F7" style={{ marginBottom: 4 }} />
-              <Text style={styles.statValue}>{totalLessons} ta</Text>
+              <Text style={styles.statValue}>{totalLessonsCount} ta</Text>
               <Text style={styles.statLabel}>Dars</Text>
             </View>
             <View style={styles.statBox}>
@@ -153,16 +232,38 @@ export default function TeacherCourseDetailScreen({ navigation }) {
 
       {/* Clean Floating Button */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity activeOpacity={0.9} style={{ width: '100%' }} onPress={() => navigation.navigate('TeacherCourseLessons')}>
-          <LinearGradient
-            colors={['#8B5CF6', '#D946EF']}
-            start={{x:0, y:0}} end={{x:1, y:0}}
-            style={styles.startGradient}
-          >
-            <Text style={styles.startBtnText}>Boshlash - Bepul</Text>
-            <MaterialCommunityIcons name="arrow-right" size={20} color="#FFF" />
-          </LinearGradient>
-        </TouchableOpacity>
+        {hasStarted ? (
+          <View style={styles.progressFooter}>
+            <View style={styles.progressInfoRow}>
+              <Text style={styles.progressLabel}>Darslar holati</Text>
+              <Text style={styles.progressValue}>{progressPercent}%</Text>
+            </View>
+            <View style={styles.progressBarBg}>
+              <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
+            </View>
+            <TouchableOpacity activeOpacity={0.9} style={{ width: '100%', marginTop: 16 }} onPress={() => navigation.navigate('TeacherCourseLessons')}>
+              <LinearGradient
+                colors={['#8B5CF6', '#D946EF']}
+                start={{x:0, y:0}} end={{x:1, y:0}}
+                style={styles.startGradient}
+              >
+                <Text style={styles.startBtnText}>Davom etish</Text>
+                <MaterialCommunityIcons name="arrow-right" size={20} color="#FFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity activeOpacity={0.9} style={{ width: '100%' }} onPress={handleEnroll}>
+            <LinearGradient
+              colors={['#8B5CF6', '#D946EF']}
+              start={{x:0, y:0}} end={{x:1, y:0}}
+              style={styles.startGradient}
+            >
+              <Text style={styles.startBtnText}>Boshlash - Bepul</Text>
+              <MaterialCommunityIcons name="arrow-right" size={20} color="#FFF" />
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Module Content Modal */}
@@ -445,5 +546,35 @@ const styles = StyleSheet.create({
     color: '#E5E7EB',
     fontSize: 13,
     fontFamily: 'Inter_500Medium',
+  },
+  progressFooter: {
+    width: '100%',
+  },
+  progressInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressLabel: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    fontFamily: 'Inter_500Medium',
+  },
+  progressValue: {
+    color: '#10B981',
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#10B981',
+    borderRadius: 3,
   }
 });

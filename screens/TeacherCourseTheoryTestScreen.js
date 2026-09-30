@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Dimens
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { usePreventScreenCapture } from 'expo-screen-capture';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../src/config/api';
 
@@ -11,6 +12,8 @@ const { width } = Dimensions.get('window');
 const TEST_DURATION_SECONDS = 10 * 60; // Default 10 minutes
 
 export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
+  usePreventScreenCapture();
+  
   const history = route?.params?.history || [];
   const testId = route?.params?.testId;
   const [showHistory, setShowHistory] = useState(history.length > 0);

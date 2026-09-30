@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking, useWindowDimensions, Platform } from 'react-native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -141,7 +141,11 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       <StatusBar barStyle="light-content" backgroundColor="#000" hidden={isFullscreen} translucent={false} />
       
       {/* Real Video Player */}
-      <View style={[styles.videoPlayer, isFullscreen && { height: screenHeight, width: screenWidth, zIndex: 999 }]}>
+      <View style={[
+        styles.videoPlayer, 
+        isFullscreen && { height: screenHeight, width: screenWidth, zIndex: 999 },
+        !isFullscreen && Platform.OS === 'ios' && { marginTop: 48 }
+      ]}>
         {ytId ? (
           <View style={StyleSheet.absoluteFill}>
             <YoutubePlayer
