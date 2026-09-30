@@ -285,6 +285,7 @@ const styles = StyleSheet.create({
     left: 60, // Don't cover back button
     right: 0,
     height: 70, // Covers channel name and share button
+    backgroundColor: 'rgba(0,0,0,0.01)',
     zIndex: 5,
   },
   bottomBlocker: {
@@ -293,6 +294,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 60, // Don't cover fullscreen button
     height: 60, // Covers YouTube logo
+    backgroundColor: 'rgba(0,0,0,0.01)',
     zIndex: 5,
   },
   fullscreenBtn: {
