@@ -409,7 +409,12 @@ export default function TeacherTrainingAdmin() {
         moduleId: savedTest.moduleId,
         duration: savedTest.duration,
         order: savedTest.order,
-        qCount: questions.length
+        qCount: testSubTab === 'theory' ? questions.length : 0,
+        title: savedTest.title || testTitle,
+        testType: savedTest.testType || testSubTab,
+        practicalOp: savedTest.practicalOp || practicalOp,
+        practicalDigits: savedTest.practicalDigits || practicalDigits,
+        practicalCount: savedTest.practicalCount || parseInt(practicalCount)
       };
 
       if (isEdit) {
