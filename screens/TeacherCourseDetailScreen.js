@@ -65,10 +65,17 @@ export default function TeacherCourseDetailScreen({ navigation }) {
 
       setModules(formatted);
       
-      const savedCompleted = await AsyncStorage.getItem('teacher_course_completed');
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      let userId = "unknown";
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        userId = userData.customId || userData.id || "unknown";
+      }
+
+      const savedCompleted = await AsyncStorage.getItem(`${userId}_teacher_course_completed`);
       let completedLessonIds = savedCompleted ? JSON.parse(savedCompleted) : [];
 
-      const savedHistoryStr = await AsyncStorage.getItem('teacher_course_test_history');
+      const savedHistoryStr = await AsyncStorage.getItem(`${userId}_teacher_course_test_history`);
       const testHistoryObj = savedHistoryStr ? JSON.parse(savedHistoryStr) : {};
       
       let count = 0;
@@ -100,7 +107,7 @@ export default function TeacherCourseDetailScreen({ navigation }) {
       setCompletedCount(count);
       setTotalLessonsCount(total);
 
-      const enrolled = await AsyncStorage.getItem('teacher_course_enrolled');
+      const enrolled = await AsyncStorage.getItem(`${userId}_teacher_course_enrolled`);
       if (enrolled === 'true') {
         setIsEnrolled(true);
       }
@@ -124,7 +131,7 @@ export default function TeacherCourseDetailScreen({ navigation }) {
         userName = userData.name || "Unknown";
       }
 
-      await AsyncStorage.setItem('teacher_course_enrolled', 'true');
+      await AsyncStorage.setItem(`${userId}_teacher_course_enrolled`, 'true');
       setIsEnrolled(true);
 
       // Send enrollment to backend without blocking navigation

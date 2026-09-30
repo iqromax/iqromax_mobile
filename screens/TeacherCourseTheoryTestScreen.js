@@ -206,18 +206,25 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
               onPress={async () => {
                 if (route?.params?.lessonId) {
                   try {
-                    const savedHistoryStr = await AsyncStorage.getItem('teacher_course_test_history');
+                    const userDataStr = await AsyncStorage.getItem('user_data');
+                    let userId = "unknown";
+                    if (userDataStr) {
+                      const userData = JSON.parse(userDataStr);
+                      userId = userData.customId || userData.id || "unknown";
+                    }
+
+                    const savedHistoryStr = await AsyncStorage.getItem(`${userId}_teacher_course_test_history`);
                     let historyObj = savedHistoryStr ? JSON.parse(savedHistoryStr) : {};
                     if (!historyObj[testId]) historyObj[testId] = [];
                     historyObj[testId].push({ score: percent, date: new Date().toISOString() });
-                    await AsyncStorage.setItem('teacher_course_test_history', JSON.stringify(historyObj));
+                    await AsyncStorage.setItem(`${userId}_teacher_course_test_history`, JSON.stringify(historyObj));
 
                     if (percent >= 60) {
-                      const saved = await AsyncStorage.getItem('teacher_course_completed');
+                      const saved = await AsyncStorage.getItem(`${userId}_teacher_course_completed`);
                       let completedLessonIds = saved ? JSON.parse(saved) : [];
                       if (!completedLessonIds.includes(route.params.lessonId)) {
                         completedLessonIds.push(route.params.lessonId);
-                        await AsyncStorage.setItem('teacher_course_completed', JSON.stringify(completedLessonIds));
+                        await AsyncStorage.setItem(`${userId}_teacher_course_completed`, JSON.stringify(completedLessonIds));
                       }
                     }
                   } catch (e) { console.log(e); }

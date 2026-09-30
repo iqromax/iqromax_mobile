@@ -65,7 +65,14 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
       const res = await fetch(`${API_URL}/courses/modules`);
       const data = await res.json();
       
-      const savedCompleted = await AsyncStorage.getItem('teacher_course_completed');
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      let userId = "unknown";
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        userId = userData.customId || userData.id || "unknown";
+      }
+
+      const savedCompleted = await AsyncStorage.getItem(`${userId}_teacher_course_completed`);
       let completedLessonIds = [];
       if (savedCompleted) {
         completedLessonIds = JSON.parse(savedCompleted);
@@ -73,7 +80,7 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
 
       let allLessonIds = [];
       
-      const savedHistoryStr = await AsyncStorage.getItem('teacher_course_test_history');
+      const savedHistoryStr = await AsyncStorage.getItem(`${userId}_teacher_course_test_history`);
       const testHistoryObj = savedHistoryStr ? JSON.parse(savedHistoryStr) : {};
       
       const formatted = data.map((mod, index) => {
@@ -216,11 +223,18 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
 
   const handleLessonComplete = async (lessonId) => {
     try {
-      const savedCompleted = await AsyncStorage.getItem('teacher_course_completed');
+      const userDataStr = await AsyncStorage.getItem('user_data');
+      let userId = "unknown";
+      if (userDataStr) {
+        const userData = JSON.parse(userDataStr);
+        userId = userData.customId || userData.id || "unknown";
+      }
+
+      const savedCompleted = await AsyncStorage.getItem(`${userId}_teacher_course_completed`);
       let completedLessonIds = savedCompleted ? JSON.parse(savedCompleted) : [];
       if (!completedLessonIds.includes(lessonId)) {
         completedLessonIds.push(lessonId);
-        await AsyncStorage.setItem('teacher_course_completed', JSON.stringify(completedLessonIds));
+        await AsyncStorage.setItem(`${userId}_teacher_course_completed`, JSON.stringify(completedLessonIds));
         fetchModules();
       }
     } catch(err) {

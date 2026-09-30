@@ -1083,6 +1083,14 @@ app.delete('/api/admin/users/:id', async (req, res) => {
         });
       }
 
+      // Also delete any course enrollments and graduate records
+      await prisma.courseEnrollment.deleteMany({
+        where: { userId: userToDelete.customId }
+      });
+      await prisma.courseGraduate.deleteMany({
+        where: { userId: userToDelete.customId }
+      });
+
       await prisma.user.delete({
         where: { id }
       });
@@ -1118,6 +1126,14 @@ app.delete('/api/admin/users/sync-delete/:identifier', async (req, res) => {
     });
     
     if (user) {
+      // Also delete any course enrollments and graduate records
+      await prisma.courseEnrollment.deleteMany({
+        where: { userId: user.customId }
+      });
+      await prisma.courseGraduate.deleteMany({
+        where: { userId: user.customId }
+      });
+
       await prisma.user.delete({ where: { id: user.id } });
       console.log(`[Sync Delete] User deleted and event emitted for: ${user.name} (${user.customId})`);
       io.emit('user_deleted', { id: user.id, customId: user.customId });
