@@ -50,7 +50,7 @@ export default function TeacherCourseGuideScreen({ route, navigation }) {
         console.log('Error saving guide complete:', e);
       }
     }
-    navigation.goBack();
+    navigation.navigate('TeacherCourseLessons', { autoOpenNextFor: lessonId });
   };
 
   return (

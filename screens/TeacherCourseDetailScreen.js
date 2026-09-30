@@ -159,7 +159,7 @@ export default function TeacherCourseDetailScreen({ navigation }) {
       <SafeAreaView style={styles.safeArea}>
         {/* Simple Navbar */}
         <View style={styles.navbar}>
-          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.navBtn} onPress={() => navigation.navigate('TeacherDashboard')}>
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
           <Text style={styles.navTitle}>Kurs haqida</Text>
