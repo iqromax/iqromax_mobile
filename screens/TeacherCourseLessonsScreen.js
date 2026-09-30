@@ -56,6 +56,9 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
 
       let allLessonIds = [];
       
+      const savedHistoryStr = await AsyncStorage.getItem('teacher_course_test_history');
+      const testHistoryObj = savedHistoryStr ? JSON.parse(savedHistoryStr) : {};
+      
       const formatted = data.map((mod, index) => {
         let lessons = [];
         
@@ -85,7 +88,7 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
               type: 'test_theory',
               title: t.title,
               questions: (t.questions?.length || 0) + ' ta savol',
-              history: [],
+              history: testHistoryObj[t.id] || [],
               globalIndex: allLessonIds.length
             });
             allLessonIds.push(lId);

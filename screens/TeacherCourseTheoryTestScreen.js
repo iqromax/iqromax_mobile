@@ -201,13 +201,21 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
               activeOpacity={0.9} 
               style={{ width: '100%' }}
               onPress={async () => {
-                if (percent >= 60 && route?.params?.lessonId) {
+                if (route?.params?.lessonId) {
                   try {
-                    const saved = await AsyncStorage.getItem('teacher_course_completed');
-                    let completedLessonIds = saved ? JSON.parse(saved) : [];
-                    if (!completedLessonIds.includes(route.params.lessonId)) {
-                      completedLessonIds.push(route.params.lessonId);
-                      await AsyncStorage.setItem('teacher_course_completed', JSON.stringify(completedLessonIds));
+                    const savedHistoryStr = await AsyncStorage.getItem('teacher_course_test_history');
+                    let historyObj = savedHistoryStr ? JSON.parse(savedHistoryStr) : {};
+                    if (!historyObj[testId]) historyObj[testId] = [];
+                    historyObj[testId].push({ score: percent, date: new Date().toISOString() });
+                    await AsyncStorage.setItem('teacher_course_test_history', JSON.stringify(historyObj));
+
+                    if (percent >= 60) {
+                      const saved = await AsyncStorage.getItem('teacher_course_completed');
+                      let completedLessonIds = saved ? JSON.parse(saved) : [];
+                      if (!completedLessonIds.includes(route.params.lessonId)) {
+                        completedLessonIds.push(route.params.lessonId);
+                        await AsyncStorage.setItem('teacher_course_completed', JSON.stringify(completedLessonIds));
+                      }
                     }
                   } catch (e) { console.log(e); }
                 }
