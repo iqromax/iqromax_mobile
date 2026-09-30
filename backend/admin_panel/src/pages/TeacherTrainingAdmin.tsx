@@ -62,7 +62,7 @@ export default function TeacherTrainingAdmin() {
     }
   };
   const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([]);
-  const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([]);
+  const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number, title?: string, testType?: string, practicalOp?: string, practicalDigits?: string, practicalCount?: number}[]>([]);
   const [guides, setGuides] = useState<{id: string, moduleId: string, title: string, order: number, content: string}[]>([]);
   const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
@@ -1104,8 +1104,8 @@ export default function TeacherTrainingAdmin() {
               </div>
 
               {testSubTab === 'theory' && (
-              {/* Questions Section */}
               <div className="space-y-6">
+                {/* Questions Section */}
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-black text-white">Savollar</h3>
                 </div>
