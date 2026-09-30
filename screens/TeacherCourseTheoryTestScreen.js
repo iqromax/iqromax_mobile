@@ -227,6 +227,7 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
                         await AsyncStorage.setItem(`${userId}_teacher_course_completed`, JSON.stringify(completedLessonIds));
                       }
                     }
+                  } catch (e) { console.log(e); }
                 }
                 navigation.navigate('TeacherCourseLessons', { autoOpenNextFor: route.params?.lessonId });
               }}
