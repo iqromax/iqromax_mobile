@@ -139,7 +139,7 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       {/* Real Video Player */}
       <View style={[styles.videoPlayer, isFullscreen && { height: screenHeight, width: screenWidth, zIndex: 999 }]}>
         {ytId ? (
-          <View style={StyleSheet.absoluteFill}>
+          <View style={StyleSheet.absoluteFill} pointerEvents="none">
             <YoutubePlayer
               ref={playerRef}
               height={isFullscreen ? screenHeight : 240}
@@ -157,6 +157,7 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
                 showClosedCaptions: false,
                 rel: false,
                 modestbranding: true,
+                showinfo: false,
               }}
             />
           </View>
