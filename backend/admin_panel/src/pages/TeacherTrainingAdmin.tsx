@@ -128,6 +128,7 @@ export default function TeacherTrainingAdmin() {
   const [examPracticalOp, setExamPracticalOp] = useState("oddiy");
   const [examPracticalDigits, setExamPracticalDigits] = useState("1");
   const [examPracticalCount, setExamPracticalCount] = useState("7");
+  const [examModuleId, setExamModuleId] = useState("");
 
   const [examQuestions, setExamQuestions] = useState([
     { id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }
@@ -600,6 +601,7 @@ export default function TeacherTrainingAdmin() {
         title: savedExam.title,
         duration: savedExam.duration,
         qCount: savedExam.questions?.length || 0,
+        moduleId: savedExam.moduleId,
         practicalOp: savedExam.practicalOp,
         practicalDigits: savedExam.practicalDigits,
         practicalCount: savedExam.practicalCount,
@@ -626,6 +628,7 @@ export default function TeacherTrainingAdmin() {
   const openEditExamModal = (exam: any) => {
     setEditingExamId(exam.id);
     setExamTitle(exam.title || "");
+    setExamModuleId(exam.moduleId || "");
     setExamDuration(exam.duration || "");
     setExamPracticalOp(exam.practicalOp || "oddiy");
     setExamPracticalDigits(exam.practicalDigits || "1");
@@ -1485,6 +1488,19 @@ export default function TeacherTrainingAdmin() {
                       className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50"
                       required
                     />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-indigo-200/80 mb-2">Modulni tanlang</label>
+                    <select 
+                      value={examModuleId}
+                      onChange={e => setExamModuleId(e.target.value)}
+                      className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 appearance-none"
+                    >
+                      <option value="">Modul tanlash...</option>
+                      {modules.map(mod => (
+                        <option key={mod.id} value={mod.id}>{mod.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

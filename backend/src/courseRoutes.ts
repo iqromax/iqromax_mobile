@@ -546,12 +546,13 @@ router.delete('/admin/courses/guides/:id', async (req, res) => {
 
 router.post('/admin/courses/exams', async (req, res) => {
   try {
-    const { title, duration, practicalOp, practicalDigits, practicalCount, questions } = req.body;
+    const { title, duration, practicalOp, practicalDigits, practicalCount, questions, moduleId } = req.body;
     
     // Create the exam
     const newExam = await prisma.courseExam.create({
       data: {
         title,
+        moduleId,
         duration,
         practicalOp,
         practicalDigits,
@@ -581,13 +582,14 @@ router.post('/admin/courses/exams', async (req, res) => {
 
 router.put('/admin/courses/exams/:id', async (req, res) => {
   try {
-    const { title, duration, practicalOp, practicalDigits, practicalCount, questions } = req.body;
+    const { title, duration, practicalOp, practicalDigits, practicalCount, questions, moduleId } = req.body;
     
     // Update the exam basic fields
     await prisma.courseExam.update({
       where: { id: req.params.id },
       data: {
         title,
+        moduleId,
         duration,
         practicalOp,
         practicalDigits,

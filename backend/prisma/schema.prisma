@@ -255,6 +255,7 @@ model CourseTestOption {
 model CourseExam {
   id              String               @id @default(uuid())
   title           String
+  moduleId        String?
   duration        String?
   practicalOp     String?
   practicalDigits String?

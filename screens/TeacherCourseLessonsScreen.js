@@ -101,6 +101,10 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
         if (mod.videos) items = items.concat(mod.videos.map(v => ({ ...v, itemType: 'video' })));
         if (mod.tests) items = items.concat(mod.tests.map(t => ({ ...t, itemType: 'test' })));
         if (mod.guides) items = items.concat(mod.guides.map(g => ({ ...g, itemType: 'guide' })));
+        if (examsData) {
+          const modExams = examsData.filter(e => e.moduleId === mod.id);
+          items = items.concat(modExams.map(e => ({ ...e, itemType: 'exam', order: 9999 })));
+        }
         
         items.sort((a, b) => (a.order || 0) - (b.order || 0));
         
@@ -147,6 +151,18 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
               globalIndex: allLessonIds.length
             });
             allLessonIds.push(lId);
+          } else if (item.itemType === 'exam') {
+            const lId = `e-${item.id}`;
+            lessons.push({
+              id: lId,
+              examId: item.id,
+              type: 'exam',
+              title: item.title,
+              questions: `${item.questions?.length || 0} ta savol`,
+              duration: `${item.duration} daqiqa`,
+              globalIndex: allLessonIds.length
+            });
+            allLessonIds.push(lId);
           }
         });
 
@@ -158,10 +174,10 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
       });
 
       // Add exams as the final virtual module
-      if (examsData && examsData.length > 0) {
-        let examLessons = examsData.map((exam, eIndex) => {
+      const unassignedExams = examsData ? examsData.filter(e => !e.moduleId) : [];
+      if (unassignedExams.length > 0) {
+        let examLessons = unassignedExams.map((exam, eIndex) => {
           const lId = `e-${exam.id}`;
-          const isCompleted = false; // We track exam completion differently, but let's assume history will handle it
           
           allLessonIds.push(lId);
           return {
