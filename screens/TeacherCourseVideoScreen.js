@@ -152,6 +152,7 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
                 allowsInlineMediaPlayback: true,
                 mediaPlaybackRequiresUserAction: false,
               }}
+              forceAndroidAutoplay={true}
               initialPlayerParams={{
                 controls: false,
                 preventFullScreen: true,
