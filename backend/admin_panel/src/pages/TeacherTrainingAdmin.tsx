@@ -998,7 +998,7 @@ export default function TeacherTrainingAdmin() {
                     <div>
                       <span className="font-semibold text-lg text-white block">{exam.title} ({exam.duration} daqiqa)</span>
                       <span className="text-sm text-indigo-200/60">
-                        Nazariy: {exam.qCount} savol • Amaliy: {exam.practicalCount} ta misol ({exam.practicalOp}, {exam.practicalDigits} xonali)
+                        Umumiy savollar soni: {exam.qCount || 0} ta
                       </span>
                     </div>
                   </div>
