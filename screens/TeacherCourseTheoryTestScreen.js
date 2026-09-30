@@ -22,6 +22,7 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
   const [isFinished, setIsFinished] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [testDurationMinutes, setTestDurationMinutes] = useState(10);
 
   useEffect(() => {
     fetchTest();
@@ -47,7 +48,9 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
         });
         setQuestions(formatted);
         if (data.duration) {
-          setTimeLeft(parseInt(data.duration) * 60);
+          const durationMins = parseInt(data.duration);
+          setTimeLeft(durationMins * 60);
+          setTestDurationMinutes(durationMins);
         }
       }
     } catch (error) {
@@ -320,7 +323,7 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
                   </View>
                   <View>
                     <Text style={styles.introInfoLabel}>Ajratilgan vaqt</Text>
-                    <Text style={styles.introInfoValue}>10 daqiqa</Text>
+                    <Text style={styles.introInfoValue}>{testDurationMinutes} daqiqa</Text>
                   </View>
                 </View>
               </View>
