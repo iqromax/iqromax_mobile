@@ -128,7 +128,7 @@ export default function TeacherTrainingAdmin() {
   const [examPracticalOp, setExamPracticalOp] = useState("oddiy");
   const [examPracticalDigits, setExamPracticalDigits] = useState("1");
   const [examPracticalCount, setExamPracticalCount] = useState("7");
-  const [examSubTab, setExamSubTab] = useState<'theory' | 'practical'>('theory');
+
   const [examQuestions, setExamQuestions] = useState([
     { id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }
   ]);
@@ -1551,7 +1551,6 @@ export default function TeacherTrainingAdmin() {
                     <button type="button" onClick={addExamQuestion} className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-[#1A1A2F] rounded-2xl text-indigo-200/60 hover:text-amber-400 hover:border-amber-400/30 hover:bg-amber-400/5 transition-all">
                       <Plus className="w-5 h-5" /> Yangi savol qo'shish
                     </button>
-                  </div>
                   </div>
                 </div>
               </form>
