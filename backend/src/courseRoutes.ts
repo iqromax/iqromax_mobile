@@ -162,10 +162,39 @@ router.post('/courses/progress', async (req, res) => {
 // Get enrollments (for admin panel)
 router.get('/admin/courses/enrollments', async (req, res) => {
   try {
-    const enrollments = await prisma.courseEnrollment.findMany({
-      orderBy: { updatedAt: 'desc' }
+    const teachers = await prisma.user.findMany({
+      where: { 
+        OR: [
+          { role: 'teacher' },
+          { role: 'Teacher' },
+          { role: "O'qituvchi" }
+        ]
+      }
     });
-    res.json(enrollments);
+
+    const enrollments = await prisma.courseEnrollment.findMany();
+    const graduates = await prisma.courseGraduate.findMany();
+
+    const result = teachers.map(t => {
+      const enr = enrollments.find(e => e.userId === t.customId);
+      const grad = graduates.find(g => g.name === t.name);
+
+      let progress = 0;
+      if (grad) progress = 100;
+      else if (enr) progress = enr.progress;
+
+      return {
+        id: t.id,
+        userId: t.customId,
+        name: t.name,
+        progress: progress,
+        createdAt: enr ? enr.createdAt : t.createdAt
+      };
+    });
+
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    res.json(result);
   } catch (error) {
     console.error('Error fetching enrollments:', error);
     res.status(500).json({ error: 'Server error' });
