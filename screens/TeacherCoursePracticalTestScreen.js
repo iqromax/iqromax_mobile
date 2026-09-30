@@ -466,6 +466,15 @@ export default function TeacherCoursePracticalTestScreen() {
       testHistoryObj[testId] = testResults;
       await AsyncStorage.setItem(`${userId}_teacher_course_test_history`, JSON.stringify(testHistoryObj));
       
+      if (lessonId) {
+        const savedCompleted = await AsyncStorage.getItem(`${userId}_teacher_course_completed`);
+        let completedLessonIds = savedCompleted ? JSON.parse(savedCompleted) : [];
+        if (!completedLessonIds.includes(lessonId)) {
+          completedLessonIds.push(lessonId);
+          await AsyncStorage.setItem(`${userId}_teacher_course_completed`, JSON.stringify(completedLessonIds));
+        }
+      }
+      
     } catch (e) {
       console.log('Error saving practical test history', e);
     }

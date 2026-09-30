@@ -160,6 +160,26 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
       setModules(formatted);
       setCompletedIds(completedLessonIds);
 
+      // Determine default expanded module
+      let targetModuleIndex = 0;
+      for (let i = 0; i < formatted.length; i++) {
+        let hasUnlockedUncompleted = false;
+        for (let j = 0; j < formatted[i].lessons.length; j++) {
+          const lesson = formatted[i].lessons[j];
+          let isCompleted = completedLessonIds.includes(lesson.id);
+          if (!lesson.locked && !isCompleted) {
+            hasUnlockedUncompleted = true;
+            break;
+          }
+        }
+        if (hasUnlockedUncompleted) {
+          targetModuleIndex = i;
+          break;
+        } else if (i === formatted.length - 1) {
+          targetModuleIndex = i;
+        }
+      }
+
       // Handle auto-open next
       if (route.params?.autoOpenNextFor) {
         const completedId = route.params.autoOpenNextFor;
@@ -212,6 +232,8 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
             }, 1000);
           }
         }
+      } else {
+        setExpandedIndex(targetModuleIndex);
       }
 
     } catch (error) {
