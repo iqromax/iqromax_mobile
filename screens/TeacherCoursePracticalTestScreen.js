@@ -311,6 +311,8 @@ export default function TeacherCoursePracticalTestScreen() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(history.length > 0);
+  const [hasStarted, setHasStarted] = useState(history.length === 0);
 
   // Initialize Audio
   useEffect(() => {
@@ -395,10 +397,10 @@ export default function TeacherCoursePracticalTestScreen() {
   };
 
   useEffect(() => {
-    if (mode === 'math') {
+    if (mode === 'math' && hasStarted) {
       initMathProblem();
     }
-  }, [mode, digits, examplesCount, operation]);
+  }, [mode, digits, examplesCount, operation, hasStarted]);
 
   // Live Timer for Math mode
   useEffect(() => {
@@ -584,12 +586,12 @@ export default function TeacherCoursePracticalTestScreen() {
         <Modal visible={showResultModal} transparent animationType="fade" onRequestClose={() => {}}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
-              <View style={styles.modalTrophyBadge}>
-                <MaterialCommunityIcons name="crown" size={50} color="#F59E0B" />
+              <View style={[styles.modalTrophyBadge, { backgroundColor: 'rgba(16, 185, 129, 0.15)', borderColor: '#10B981' }]}>
+                <MaterialCommunityIcons name="check-decagram" size={50} color="#10B981" />
               </View>
 
-              <Text style={styles.modalWinTitle}>{t.winTitle}</Text>
-              <Text style={styles.modalWinSub}>{t.winSub}</Text>
+              <Text style={[styles.modalWinTitle, { color: '#10B981' }]}>TOPSHIRILDI!</Text>
+              <Text style={styles.modalWinSub}>Barcha misollarni abakusda muvaffaqiyatli yechdingiz!</Text>
 
               {/* Stats Box */}
               <View style={styles.resultStatsGrid}>
@@ -604,28 +606,73 @@ export default function TeacherCoursePracticalTestScreen() {
                   <Text style={styles.resultStatLabel}>{t.step}</Text>
                   <Text style={styles.resultStatVal}>{sequence.length}</Text>
                 </View>
-
-                <View style={styles.resultStatBox}>
-                  <View style={styles.xpIconBadge}>
-                    <Text style={styles.xpIconText}>XP</Text>
-                  </View>
-                  <Text style={styles.resultStatLabel}>{t.gainedXp}</Text>
-                  <Text style={[styles.resultStatVal, { color: '#F59E0B' }]}>+{earnedXp} XP</Text>
-                </View>
               </View>
 
               {/* Action Buttons */}
               <View style={styles.modalButtonsRow}>
-                <TouchableOpacity style={styles.modalPlayAgainBtn} onPress={initMathProblem} activeOpacity={0.8}>
-                  <MaterialCommunityIcons name="refresh" size={18} color="#FFF" style={{ marginRight: 6 }} />
-                  <Text style={styles.modalBtnText}>{t.playAgain}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.modalHomeBtn} onPress={() => navigation.navigate('TeacherCourseLessons', { autoOpenNextFor: lessonId })} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.modalHomeBtn, { backgroundColor: '#3B82F6', borderColor: '#3B82F6' }]} onPress={() => navigation.navigate('TeacherCourseLessons', { autoOpenNextFor: lessonId })} activeOpacity={0.8}>
                   <MaterialCommunityIcons name="arrow-left" size={18} color="#FFF" style={{ marginRight: 6 }} />
                   <Text style={styles.modalBtnText}>Darslarga qaytish</Text>
                 </TouchableOpacity>
               </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Intro or History Modal Alert */}
+        <Modal visible={showHistory} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.introCard}>
+              <TouchableOpacity style={styles.introCloseModalBtn} onPress={() => navigation.goBack()}>
+                <MaterialCommunityIcons name="close" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+
+              <View style={[styles.introIconBox, { backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(59, 130, 246, 0.3)' }]}>
+                <MaterialCommunityIcons name="history" size={48} color="#3B82F6" />
+              </View>
+              
+              <Text style={styles.introTitle}>Natijalar tarixi</Text>
+              <Text style={styles.introDesc}>
+                Siz bu testni avval ishlagansiz. Quyida oldingi urinishlaringiz natijalari bilan tanishishingiz mumkin.
+              </Text>
+
+              <View style={styles.introInfoBox}>
+                {history.map((h, i) => (
+                  <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: i === history.length - 1 ? 0 : 12 }}>
+                    <Text style={{ color: '#9CA3AF', fontSize: 14, fontFamily: 'Inter_500Medium' }}>
+                      {i + 1}-urinish
+                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Text style={{ color: '#FFF', fontSize: 14, fontFamily: 'Inter_700Bold', marginRight: 10 }}>
+                        {h.time}s
+                      </Text>
+                      <View style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                        <Text style={{ color: '#34D399', fontSize: 10, fontFamily: 'Inter_700Bold' }}>
+                          Muvaffaqiyatli
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              <TouchableOpacity 
+                activeOpacity={0.9} 
+                style={{ width: '100%', marginTop: 24 }}
+                onPress={() => {
+                  setShowHistory(false);
+                  setHasStarted(true);
+                }}
+              >
+                <LinearGradient
+                  colors={['#8B5CF6', '#D946EF']}
+                  start={{x:0, y:0}} end={{x:1, y:0}}
+                  style={{ paddingVertical: 14, borderRadius: 12, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}
+                >
+                  <MaterialCommunityIcons name="refresh" size={20} color="#FFF" style={{ marginRight: 8 }} />
+                  <Text style={{ color: '#FFF', fontSize: 16, fontFamily: 'Inter_700Bold' }}>Qayta topshirish</Text>
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -1019,4 +1066,57 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     fontSize: 13,
   },
+  introCard: {
+    width: '90%',
+    backgroundColor: '#0F121C',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  },
+  introCloseModalBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  introIconBox: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  introTitle: {
+    fontSize: 24,
+    color: '#FFF',
+    fontFamily: 'Inter_900Black',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  introDesc: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    fontFamily: 'Inter_500Medium',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  introInfoBox: {
+    width: '100%',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+  }
 });
