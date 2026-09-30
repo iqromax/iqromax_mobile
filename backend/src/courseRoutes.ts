@@ -162,35 +162,35 @@ router.post('/courses/progress', async (req, res) => {
 // Get enrollments (for admin panel)
 router.get('/admin/courses/enrollments', async (req, res) => {
   try {
-    const teachers = await prisma.user.findMany({
-      where: { 
-        OR: [
-          { role: 'teacher' },
-          { role: 'Teacher' },
-          { role: "O'qituvchi" }
-        ]
-      }
-    });
-
     const enrollments = await prisma.courseEnrollment.findMany();
     const graduates = await prisma.courseGraduate.findMany();
 
-    const result = teachers.map(t => {
-      const enr = enrollments.find(e => e.userId === t.customId);
-      const grad = graduates.find(g => g.name === t.name);
+    const result: any[] = [];
 
-      let progress = 0;
-      if (grad) progress = 100;
-      else if (enr) progress = enr.progress;
+    for (const enr of enrollments) {
+      result.push({
+        id: enr.id,
+        userId: enr.userId,
+        name: enr.name,
+        progress: enr.progress,
+        createdAt: enr.createdAt
+      });
+    }
 
-      return {
-        id: t.id,
-        userId: t.customId,
-        name: t.name,
-        progress: progress,
-        createdAt: enr ? enr.createdAt : t.createdAt
-      };
-    });
+    for (const grad of graduates) {
+      const exists = result.find(r => r.name === grad.name);
+      if (!exists) {
+        result.push({
+          id: grad.id,
+          userId: 'N/A',
+          name: grad.name,
+          progress: 100,
+          createdAt: grad.createdAt
+        });
+      } else {
+        exists.progress = 100;
+      }
+    }
 
     result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
