@@ -141,6 +141,26 @@ router.delete('/admin/courses/modules/:id', async (req, res) => {
   }
 });
 
+// Update a Module
+router.put('/admin/courses/modules/:id', async (req, res) => {
+  try {
+    const { name, order } = req.body;
+    if (!name) return res.status(400).json({ error: 'Nomi kiritilishi shart' });
+    
+    const updatedModule = await prisma.courseModule.update({
+      where: { id: req.params.id },
+      data: { name, order: parseInt(order) || 0 }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json(updatedModule);
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Add a Video (Multipart: fields + files)
 router.post(
   '/admin/courses/videos', 
@@ -190,6 +210,46 @@ router.delete('/admin/courses/videos/:id', async (req, res) => {
 
     res.json({ message: 'Video o\'chirildi' });
   } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Update a Video
+router.put(
+  '/admin/courses/videos/:id', 
+  upload.fields([{ name: 'videoFile', maxCount: 1 }, { name: 'pdfFile', maxCount: 1 }]), 
+  async (req, res) => {
+  try {
+    const { moduleId, name, description, duration, order, videoUrl } = req.body;
+    if (!moduleId || !name) return res.status(400).json({ error: 'Modul va nom kiritilishi shart' });
+
+    // Extract paths if files exist
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    
+    let pdfUrl = undefined;
+    if (files && files['pdfFile'] && files['pdfFile'].length > 0) {
+      pdfUrl = `/uploads/courses/${files['pdfFile'][0].filename}`;
+    }
+
+    const updatedVideo = await prisma.courseVideo.update({
+      where: { id: req.params.id },
+      data: {
+        moduleId,
+        name,
+        description,
+        duration,
+        order: parseInt(order) || 0,
+        videoUrl,
+        ...(pdfUrl !== undefined && { pdfUrl })
+      }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json(updatedVideo);
+  } catch (error) {
+    console.error('Error updating video:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

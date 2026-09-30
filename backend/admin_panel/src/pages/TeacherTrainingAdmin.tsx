@@ -9,10 +9,10 @@ import {
   CheckCircle2, 
   Clock, 
   ListOrdered,
-  X,
   CheckSquare,
   GraduationCap,
-  Award
+  Award,
+  Pencil
 } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
 
@@ -53,6 +53,8 @@ export default function TeacherTrainingAdmin() {
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+
+  const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
 
   // FORM STATES: Module
   const [moduleName, setModuleName] = useState("");
@@ -134,14 +136,21 @@ export default function TeacherTrainingAdmin() {
     if (pdfFile) formData.append('pdfFile', pdfFile);
 
     try {
-      const res = await fetch('/api/admin/courses/videos', {
-        method: 'POST',
+      const isEdit = !!editingVideoId;
+      const url = isEdit ? `/api/admin/courses/videos/${editingVideoId}` : '/api/admin/courses/videos';
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
         body: formData
       });
       if (!res.ok) throw new Error('Xatolik');
-      const newVideo = await res.json();
+      const savedVideo = await res.json();
       
-      setVideos([...videos, newVideo]);
+      if (isEdit) {
+        setVideos(videos.map(v => v.id === savedVideo.id ? savedVideo : v));
+      } else {
+        setVideos([...videos, savedVideo]);
+      }
+      
       setSelectedModuleForVideo("");
       setVideoName("");
       setVideoDuration("");
@@ -149,11 +158,24 @@ export default function TeacherTrainingAdmin() {
       setVideoDescription("");
       setVideoLink("");
       setPdfFile(null);
+      setEditingVideoId(null);
       setIsVideoModalOpen(false);
-      showToast("Video muvaffaqiyatli yuklandi!");
+      showToast(editingVideoId ? "Video muvaffaqiyatli yangilandi!" : "Video muvaffaqiyatli yuklandi!");
     } catch (error) {
       showToast("Server xatosi", 'error');
     }
+  };
+
+  const openEditVideoModal = (video: any) => {
+    setEditingVideoId(video.id);
+    setSelectedModuleForVideo(video.moduleId);
+    setVideoName(video.name || "");
+    setVideoDuration(video.duration || "");
+    setVideoOrder(video.order?.toString() || "");
+    setVideoDescription(video.description || "");
+    setVideoLink(video.videoUrl || "");
+    setPdfFile(null);
+    setIsVideoModalOpen(true);
   };
 
   const handleDeleteVideo = async (id: string) => {
@@ -372,7 +394,17 @@ export default function TeacherTrainingAdmin() {
           <div className="space-y-4">
             <div className="flex justify-end">
               <button 
-                onClick={() => setIsVideoModalOpen(true)}
+                onClick={() => {
+                  setEditingVideoId(null);
+                  setSelectedModuleForVideo("");
+                  setVideoName("");
+                  setVideoDuration("");
+                  setVideoOrder("");
+                  setVideoDescription("");
+                  setVideoLink("");
+                  setPdfFile(null);
+                  setIsVideoModalOpen(true);
+                }}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(8,145,178,0.3)]"
               >
                 <Upload className="w-4 h-4" /> Video joylash
@@ -391,9 +423,14 @@ export default function TeacherTrainingAdmin() {
                       <span className="text-sm text-indigo-200/60">Tartib: {vid.order} • Modul: {modules.find(m => m.id === vid.moduleId)?.name}</span>
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteVideo(vid.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditVideoModal(vid)} className="p-3 text-cyan-400 hover:text-white hover:bg-cyan-500/20 transition-colors rounded-xl bg-cyan-500/10">
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => handleDeleteVideo(vid.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {videos.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Videolar mavjud emas</div>}
