@@ -139,7 +139,7 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       {/* Real Video Player */}
       <View style={[styles.videoPlayer, isFullscreen && { height: screenHeight, width: screenWidth, zIndex: 999 }]}>
         {ytId ? (
-          <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <View style={StyleSheet.absoluteFill}>
             <YoutubePlayer
               ref={playerRef}
               height={isFullscreen ? screenHeight : 240}
@@ -168,25 +168,15 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
         )}
 
         {/* Header Overlay */}
-        <View style={styles.videoHeader}>
+        <View style={styles.videoHeader} pointerEvents="box-none">
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
           </TouchableOpacity>
         </View>
 
-        {/* Play/Pause Button Overlay */}
-        <TouchableOpacity style={styles.playBtnOverlay} activeOpacity={1} onPress={togglePlayPause}>
-          {!isPlaying && ytId && (
-            <View style={styles.playCircle}>
-              <MaterialCommunityIcons 
-                name={isFinished ? "replay" : "play"} 
-                size={32} 
-                color="#FFF" 
-                style={!isFinished ? { marginLeft: 4 } : {}} 
-              />
-            </View>
-          )}
-        </TouchableOpacity>
+        {/* Top and Bottom Touch Blockers for YouTube UI */}
+        <TouchableOpacity style={styles.topBlocker} activeOpacity={1} />
+        <TouchableOpacity style={styles.bottomBlocker} activeOpacity={1} />
 
         {/* Fullscreen Button */}
         {ytId && (
@@ -279,6 +269,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 16,
     flexDirection: 'row',
+    zIndex: 10,
   },
   backBtn: {
     width: 40,
@@ -288,10 +279,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  playBtnOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
+  topBlocker: {
+    position: 'absolute',
+    top: 0,
+    left: 60, // Don't cover back button
+    right: 0,
+    height: 70, // Covers channel name and share button
+    zIndex: 5,
+  },
+  bottomBlocker: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 60, // Don't cover fullscreen button
+    height: 60, // Covers YouTube logo
     zIndex: 5,
   },
   fullscreenBtn: {
