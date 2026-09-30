@@ -104,6 +104,8 @@ export default function TeacherTrainingAdmin() {
   const [guideContent, setGuideContent] = useState("");
   const [guideOrder, setGuideOrder] = useState("");
 
+  const [testSubTab, setTestSubTab] = useState<'theory' | 'practical'>('theory');
+
   // Test Questions State
   const [questions, setQuestions] = useState([
     { id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }
@@ -654,22 +656,41 @@ export default function TeacherTrainingAdmin() {
         {/* CONTENT: TESTS */}
         {activeTab === 'tests' && (
           <div className="space-y-4">
-            <div className="flex justify-end">
+            
+            {/* Sub-tabs for Tests */}
+            <div className="flex gap-4 border-b border-[#1A1A2F] pb-4 mb-4">
               <button 
-                onClick={() => {
-                  setEditingTestId(null);
-                  setSelectedModuleForTest("");
-                  setTestTitle("");
-                  setTestOrder("");
-                  setTestDuration("");
-                  setQuestions([{ id: Date.now(), text: "", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }], correctOptionId: Date.now() + 1 }]);
-                  setIsTestModalOpen(true);
-                }}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)]"
+                onClick={() => setTestSubTab('theory')}
+                className={`px-4 py-2 rounded-xl font-medium transition-all ${testSubTab === 'theory' ? 'bg-emerald-500/20 text-emerald-400' : 'text-indigo-200/50 hover:text-indigo-200 hover:bg-[#1A1A2F]'}`}
               >
-                <Plus className="w-4 h-4" /> Yangi test
+                Nazariy testlar
+              </button>
+              <button 
+                onClick={() => setTestSubTab('practical')}
+                className={`px-4 py-2 rounded-xl font-medium transition-all ${testSubTab === 'practical' ? 'bg-emerald-500/20 text-emerald-400' : 'text-indigo-200/50 hover:text-indigo-200 hover:bg-[#1A1A2F]'}`}
+              >
+                Amaliy testlar
               </button>
             </div>
+
+            {testSubTab === 'theory' ? (
+              <>
+                <div className="flex justify-end">
+                  <button 
+                    onClick={() => {
+                      setEditingTestId(null);
+                      setSelectedModuleForTest("");
+                      setTestTitle("");
+                      setTestOrder("");
+                      setTestDuration("");
+                      setQuestions([{ id: Date.now(), text: "", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }], correctOptionId: Date.now() + 1 }]);
+                      setIsTestModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)]"
+                  >
+                    <Plus className="w-4 h-4" /> Yangi test
+                  </button>
+                </div>
 
             <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
               {tests.map(test => (
@@ -695,6 +716,13 @@ export default function TeacherTrainingAdmin() {
               ))}
               {tests.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Testlar mavjud emas</div>}
             </div>
+              </>
+            ) : (
+              <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl p-12 text-center">
+                <h3 className="text-xl font-bold text-white mb-2">Amaliy testlar</h3>
+                <p className="text-indigo-200/60">Bu bo'limda amaliy testlar tez orada ishga tushiriladi...</p>
+              </div>
+            )}
           </div>
         )}
 
