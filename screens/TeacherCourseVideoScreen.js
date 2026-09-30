@@ -116,20 +116,27 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       {/* Real Video Player */}
       <View style={styles.videoPlayer}>
         {ytId ? (
-          <YoutubePlayer
-            ref={playerRef}
-            height={240}
-            play={isPlaying}
-            videoId={ytId}
-            onChangeState={onStateChange}
-            initialPlayerParams={{
-              controls: false,
-              preventFullScreen: true,
-              showClosedCaptions: false,
-              rel: false,
-              modestbranding: true,
-            }}
-          />
+          <View style={StyleSheet.absoluteFill}>
+            <YoutubePlayer
+              ref={playerRef}
+              height={240}
+              play={isPlaying}
+              videoId={ytId}
+              onChangeState={onStateChange}
+              webViewStyle={{ opacity: 0.99 }}
+              webViewProps={{
+                androidLayerType: 'hardware',
+                allowsInlineMediaPlayback: true,
+              }}
+              initialPlayerParams={{
+                controls: false,
+                preventFullScreen: true,
+                showClosedCaptions: false,
+                rel: false,
+                modestbranding: true,
+              }}
+            />
+          </View>
         ) : (
           <Text style={{ color: '#6B7280' }}>Video topilmadi</Text>
         )}
@@ -222,10 +229,11 @@ const styles = StyleSheet.create({
   videoPlayer: {
     width: '100%',
     height: 240,
-    backgroundColor: '#111',
+    backgroundColor: '#000',
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   videoHeader: {
     position: 'absolute',
