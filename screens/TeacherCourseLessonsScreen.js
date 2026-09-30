@@ -146,6 +146,17 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
         };
       });
 
+      // Retroactive fix: ensure passed tests are considered completed
+      formatted.forEach(mod => {
+        mod.lessons.forEach(lesson => {
+          if ((lesson.type === 'test_theory' || lesson.type === 'test_practical') && lesson.history && lesson.history.some(h => h.score >= 60)) {
+            if (!completedLessonIds.includes(lesson.id)) {
+              completedLessonIds.push(lesson.id);
+            }
+          }
+        });
+      });
+
       formatted.forEach(mod => {
         mod.lessons.forEach(lesson => {
           if (lesson.globalIndex === 0) {
