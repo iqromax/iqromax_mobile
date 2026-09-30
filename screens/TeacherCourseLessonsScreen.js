@@ -65,6 +65,7 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
         let items = [];
         if (mod.videos) items = items.concat(mod.videos.map(v => ({ ...v, itemType: 'video' })));
         if (mod.tests) items = items.concat(mod.tests.map(t => ({ ...t, itemType: 'test' })));
+        if (mod.guides) items = items.concat(mod.guides.map(g => ({ ...g, itemType: 'guide' })));
         
         items.sort((a, b) => (a.order || 0) - (b.order || 0));
         
@@ -91,6 +92,18 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
               title: item.title,
               questions: (item.questions?.length || 0) + ' ta savol',
               history: testHistoryObj[item.id] || [],
+              globalIndex: allLessonIds.length
+            });
+            allLessonIds.push(lId);
+          } else if (item.itemType === 'guide') {
+            const lId = `g-${item.id}`;
+            lessons.push({
+              id: lId,
+              guideId: item.id,
+              type: 'guide',
+              title: item.title,
+              content: item.content,
+              duration: "Qo'llanma",
               globalIndex: allLessonIds.length
             });
             allLessonIds.push(lId);
@@ -159,6 +172,13 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
                   testId: nextLesson.testId,
                   history: nextLesson.history
                 });
+              } else if (nextLesson.type === 'guide') {
+                navigation.navigate('TeacherCourseGuide', {
+                  lessonId: nextLesson.id,
+                  guideId: nextLesson.guideId,
+                  title: nextLesson.title,
+                  content: nextLesson.content
+                });
               }
             }, 1000);
           }
@@ -197,6 +217,7 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
     switch (type) {
       case 'video': return { name: "play", color: "#3B82F6", bg: "rgba(59, 130, 246, 0.15)" };
       case 'test_theory': return { name: "file-document-edit-outline", color: "#F59E0B", bg: "rgba(245, 158, 11, 0.15)" };
+      case 'guide': return { name: "text-box-outline", color: "#EC4899", bg: "rgba(236, 72, 153, 0.15)" };
       case 'test_practical': return { name: "laptop", color: "#10B981", bg: "rgba(16, 185, 129, 0.15)" };
       case 'certificate': return { name: "certificate", color: "#D946EF", bg: "rgba(217, 70, 239, 0.15)" };
       default: return { name: "play", color: "#3B82F6", bg: "rgba(59, 130, 246, 0.15)" };
@@ -305,6 +326,13 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
                                     lessonId: lesson.id,
                                     testId: lesson.testId,
                                     history: lesson.history
+                                  });
+                                } else if (lesson.type === 'guide') {
+                                  navigation.navigate('TeacherCourseGuide', {
+                                    lessonId: lesson.id,
+                                    guideId: lesson.guideId,
+                                    title: lesson.title,
+                                    content: lesson.content
                                   });
                                 }
                               }

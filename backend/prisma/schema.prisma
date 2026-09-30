@@ -186,6 +186,7 @@ model CourseModule {
 
   videos    CourseVideo[]
   tests     CourseTest[]
+  guides    CourseGuide[]
 }
 
 model CourseVideo {
@@ -210,6 +211,17 @@ model CourseTest {
   duration  String?
   order     Int      @default(0)
   questions CourseTestQuestion[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourseGuide {
+  id        String   @id @default(uuid())
+  moduleId  String
+  module    CourseModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title     String
+  content   String?  // Rich text HTML
+  order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -49,6 +49,9 @@ router.get('/courses/modules', async (req, res) => {
         },
         tests: {
           orderBy: { order: 'asc' }
+        },
+        guides: {
+          orderBy: { order: 'asc' }
         }
       }
     });
@@ -363,6 +366,71 @@ router.put('/admin/courses/tests/:id', async (req, res) => {
     res.json(updatedTest);
   } catch (error) {
     console.error('Error updating test:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// =======================
+// GUIDES
+// =======================
+
+router.post('/admin/courses/guides', async (req, res) => {
+  try {
+    const { moduleId, title, content, order } = req.body;
+    const newGuide = await prisma.courseGuide.create({
+      data: {
+        moduleId,
+        title,
+        content,
+        order: parseInt(order) || 0
+      }
+    });
+    
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json(newGuide);
+  } catch (error) {
+    console.error('Error creating guide:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.put('/admin/courses/guides/:id', async (req, res) => {
+  try {
+    const { moduleId, title, content, order } = req.body;
+    const updatedGuide = await prisma.courseGuide.update({
+      where: { id: req.params.id },
+      data: {
+        moduleId,
+        title,
+        content,
+        order: parseInt(order) || 0
+      }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json(updatedGuide);
+  } catch (error) {
+    console.error('Error updating guide:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.delete('/admin/courses/guides/:id', async (req, res) => {
+  try {
+    await prisma.courseGuide.delete({
+      where: { id: req.params.id }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json({ message: 'Guide deleted' });
+  } catch (error) {
+    console.error('Error deleting guide:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { 
   FolderOpen, 
   Video, 
@@ -18,7 +20,7 @@ import {
 import AdminLayout from '../components/AdminLayout';
 
 export default function TeacherTrainingAdmin() {
-  const [activeTab, setActiveTab] = useState<'modules' | 'videos' | 'tests' | 'exams' | 'graduates'>('modules');
+  const [activeTab, setActiveTab] = useState<'modules' | 'videos' | 'tests' | 'exams' | 'graduates' | 'guides'>('modules');
 
   // MOCK DATA STATES
   const [modules, setModules] = useState<{id: string, name: string}[]>([]);
@@ -35,18 +37,22 @@ export default function TeacherTrainingAdmin() {
       
       const allVideos: any[] = [];
       const allTests: any[] = [];
+      const allGuides: any[] = [];
       data.forEach((m: any) => {
         if (m.videos) allVideos.push(...m.videos);
         if (m.tests) allTests.push(...m.tests);
+        if (m.guides) allGuides.push(...m.guides);
       });
       setVideos(allVideos);
       setTests(allTests);
+      setGuides(allGuides);
     } catch (error) {
       console.error('Error fetching modules:', error);
     }
   };
   const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([]);
   const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number}[]>([]);
+  const [guides, setGuides] = useState<{id: string, moduleId: string, title: string, order: number, content: string}[]>([]);
   const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
   const [graduates] = useState<{id: string, name: string, score: string, date: string}[]>([]);
 
@@ -54,10 +60,12 @@ export default function TeacherTrainingAdmin() {
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
 
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const [editingTestId, setEditingTestId] = useState<string | null>(null);
+  const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
 
   // FORM STATES: Module
   const [moduleName, setModuleName] = useState("");
@@ -78,6 +86,12 @@ export default function TeacherTrainingAdmin() {
   const [testDuration, setTestDuration] = useState("");
   const [testTitle, setTestTitle] = useState("");
   
+  // FORM STATES: Guide
+  const [selectedModuleForGuide, setSelectedModuleForGuide] = useState("");
+  const [guideTitle, setGuideTitle] = useState("");
+  const [guideContent, setGuideContent] = useState("");
+  const [guideOrder, setGuideOrder] = useState("");
+
   // Test Questions State
   const [questions, setQuestions] = useState([
     { id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }
@@ -132,6 +146,68 @@ export default function TeacherTrainingAdmin() {
       if (!res.ok) throw new Error('Xatolik');
       setModules(modules.filter(m => m.id !== id));
       showToast("Modul o'chirildi");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
+  };
+
+  // HANDLERS: Guide
+  const handleAddGuide = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedModuleForGuide) return showToast("Modulni tanlang", 'error');
+    if (!guideTitle.trim()) return showToast("Qo'llanma nomini kiriting", 'error');
+    if (!guideOrder.trim()) return showToast("Tartib raqamini kiriting", 'error');
+    
+    try {
+      const isEdit = !!editingGuideId;
+      const url = isEdit ? `/api/admin/courses/guides/${editingGuideId}` : '/api/admin/courses/guides';
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          moduleId: selectedModuleForGuide,
+          title: guideTitle,
+          content: guideContent,
+          order: parseInt(guideOrder)
+        })
+      });
+      if (!res.ok) throw new Error('Xatolik');
+      
+      const savedGuide = await res.json();
+      if (isEdit) {
+        setGuides(guides.map(g => g.id === savedGuide.id ? savedGuide : g));
+      } else {
+        setGuides([...guides, savedGuide]);
+      }
+      
+      setSelectedModuleForGuide("");
+      setGuideTitle("");
+      setGuideContent("");
+      setGuideOrder("");
+      setEditingGuideId(null);
+      setIsGuideModalOpen(false);
+      showToast(isEdit ? "Qo'llanma muvaffaqiyatli yangilandi!" : "Qo'llanma muvaffaqiyatli qo'shildi!");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
+  };
+
+  const openEditGuideModal = (guide: any) => {
+    setEditingGuideId(guide.id);
+    setSelectedModuleForGuide(guide.moduleId);
+    setGuideTitle(guide.title || "");
+    setGuideContent(guide.content || "");
+    setGuideOrder(guide.order?.toString() || "");
+    setIsGuideModalOpen(true);
+  };
+
+  const handleDeleteGuide = async (id: string) => {
+    if (!window.confirm('Rostdan ham o\'chirmoqchimisiz?')) return;
+    try {
+      const res = await fetch(`/api/admin/courses/guides/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Xatolik');
+      setGuides(guides.filter(g => g.id !== id));
+      showToast("Qo'llanma o'chirildi");
     } catch (error) {
       showToast("Server xatosi", 'error');
     }
@@ -408,6 +484,12 @@ export default function TeacherTrainingAdmin() {
             <FileText className="w-4 h-4" /> Testlar
           </button>
           <button 
+            onClick={() => setActiveTab('guides')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all text-sm ${activeTab === 'guides' ? 'bg-[#1A1A2F] text-pink-400' : 'text-indigo-200/60 hover:text-white hover:bg-[#121223]'}`}
+          >
+            <FileText className="w-4 h-4" /> Qo'llanma darsliklar
+          </button>
+          <button 
             onClick={() => setActiveTab('exams')}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all text-sm ${activeTab === 'exams' ? 'bg-[#1A1A2F] text-amber-400' : 'text-indigo-200/60 hover:text-white hover:bg-[#121223]'}`}
           >
@@ -507,6 +589,52 @@ export default function TeacherTrainingAdmin() {
                 </div>
               ))}
               {videos.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Videolar mavjud emas</div>}
+            </div>
+          </div>
+        )}
+
+        {/* CONTENT: GUIDES */}
+        {activeTab === 'guides' && (
+          <div className="space-y-4">
+            <div className="flex justify-end">
+              <button 
+                onClick={() => {
+                  setEditingGuideId(null);
+                  setSelectedModuleForGuide("");
+                  setGuideTitle("");
+                  setGuideOrder("");
+                  setGuideContent("");
+                  setIsGuideModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(219,39,119,0.3)]"
+              >
+                <Plus className="w-4 h-4" /> Qo'llanma qo'shish
+              </button>
+            </div>
+
+            <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
+              {guides.map(guide => (
+                <div key={guide.id} className="flex items-center justify-between p-5 border-b border-[#1A1A2F] last:border-0 hover:bg-[#121223] transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400 border border-pink-500/20">
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-lg text-white block">{guide.title}</span>
+                      <span className="text-sm text-indigo-200/60">Tartib: {guide.order} • Modul: {modules.find(m => m.id === guide.moduleId)?.name}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditGuideModal(guide)} className="p-3 text-pink-400 hover:text-white hover:bg-pink-500/20 transition-colors rounded-xl bg-pink-500/10">
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => handleDeleteGuide(guide.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {guides.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Qo'llanmalar mavjud emas</div>}
             </div>
           </div>
         )}
@@ -887,7 +1015,80 @@ export default function TeacherTrainingAdmin() {
             </div>
           </div>
         </div>
+      {/* GUIDE MODAL */}
+      {isGuideModalOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0C0C18] w-full max-w-3xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 border-l border-[#1A1A2F]">
+            <div className="flex items-center justify-between px-8 h-20 shrink-0 border-b border-[#1A1A2F] bg-[#121223]">
+              <div>
+                <h3 className="text-2xl font-black text-white">Qo'llanma Yaratish</h3>
+                <p className="text-sm text-indigo-200/50">Yangi darslik uchun qo'llanmani sozlang</p>
+              </div>
+              <button onClick={() => setIsGuideModalOpen(false)} className="w-10 h-10 rounded-full bg-[#1A1A2F] hover:bg-pink-500 hover:text-white flex items-center justify-center transition-all text-indigo-200/50">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+              <div className="space-y-6">
+                <div>
+                  <label className="text-sm font-bold text-pink-400 uppercase tracking-widest block mb-2">Qaysi modulga?</label>
+                  <select 
+                    value={selectedModuleForGuide}
+                    onChange={(e) => setSelectedModuleForGuide(e.target.value)}
+                    className="w-full rounded-xl h-14 px-4 bg-[#121223] border border-[#1A1A2F] text-white focus:outline-none focus:border-pink-500 transition-colors"
+                  >
+                    <option value="">Modulni tanlang</option>
+                    {modules.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-sm font-bold text-pink-400 uppercase tracking-widest block mb-2">Qo'llanma Nomi</label>
+                    <input 
+                      placeholder="Qo'llanma nomi..." 
+                      value={guideTitle}
+                      onChange={(e) => setGuideTitle(e.target.value)}
+                      className="w-full rounded-xl h-14 px-4 bg-[#121223] border border-[#1A1A2F] text-white placeholder-indigo-200/30 focus:outline-none focus:border-pink-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-pink-400 uppercase tracking-widest block mb-2">Tartib Raqami</label>
+                    <input 
+                      placeholder="1, 2..." 
+                      type="number"
+                      value={guideOrder}
+                      onChange={(e) => setGuideOrder(e.target.value)}
+                      className="w-full rounded-xl h-14 px-4 bg-[#121223] border border-[#1A1A2F] text-white placeholder-indigo-200/30 focus:outline-none focus:border-pink-500 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-bold text-pink-400 uppercase tracking-widest block mb-2">Tavsif (Rich Text)</label>
+                  <div className="bg-white rounded-xl text-black">
+                    <ReactQuill 
+                      theme="snow" 
+                      value={guideContent} 
+                      onChange={setGuideContent} 
+                      className="rounded-xl overflow-hidden"
+                      style={{ height: '300px' }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-[#1A1A2F] shrink-0 bg-[#0C0C18] rounded-b-2xl mt-10">
+              <button onClick={handleAddGuide} className="w-full rounded-xl h-14 bg-pink-600 hover:bg-pink-500 text-white font-bold text-lg shadow-[0_0_20px_rgba(219,39,119,0.3)] transition-colors">
+                Qo'llanmani Saqlash
+              </button>
+            </div>
+          </div>
+        </div>
       )}
+
     </AdminLayout>
   );
 }
