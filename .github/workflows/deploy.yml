@@ -29,7 +29,7 @@ jobs:
             # Build Admin Panel
             if [ -d "admin_panel" ]; then
               cd admin_panel
-              npm install
+              npm install --legacy-peer-deps
               npm run build
               cd ..
             fi
