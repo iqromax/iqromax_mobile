@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Dimensions, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Dimensions, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -223,6 +223,25 @@ export default function TeacherCourseTheoryTestScreen({ route, navigation }) {
           </View>
 
         </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#D946EF" />
+      </View>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
+        <TouchableOpacity style={styles.introCloseModalBtn} onPress={() => navigation.goBack()}>
+          <MaterialCommunityIcons name="close" size={20} color="#9CA3AF" />
+        </TouchableOpacity>
+        <Text style={{color: '#9CA3AF', fontSize: 16, fontFamily: 'Inter_500Medium'}}>Test savollari topilmadi!</Text>
       </View>
     );
   }
