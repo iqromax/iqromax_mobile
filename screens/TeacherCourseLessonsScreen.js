@@ -169,7 +169,7 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
             examId: exam.id,
             type: 'exam',
             title: exam.title,
-            questions: `${exam.questions?.length || 0} savol, ${exam.practicalCount || 0} misol`,
+            questions: `${exam.questions?.length || 0} ta savol`,
             duration: `${exam.duration} daqiqa`,
             globalIndex: allLessonIds.length - 1,
           };

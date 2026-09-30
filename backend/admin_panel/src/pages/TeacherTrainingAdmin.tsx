@@ -1459,20 +1459,7 @@ export default function TeacherTrainingAdmin() {
               </button>
             </div>
 
-            <div className="flex bg-[#0C0C18] border-b border-[#1A1A2F]">
-              <button 
-                onClick={() => setExamSubTab('theory')}
-                className={`flex-1 py-4 text-center font-medium transition-colors ${examSubTab === 'theory' ? 'text-amber-400 border-b-2 border-amber-400' : 'text-indigo-200/60 hover:text-white'}`}
-              >
-                Nazariy qism (Testlar)
-              </button>
-              <button 
-                onClick={() => setExamSubTab('practical')}
-                className={`flex-1 py-4 text-center font-medium transition-colors ${examSubTab === 'practical' ? 'text-orange-400 border-b-2 border-orange-400' : 'text-indigo-200/60 hover:text-white'}`}
-              >
-                Amaliy qism (Abakus)
-              </button>
-            </div>
+
 
             <div className="p-6 overflow-y-auto flex-1">
               <form id="examForm" onSubmit={handleAddExam} className="space-y-6">
@@ -1501,7 +1488,6 @@ export default function TeacherTrainingAdmin() {
                   </div>
                 </div>
 
-                {examSubTab === 'theory' && (
                 <div className="space-y-6">
                   {/* Questions Section */}
                   <div className="space-y-8">
@@ -1566,51 +1552,8 @@ export default function TeacherTrainingAdmin() {
                       <Plus className="w-5 h-5" /> Yangi savol qo'shish
                     </button>
                   </div>
-                </div>
-                )}
-
-                {examSubTab === 'practical' && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-indigo-200/80 mb-2">Misol turi (Formula)</label>
-                    <select 
-                      value={examPracticalOp}
-                      onChange={e => setExamPracticalOp(e.target.value)}
-                      className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 appearance-none"
-                    >
-                      <option value="oddiy">Oddiy</option>
-                      <option value="formula_5">Formula 5</option>
-                      <option value="formula_10">Formula 10</option>
-                      <option value="formula_aralash">Formula Aralash</option>
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-indigo-200/80 mb-2">Necha xonali?</label>
-                      <select 
-                        value={examPracticalDigits}
-                        onChange={e => setExamPracticalDigits(e.target.value)}
-                        className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 appearance-none"
-                      >
-                        <option value="1">Bir xonali</option>
-                        <option value="2">Ikki xonali</option>
-                        <option value="3">Uch xonali</option>
-                        <option value="4">To'rt xonali</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-indigo-200/80 mb-2">Qatorlar soni (Misol uzunligi)</label>
-                      <input 
-                        type="number" 
-                        value={examPracticalCount}
-                        onChange={e => setExamPracticalCount(e.target.value)}
-                        className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50"
-                      />
-                    </div>
                   </div>
                 </div>
-                )}
               </form>
             </div>
 

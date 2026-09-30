@@ -45,17 +45,6 @@ export default function TeacherCourseExamScreen({ route, navigation }) {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  // Practical State
-  const [practicalQuestions, setPracticalQuestions] = useState([]);
-  const [currentPracIndex, setCurrentPracIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState({});
-  const [practicalScore, setPracticalScore] = useState(0);
-  const [showCurrentNum, setShowCurrentNum] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [speed] = useState(1000); // 1 second per number
-  const intervalRef = useRef(null);
-
   // Result State
   const [overallResult, setOverallResult] = useState(''); // 'pass' or 'fail'
 
@@ -98,19 +87,6 @@ export default function TeacherCourseExamScreen({ route, navigation }) {
       const totalSec = durationMinutes * 60;
       setTotalTime(totalSec);
       setTimeLeft(totalSec);
-      
-      // Generate practical questions
-      const pQuestions = [];
-      const op = currentExam.practicalOp || 'oddiy';
-      const digits = parseInt(currentExam.practicalDigits) || 1;
-      const count = parseInt(currentExam.practicalCount) || 5;
-      
-      // Generate 5 practical questions for the exam
-      for(let i = 0; i < 5; i++) {
-        pQuestions.push(MentalMathGenerator.generate(op, digits, count));
-      }
-      setPracticalQuestions(pQuestions);
-      
       setTimerRunning(true);
       setLoading(false);
     } catch (error) {
@@ -167,73 +143,18 @@ export default function TeacherCourseExamScreen({ route, navigation }) {
     setTheoryScore(percent);
 
     if (percent < 80) {
-      // Fail immediately
       setTimerRunning(false);
       setOverallResult('fail');
       setPhase('result');
     } else {
-      // Pass theory, move to practical
-      setPhase('practical');
-    }
-  };
-
-
-  // ================== PRACTICAL HANDLERS ==================
-
-  const startPracticalPlaying = () => {
-    if (isPlaying) return;
-    setIsPlaying(true);
-    setShowCurrentNum(true);
-    setCurrentIndex(0);
-
-    intervalRef.current = setInterval(() => {
-      setCurrentIndex(prev => {
-        if (prev >= practicalQuestions[currentPracIndex].numbers.length - 1) {
-          clearInterval(intervalRef.current);
-          setTimeout(() => {
-            setShowCurrentNum(false);
-            setIsPlaying(false);
-          }, speed);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, speed);
-  };
-
-  const handleNextPractical = () => {
-    const ans = userAnswers[currentPracIndex];
-    if (!ans) return alert("Javobingizni kiriting!");
-    
-    if (currentPracIndex < practicalQuestions.length - 1) {
-      setCurrentPracIndex(prev => prev + 1);
-      setShowCurrentNum(false);
-      setCurrentIndex(0);
-    } else {
-      finishPractical();
-    }
-  };
-
-  const finishPractical = async () => {
-    setTimerRunning(false);
-    let correct = 0;
-    practicalQuestions.forEach((q, idx) => {
-      if (parseInt(userAnswers[idx]) === q.answer) {
-        correct++;
-      }
-    });
-    
-    const percent = Math.round((correct / practicalQuestions.length) * 100);
-    setPracticalScore(percent);
-
-    if (percent < 80) {
-      setOverallResult('fail');
-    } else {
+      setTimerRunning(false);
       setOverallResult('pass');
-      await saveExamResult(true);
+      saveExamResult(true);
+      setPhase('result');
     }
-    setPhase('result');
   };
+
+
 
   const saveExamResult = async (passed) => {
     if (!passed) return;
@@ -302,16 +223,12 @@ export default function TeacherCourseExamScreen({ route, navigation }) {
             <Animated.View style={[
               styles.progressBarFill, 
               { 
-                width: `${
-                  phase === 'theory' 
-                    ? (currentQIndex / (theoryQuestions.length + practicalQuestions.length)) * 100 
-                    : ((theoryQuestions.length + currentPracIndex) / (theoryQuestions.length + practicalQuestions.length)) * 100
-                }%` 
+                width: `${(currentQIndex / theoryQuestions.length) * 100}%` 
               }
             ]} />
           </View>
           <Text style={styles.progressText}>
-            {phase === 'theory' ? `Nazariy: ${currentQIndex + 1}/${theoryQuestions.length}` : `Amaliy: ${currentPracIndex + 1}/${practicalQuestions.length}`}
+            {`Nazariy: ${currentQIndex + 1}/${theoryQuestions.length}`}
           </Text>
         </View>
       )}
@@ -355,7 +272,7 @@ export default function TeacherCourseExamScreen({ route, navigation }) {
             >
               <LinearGradient colors={['#8B5CF6', '#D946EF']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.nextBtnGrad}>
                 <Text style={styles.nextBtnText}>
-                  {currentQIndex === theoryQuestions.length - 1 ? 'Amaliy qismga o\'tish' : 'Keyingisi'}
+                  {currentQIndex === theoryQuestions.length - 1 ? 'Yakunlash' : 'Keyingisi'}
                 </Text>
                 <MaterialCommunityIcons name="arrow-right" size={20} color="#FFF" />
               </LinearGradient>
@@ -364,96 +281,7 @@ export default function TeacherCourseExamScreen({ route, navigation }) {
         </Animated.View>
       )}
 
-      {/* PRACTICAL PHASE */}
-      {phase === 'practical' && (
-        <View style={styles.phaseContainer}>
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-             <View style={styles.questionCard}>
-                <View style={styles.qBadge}>
-                  <Text style={styles.qBadgeText}>Amaliy: {currentPracIndex + 1}-misol</Text>
-                </View>
-                <Text style={styles.questionText}>Abakus tasavvuri orqali hisoblang</Text>
-              </View>
-
-             <View style={styles.abacusContainer}>
-                {showCurrentNum ? (
-                  <Animated.Text style={styles.flashNumber}>
-                    {practicalQuestions[currentPracIndex].numbers[currentIndex] > 0 && currentIndex > 0 ? '+' : ''}
-                    {practicalQuestions[currentPracIndex].numbers[currentIndex]}
-                  </Animated.Text>
-                ) : (
-                  <View style={styles.readyContainer}>
-                    <TouchableOpacity 
-                      onPress={startPracticalPlaying}
-                      style={styles.playBtn}
-                    >
-                      <MaterialCommunityIcons name="play" size={48} color="#FFF" />
-                    </TouchableOpacity>
-                    <Text style={styles.readyText}>Boshlash uchun bosing</Text>
-                  </View>
-                )}
-             </View>
-
-             {!showCurrentNum && !isPlaying && currentIndex > 0 && (
-               <View style={styles.answerInputContainer}>
-                 <Text style={styles.answerLabel}>Javobingiz:</Text>
-                 <View style={styles.numpad}>
-                    {[1,2,3,4,5,6,7,8,9].map(num => (
-                      <TouchableOpacity 
-                        key={num} 
-                        style={styles.numBtn}
-                        onPress={() => setUserAnswers(prev => ({ ...prev, [currentPracIndex]: (prev[currentPracIndex] || '') + num }))}
-                      >
-                        <Text style={styles.numBtnText}>{num}</Text>
-                      </TouchableOpacity>
-                    ))}
-                    <TouchableOpacity 
-                        style={[styles.numBtn, { backgroundColor: 'rgba(239,68,68,0.1)' }]}
-                        onPress={() => setUserAnswers(prev => ({ ...prev, [currentPracIndex]: '' }))}
-                      >
-                        <MaterialCommunityIcons name="backspace-outline" size={24} color="#EF4444" />
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        style={styles.numBtn}
-                        onPress={() => setUserAnswers(prev => ({ ...prev, [currentPracIndex]: (prev[currentPracIndex] || '') + '0' }))}
-                      >
-                        <Text style={styles.numBtnText}>0</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity 
-                        style={[styles.numBtn, { backgroundColor: 'rgba(255,255,255,0.05)' }]}
-                        onPress={() => {
-                          const curr = userAnswers[currentPracIndex] || '';
-                          if (curr.startsWith('-')) setUserAnswers(prev => ({ ...prev, [currentPracIndex]: curr.substring(1) }));
-                          else setUserAnswers(prev => ({ ...prev, [currentPracIndex]: '-' + curr }));
-                        }}
-                      >
-                        <Text style={styles.numBtnText}>+/-</Text>
-                    </TouchableOpacity>
-                 </View>
-                 <View style={styles.answerDisplayBox}>
-                    <Text style={styles.answerDisplayText}>{userAnswers[currentPracIndex] || '?'}</Text>
-                 </View>
-               </View>
-             )}
-
-          </ScrollView>
-          <View style={styles.bottomBar}>
-            <TouchableOpacity 
-              style={[styles.nextBtn, !userAnswers[currentPracIndex] && { opacity: 0.5 }]} 
-              onPress={handleNextPractical}
-              activeOpacity={0.8}
-            >
-              <LinearGradient colors={['#8B5CF6', '#D946EF']} start={{x:0, y:0}} end={{x:1, y:0}} style={styles.nextBtnGrad}>
-                <Text style={styles.nextBtnText}>
-                  {currentPracIndex === practicalQuestions.length - 1 ? 'Yakunlash' : 'Keyingisi'}
-                </Text>
-                <MaterialCommunityIcons name="arrow-right" size={20} color="#FFF" />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
+    
       {/* RESULT PHASE */}
       {phase === 'result' && (
         <View style={styles.resultContainer}>
@@ -479,12 +307,8 @@ export default function TeacherCourseExamScreen({ route, navigation }) {
 
           <View style={styles.scoreCards}>
             <View style={styles.scoreCard}>
-              <Text style={styles.scoreCardTitle}>Nazariy</Text>
+              <Text style={styles.scoreCardTitle}>Nazariy natija</Text>
               <Text style={[styles.scoreCardValue, theoryScore >= 80 ? { color: '#10B981' } : { color: '#EF4444' }]}>{theoryScore}%</Text>
-            </View>
-            <View style={styles.scoreCard}>
-              <Text style={styles.scoreCardTitle}>Amaliy</Text>
-              <Text style={[styles.scoreCardValue, practicalScore >= 80 ? { color: '#10B981' } : { color: '#EF4444' }]}>{practicalScore}%</Text>
             </View>
           </View>
 
