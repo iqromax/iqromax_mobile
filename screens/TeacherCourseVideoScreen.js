@@ -282,9 +282,9 @@ const styles = StyleSheet.create({
   topBlocker: {
     position: 'absolute',
     top: 0,
-    left: 60, // Don't cover back button
+    left: 0, 
     right: 0,
-    height: 70, // Covers channel name and share button
+    height: 80, // Covers channel name and share button entirely
     backgroundColor: 'rgba(0,0,0,0.01)',
     zIndex: 5,
   },
@@ -292,8 +292,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     left: 0,
-    right: 60, // Don't cover fullscreen button
-    height: 60, // Covers YouTube logo
+    right: 0, 
+    height: 100, // Covers YouTube logo and related video thumbnail
     backgroundColor: 'rgba(0,0,0,0.01)',
     zIndex: 5,
   },

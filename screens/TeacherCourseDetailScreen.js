@@ -17,7 +17,14 @@ export default function TeacherCourseDetailScreen({ navigation }) {
   const fetchModules = async () => {
     try {
       const res = await fetch(`${API_URL}/courses/modules`);
-      const data = await res.json();
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Failed to parse JSON. Response text was:', text.substring(0, 500));
+        throw e;
+      }
       
       // Format to UI structure
       const formatted = data.map((mod, index) => {
