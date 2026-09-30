@@ -9,6 +9,7 @@ import {
   CheckCircle2, 
   Clock, 
   ListOrdered,
+  X,
   CheckSquare,
   GraduationCap,
   Award,
