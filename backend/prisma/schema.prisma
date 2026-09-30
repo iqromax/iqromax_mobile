@@ -253,11 +253,26 @@ model CourseTestOption {
 }
 
 model CourseExam {
-  id        String   @id @default(uuid())
-  title     String
-  duration  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String               @id @default(uuid())
+  title           String
+  duration        String?
+  practicalOp     String?
+  practicalDigits String?
+  practicalCount  Int?
+  questions       CourseExamQuestion[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+}
+
+model CourseExamQuestion {
+  id        String     @id @default(uuid())
+  examId    String
+  exam      CourseExam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question  String
+  options   String[]
+  answer    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model CourseGraduate {

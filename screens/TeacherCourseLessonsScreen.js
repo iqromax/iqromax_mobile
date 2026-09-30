@@ -62,8 +62,11 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
 
   const fetchModules = async () => {
     try {
-      const res = await fetch(`${API_URL}/courses/modules`);
+      const res = await fetch(`${API_URL}/api/courses/modules`);
       const data = await res.json();
+      
+      const examsRes = await fetch(`${API_URL}/api/courses/exams`);
+      const examsData = await examsRes.json();
       
       const userDataStr = await AsyncStorage.getItem('user_data');
       let userId = "unknown";
@@ -76,6 +79,14 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
       let completedLessonIds = [];
       if (savedCompleted) {
         completedLessonIds = JSON.parse(savedCompleted);
+      }
+
+      const savedExams = await AsyncStorage.getItem(`${userId}_teacher_exams_completed`);
+      if (savedExams) {
+        const completedExamIds = JSON.parse(savedExams);
+        completedExamIds.forEach(id => {
+          completedLessonIds.push(`e-${id}`);
+        });
       }
 
       let allLessonIds = [];
@@ -145,6 +156,31 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
           lessons
         };
       });
+
+      // Add exams as the final virtual module
+      if (examsData && examsData.length > 0) {
+        let examLessons = examsData.map((exam, eIndex) => {
+          const lId = `e-${exam.id}`;
+          const isCompleted = false; // We track exam completion differently, but let's assume history will handle it
+          
+          allLessonIds.push(lId);
+          return {
+            id: lId,
+            examId: exam.id,
+            type: 'exam',
+            title: exam.title,
+            questions: `${exam.questions?.length || 0} savol, ${exam.practicalCount || 0} misol`,
+            duration: `${exam.duration} daqiqa`,
+            globalIndex: allLessonIds.length - 1,
+          };
+        });
+
+        formatted.push({
+          id: 'exams_module',
+          title: 'Imtihonlar',
+          lessons: examLessons
+        });
+      }
 
       // Retroactive fix: ensure passed tests are considered completed
       formatted.forEach(mod => {
@@ -239,6 +275,10 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
                   title: nextLesson.title,
                   content: nextLesson.content
                 });
+              } else if (nextLesson.type === 'exam') {
+                navigation.navigate('TeacherCourseExam', {
+                  examId: nextLesson.examId
+                });
               }
             }, 1000);
           }
@@ -288,6 +328,7 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
       case 'test_theory': return { name: "file-document-edit-outline", color: "#F59E0B", bg: "rgba(245, 158, 11, 0.15)" };
       case 'guide': return { name: "text-box-outline", color: "#EC4899", bg: "rgba(236, 72, 153, 0.15)" };
       case 'test_practical': return { name: "laptop", color: "#10B981", bg: "rgba(16, 185, 129, 0.15)" };
+      case 'exam': return { name: "check-decagram", color: "#F59E0B", bg: "rgba(245, 158, 11, 0.15)" };
       case 'certificate': return { name: "certificate", color: "#D946EF", bg: "rgba(217, 70, 239, 0.15)" };
       default: return { name: "play", color: "#3B82F6", bg: "rgba(59, 130, 246, 0.15)" };
     }
@@ -447,6 +488,10 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
                                     practicalOp: lesson.practicalOp,
                                     practicalDigits: lesson.practicalDigits,
                                     practicalCount: lesson.practicalCount
+                                  });
+                                } else if (lesson.type === 'exam') {
+                                  navigation.navigate('TeacherCourseExam', {
+                                    examId: lesson.examId
                                   });
                                 }
                               }

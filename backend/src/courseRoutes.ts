@@ -86,7 +86,10 @@ router.get('/courses/tests/:testId', async (req, res) => {
 router.get('/courses/exams', async (req, res) => {
   try {
     const exams = await prisma.courseExam.findMany({
-      orderBy: { createdAt: 'asc' }
+      orderBy: { createdAt: 'asc' },
+      include: {
+        questions: true
+      }
     });
     res.json(exams);
   } catch (error) {
@@ -533,6 +536,109 @@ router.delete('/admin/courses/guides/:id', async (req, res) => {
     res.json({ message: 'Guide deleted' });
   } catch (error) {
     console.error('Error deleting guide:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// =======================
+// EXAM ROUTES
+// =======================
+
+router.post('/admin/courses/exams', async (req, res) => {
+  try {
+    const { title, duration, practicalOp, practicalDigits, practicalCount, questions } = req.body;
+    
+    // Create the exam
+    const newExam = await prisma.courseExam.create({
+      data: {
+        title,
+        duration,
+        practicalOp,
+        practicalDigits,
+        practicalCount: parseInt(practicalCount) || 7,
+        questions: {
+          create: questions?.map((q: any) => ({
+            question: q.question,
+            options: q.options,
+            answer: q.answer
+          })) || []
+        }
+      },
+      include: {
+        questions: true
+      }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json(newExam);
+  } catch (error) {
+    console.error('Error creating exam:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.put('/admin/courses/exams/:id', async (req, res) => {
+  try {
+    const { title, duration, practicalOp, practicalDigits, practicalCount, questions } = req.body;
+    
+    // Update the exam basic fields
+    await prisma.courseExam.update({
+      where: { id: req.params.id },
+      data: {
+        title,
+        duration,
+        practicalOp,
+        practicalDigits,
+        practicalCount: parseInt(practicalCount) || 7
+      }
+    });
+
+    // Handle questions update: delete old ones and create new ones (simplest approach for nested array)
+    if (questions) {
+      await prisma.courseExamQuestion.deleteMany({
+        where: { examId: req.params.id }
+      });
+      if (questions.length > 0) {
+        await prisma.courseExamQuestion.createMany({
+          data: questions.map((q: any) => ({
+            examId: req.params.id,
+            question: q.question,
+            options: q.options,
+            answer: q.answer
+          }))
+        });
+      }
+    }
+
+    const updatedExam = await prisma.courseExam.findUnique({
+      where: { id: req.params.id },
+      include: { questions: true }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json(updatedExam);
+  } catch (error) {
+    console.error('Error updating exam:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.delete('/admin/courses/exams/:id', async (req, res) => {
+  try {
+    await prisma.courseExam.delete({
+      where: { id: req.params.id }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json({ message: 'Exam deleted' });
+  } catch (error) {
+    console.error('Error deleting exam:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });

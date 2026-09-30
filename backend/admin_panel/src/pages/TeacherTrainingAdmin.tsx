@@ -28,7 +28,18 @@ export default function TeacherTrainingAdmin() {
   React.useEffect(() => {
     fetchModules();
     fetchEnrollments();
+    fetchExams();
   }, []);
+
+  const fetchExams = async () => {
+    try {
+      const res = await fetch('/api/courses/exams');
+      const data = await res.json();
+      setExams(data);
+    } catch (error) {
+      console.error('Error fetching exams:', error);
+    }
+  };
 
   const fetchEnrollments = async () => {
     try {
@@ -64,7 +75,7 @@ export default function TeacherTrainingAdmin() {
   const [videos, setVideos] = useState<{id: string, moduleId: string, name: string, order: number, duration: string}[]>([]);
   const [tests, setTests] = useState<{id: string, moduleId: string, duration: string, order: number, qCount: number, title?: string, testType?: string, practicalOp?: string, practicalDigits?: string, practicalCount?: number}[]>([]);
   const [guides, setGuides] = useState<{id: string, moduleId: string, title: string, order: number, content: string}[]>([]);
-  const [exams] = useState<{id: string, title: string, duration: string, qCount: number}[]>([]);
+  const [exams, setExams] = useState<{id: string, title: string, duration: string, qCount: number, practicalOp?: string, practicalDigits?: string, practicalCount?: number, questions?: any[]}[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [teachersSubTab, setTeachersSubTab] = useState<'in_progress' | 'completed'>('in_progress');
 
@@ -72,11 +83,13 @@ export default function TeacherTrainingAdmin() {
   const [isModuleModalOpen, setIsModuleModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [isExamModalOpen, setIsExamModalOpen] = useState(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
 
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
   const [editingTestId, setEditingTestId] = useState<string | null>(null);
+  const [editingExamId, setEditingExamId] = useState<string | null>(null);
   const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
 
   // FORM STATES: Module
@@ -108,6 +121,17 @@ export default function TeacherTrainingAdmin() {
   const [guideOrder, setGuideOrder] = useState("");
 
   const [testSubTab, setTestSubTab] = useState<'theory' | 'practical'>('theory');
+
+  // Exam State
+  const [examTitle, setExamTitle] = useState("");
+  const [examDuration, setExamDuration] = useState("");
+  const [examPracticalOp, setExamPracticalOp] = useState("oddiy");
+  const [examPracticalDigits, setExamPracticalDigits] = useState("1");
+  const [examPracticalCount, setExamPracticalCount] = useState("7");
+  const [examSubTab, setExamSubTab] = useState<'theory' | 'practical'>('theory');
+  const [examQuestions, setExamQuestions] = useState([
+    { id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }
+  ]);
 
   // Test Questions State
   const [questions, setQuestions] = useState([
@@ -483,6 +507,160 @@ export default function TeacherTrainingAdmin() {
     }
   };
 
+  // HANDLERS: Exam
+  const addExamQuestion = () => {
+    setExamQuestions([...examQuestions, {
+      id: Date.now(), text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1
+    }]);
+  };
+
+  const removeExamQuestion = (id: number) => {
+    if (examQuestions.length <= 1) return showToast("Kamida 1 ta savol bo'lishi shart!", 'error');
+    setExamQuestions(examQuestions.filter(q => q.id !== id));
+  };
+
+  const addExamOption = (qId: number) => {
+    setExamQuestions(examQuestions.map(q => {
+      if (q.id === qId) {
+        return { ...q, options: [...q.options, { id: Date.now(), text: "" }] };
+      }
+      return q;
+    }));
+  };
+
+  const removeExamOption = (qId: number, optId: number) => {
+    setExamQuestions(examQuestions.map(q => {
+      if (q.id === qId) {
+        if (q.options.length <= 2) {
+          showToast("Kamida 2 ta variant bo'lishi shart!", 'error');
+          return q;
+        }
+        const newOptions = q.options.filter(o => o.id !== optId);
+        return { 
+          ...q, 
+          options: newOptions,
+          correctOptionId: q.correctOptionId === optId ? newOptions[0].id : q.correctOptionId
+        };
+      }
+      return q;
+    }));
+  };
+
+  const updateExamOptionText = (qId: number, optId: number, text: string) => {
+    setExamQuestions(examQuestions.map(q => {
+      if (q.id === qId) {
+        return { ...q, options: q.options.map(o => o.id === optId ? { ...o, text } : o) };
+      }
+      return q;
+    }));
+  };
+
+  const setCorrectExamOption = (qId: number, optId: number) => {
+    setExamQuestions(examQuestions.map(q => q.id === qId ? { ...q, correctOptionId: optId } : q));
+  };
+
+  const handleAddExam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!examTitle.trim()) return showToast("Imtihon nomini kiriting", 'error');
+    if (!examDuration.trim()) return showToast("Umumiy vaqtni kiriting", 'error');
+    
+    for (let i=0; i<examQuestions.length; i++) {
+      if (!examQuestions[i].text.trim()) return showToast(`${i+1}-savol matni yo'q!`, 'error');
+      for (let j=0; j<examQuestions[i].options.length; j++) {
+        if (!examQuestions[i].options[j].text.trim()) return showToast(`${i+1}-savolning ${j+1}-varianti bo'sh!`, 'error');
+      }
+    }
+
+    const payload = {
+      title: examTitle,
+      duration: examDuration,
+      practicalOp: examPracticalOp,
+      practicalDigits: examPracticalDigits,
+      practicalCount: examPracticalCount,
+      questions: examQuestions.map(q => ({
+        question: q.text,
+        options: q.options.map(o => o.text),
+        answer: q.options.find(o => o.id === q.correctOptionId)?.text || q.options[0].text
+      }))
+    };
+
+    try {
+      const isEdit = !!editingExamId;
+      const url = isEdit ? `/api/admin/courses/exams/${editingExamId}` : '/api/admin/courses/exams';
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Xatolik');
+      const savedExam = await res.json();
+      
+      const formattedExam = {
+        id: savedExam.id,
+        title: savedExam.title,
+        duration: savedExam.duration,
+        qCount: savedExam.questions?.length || 0,
+        practicalOp: savedExam.practicalOp,
+        practicalDigits: savedExam.practicalDigits,
+        practicalCount: savedExam.practicalCount,
+        questions: savedExam.questions
+      };
+
+      if (isEdit) {
+        setExams(exams.map(e => e.id === savedExam.id ? formattedExam : e));
+      } else {
+        setExams([...exams, formattedExam]);
+      }
+
+      setExamTitle("");
+      setExamDuration("");
+      setExamQuestions([{ id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }]);
+      setIsExamModalOpen(false);
+      setEditingExamId(null);
+      showToast(isEdit ? "Imtihon muvaffaqiyatli yangilandi!" : "Imtihon muvaffaqiyatli qo'shildi!");
+    } catch (error) {
+      showToast("Server xatosi", 'error');
+    }
+  };
+
+  const openEditExamModal = (exam: any) => {
+    setEditingExamId(exam.id);
+    setExamTitle(exam.title || "");
+    setExamDuration(exam.duration || "");
+    setExamPracticalOp(exam.practicalOp || "oddiy");
+    setExamPracticalDigits(exam.practicalDigits || "1");
+    setExamPracticalCount(exam.practicalCount?.toString() || "7");
+    
+    if (exam.questions && exam.questions.length > 0) {
+      setExamQuestions(exam.questions.map((q: any, idx: number) => {
+        const options = q.options.map((opt: string, oIdx: number) => ({ id: oIdx + 1, text: opt }));
+        const correctOpt = options.find((o: any) => o.text === q.answer) || options[0];
+        return {
+          id: idx + 1,
+          text: q.question,
+          options,
+          correctOptionId: correctOpt.id
+        };
+      }));
+    } else {
+      setExamQuestions([{ id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }]);
+    }
+    
+    setIsExamModalOpen(true);
+  };
+
+  const handleDeleteExam = async (id: string) => {
+    if (!window.confirm("Rostdan ham ushbu imtihonni o'chirmoqchimisiz?")) return;
+    try {
+      const res = await fetch(`/api/admin/courses/exams/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Xato');
+      setExams(exams.filter(e => e.id !== id));
+      showToast("Imtihon o'chirildi!");
+    } catch (error) {
+      showToast("Xatolik yuz berdi", 'error');
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 text-white pb-20">
@@ -794,7 +972,16 @@ export default function TeacherTrainingAdmin() {
           <div className="space-y-4">
             <div className="flex justify-end">
               <button 
-                onClick={() => showToast("Tez orada imtihon yaratish moduli qo'shiladi", 'success')}
+                onClick={() => {
+                  setEditingExamId(null);
+                  setExamTitle("");
+                  setExamDuration("");
+                  setExamPracticalOp("oddiy");
+                  setExamPracticalDigits("1");
+                  setExamPracticalCount("7");
+                  setExamQuestions([{ id: 1, text: "", options: [{ id: 1, text: "" }, { id: 2, text: "" }], correctOptionId: 1 }]);
+                  setIsExamModalOpen(true);
+                }}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(217,119,6,0.3)]"
               >
                 <Plus className="w-4 h-4" /> Yangi imtihon
@@ -810,12 +997,19 @@ export default function TeacherTrainingAdmin() {
                     </div>
                     <div>
                       <span className="font-semibold text-lg text-white block">{exam.title} ({exam.duration} daqiqa)</span>
-                      <span className="text-sm text-indigo-200/60">{exam.qCount} ta savol</span>
+                      <span className="text-sm text-indigo-200/60">
+                        Nazariy: {exam.qCount} savol • Amaliy: {exam.practicalCount} ta misol ({exam.practicalOp}, {exam.practicalDigits} xonali)
+                      </span>
                     </div>
                   </div>
-                  <button className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditExamModal(exam)} className="p-3 text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-colors rounded-xl bg-emerald-500/10">
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => handleDeleteExam(exam.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {exams.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Imtihonlar mavjud emas</div>}
@@ -1248,6 +1442,181 @@ export default function TeacherTrainingAdmin() {
             <div className="p-6 border-t border-[#1A1A2F] shrink-0 bg-[#0C0C18] rounded-b-2xl mt-10">
               <button onClick={handleAddGuide} className="w-full rounded-xl h-14 bg-pink-600 hover:bg-pink-500 text-white font-bold text-lg shadow-[0_0_20px_rgba(219,39,119,0.3)] transition-colors">
                 Qo'llanmani Saqlash
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EXAM MODAL */}
+      {isExamModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121223] w-full max-w-4xl rounded-3xl border border-[#1A1A2F] shadow-2xl flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-[#1A1A2F] flex items-center justify-between sticky top-0 bg-[#121223] z-10 rounded-t-3xl">
+              <h3 className="text-2xl font-bold text-white">{editingExamId ? "Imtihonni tahrirlash" : "Yangi imtihon qo'shish"}</h3>
+              <button onClick={() => setIsExamModalOpen(false)} className="p-2 text-indigo-200/60 hover:text-white transition-colors">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex bg-[#0C0C18] border-b border-[#1A1A2F]">
+              <button 
+                onClick={() => setExamSubTab('theory')}
+                className={`flex-1 py-4 text-center font-medium transition-colors ${examSubTab === 'theory' ? 'text-amber-400 border-b-2 border-amber-400' : 'text-indigo-200/60 hover:text-white'}`}
+              >
+                Nazariy qism (Testlar)
+              </button>
+              <button 
+                onClick={() => setExamSubTab('practical')}
+                className={`flex-1 py-4 text-center font-medium transition-colors ${examSubTab === 'practical' ? 'text-orange-400 border-b-2 border-orange-400' : 'text-indigo-200/60 hover:text-white'}`}
+              >
+                Amaliy qism (Abakus)
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              <form id="examForm" onSubmit={handleAddExam} className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-indigo-200/80 mb-2">Imtihon nomi</label>
+                    <input 
+                      type="text" 
+                      value={examTitle}
+                      onChange={e => setExamTitle(e.target.value)}
+                      placeholder="Masalan: Yakuniy Imtihon"
+                      className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-indigo-200/80 mb-2">Umumiy davomiyligi (daqiqa)</label>
+                    <input 
+                      type="text" 
+                      value={examDuration}
+                      onChange={e => setExamDuration(e.target.value)}
+                      placeholder="Masalan: 60"
+                      className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {examSubTab === 'theory' && (
+                <div className="space-y-6">
+                  {/* Questions Section */}
+                  <div className="space-y-8">
+                    {examQuestions.map((q, qIndex) => (
+                      <div key={q.id} className="bg-[#0C0C18] p-6 rounded-2xl border border-[#1A1A2F] relative group">
+                        <button 
+                          type="button" 
+                          onClick={() => removeExamQuestion(q.id)}
+                          className="absolute -right-3 -top-3 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        
+                        <div className="mb-4">
+                          <label className="block text-sm font-bold text-amber-400 mb-2">{qIndex + 1}-savol</label>
+                          <input 
+                            type="text" 
+                            value={q.text}
+                            onChange={(e) => {
+                              setExamQuestions(examQuestions.map(ques => ques.id === q.id ? { ...ques, text: e.target.value } : ques));
+                            }}
+                            placeholder="Savol matnini kiriting"
+                            className="w-full bg-[#121223] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-3 pl-4 border-l-2 border-[#1A1A2F]">
+                          {q.options.map((opt, optIndex) => (
+                            <div key={opt.id} className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => setCorrectExamOption(q.id, opt.id)}
+                                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${q.correctOptionId === opt.id ? 'border-amber-400 bg-amber-400/20 text-amber-400' : 'border-[#1A1A2F] text-transparent hover:border-amber-400/50'}`}
+                              >
+                                <div className={`w-2.5 h-2.5 rounded-full ${q.correctOptionId === opt.id ? 'bg-amber-400' : 'bg-transparent'}`} />
+                              </button>
+                              
+                              <input 
+                                type="text" 
+                                value={opt.text}
+                                onChange={(e) => updateExamOptionText(q.id, opt.id, e.target.value)}
+                                placeholder={`${optIndex + 1}-variant`}
+                                className={`w-full bg-[#121223] border rounded-lg px-3 py-2 text-white focus:outline-none ${q.correctOptionId === opt.id ? 'border-amber-500/50' : 'border-[#1A1A2F] focus:border-indigo-500/50'}`}
+                                required
+                              />
+                              
+                              <button type="button" onClick={() => removeExamOption(q.id, opt.id)} className="text-red-400 hover:bg-red-500/10 p-2 rounded-lg transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          ))}
+                          
+                          <button type="button" onClick={() => addExamOption(q.id)} className="flex items-center gap-2 text-amber-400 hover:text-amber-300 text-sm font-medium mt-2">
+                            <Plus className="w-4 h-4" /> Variant qo'shish
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <button type="button" onClick={addExamQuestion} className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-[#1A1A2F] rounded-2xl text-indigo-200/60 hover:text-amber-400 hover:border-amber-400/30 hover:bg-amber-400/5 transition-all">
+                      <Plus className="w-5 h-5" /> Yangi savol qo'shish
+                    </button>
+                  </div>
+                </div>
+                )}
+
+                {examSubTab === 'practical' && (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-indigo-200/80 mb-2">Misol turi (Formula)</label>
+                    <select 
+                      value={examPracticalOp}
+                      onChange={e => setExamPracticalOp(e.target.value)}
+                      className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 appearance-none"
+                    >
+                      <option value="oddiy">Oddiy</option>
+                      <option value="formula_5">Formula 5</option>
+                      <option value="formula_10">Formula 10</option>
+                      <option value="formula_aralash">Formula Aralash</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-indigo-200/80 mb-2">Necha xonali?</label>
+                      <select 
+                        value={examPracticalDigits}
+                        onChange={e => setExamPracticalDigits(e.target.value)}
+                        className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 appearance-none"
+                      >
+                        <option value="1">Bir xonali</option>
+                        <option value="2">Ikki xonali</option>
+                        <option value="3">Uch xonali</option>
+                        <option value="4">To'rt xonali</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-indigo-200/80 mb-2">Qatorlar soni (Misol uzunligi)</label>
+                      <input 
+                        type="number" 
+                        value={examPracticalCount}
+                        onChange={e => setExamPracticalCount(e.target.value)}
+                        className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+                )}
+              </form>
+            </div>
+
+            <div className="p-6 border-t border-[#1A1A2F] sticky bottom-0 bg-[#121223] rounded-b-3xl">
+              <button type="submit" form="examForm" className="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(217,119,6,0.3)]">
+                <CheckCircle2 className="w-5 h-5" /> Saqlash va {editingExamId ? 'Yangilash' : 'Yaratish'}
               </button>
             </div>
           </div>
