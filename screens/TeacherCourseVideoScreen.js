@@ -150,6 +150,7 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
               webViewProps={{
                 androidLayerType: 'hardware',
                 allowsInlineMediaPlayback: true,
+                mediaPlaybackRequiresUserAction: false,
               }}
               initialPlayerParams={{
                 controls: false,
