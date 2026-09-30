@@ -62,38 +62,40 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
       const formatted = data.map((mod, index) => {
         let lessons = [];
         
-        if (mod.videos) {
-          mod.videos.forEach(v => {
-            const lId = `v-${v.id}`;
+        let items = [];
+        if (mod.videos) items = items.concat(mod.videos.map(v => ({ ...v, itemType: 'video' })));
+        if (mod.tests) items = items.concat(mod.tests.map(t => ({ ...t, itemType: 'test' })));
+        
+        items.sort((a, b) => (a.order || 0) - (b.order || 0));
+        
+        items.forEach(item => {
+          if (item.itemType === 'video') {
+            const lId = `v-${item.id}`;
             lessons.push({
               id: lId,
               type: 'video',
-              title: v.name,
-              duration: v.duration || 'N/A',
-              videoUrl: v.videoUrl,
-              pdfUrl: v.pdfUrl,
-              description: v.description,
+              title: item.name,
+              duration: item.duration || 'N/A',
+              videoUrl: item.videoUrl,
+              pdfUrl: item.pdfUrl,
+              description: item.description,
               globalIndex: allLessonIds.length
             });
             allLessonIds.push(lId);
-          });
-        }
-        
-        if (mod.tests) {
-          mod.tests.forEach(t => {
-            const lId = `t-${t.id}`;
+          } else if (item.itemType === 'test') {
+            const lId = `t-${item.id}`;
             lessons.push({
               id: lId,
-              testId: t.id,
+              testId: item.id,
               type: 'test_theory',
-              title: t.title,
-              questions: (t.questions?.length || 0) + ' ta savol',
-              history: testHistoryObj[t.id] || [],
+              title: item.title,
+              questions: (item.questions?.length || 0) + ' ta savol',
+              history: testHistoryObj[item.id] || [],
               globalIndex: allLessonIds.length
             });
             allLessonIds.push(lId);
-          });
-        }
+          }
+        });
 
         return {
           id: mod.id,
