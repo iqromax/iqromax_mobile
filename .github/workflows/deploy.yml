@@ -24,7 +24,7 @@ jobs:
             cd backend
             npm install
             npx prisma generate
-            npx prisma db push
+            npx prisma db push --accept-data-loss
             
             # Build Admin Panel
             if [ -d "admin_panel" ]; then
