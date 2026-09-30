@@ -315,4 +315,56 @@ router.delete('/admin/courses/tests/:id', async (req, res) => {
   }
 });
 
+// Update a Test with Questions and Options
+router.put('/admin/courses/tests/:id', async (req, res) => {
+  try {
+    const { moduleId, title, duration, order, questions } = req.body;
+    
+    if (!moduleId || !title || !questions || !Array.isArray(questions)) {
+      return res.status(400).json({ error: 'Noto\'g\'ri ma\'lumot' });
+    }
+
+    // First delete all existing questions to recreate them cleanly
+    await prisma.courseTestQuestion.deleteMany({
+      where: { testId: req.params.id }
+    });
+
+    const updatedTest = await prisma.courseTest.update({
+      where: { id: req.params.id },
+      data: {
+        moduleId,
+        title,
+        duration,
+        order: parseInt(order) || 0,
+        questions: {
+          create: questions.map((q: any) => ({
+            text: q.text,
+            options: {
+              create: q.options.map((opt: any) => ({
+                text: opt.text,
+                isCorrect: Boolean(opt.isCorrect)
+              }))
+            }
+          }))
+        }
+      },
+      include: {
+        questions: {
+          include: {
+            options: true
+          }
+        }
+      }
+    });
+
+    const io = req.app.get('io');
+    if (io) io.emit('courses-updated');
+
+    res.json(updatedTest);
+  } catch (error) {
+    console.error('Error updating test:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 export default router;

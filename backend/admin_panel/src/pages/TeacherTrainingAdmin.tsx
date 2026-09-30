@@ -56,9 +56,12 @@ export default function TeacherTrainingAdmin() {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
 
   const [editingVideoId, setEditingVideoId] = useState<string | null>(null);
+  const [editingModuleId, setEditingModuleId] = useState<string | null>(null);
+  const [editingTestId, setEditingTestId] = useState<string | null>(null);
 
   // FORM STATES: Module
   const [moduleName, setModuleName] = useState("");
+  const [moduleOrder, setModuleOrder] = useState("");
 
   // FORM STATES: Video
   const [selectedModuleForVideo, setSelectedModuleForVideo] = useState("");
@@ -90,21 +93,36 @@ export default function TeacherTrainingAdmin() {
     if (!moduleName.trim()) return showToast("Modul nomini kiriting", 'error');
     
     try {
-      const res = await fetch('/api/admin/courses/modules', {
-        method: 'POST',
+      const isEdit = !!editingModuleId;
+      const url = isEdit ? `/api/admin/courses/modules/${editingModuleId}` : '/api/admin/courses/modules';
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: moduleName, order: modules.length + 1 })
+        body: JSON.stringify({ name: moduleName, order: parseInt(moduleOrder) || (modules.length + 1) })
       });
       if (!res.ok) throw new Error('Xatolik');
       
-      const newMod = await res.json();
-      setModules([...modules, newMod]);
+      const savedMod = await res.json();
+      if (isEdit) {
+        setModules(modules.map(m => m.id === savedMod.id ? savedMod : m));
+      } else {
+        setModules([...modules, savedMod]);
+      }
       setModuleName("");
+      setModuleOrder("");
+      setEditingModuleId(null);
       setIsModuleModalOpen(false);
-      showToast("Modul muvaffaqiyatli qo'shildi!");
+      showToast(isEdit ? "Modul muvaffaqiyatli yangilandi!" : "Modul muvaffaqiyatli qo'shildi!");
     } catch (error) {
       showToast("Server xatosi", 'error');
     }
+  };
+
+  const openEditModuleModal = (mod: any) => {
+    setEditingModuleId(mod.id);
+    setModuleName(mod.name || "");
+    setModuleOrder(mod.order?.toString() || "");
+    setIsModuleModalOpen(true);
   };
 
   const handleDeleteModule = async (id: string) => {
@@ -277,31 +295,75 @@ export default function TeacherTrainingAdmin() {
     };
 
     try {
-      const res = await fetch('/api/admin/courses/tests', {
-        method: 'POST',
+      const isEdit = !!editingTestId;
+      const url = isEdit ? `/api/admin/courses/tests/${editingTestId}` : '/api/admin/courses/tests';
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error('Xatolik');
-      const newTest = await res.json();
+      const savedTest = await res.json();
       
-      setTests([...tests, {
-        id: newTest.id,
-        moduleId: newTest.moduleId,
-        duration: newTest.duration,
-        order: newTest.order,
+      const formattedTest = {
+        id: savedTest.id,
+        moduleId: savedTest.moduleId,
+        duration: savedTest.duration,
+        order: savedTest.order,
         qCount: questions.length
-      }]);
+      };
+
+      if (isEdit) {
+        setTests(tests.map(t => t.id === savedTest.id ? formattedTest : t));
+      } else {
+        setTests([...tests, formattedTest]);
+      }
 
       setSelectedModuleForTest("");
       setTestTitle("");
       setTestOrder("");
       setTestDuration("");
       setQuestions([{ id: Date.now(), text: "", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }], correctOptionId: Date.now() + 1 }]);
+      setEditingTestId(null);
       setIsTestModalOpen(false);
-      showToast("Test muvaffaqiyatli qo'shildi!");
+      showToast(isEdit ? "Test muvaffaqiyatli yangilandi!" : "Test muvaffaqiyatli qo'shildi!");
     } catch (error) {
       showToast("Server xatosi", 'error');
+    }
+  };
+
+  const openEditTestModal = async (testId: string) => {
+    try {
+      const res = await fetch(`/api/courses/tests/${testId}`);
+      if (!res.ok) throw new Error('Testni yuklashda xatolik');
+      const testData = await res.json();
+
+      setEditingTestId(testData.id);
+      setSelectedModuleForTest(testData.moduleId || "");
+      setTestTitle(testData.title || "");
+      setTestDuration(testData.duration || "");
+      setTestOrder(testData.order?.toString() || "");
+      
+      if (testData.questions && testData.questions.length > 0) {
+        setQuestions(testData.questions.map((q: any, qIdx: number) => {
+          const correctOpt = q.options.find((o: any) => o.isCorrect) || q.options[0];
+          return {
+            id: q.id || (Date.now() + qIdx),
+            text: q.text || "",
+            options: q.options.map((o: any, oIdx: number) => ({
+              id: o.id || (Date.now() + qIdx * 10 + oIdx),
+              text: o.text || ""
+            })),
+            correctOptionId: correctOpt.id || (Date.now() + qIdx * 10)
+          };
+        }));
+      } else {
+        setQuestions([{ id: Date.now(), text: "", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }], correctOptionId: Date.now() + 1 }]);
+      }
+
+      setIsTestModalOpen(true);
+    } catch (error) {
+      showToast("Test ma'lumotlarini yuklashda xatolik", 'error');
     }
   };
 
@@ -364,7 +426,12 @@ export default function TeacherTrainingAdmin() {
           <div className="space-y-4">
             <div className="flex justify-end">
               <button 
-                onClick={() => setIsModuleModalOpen(true)}
+                onClick={() => {
+                  setEditingModuleId(null);
+                  setModuleName("");
+                  setModuleOrder("");
+                  setIsModuleModalOpen(true);
+                }}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)]"
               >
                 <Plus className="w-4 h-4" /> Yangi modul
@@ -380,9 +447,14 @@ export default function TeacherTrainingAdmin() {
                     </div>
                     <span className="font-semibold text-lg text-white">{mod.name}</span>
                   </div>
-                  <button onClick={() => handleDeleteModule(mod.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditModuleModal(mod)} className="p-3 text-purple-400 hover:text-white hover:bg-purple-500/20 transition-colors rounded-xl bg-purple-500/10">
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => handleDeleteModule(mod.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {modules.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Modullar mavjud emas</div>}
@@ -444,7 +516,15 @@ export default function TeacherTrainingAdmin() {
           <div className="space-y-4">
             <div className="flex justify-end">
               <button 
-                onClick={() => setIsTestModalOpen(true)}
+                onClick={() => {
+                  setEditingTestId(null);
+                  setSelectedModuleForTest("");
+                  setTestTitle("");
+                  setTestOrder("");
+                  setTestDuration("");
+                  setQuestions([{ id: Date.now(), text: "", options: [{ id: Date.now() + 1, text: "" }, { id: Date.now() + 2, text: "" }], correctOptionId: Date.now() + 1 }]);
+                  setIsTestModalOpen(true);
+                }}
                 className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)]"
               >
                 <Plus className="w-4 h-4" /> Yangi test
@@ -463,9 +543,14 @@ export default function TeacherTrainingAdmin() {
                       <span className="text-sm text-indigo-200/60">Tartib: {test.order} • Modul: {modules.find(m => m.id === test.moduleId)?.name} • {test.qCount} ta savol</span>
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteTest(test.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => openEditTestModal(test.id)} className="p-3 text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-colors rounded-xl bg-emerald-500/10">
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button onClick={() => handleDeleteTest(test.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {tests.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Testlar mavjud emas</div>}
