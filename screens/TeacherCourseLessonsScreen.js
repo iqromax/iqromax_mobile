@@ -13,15 +13,16 @@ import { API_URL } from '../src/config/api';
 
 const INITIAL_MODULES = [];
 
-export default function TeacherCourseLessonsScreen({ navigation }) {
+export default function TeacherCourseLessonsScreen({ navigation, route }) {
   const [modules, setModules] = useState(INITIAL_MODULES);
+  const [completedIds, setCompletedIds] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
     React.useCallback(() => {
       fetchModules();
-    }, [])
+    }, [route.params?.autoOpenNextFor])
   );
 
   React.useEffect(() => {
@@ -110,6 +111,55 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
       });
 
       setModules(formatted);
+      setCompletedIds(completedLessonIds);
+
+      // Handle auto-open next
+      if (route.params?.autoOpenNextFor) {
+        const completedId = route.params.autoOpenNextFor;
+        const currentIndex = allLessonIds.indexOf(completedId);
+        if (currentIndex !== -1 && currentIndex + 1 < allLessonIds.length) {
+          const nextId = allLessonIds[currentIndex + 1];
+          // Find next lesson details
+          let nextLesson = null;
+          let moduleIndex = 0;
+          for (let i = 0; i < formatted.length; i++) {
+            const found = formatted[i].lessons.find(l => l.id === nextId);
+            if (found) {
+              nextLesson = found;
+              moduleIndex = i;
+              break;
+            }
+          }
+          if (nextLesson) {
+            // Expand the correct module
+            setExpandedIndex(moduleIndex);
+            
+            // Clear the param so it doesn't loop
+            navigation.setParams({ autoOpenNextFor: undefined });
+
+            // Wait a bit so the user can see the green checkmark
+            setTimeout(() => {
+              if (nextLesson.type === 'video') {
+                navigation.navigate('TeacherCourseVideo', {
+                  lessonId: nextLesson.id,
+                  title: nextLesson.title,
+                  duration: nextLesson.duration,
+                  description: nextLesson.description,
+                  pdfUrl: nextLesson.pdfUrl,
+                  videoUrl: nextLesson.videoUrl
+                });
+              } else if (nextLesson.type === 'test_theory') {
+                navigation.navigate('TeacherCourseTheoryTest', {
+                  lessonId: nextLesson.id,
+                  testId: nextLesson.testId,
+                  history: nextLesson.history
+                });
+              }
+            }, 1000);
+          }
+        }
+      }
+
     } catch (error) {
       console.error('Fetch error:', error);
     } finally {
@@ -213,7 +263,12 @@ export default function TeacherCourseLessonsScreen({ navigation }) {
                         let iconData = getIconData(lesson.type, lesson.locked);
                         let isFailed = false;
                         let isPassed = false;
+                        const isCompleted = completedIds.includes(lesson.id);
                         
+                        if (isCompleted && lesson.type === 'video') {
+                          iconData = { name: "check-circle", color: "#10B981", bg: "rgba(16, 185, 129, 0.15)" };
+                        }
+
                         if (lesson.history && lesson.history.length > 0) {
                           const lastScore = lesson.history[lesson.history.length - 1].score;
                           if (lastScore < 60) {

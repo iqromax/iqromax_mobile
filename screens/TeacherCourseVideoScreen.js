@@ -111,7 +111,11 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
   };
 
   const handleNextLesson = () => {
-    navigation.goBack();
+    navigation.navigate({
+      name: 'TeacherCourseLessons',
+      params: { autoOpenNextFor: lessonId },
+      merge: true,
+    });
   };
 
   const togglePlayPause = () => {
