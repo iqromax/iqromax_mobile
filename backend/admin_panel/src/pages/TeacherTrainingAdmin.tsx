@@ -97,6 +97,9 @@ export default function TeacherTrainingAdmin() {
   const [testOrder, setTestOrder] = useState("");
   const [testDuration, setTestDuration] = useState("");
   const [testTitle, setTestTitle] = useState("");
+  const [practicalOp, setPracticalOp] = useState("oddiy");
+  const [practicalDigits, setPracticalDigits] = useState("1");
+  const [practicalCount, setPracticalCount] = useState("7");
   
   // FORM STATES: Guide
   const [selectedModuleForGuide, setSelectedModuleForGuide] = useState("");
@@ -361,27 +364,33 @@ export default function TeacherTrainingAdmin() {
     if (!selectedModuleForTest) return showToast("Modulni tanlang", 'error');
     if (!testTitle.trim()) return showToast("Test nomini kiriting", 'error');
     if (!testOrder.trim()) return showToast("Tartib raqamini kiriting", 'error');
-    if (!testDuration.trim()) return showToast("Vaqtni kiriting", 'error');
-
-    for (let i=0; i<questions.length; i++) {
-      if (!questions[i].text.trim()) return showToast(`${i+1}-savol matni yo'q!`, 'error');
-      for (let j=0; j<questions[i].options.length; j++) {
-        if (!questions[i].options[j].text.trim()) return showToast(`${i+1}-savolning ${j+1}-varianti bo'sh!`, 'error');
+    
+    if (testSubTab === 'theory') {
+      if (!testDuration.trim()) return showToast("Vaqtni kiriting", 'error');
+      for (let i=0; i<questions.length; i++) {
+        if (!questions[i].text.trim()) return showToast(`${i+1}-savol matni yo'q!`, 'error');
+        for (let j=0; j<questions[i].options.length; j++) {
+          if (!questions[i].options[j].text.trim()) return showToast(`${i+1}-savolning ${j+1}-varianti bo'sh!`, 'error');
+        }
       }
     }
 
     const payload = {
       moduleId: selectedModuleForTest,
       title: testTitle,
-      duration: testDuration,
+      duration: testSubTab === 'theory' ? testDuration : "",
       order: parseInt(testOrder),
-      questions: questions.map(q => ({
+      testType: testSubTab,
+      practicalOp: testSubTab === 'practical' ? practicalOp : undefined,
+      practicalDigits: testSubTab === 'practical' ? practicalDigits : undefined,
+      practicalCount: testSubTab === 'practical' ? practicalCount : undefined,
+      questions: testSubTab === 'theory' ? questions.map(q => ({
         text: q.text,
         options: q.options.map(o => ({
           text: o.text,
           isCorrect: o.id === q.correctOptionId
         }))
-      }))
+      })) : []
     };
 
     try {
@@ -688,40 +697,89 @@ export default function TeacherTrainingAdmin() {
                     }}
                     className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)]"
                   >
-                    <Plus className="w-4 h-4" /> Yangi test
+                    <Plus className="w-4 h-4" /> Yangi nazariy test
                   </button>
                 </div>
 
-            <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
-              {tests.map(test => (
-                <div key={test.id} className="flex items-center justify-between p-5 border-b border-[#1A1A2F] last:border-0 hover:bg-[#121223] transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
-                      <FileText className="w-6 h-6" />
+                <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
+                  {tests.filter(t => t.testType === 'theory' || !t.testType).map(test => (
+                    <div key={test.id} className="flex items-center justify-between p-5 border-b border-[#1A1A2F] last:border-0 hover:bg-[#121223] transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <span className="font-semibold text-lg text-white block">{test.title} ({test.duration} daqiqa)</span>
+                          <span className="text-sm text-indigo-200/60">Tartib: {test.order} • Modul: {modules.find(m => m.id === test.moduleId)?.name} • {test.qCount} ta savol</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => openEditTestModal(test.id)} className="p-3 text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-colors rounded-xl bg-emerald-500/10">
+                          <Pencil className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => handleDeleteTest(test.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
                     </div>
-                    <div>
-                      <span className="font-semibold text-lg text-white block">Nazariy test ({test.duration} daqiqa)</span>
-                      <span className="text-sm text-indigo-200/60">Tartib: {test.order} • Modul: {modules.find(m => m.id === test.moduleId)?.name} • {test.qCount} ta savol</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => openEditTestModal(test.id)} className="p-3 text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-colors rounded-xl bg-emerald-500/10">
-                      <Pencil className="w-5 h-5" />
-                    </button>
-                    <button onClick={() => handleDeleteTest(test.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
+                  ))}
+                  {tests.filter(t => t.testType === 'theory' || !t.testType).length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Nazariy testlar mavjud emas</div>}
                 </div>
-              ))}
-              {tests.length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Testlar mavjud emas</div>}
-            </div>
               </>
             ) : (
-              <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl p-12 text-center">
-                <h3 className="text-xl font-bold text-white mb-2">Amaliy testlar</h3>
-                <p className="text-indigo-200/60">Bu bo'limda amaliy testlar tez orada ishga tushiriladi...</p>
-              </div>
+              <>
+                <div className="flex justify-end">
+                  <button 
+                    onClick={() => {
+                      setEditingTestId(null);
+                      setSelectedModuleForTest("");
+                      setTestTitle("");
+                      setTestOrder("");
+                      setPracticalOp("oddiy");
+                      setPracticalDigits("1");
+                      setPracticalCount("7");
+                      setIsTestModalOpen(true);
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-all shadow-[0_0_15px_rgba(5,150,105,0.3)]"
+                  >
+                    <Plus className="w-4 h-4" /> Yangi amaliy test
+                  </button>
+                </div>
+
+                <div className="bg-[#0C0C18] border border-[#1A1A2F] rounded-2xl overflow-hidden">
+                  {tests.filter(t => t.testType === 'practical').map(test => (
+                    <div key={test.id} className="flex items-center justify-between p-5 border-b border-[#1A1A2F] last:border-0 hover:bg-[#121223] transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 border border-orange-500/20">
+                          <ListOrdered className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <span className="font-semibold text-lg text-white block">{test.title}</span>
+                          <span className="text-sm text-indigo-200/60">Tartib: {test.order} • Modul: {modules.find(m => m.id === test.moduleId)?.name} • {test.practicalCount} ta misol, {test.practicalOp}, {test.practicalDigits} xonali</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => {
+                          setEditingTestId(test.id);
+                          setSelectedModuleForTest(test.moduleId);
+                          setTestTitle(test.title || "");
+                          setTestOrder(test.order?.toString() || "");
+                          setPracticalOp(test.practicalOp || "oddiy");
+                          setPracticalDigits(test.practicalDigits || "1");
+                          setPracticalCount(test.practicalCount?.toString() || "7");
+                          setIsTestModalOpen(true);
+                        }} className="p-3 text-emerald-400 hover:text-white hover:bg-emerald-500/20 transition-colors rounded-xl bg-emerald-500/10">
+                          <Pencil className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => handleDeleteTest(test.id)} className="p-3 text-red-400 hover:text-white hover:bg-red-500/20 transition-colors rounded-xl bg-red-500/10">
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {tests.filter(t => t.testType === 'practical').length === 0 && <div className="p-12 text-center text-indigo-200/50 font-medium">Amaliy testlar mavjud emas</div>}
+                </div>
+              </>
             )}
           </div>
         )}
@@ -979,7 +1037,7 @@ export default function TeacherTrainingAdmin() {
                   />
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-2 col-span-2">
                   <label className="text-xs font-semibold text-indigo-200/60 uppercase flex items-center gap-1"><ListOrdered className="w-3 h-3" /> Tartib raqami</label>
                   <input 
                     type="number" 
@@ -990,18 +1048,62 @@ export default function TeacherTrainingAdmin() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-indigo-200/60 uppercase flex items-center gap-1"><Clock className="w-3 h-3" /> Vaqt (daqiqa)</label>
-                  <input 
-                    type="number" 
-                    placeholder="Masalan: 10" 
-                    value={testDuration} 
-                    onChange={e => setTestDuration(e.target.value)} 
-                    className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-emerald-500 transition-colors"
-                  />
-                </div>
+                {testSubTab === 'theory' ? (
+                  <div className="space-y-2 col-span-2">
+                    <label className="text-xs font-semibold text-indigo-200/60 uppercase flex items-center gap-1"><Clock className="w-3 h-3" /> Vaqt (daqiqa)</label>
+                    <input 
+                      type="number" 
+                      placeholder="Masalan: 10" 
+                      value={testDuration} 
+                      onChange={e => setTestDuration(e.target.value)} 
+                      className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-emerald-500 transition-colors"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-indigo-200/60 uppercase flex items-center gap-1">Misol turi</label>
+                      <select 
+                        value={practicalOp} 
+                        onChange={e => setPracticalOp(e.target.value)}
+                        className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+                      >
+                        <option value="oddiy">Oddiy</option>
+                        <option value="formula5">Formula 5</option>
+                        <option value="formula10">Formula 10</option>
+                        <option value="aralash">Aralash</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-indigo-200/60 uppercase flex items-center gap-1">Nechi xonalik</label>
+                      <select 
+                        value={practicalDigits} 
+                        onChange={e => setPracticalDigits(e.target.value)}
+                        className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white focus:outline-none focus:border-emerald-500 transition-colors"
+                      >
+                        <option value="1">1 xonali</option>
+                        <option value="2">2 xonali</option>
+                        <option value="3">3 xonali</option>
+                        <option value="4">4 xonali</option>
+                      </select>
+                    </div>
+                    
+                    <div className="space-y-2 col-span-2">
+                      <label className="text-xs font-semibold text-indigo-200/60 uppercase flex items-center gap-1">Misollar soni</label>
+                      <input 
+                        type="number" 
+                        placeholder="Masalan: 10" 
+                        value={practicalCount} 
+                        onChange={e => setPracticalCount(e.target.value)} 
+                        className="w-full bg-[#0C0C18] border border-[#1A1A2F] rounded-xl h-12 px-4 text-white placeholder-indigo-200/30 focus:outline-none focus:border-emerald-500 transition-colors"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
+              {testSubTab === 'theory' && (
               {/* Questions Section */}
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -1061,6 +1163,7 @@ export default function TeacherTrainingAdmin() {
                   <Plus className="w-5 h-5" /> Yangi savol qo'shish
                 </button>
               </div>
+              )}
 
             </div>
 

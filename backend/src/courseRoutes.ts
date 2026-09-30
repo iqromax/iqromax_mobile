@@ -350,11 +350,13 @@ router.put(
 // Add a Test with Questions and Options
 router.post('/admin/courses/tests', async (req, res) => {
   try {
-    const { moduleId, title, duration, order, questions } = req.body;
+    const { moduleId, title, duration, order, questions, testType, practicalOp, practicalDigits, practicalCount } = req.body;
     
-    if (!moduleId || !title || !questions || !Array.isArray(questions)) {
+    if (!moduleId || !title) {
       return res.status(400).json({ error: 'Noto\'g\'ri ma\'lumot' });
     }
+
+    const qArray = Array.isArray(questions) ? questions : [];
 
     // Create the test, its questions, and their options in a single nested write
     const newTest = await prisma.courseTest.create({
@@ -363,8 +365,12 @@ router.post('/admin/courses/tests', async (req, res) => {
         title,
         duration,
         order: parseInt(order) || 0,
-        questions: {
-          create: questions.map((q: any) => ({
+        testType: testType || 'theory',
+        practicalOp,
+        practicalDigits,
+        practicalCount: practicalCount ? parseInt(practicalCount) : null,
+        questions: testType === 'practical' ? undefined : {
+          create: qArray.map((q: any) => ({
             text: q.text,
             options: {
               create: q.options.map((opt: any) => ({
@@ -411,11 +417,13 @@ router.delete('/admin/courses/tests/:id', async (req, res) => {
 // Update a Test with Questions and Options
 router.put('/admin/courses/tests/:id', async (req, res) => {
   try {
-    const { moduleId, title, duration, order, questions } = req.body;
+    const { moduleId, title, duration, order, questions, testType, practicalOp, practicalDigits, practicalCount } = req.body;
     
-    if (!moduleId || !title || !questions || !Array.isArray(questions)) {
+    if (!moduleId || !title) {
       return res.status(400).json({ error: 'Noto\'g\'ri ma\'lumot' });
     }
+
+    const qArray = Array.isArray(questions) ? questions : [];
 
     // First delete all existing questions to recreate them cleanly
     await prisma.courseTestQuestion.deleteMany({
@@ -429,8 +437,12 @@ router.put('/admin/courses/tests/:id', async (req, res) => {
         title,
         duration,
         order: parseInt(order) || 0,
-        questions: {
-          create: questions.map((q: any) => ({
+        testType: testType || 'theory',
+        practicalOp,
+        practicalDigits,
+        practicalCount: practicalCount ? parseInt(practicalCount) : null,
+        questions: testType === 'practical' ? undefined : {
+          create: qArray.map((q: any) => ({
             text: q.text,
             options: {
               create: q.options.map((opt: any) => ({

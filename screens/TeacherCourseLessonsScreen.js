@@ -109,14 +109,19 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
             allLessonIds.push(lId);
           } else if (item.itemType === 'test') {
             const lId = `t-${item.id}`;
+            const isPractical = item.testType === 'practical';
             lessons.push({
               id: lId,
               testId: item.id,
-              type: 'test_theory',
+              type: isPractical ? 'test_practical' : 'test_theory',
               title: item.title,
-              questions: (item.questions?.length || 0) + ' ta savol',
+              questions: isPractical ? `${item.practicalCount || 7} ta misol` : (item.questions?.length || 0) + ' ta savol',
+              duration: isPractical ? `${item.practicalOp}, ${item.practicalDigits} xonali` : undefined,
               history: testHistoryObj[item.id] || [],
-              globalIndex: allLessonIds.length
+              globalIndex: allLessonIds.length,
+              practicalOp: item.practicalOp,
+              practicalDigits: item.practicalDigits,
+              practicalCount: item.practicalCount
             });
             allLessonIds.push(lId);
           } else if (item.itemType === 'guide') {
@@ -263,7 +268,7 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
       totalLessonsCount++;
       if ((lesson.type === 'video' || lesson.type === 'guide') && completedIds.includes(lesson.id)) {
         completedLessonsCount++;
-      } else if (lesson.type === 'test_theory' && lesson.history && lesson.history.length > 0) {
+      } else if ((lesson.type === 'test_theory' || lesson.type === 'test_practical') && lesson.history && lesson.history.length > 0) {
         const hasPassed = lesson.history.some(h => h.score >= 60);
         if (hasPassed) {
           completedLessonsCount++;
@@ -401,6 +406,15 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
                                     title: lesson.title,
                                     content: lesson.content
                                   });
+                                } else if (lesson.type === 'test_practical') {
+                                  navigation.navigate('TeacherCoursePracticalTest', {
+                                    lessonId: lesson.id,
+                                    testId: lesson.testId,
+                                    history: lesson.history,
+                                    practicalOp: lesson.practicalOp,
+                                    practicalDigits: lesson.practicalDigits,
+                                    practicalCount: lesson.practicalCount
+                                  });
                                 }
                               }
                             }}
@@ -427,6 +441,14 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
                                   <MaterialCommunityIcons name="clock-outline" size={12} color="#6B7280" />
                                   <Text style={styles.lessonDuration}>
                                     {lesson.duration}
+                                  </Text>
+                                </View>
+                              )}
+                              {(lesson.type === 'test_theory' || lesson.type === 'test_practical') && (
+                                <View style={styles.lessonMeta}>
+                                  <MaterialCommunityIcons name="help-circle-outline" size={12} color="#6B7280" />
+                                  <Text style={styles.lessonDuration}>
+                                    {lesson.questions} {lesson.duration ? `• ${lesson.duration}` : ''}
                                   </Text>
                                 </View>
                               )}

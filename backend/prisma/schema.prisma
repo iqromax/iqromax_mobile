@@ -210,6 +210,12 @@ model CourseTest {
   title     String
   duration  String?
   order     Int      @default(0)
+  
+  testType        String   @default("theory") // "theory" or "practical"
+  practicalOp     String?  // e.g. "Oddiy", "Formula 5", "Formula 10", "Aralash"
+  practicalDigits String?  // e.g. "1", "2"
+  practicalCount  Int?     // e.g. 10
+
   questions CourseTestQuestion[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

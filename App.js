@@ -64,6 +64,7 @@ import TeacherDashboardScreen from './screens/TeacherDashboardScreen';
 import TeacherCourseDetailScreen from './screens/TeacherCourseDetailScreen';
 import TeacherCourseLessonsScreen from './screens/TeacherCourseLessonsScreen';
 import TeacherCourseVideoScreen from './screens/TeacherCourseVideoScreen';
+import TeacherCoursePracticalTestScreen from './screens/TeacherCoursePracticalTestScreen';
 import TeacherCourseTheoryTestScreen from './screens/TeacherCourseTheoryTestScreen';
 import TeacherCourseGuideScreen from './screens/TeacherCourseGuideScreen';
 import ParentDashboardScreen from './screens/ParentDashboardScreen';
@@ -563,6 +564,7 @@ export default function App() {
           <Stack.Screen name="TeacherCourseLessons" component={TeacherCourseLessonsScreen} options={{ headerShown: false }} />
           <Stack.Screen name="TeacherCourseVideo" component={TeacherCourseVideoScreen} options={{ headerShown: false }} />
           <Stack.Screen name="TeacherCourseTheoryTest" component={TeacherCourseTheoryTestScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="TeacherCoursePracticalTest" component={TeacherCoursePracticalTestScreen} options={{ headerShown: false }} />
           <Stack.Screen name="TeacherCourseGuide" component={TeacherCourseGuideScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ParentDashboard" component={ParentDashboardScreen} initialParams={initialRoute === 'ParentDashboard' ? initialParams : undefined} />
           <Stack.Screen name="EnergyCenter" component={EnergyCenterScreen} />
