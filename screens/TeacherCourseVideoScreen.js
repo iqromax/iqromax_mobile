@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Linking, useWindowDimensions } from 'react-native';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import YoutubePlayer from 'react-native-youtube-iframe';
@@ -18,6 +19,8 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
 
   const extractYoutubeId = (url) => {
     if (!url) return null;
@@ -73,6 +76,12 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
     };
   }, [isPlaying, ytId]);
 
+  useEffect(() => {
+    return () => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {});
+    };
+  }, []);
+
   const saveProgress = async () => {
     try {
       if (lessonId) {
@@ -109,17 +118,31 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
     setIsPlaying((prev) => !prev);
   };
 
+  const toggleFullscreen = async () => {
+    try {
+      if (isFullscreen) {
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+        setIsFullscreen(false);
+      } else {
+        await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
+        setIsFullscreen(true);
+      }
+    } catch (error) {
+      setIsFullscreen(!isFullscreen);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" translucent={false} />
+      <StatusBar barStyle="light-content" backgroundColor="#000" hidden={isFullscreen} translucent={false} />
       
       {/* Real Video Player */}
-      <View style={styles.videoPlayer}>
+      <View style={[styles.videoPlayer, isFullscreen && { height: screenHeight, width: screenWidth, zIndex: 999 }]}>
         {ytId ? (
           <View style={StyleSheet.absoluteFill}>
             <YoutubePlayer
               ref={playerRef}
-              height={240}
+              height={isFullscreen ? screenHeight : 240}
               play={isPlaying}
               videoId={ytId}
               onChangeState={onStateChange}
@@ -162,6 +185,13 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
           )}
         </TouchableOpacity>
 
+        {/* Fullscreen Button */}
+        {ytId && (
+          <TouchableOpacity style={styles.fullscreenBtn} onPress={toggleFullscreen}>
+            <MaterialCommunityIcons name={isFullscreen ? "fullscreen-exit" : "fullscreen"} size={24} color="#FFF" />
+          </TouchableOpacity>
+        )}
+
         {/* Unseekable Progress Bar */}
         <View style={styles.progressContainer}>
           <View style={styles.progressBg}>
@@ -171,52 +201,56 @@ export default function TeacherCourseVideoScreen({ route, navigation }) {
       </View>
 
       {/* Clean Content Area */}
-      <ScrollView style={styles.contentScroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.contentBox}>
-          <Text style={styles.titleText}>{videoData.title}</Text>
-          {!!videoData.duration && <Text style={styles.metaText}>{videoData.duration}</Text>}
-          
-          <Text style={styles.descText}>{videoData.description}</Text>
+      {!isFullscreen && (
+        <>
+          <ScrollView style={styles.contentScroll} showsVerticalScrollIndicator={false}>
+            <View style={styles.contentBox}>
+              <Text style={styles.titleText}>{videoData.title}</Text>
+              {!!videoData.duration && <Text style={styles.metaText}>{videoData.duration}</Text>}
+              
+              <Text style={styles.descText}>{videoData.description}</Text>
 
-          {/* Simple Resources */}
-          {!!pdfUrl && (
-            <>
-              <Text style={styles.sectionTitle}>Materiallar</Text>
-              <TouchableOpacity 
-                activeOpacity={0.7} 
-                style={styles.resourceRow}
-                onPress={() => Linking.openURL(fullPdfUrl)}
+              {/* Simple Resources */}
+              {!!pdfUrl && (
+                <>
+                  <Text style={styles.sectionTitle}>Materiallar</Text>
+                  <TouchableOpacity 
+                    activeOpacity={0.7} 
+                    style={styles.resourceRow}
+                    onPress={() => Linking.openURL(fullPdfUrl)}
+                  >
+                    <MaterialCommunityIcons name="file-pdf-box" size={24} color="#EF4444" />
+                    <Text style={styles.resourceTitle}>Dars materialini ko'rish</Text>
+                    <MaterialCommunityIcons name="download" size={20} color="#6B7280" />
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
+          </ScrollView>
+
+          {/* Simple Bottom Navigation */}
+          <View style={styles.bottomNav}>
+            <TouchableOpacity style={styles.navBtn}>
+              <MaterialCommunityIcons name="chevron-left" size={20} color="#9CA3AF" />
+              <Text style={styles.navBtnText}>Oldingi</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[styles.navBtnNext, !isFinished && { opacity: 0.5 }]} 
+              disabled={!isFinished}
+              onPress={handleNextLesson}
+            >
+              <LinearGradient
+                colors={['#8B5CF6', '#D946EF']}
+                start={{x:0, y:0}} end={{x:1, y:0}}
+                style={styles.navGradient}
               >
-                <MaterialCommunityIcons name="file-pdf-box" size={24} color="#EF4444" />
-                <Text style={styles.resourceTitle}>Dars materialini ko'rish</Text>
-                <MaterialCommunityIcons name="download" size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Simple Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-left" size={20} color="#9CA3AF" />
-          <Text style={styles.navBtnText}>Oldingi</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[styles.navBtnNext, !isFinished && { opacity: 0.5 }]} 
-          disabled={!isFinished}
-          onPress={handleNextLesson}
-        >
-          <LinearGradient
-            colors={['#8B5CF6', '#D946EF']}
-            start={{x:0, y:0}} end={{x:1, y:0}}
-            style={styles.navGradient}
-          >
-            <Text style={styles.navBtnTextNext}>Keyingi dars</Text>
-            <MaterialCommunityIcons name="chevron-right" size={20} color="#FFF" />
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
+                <Text style={styles.navBtnTextNext}>Keyingi dars</Text>
+                <MaterialCommunityIcons name="chevron-right" size={20} color="#FFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
     </View>
   );
 }
@@ -256,6 +290,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 5,
+  },
+  fullscreenBtn: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    padding: 8,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 8,
+    zIndex: 10,
   },
   playCircle: {
     width: 64,
