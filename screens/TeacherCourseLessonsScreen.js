@@ -62,10 +62,10 @@ export default function TeacherCourseLessonsScreen({ navigation, route }) {
 
   const fetchModules = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/courses/modules`);
+      const res = await fetch(`${API_URL}/courses/modules`);
       const data = await res.json();
       
-      const examsRes = await fetch(`${API_URL}/api/courses/exams`);
+      const examsRes = await fetch(`${API_URL}/courses/exams`);
       const examsData = await examsRes.json();
       
       const userDataStr = await AsyncStorage.getItem('user_data');
