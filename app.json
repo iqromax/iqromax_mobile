@@ -8,7 +8,8 @@
     "backgroundColor": "#05050C",
     "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.iqromax.iqromax-mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +30,8 @@
       "expo-asset",
       "expo-image",
       "expo-sharing",
-      "expo-status-bar"
+      "expo-status-bar",
+      "./plugins/withCustomSplash"
     ],
     "extra": {
       "eas": {
@@ -39,6 +41,9 @@
     "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/8da23491-15a9-4db5-8e6a-fc56f33e7d1c"
+    },
+    "splash": {
+      "backgroundColor": "#05050C"
     }
   }
 }
