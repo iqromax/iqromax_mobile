@@ -350,10 +350,19 @@ export default function AbacusSimulatorScreen() {
     return () => {};
   }, []);
 
+  const prevQuestionRef = useRef(null);
+
   // Initialize Math Problem for 'math' mode
   const initMathProblem = () => {
     try {
-      const q = MentalMathGenerator.generate(operation, digits, examplesCount);
+      let q = MentalMathGenerator.generate(operation, digits, examplesCount);
+      let attempts = 0;
+      while (prevQuestionRef.current && q.display === prevQuestionRef.current.display && attempts < 10) {
+        q = MentalMathGenerator.generate(operation, digits, examplesCount);
+        attempts++;
+      }
+      prevQuestionRef.current = q;
+      
       let parts = q.display.split(' ');
       let steps = [];
       let currentSum = 0;

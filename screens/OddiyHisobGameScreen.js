@@ -672,6 +672,20 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
               } else {
                 setInputValue('');
                 setSeqIndex(0);
+                
+                const terms = isSpeedMode ? 2 : examplesCount;
+                let newQ = MentalMathGenerator.generate(operation, digits, terms);
+                let attempts = 0;
+                while (questions[currentQIndex] && newQ.display === questions[currentQIndex].display && attempts < 10) {
+                  newQ = MentalMathGenerator.generate(operation, digits, terms);
+                  attempts++;
+                }
+                setQuestions(prev => {
+                  const newQuestions = [...prev];
+                  newQuestions[currentQIndex] = newQ;
+                  return newQuestions;
+                });
+                
                 setPhase('countdown');
                 setLightState(0);
               }
@@ -1053,7 +1067,13 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
                     const numQuestions = isSpeedMode ? examplesCount : 10;
                     const terms = isSpeedMode ? 2 : examplesCount;
                     for (let i = 0; i < numQuestions; i++) {
-                      generated.push(MentalMathGenerator.generate(operation, digits, terms));
+                      let newQ = MentalMathGenerator.generate(operation, digits, terms);
+                      let attempts = 0;
+                      while (questions.length > 0 && questions[i] && newQ.display === questions[i].display && attempts < 10) {
+                        newQ = MentalMathGenerator.generate(operation, digits, terms);
+                        attempts++;
+                      }
+                      generated.push(newQ);
                     }
                     setQuestions(generated);
                   }
