@@ -17,6 +17,7 @@ import { Character3DViewer } from '../components/Character3DViewer';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Polygon, Line, Circle, Text as SvgText, Path, G } from 'react-native-svg';
 import { calculateUserRank } from '../src/utils/rankUtils';
+import { isSkinVisibleForGender } from '../src/utils/avatars';
 import { useEnergy } from '../src/hooks/useEnergy';
 import { MYSTERY_TRANSLATIONS } from './MysteryBoxScreen';
 
@@ -449,30 +450,60 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [activeTab, setActiveTab] = useState('home');
   const getCharIndexFromUser = (u, defaultIdx = 0) => {
     if (u && u.character) {
+      const cStr = String(u.character);
       const charMap = { alex: 0, maks: 1, david: 2, kevin: 3, lily: 4, maya: 5, emma: 6, sophia: 7 };
-      const cName = String(u.character).toLowerCase();
-      if (charMap[cName] !== undefined) return charMap[cName];
+      if (charMap[cStr.toLowerCase()] !== undefined) return charMap[cStr.toLowerCase()];
+      return cStr;
     }
     return defaultIdx;
   };
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(() => getCharIndexFromUser(user, selectedChar));
 
+  const [persistedGender, setPersistedGender] = useState(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem('user_gender').then(stored => {
+      if (stored) {
+        const s = String(stored).toLowerCase().trim();
+        if (s === 'girls' || s === 'qiz' || s === 'girl' || s === 'female') {
+          setPersistedGender('girls');
+        } else if (s === 'boys' || s === 'boy' || s === 'ogil' || s === "o'g'il" || s === 'male') {
+          setPersistedGender('boys');
+        }
+      }
+    });
+  }, []);
+
   const getCurrentUserGender = () => {
-    // Check avatar index first (0-3: boys, 4-7: girls)
-    if (typeof activeAvatarIndex === 'number') {
-      if (activeAvatarIndex >= 4) return 'girls';
-      if (activeAvatarIndex >= 0) return 'boys';
+    // 1. Direct explicit gender on user, route params, or persisted in AsyncStorage
+    let uGender = route.params?.gender || user?.gender || persistedGender;
+    if (uGender) {
+      const g = String(uGender).toLowerCase().trim();
+      if (g === 'qiz' || g === 'girl' || g === 'female' || g === 'girls') return 'girls';
+      if (g === 'ogil' || g === 'o_gil' || g === "o'g'il" || g === 'boy' || g === 'male' || g === 'boys') return 'boys';
     }
 
+    // 2. Character name from static lists
     const charName = user?.character ? String(user.character).toLowerCase() : '';
-    const isGirlChar = ['lily', 'maya', 'sophia', 'emma'].includes(charName);
-    const isBoyChar = ['alex', 'maks', 'david', 'kevin'].includes(charName);
-    if (isGirlChar) return 'girls';
-    if (isBoyChar) return 'boys';
+    if (['lily', 'maya', 'sophia', 'emma'].includes(charName)) return 'girls';
+    if (['alex', 'maks', 'david', 'kevin'].includes(charName)) return 'boys';
 
-    let uGender = route.params?.gender || user?.gender;
-    if (uGender === 'qiz' || uGender === 'girl' || uGender === 'female' || uGender === 'girls') return 'girls';
-    if (uGender === 'ogil' || uGender === 'o_gil' || uGender === "o'g'il" || uGender === 'boy' || uGender === 'male' || uGender === 'boys') return 'boys';
+    // 3. Dynamic character check
+    const activeCharId = String(activeAvatarIndex || user?.character || '');
+    if (activeCharId && Array.isArray(backendSkins) && backendSkins.length > 0) {
+      const foundChar = backendSkins.find(c => c.category === 'personajlar' && (String(c.id) === activeCharId || String(c.name).toLowerCase() === activeCharId.toLowerCase()));
+      if (foundChar && foundChar.targetGender) {
+        const tg = String(foundChar.targetGender).toLowerCase().trim();
+        if (tg === 'girls' || tg === 'girl' || tg === 'qiz' || tg === 'female') return 'girls';
+        if (tg === 'boys' || tg === 'boy' || tg === 'ogil' || tg === "o'g'il" || tg === 'male') return 'boys';
+      }
+    }
+
+    // 4. Static avatar index check (0-3: boys, 4-7: girls)
+    if (typeof activeAvatarIndex === 'number') {
+      if (activeAvatarIndex >= 4 && activeAvatarIndex <= 7) return 'girls';
+      if (activeAvatarIndex >= 0 && activeAvatarIndex <= 3) return 'boys';
+    }
 
     return 'boys';
   };
@@ -704,7 +735,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [backendSkins, setBackendSkins] = useState([]);
   
   const dynamicCharacters = backendSkins.filter(s => s.category === 'personajlar');
-  const selectedAvatarObj = dynamicCharacters.find(a => String(a.id) === String(activeAvatarIndex)) || dynamicCharacters[0];
+  const selectedAvatarObj = dynamicCharacters.find(a => String(a.id) === String(activeAvatarIndex) || (user?.character && String(a.id) === String(user.character))) 
+    || dynamicCharacters.find(a => isSkinVisibleForGender(a.targetGender, getCurrentUserGender())) 
+    || dynamicCharacters[0];
   
   const avatarsList = selectedAvatarObj 
     ? [selectedAvatarObj, ...dynamicCharacters.filter(a => String(a.id) !== String(selectedAvatarObj.id))]
@@ -1030,7 +1063,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
 
 
-  const updateCharacterOnServer = async (index) => {
+  const updateCharacterOnServer = async (indexOrId) => {
     const charNames = {
       0: 'alex',
       1: 'maks',
@@ -1041,7 +1074,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       6: 'emma',
       7: 'sophia'
     };
-    const characterName = charNames[index] || 'maks';
+    const characterName = (typeof indexOrId === 'number' ? charNames[indexOrId] : null) || String(indexOrId);
     
     // Update local user state immediately
     setUser(prev => ({ ...prev, character: characterName }));
@@ -1676,10 +1709,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       if (item.category !== kiyimKategoriya) return false;
 
       // Gender check
-      if (item.targetGender && item.targetGender !== 'all') {
-        return item.targetGender === userGender;
-      }
-      return true;
+      return isSkinVisibleForGender(item.targetGender, userGender);
     });
 
     const filteredData = activeKiyimFilter === 'BARCHASI' ? combinedSkins : combinedSkins.filter(item => item.rarity === activeKiyimFilter);
@@ -3665,20 +3695,22 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 <View style={{ marginBottom: 0, paddingHorizontal: 2 }}>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', gap: 8 }}>
                     {dynamicCharacters
+                    .filter(char => {
+                      const userGender = getCurrentUserGender();
+                      return isSkinVisibleForGender(char.targetGender, userGender);
+                    })
                     .map(char => ({
                       id: char.id,
                       name: char.name || 'Personaj',
                       rarity: char.rarity || 'ODDIY',
                       locked: char.isLocked || false,
                       avatar: char.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${char.imageUrl}` } : require('../assets/avatar_maks.png'),
-                      gender: char.targetGender === 'qiz' || char.targetGender === 'female' ? 'girls' : 'boys'
+                      targetGender: char.targetGender || 'all',
+                      price: char.price || 0,
+                      type: 'coin'
                     }))
-                    .filter(item => {
-                      const userGender = getCurrentUserGender();
-                      return item.gender === userGender;
-                    })
                     .map((item) => {
-                    const isSelected = activeAvatarIndex === item.id;
+                    const isSelected = String(activeAvatarIndex) === String(item.id) || (user?.character && String(user.character) === String(item.id));
                     return (
                       <TouchableOpacity
                         key={item.id}
@@ -3796,10 +3828,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       return { ...item, category };
                     });
                     const combinedSkins = [...backendSkins, ...shopInventoryItems, ...kiyimData].filter(item => {
-                      if (item.targetGender && item.targetGender !== 'all') {
-                        return item.targetGender === userGender;
-                      }
-                      return true;
+                      return isSkinVisibleForGender(item.targetGender, userGender);
                     });
                     const getCountStr = (catKey) => {
                       const total = combinedSkins.filter(i => i.category === catKey).length;
@@ -5727,10 +5756,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                         
                         // Strict targetGender filtering
                         const userGender = getCurrentUserGender();
-                        if (item.targetGender && item.targetGender !== 'all') {
-                          return item.targetGender === userGender;
-                        }
-                        return true;
+                        return isSkinVisibleForGender(item.targetGender, userGender);
                       })
                       .map(item => {
                         const sub = item.subcategory || item.category || 'headwear';
@@ -5870,10 +5896,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                       const normalizedSub = (sub === 'bosh_kiyim' ? 'headwear' : sub === 'ustki_kiyim' ? 'top' : sub === 'futbolka' ? 'tshirt' : sub === 'shim' ? 'pants' : sub === 'oyoq_kiyim' ? 'shoes' : sub === 'aksessuar' ? 'accessories' : sub === 'ryukzak' ? 'backpacks' : sub);
                       if (activeSkinCategory !== 'all' && normalizedSub !== activeSkinCategory) return false;
                       const userGender = getCurrentUserGender();
-                      if (item.targetGender && item.targetGender !== 'all') {
-                        return item.targetGender === userGender;
-                      }
-                      return true;
+                      return isSkinVisibleForGender(item.targetGender, userGender);
                     }).length === 0 && (
                       <View style={{ width: '100%', paddingVertical: 30, alignItems: 'center' }}>
                         <FontAwesome5 name="store-alt-slash" size={32} color="#666" />

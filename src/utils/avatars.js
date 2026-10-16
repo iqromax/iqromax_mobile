@@ -11,3 +11,28 @@ export const getAvatarByName = (name) => {
   if (lower.includes('emma')) return require('../../assets/avatar_emma.jpg');
   return require('../../assets/avatar_maks.png');
 };
+
+export const isSkinVisibleForGender = (itemTargetGender, userGender) => {
+  const normTarget = (itemTargetGender || 'all').toLowerCase().trim();
+  // 'all' / 'barchasi' is visible for both boys and girls
+  if (normTarget === 'all' || normTarget === 'barchasi' || normTarget === '') {
+    return true;
+  }
+  
+  const isBoyTarget = normTarget === 'boys' || normTarget === 'boy' || normTarget === 'ogil' || normTarget === "o'g'il" || normTarget === 'male';
+  const isGirlTarget = normTarget === 'girls' || normTarget === 'girl' || normTarget === 'qiz' || normTarget === 'female';
+
+  const normUser = (userGender || 'boys').toLowerCase().trim();
+  const isUserBoy = normUser === 'boys' || normUser === 'boy' || normUser === 'ogil' || normUser === "o'g'il" || normUser === 'male';
+  const isUserGirl = normUser === 'girls' || normUser === 'girl' || normUser === 'qiz' || normUser === 'female';
+
+  if (isUserBoy) {
+    return isBoyTarget;
+  }
+  if (isUserGirl) {
+    return isGirlTarget;
+  }
+
+  return true;
+};
+

@@ -302,7 +302,7 @@ export default function AuthScreen({ navigation, route }) {
         
         if (response.ok) {
           let charIndex = 0;
-          let gender = 'boys';
+          let gender = data.user?.gender || 'boys';
           const boysChars = ["Alex", "Maks", "David", "Kevin"];
           const girlsChars = ["Lily", "Maya", "Emma", "Sophia"];
           
@@ -320,7 +320,17 @@ export default function AuthScreen({ navigation, route }) {
           }
 
           try {
-            await AsyncStorage.setItem('user_data', JSON.stringify(data.user));
+            const savedGender = await AsyncStorage.getItem('user_gender');
+            if (savedGender && (!data.user?.gender && charIndex === 0)) {
+              gender = savedGender;
+            }
+          } catch (e) {}
+
+          const finalLoggedUser = { ...data.user, gender };
+
+          try {
+            await AsyncStorage.setItem('user_data', JSON.stringify(finalLoggedUser));
+            await AsyncStorage.setItem('user_gender', gender);
           } catch (e) {
             console.error('AsyncStorage error', e);
           }
@@ -330,12 +340,12 @@ export default function AuthScreen({ navigation, route }) {
           if (actualRole === 'teacher' || actualRole === "o'qituvchi") {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'TeacherDashboard', params: { user: data.user, language } }]
+              routes: [{ name: 'TeacherDashboard', params: { user: finalLoggedUser, language } }]
             });
           } else if (actualRole === 'parent' || actualRole === 'ota-ona') {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'ParentDashboard', params: { user: data.user, language } }]
+              routes: [{ name: 'ParentDashboard', params: { user: finalLoggedUser, language } }]
             });
           } else {
             navigation.reset({
@@ -343,7 +353,7 @@ export default function AuthScreen({ navigation, route }) {
               routes: [{ 
                 name: 'StudentDashboard', 
                 params: { 
-                  user: data.user,
+                  user: finalLoggedUser,
                   language: data.user.language || 'uz',
                   selectedChar: charIndex,
                   gender: gender

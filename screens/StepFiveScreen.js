@@ -7,6 +7,7 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { API_URL } from '../src/config/api';
 import { Character3DViewer } from '../components/Character3DViewer';
+import { isSkinVisibleForGender } from '../src/utils/avatars';
 
 const T = {
   uz: {
@@ -202,8 +203,8 @@ export default function StepFiveScreen({ navigation, route }) {
       .catch(err => console.error("Error fetching skins in step 5:", err));
   }, []);
 
-  const boysChars = dynamicCharacters.filter(c => c.targetGender === 'ogil' || c.targetGender === 'boy' || c.targetGender === 'male' || c.targetGender === "o'g'il" || c.targetGender === 'boys');
-  const girlsChars = dynamicCharacters.filter(c => c.targetGender === 'qiz' || c.targetGender === 'girl' || c.targetGender === 'female' || c.targetGender === 'girls');
+  const boysChars = dynamicCharacters.filter(c => isSkinVisibleForGender(c.targetGender, 'boys'));
+  const girlsChars = dynamicCharacters.filter(c => isSkinVisibleForGender(c.targetGender, 'girls'));
 
   const currentChars = gender === 'boys' ? boysChars : girlsChars;
 
@@ -236,23 +237,26 @@ export default function StepFiveScreen({ navigation, route }) {
           country: country,
           language: language,
           character: characterName,
+          gender: gender,
           referralCode: referralCode.trim() || undefined
         })
       });
 
       const data = await res.json();
-      const finalUser = (res.ok && data.user) ? data.user : {
+      const finalUser = (res.ok && data.user) ? { ...data.user, gender } : {
         name: name || 'Mehmon',
         character: characterName,
         country,
         role,
         isGuest: true,
         xp: 0,
+        gender: gender,
         customId: Math.floor(100000 + Math.random() * 900000).toString()
       };
 
       try {
         await AsyncStorage.setItem('user_data', JSON.stringify(finalUser));
+        await AsyncStorage.setItem('user_gender', gender);
       } catch (e) {}
 
       // Directly navigate to Main Dashboard without modal
@@ -290,10 +294,12 @@ export default function StepFiveScreen({ navigation, route }) {
         role,
         isGuest: true,
         xp: 0,
+        gender: gender,
         customId: Math.floor(100000 + Math.random() * 900000).toString()
       };
       try {
         await AsyncStorage.setItem('user_data', JSON.stringify(fallbackUser));
+        await AsyncStorage.setItem('user_gender', gender);
       } catch (err) {}
 
       navigation.reset({
