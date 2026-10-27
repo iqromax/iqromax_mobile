@@ -4342,9 +4342,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     <ActivityIndicator size="small" color="#C084FC" />
                   </View>
                 ) : null}
-                <View style={styles.proAvatarBadge}>
-                  <Text style={styles.proAvatarBadgeText}>{user?.level || 12}</Text>
-                </View>
+
                 <View style={styles.proAvatarEditBadge}>
                   <LinearGradient
                     colors={['#A855F7', '#6366F1']}
