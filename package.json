@@ -38,7 +38,8 @@
     "three": "^0.184.0"
   },
   "scripts": {
-    "start": "EXPO_NO_DEVTOOLS=1 expo start",
+    "start": "EXPO_NO_DEVTOOLS=1 EXPO_OFFLINE=1 expo start",
+    "start:clean": "EXPO_NO_DEVTOOLS=1 EXPO_OFFLINE=1 expo start -c",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web"
