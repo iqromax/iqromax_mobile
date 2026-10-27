@@ -8,11 +8,22 @@ const SERVER_BASE = (API_URL || 'https://iqromax.net/api').replace(/\/api\/?$/, 
 export const resolveAvatarUrl = (avatar) => {
   if (!avatar || typeof avatar !== 'string') return null;
   const trimmed = avatar.trim();
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+  if (
+    trimmed.startsWith('http://') || 
+    trimmed.startsWith('https://') || 
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('file://') ||
+    trimmed.startsWith('ph://') ||
+    trimmed.startsWith('content://')
+  ) {
     return trimmed;
   }
   if (trimmed.startsWith('/') || trimmed.includes('/')) {
-    const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    let cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    // Ensure all uploads paths go through /api/uploads because Nginx only proxies /api to Express
+    if (cleanPath.startsWith('/uploads/')) {
+      cleanPath = `/api${cleanPath}`;
+    }
     return `${SERVER_BASE}${cleanPath}`;
   }
   return null;

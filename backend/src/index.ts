@@ -898,7 +898,7 @@ app.post('/api/user/avatar', (req, res, next) => {
 
     let avatarPath = '';
     if (req.file) {
-      avatarPath = `/uploads/avatars/${req.file.filename}`;
+      avatarPath = `/api/uploads/avatars/${req.file.filename}`;
     } else if (req.body.avatarBase64) {
       const base64Data = req.body.avatarBase64.replace(/^data:image\/\w+;base64,/, '');
       if (!fs.existsSync(avatarUploadDir)) {
@@ -906,9 +906,10 @@ app.post('/api/user/avatar', (req, res, next) => {
       }
       const filename = `avatar_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.jpg`;
       fs.writeFileSync(path.join(avatarUploadDir, filename), Buffer.from(base64Data, 'base64'));
-      avatarPath = `/uploads/avatars/${filename}`;
+      avatarPath = `/api/uploads/avatars/${filename}`;
     } else if (req.body.character || req.body.avatarUrl) {
-      avatarPath = req.body.character || req.body.avatarUrl;
+      const raw = req.body.character || req.body.avatarUrl;
+      avatarPath = raw.startsWith('/uploads') ? `/api${raw}` : raw;
     } else {
       return res.status(400).json({ error: 'Rasm fayli (avatar) yoki avatarBase64 talab qilinadi' });
     }

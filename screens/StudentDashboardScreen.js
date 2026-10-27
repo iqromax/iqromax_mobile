@@ -762,6 +762,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
       }
 
       const selectedAsset = result.assets[0];
+
+      // Optimistic instant visual update (0ms delay):
+      const instantUri = selectedAsset.uri;
+      setUser(prev => ({
+        ...prev,
+        avatar: instantUri,
+        character: instantUri,
+      }));
+      AsyncStorage.getItem('user_data').then(str => {
+        if (str) {
+          const cur = JSON.parse(str);
+          cur.character = instantUri;
+          cur.avatar = instantUri;
+          AsyncStorage.setItem('user_data', JSON.stringify(cur)).catch(() => {});
+        }
+      }).catch(() => {});
+
       setIsUploadingAvatar(true);
 
       const userId = user?.id || user?.customId;
@@ -835,8 +852,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
         } catch (e) {
           console.log('AsyncStorage save error:', e);
         }
-
-        Alert.alert('Muvaffaqiyat', 'Avatar rasmingiz muvaffaqiyatli saqlandi!');
       } else {
         Alert.alert('Xatolik', resData.error || 'Rasmni yuklashda xatolik yuz berdi');
       }
@@ -4337,25 +4352,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                     end={{ x: 1, y: 1 }}
                     style={styles.proAvatarEditGradient}
                   >
-                    <Feather name="camera" size={13} color="#FFFFFF" />
+                    <Feather name="camera" size={15} color="#FFFFFF" />
                   </LinearGradient>
                 </View>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                activeOpacity={0.75}
-                onPress={() => setAvatarPickerModalVisible(true)}
-                style={styles.proChangeAvatarBtn}
-              >
-                <LinearGradient
-                  colors={['rgba(168, 85, 247, 0.25)', 'rgba(99, 102, 241, 0.25)']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.proChangeAvatarGradient}
-                >
-                  <Feather name="upload-cloud" size={13} color="#C084FC" style={{ marginRight: 6 }} />
-                  <Text style={styles.proChangeAvatarText}>Rasmni o'zgartirish</Text>
-                </LinearGradient>
               </TouchableOpacity>
               <Text style={styles.proUserName} numberOfLines={1}>{user?.name || 'IQROMAX CHAMPION'}</Text>
               <Text style={styles.proUserTag} numberOfLines={1}>#{String(user?.customId || '0000').replace(/^#+/, '')} | {user?.email || "No Email"}</Text>
@@ -9591,38 +9590,19 @@ const styles = StyleSheet.create({
   proAvatarEditBadge: {
     position: 'absolute',
     bottom: -2,
-    right: -4,
+    right: -2,
     zIndex: 4,
-    borderRadius: 15,
-    borderWidth: 2,
+    borderRadius: 18,
+    borderWidth: 2.5,
     borderColor: '#05050C',
-    elevation: 5,
+    elevation: 6,
   },
   proAvatarEditGradient: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  proChangeAvatarBtn: {
-    marginBottom: 14,
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.4)',
-  },
-  proChangeAvatarGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-  },
-  proChangeAvatarText: {
-    color: '#E9D5FF',
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
   },
   proUserName: {
     color: '#FFF',
