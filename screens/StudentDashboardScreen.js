@@ -863,6 +863,112 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }
   };
 
+  // User Name Change State & Handlers
+  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+  const [newNameInput, setNewNameInput] = useState('');
+  const [isSavingName, setIsSavingName] = useState(false);
+  const [nameChangeError, setNameChangeError] = useState('');
+
+  const getNameChangePrice = (count = 0) => {
+    if (count <= 0) return 0; // 1-marta: Tekin (0 tanga)
+    if (count === 1) return 500; // 2-marta: 500 tanga
+    if (count === 2) return 1000; // 3-marta: 1000 tanga
+    let price = 1000;
+    for (let i = 2; i < count; i++) {
+      price = Math.round(price * 1.5);
+    }
+    return price;
+  };
+
+  const openNameChangeModal = () => {
+    setNewNameInput(user?.name || '');
+    setNameChangeError('');
+    setIsNameModalOpen(true);
+  };
+
+  const handleSaveNewName = async () => {
+    const trimmed = (newNameInput || '').trim();
+    if (!trimmed || trimmed.length < 2) {
+      setNameChangeError("Ism kamida 2 ta belgidan iborat bo'lishi kerak");
+      return;
+    }
+    if (trimmed.length > 30) {
+      setNameChangeError("Ism 30 ta belgidan oshmasligi kerak");
+      return;
+    }
+    if (trimmed === user?.name) {
+      setIsNameModalOpen(false);
+      return;
+    }
+
+    const currentCount = Number(user?.nameChangeCount || 0);
+    const price = getNameChangePrice(currentCount);
+
+    if (price > 0 && userCoin < price) {
+      setNameChangeError(`Tanga yetarli emas! Ismni o'zgartirish uchun ${price} tanga kerak (Sizda: ${userCoin} tanga).`);
+      return;
+    }
+
+    try {
+      setIsSavingName(true);
+      setNameChangeError('');
+
+      const response = await fetch(`${API_URL}/user/change-name`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          customId: user?.customId,
+          userId: user?.id,
+          newName: trimmed
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setNameChangeError(data.error || "Ismni o'zgartirishda xatolik yuz berdi");
+        setIsSavingName(false);
+        return;
+      }
+
+      const updatedUser = data.user;
+      setUser(prev => ({
+        ...prev,
+        ...updatedUser,
+        name: updatedUser.name,
+        nameChangeCount: updatedUser.nameChangeCount,
+        coin: typeof updatedUser.coin === 'number' ? updatedUser.coin : prev?.coin
+      }));
+
+      if (typeof updatedUser.coin === 'number') {
+        setUserCoin(updatedUser.coin);
+      }
+
+      try {
+        const storedStr = await AsyncStorage.getItem('user_data');
+        if (storedStr) {
+          const cur = JSON.parse(storedStr);
+          cur.name = updatedUser.name;
+          cur.nameChangeCount = updatedUser.nameChangeCount;
+          if (typeof updatedUser.coin === 'number') cur.coin = updatedUser.coin;
+          await AsyncStorage.setItem('user_data', JSON.stringify(cur));
+        }
+      } catch (e) {
+        console.log('AsyncStorage update user name error:', e);
+      }
+
+      setIsNameModalOpen(false);
+    } catch (err) {
+      console.error('Error changing name:', err);
+      setNameChangeError(err.message || "Serverga ulanishda xatolik yuz berdi");
+    } finally {
+      setIsSavingName(false);
+    }
+  };
+
   const [backendSkins, setBackendSkins] = useState([]);
   
   const dynamicCharacters = backendSkins.filter(s => s.category === 'personajlar');
@@ -1478,6 +1584,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
     socket.on('user_updated', (data) => {
       if (String(data.id) === String(user?.id) || (data.customId && user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase())) {
         setUser(data);
+        if (typeof data.coin === 'number') {
+          setUserCoin(data.coin);
+        }
       }
       
       setLeaderboardData(prev => {
@@ -4354,7 +4463,25 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   </LinearGradient>
                 </View>
               </TouchableOpacity>
-              <Text style={styles.proUserName} numberOfLines={1}>{user?.name || 'IQROMAX CHAMPION'}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 4, paddingHorizontal: 16 }}>
+                <Text style={[styles.proUserName, { marginBottom: 0 }]} numberOfLines={1}>{user?.name || 'IQROMAX CHAMPION'}</Text>
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  onPress={openNameChangeModal}
+                  style={{
+                    marginLeft: 8,
+                    padding: 6,
+                    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: 'rgba(168, 85, 247, 0.35)',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                  }}
+                >
+                  <Feather name="edit-2" size={14} color="#C084FC" />
+                </TouchableOpacity>
+              </View>
               <Text style={styles.proUserTag} numberOfLines={1}>#{String(user?.customId || '0000').replace(/^#+/, '')} | {user?.email || "No Email"}</Text>
               
               <View style={styles.proTopStatsRow}>
@@ -6814,6 +6941,235 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      {/* USERNAME CHANGE MODAL */}
+      <Modal
+        visible={isNameModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!isSavingName) setIsNameModalOpen(false);
+        }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={styles.modalOverlay}
+        >
+          <TouchableOpacity
+            style={{ width: '100%', height: '100%', position: 'absolute' }}
+            activeOpacity={1}
+            onPress={() => {
+              if (!isSavingName) setIsNameModalOpen(false);
+            }}
+          />
+          <View
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: '#0D0D1A',
+                borderWidth: 1.5,
+                borderColor: '#A855F7',
+                padding: 24,
+                borderRadius: 24,
+                width: '88%',
+                maxWidth: 380,
+                shadowColor: '#A855F7',
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.35,
+                shadowRadius: 16,
+                elevation: 12,
+              }
+            ]}
+          >
+            {/* Header Icon & Title */}
+            <View style={{ alignItems: 'center', marginBottom: 18 }}>
+              <View
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 30,
+                  backgroundColor: 'rgba(168,85,247,0.15)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: 12,
+                  borderWidth: 1.5,
+                  borderColor: '#A855F7',
+                }}
+              >
+                <Feather name="edit-3" size={26} color="#C084FC" />
+              </View>
+              <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 4 }}>
+                Ismni O'zgartirish
+              </Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', textAlign: 'center' }}>
+                Profilingiz uchun yangi ism kiriting
+              </Text>
+            </View>
+
+            {/* Price Info Banner */}
+            {(() => {
+              const currentCount = Number(user?.nameChangeCount || 0);
+              const price = getNameChangePrice(currentCount);
+              const isFree = price === 0;
+
+              return (
+                <View
+                  style={{
+                    width: '100%',
+                    backgroundColor: isFree ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                    borderWidth: 1,
+                    borderColor: isFree ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.35)',
+                    borderRadius: 14,
+                    padding: 12,
+                    marginBottom: 16,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      {isFree ? (
+                        <Feather name="gift" size={16} color="#10B981" style={{ marginRight: 6 }} />
+                      ) : (
+                        <Image source={require('../assets/s_coin.png')} style={{ width: 16, height: 16, marginRight: 6 }} />
+                      )}
+                      <Text style={{ color: isFree ? '#10B981' : '#F59E0B', fontFamily: 'Inter_700Bold', fontSize: 14 }}>
+                        {isFree ? "1-Marta: BEPUL" : `Narxi: ${price} Tanga`}
+                      </Text>
+                    </View>
+                    <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 12 }}>
+                      {userCoin} tanga bor
+                    </Text>
+                  </View>
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_400Regular', fontSize: 11 }}>
+                    {isFree
+                      ? "Birinchi marta o'zgartirish bepul. Keyingi safar 500 tanga bo'ladi."
+                      : `Har bir keyingi o'zgartirish narxi 50% ga oshib boradi.`}
+                  </Text>
+                </View>
+              );
+            })()}
+
+            {/* Input Field */}
+            <View style={{ width: '100%', marginBottom: 8 }}>
+              <Text style={{ color: '#D1D5DB', fontSize: 12, fontFamily: 'Inter_600SemiBold', marginBottom: 6 }}>
+                Yangi Ism
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                  borderWidth: 1.5,
+                  borderColor: nameChangeError ? '#EF4444' : 'rgba(168, 85, 247, 0.4)',
+                  borderRadius: 14,
+                  paddingHorizontal: 14,
+                  paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+                }}
+              >
+                <Feather name="user" size={18} color="#9CA3AF" style={{ marginRight: 10 }} />
+                <TextInput
+                  value={newNameInput}
+                  onChangeText={(text) => {
+                    setNewNameInput(text);
+                    if (nameChangeError) setNameChangeError('');
+                  }}
+                  placeholder="Ismingizni kiriting..."
+                  placeholderTextColor="#6B7280"
+                  maxLength={30}
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  style={{
+                    flex: 1,
+                    color: '#FFF',
+                    fontFamily: 'Inter_600SemiBold',
+                    fontSize: 15,
+                    padding: 0,
+                  }}
+                />
+                <Text style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Inter_500Medium', marginLeft: 6 }}>
+                  {newNameInput.length}/30
+                </Text>
+              </View>
+            </View>
+
+            {/* Error Message */}
+            {nameChangeError ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 4 }}>
+                <Feather name="alert-circle" size={14} color="#EF4444" style={{ marginRight: 6 }} />
+                <Text style={{ color: '#EF4444', fontSize: 12, fontFamily: 'Inter_500Medium', flex: 1 }}>
+                  {nameChangeError}
+                </Text>
+              </View>
+            ) : <View style={{ height: 8 }} />}
+
+            {/* Action Buttons */}
+            <View style={{ flexDirection: 'row', width: '100%', gap: 10, marginTop: 4 }}>
+              {/* Cancel Button */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                disabled={isSavingName}
+                onPress={() => setIsNameModalOpen(false)}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: 14,
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text style={{ color: '#D1D5DB', fontFamily: 'Inter_600SemiBold', fontSize: 14 }}>
+                  Bekor qilish
+                </Text>
+              </TouchableOpacity>
+
+              {/* Save Button */}
+              {(() => {
+                const currentCount = Number(user?.nameChangeCount || 0);
+                const price = getNameChangePrice(currentCount);
+                const isFree = price === 0;
+
+                return (
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    disabled={isSavingName}
+                    onPress={handleSaveNewName}
+                    style={{
+                      flex: 1.3,
+                      borderRadius: 14,
+                      overflow: 'hidden',
+                      opacity: isSavingName ? 0.7 : 1,
+                    }}
+                  >
+                    <LinearGradient
+                      colors={['#A855F7', '#6366F1']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        paddingVertical: 12,
+                        paddingHorizontal: 12,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'row',
+                      }}
+                    >
+                      {isSavingName ? (
+                        <ActivityIndicator size="small" color="#FFF" />
+                      ) : (
+                        <>
+                          <Feather name="check" size={16} color="#FFF" style={{ marginRight: 6 }} />
+                          <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 14 }}>
+                            {isFree ? "Saqlash" : `${price} Tanga`}
+                          </Text>
+                        </>
+                      )}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                );
+              })()}
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Friends Modal */}

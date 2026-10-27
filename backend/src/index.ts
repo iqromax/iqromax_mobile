@@ -880,6 +880,126 @@ app.put('/api/user/character', async (req, res) => {
   }
 });
 
+// Helper to calculate name change price
+const getNameChangePrice = (changeCount: number = 0): number => {
+  if (changeCount <= 0) return 0; // 1-marta: Tekin (0 tanga)
+  if (changeCount === 1) return 500; // 2-marta: 500 tanga
+  if (changeCount === 2) return 1000; // 3-marta: 1000 tanga
+  let price = 1000;
+  for (let i = 2; i < changeCount; i++) {
+    price = Math.round(price * 1.5);
+  }
+  return price;
+};
+
+// Get name change info
+app.get('/api/user/name-change-info/:customId', async (req, res) => {
+  try {
+    const { customId } = req.params;
+    const cleanId = String(customId).replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId.toUpperCase()}` },
+          { customId: cleanId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId },
+          { id: customId }
+        ]
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+    }
+
+    const count = (user as any).nameChangeCount || 0;
+    const price = getNameChangePrice(count);
+
+    res.json({
+      nameChangeCount: count,
+      price,
+      isFree: price === 0,
+      coin: user.coin
+    });
+  } catch (error) {
+    console.error('Get name change info error:', error);
+    res.status(500).json({ error: 'Ma\'lumot olishda xatolik' });
+  }
+});
+
+// Change username endpoint
+app.post('/api/user/change-name', async (req, res) => {
+  try {
+    const { customId, userId, newName } = req.body;
+    const identifier = customId || userId;
+    if (!identifier) {
+      return res.status(400).json({ error: 'Foydalanuvchi identifikatori (customId) kiritilmadi' });
+    }
+
+    const trimmedName = (newName || '').trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      return res.status(400).json({ error: 'Ism kamida 2 ta belgidan iborat bo\'lishi kerak' });
+    }
+    if (trimmedName.length > 30) {
+      return res.status(400).json({ error: 'Ism 30 ta belgidan oshmasligi kerak' });
+    }
+
+    const cleanId = String(identifier).replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: String(identifier).toUpperCase() },
+          { customId: `#${cleanId.toUpperCase()}` },
+          { customId: cleanId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId },
+          { id: String(identifier) }
+        ]
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+    }
+
+    const currentCount = (user as any).nameChangeCount || 0;
+    const price = getNameChangePrice(currentCount);
+
+    if (price > 0 && user.coin < price) {
+      return res.status(400).json({
+        error: `Tanga yetarli emas! Ismni o'zgartirish uchun ${price} tanga kerak (Sizda: ${user.coin} tanga).`,
+        price,
+        currentCoin: user.coin
+      });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: trimmedName,
+        nameChangeCount: currentCount + 1,
+        coin: price > 0 ? { decrement: price } : undefined
+      }
+    });
+
+    io.emit('user_updated', updatedUser);
+
+    res.json({
+      success: true,
+      message: 'Ism muvaffaqiyatli o\'zgartirildi',
+      user: updatedUser,
+      pricePaid: price,
+      nextPrice: getNameChangePrice((updatedUser as any).nameChangeCount || 0),
+      nameChangeCount: (updatedUser as any).nameChangeCount || 0
+    });
+  } catch (error) {
+    console.error('Change username error:', error);
+    res.status(500).json({ error: 'Ismni o\'zgartirishda xatolik yuz berdi' });
+  }
+});
+
 // Upload User Avatar (Device file or Base64)
 app.post('/api/user/avatar', (req, res, next) => {
   avatarUpload.single('avatar')(req, res, (err) => {
