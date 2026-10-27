@@ -229,7 +229,7 @@ export default function UserProfileScreen({ route, navigation }) {
             {/* Rank Badge Removed */}
 
             {/* Background Pedestal */}
-            <Image source={require('../assets/pedestal_bg.jpg')} style={{ position: 'absolute', width: '130%', height: '90%', bottom: -20, alignSelf: 'center', zIndex: -1 }} resizeMode="contain" />
+            <Image source={require('../assets/pedestal_bg.jpg')} style={{ position: 'absolute', width: '130%', height: '90%', bottom: -20, alignSelf: 'center', zIndex: -1 }} contentFit="contain" />
 
             {/* 3D Character */}
             <View style={styles.characterContainer}>

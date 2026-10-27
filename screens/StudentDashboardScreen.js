@@ -771,35 +771,51 @@ export default function StudentDashboardScreen({ navigation, route }) {
         return;
       }
 
-      const formData = new FormData();
-      formData.append('userId', String(userId));
-      if (user?.customId) formData.append('customId', String(user.customId));
-
-      const filename = selectedAsset.fileName || `avatar_${Date.now()}.jpg`;
-      const match = /\.(\w+)$/.exec(filename);
-      const type = match ? `image/${match[1]}` : `image/jpeg`;
-
-      formData.append('avatar', {
-        uri: selectedAsset.uri,
-        name: filename,
-        type: type,
-      });
-
-      if (selectedAsset.base64) {
-        formData.append('avatarBase64', `data:image/jpeg;base64,${selectedAsset.base64}`);
+      let base64Payload = selectedAsset.base64;
+      if (!base64Payload && selectedAsset.uri) {
+        try {
+          const blobRes = await fetch(selectedAsset.uri);
+          const blob = await blobRes.blob();
+          base64Payload = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const res = reader.result;
+              resolve(typeof res === 'string' ? res : '');
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        } catch (e) {
+          console.log('Blob fallback read error:', e);
+        }
       }
+
+      if (!base64Payload) {
+        Alert.alert('Xatolik', 'Rasm ma\'lumotini o\'qib bo\'lmadi');
+        setIsUploadingAvatar(false);
+        return;
+      }
+
+      const formattedBase64 = base64Payload.startsWith('data:')
+        ? base64Payload
+        : `data:image/jpeg;base64,${base64Payload}`;
 
       const uploadRes = await fetch(`${API_URL}/user/avatar`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: formData,
+        body: JSON.stringify({
+          userId: String(userId),
+          customId: String(user?.customId || ''),
+          avatarBase64: formattedBase64,
+        }),
       });
 
       const resData = await uploadRes.json();
 
-      if (resData.success && resData.user) {
+      if ((resData.success || resData.user) && resData.user) {
         const updated = resData.user;
         setUser(prev => ({
           ...prev,
@@ -822,35 +838,6 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
         Alert.alert('Muvaffaqiyat', 'Avatar rasmingiz muvaffaqiyatli saqlandi!');
       } else {
-        if (selectedAsset.base64) {
-          const fallbackRes = await fetch(`${API_URL}/user/avatar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              userId,
-              customId: user?.customId,
-              avatarBase64: `data:image/jpeg;base64,${selectedAsset.base64}`
-            })
-          });
-          const fbData = await fallbackRes.json();
-          if (fbData.success && fbData.user) {
-            setUser(prev => ({
-              ...prev,
-              ...fbData.user,
-              avatar: fbData.user.character || fbData.avatarUrl,
-              character: fbData.user.character || fbData.avatarUrl,
-            }));
-            const storedStr = await AsyncStorage.getItem('user_data');
-            if (storedStr) {
-              const cur = JSON.parse(storedStr);
-              cur.character = fbData.user.character;
-              cur.avatar = fbData.user.character;
-              await AsyncStorage.setItem('user_data', JSON.stringify(cur));
-            }
-            Alert.alert('Muvaffaqiyat', 'Avatar rasmingiz muvaffaqiyatli saqlandi!');
-            return;
-          }
-        }
         Alert.alert('Xatolik', resData.error || 'Rasmni yuklashda xatolik yuz berdi');
       }
     } catch (err) {
