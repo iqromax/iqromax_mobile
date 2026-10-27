@@ -739,18 +739,24 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     const isMinus = currentTerm.op === '-';
     const isMult = currentTerm.op === 'x';
     const opColor = isPlus ? '#10B981' : isMinus ? '#EF4444' : isMult ? '#A855F7' : '#F59E0B';
+    const isTop = seqIndex % 2 === 0;
 
     return (
-      <View style={styles.flashingCard}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <View style={[styles.flashingCardOperator, { marginRight: 20, marginBottom: 15 }]}>
+      <View 
+        style={[
+          styles.flashingCard, 
+          { 
+            justifyContent: isTop ? 'flex-start' : 'flex-end',
+            paddingTop: isTop ? 36 : 0,
+            paddingBottom: !isTop ? 36 : 0,
+          }
+        ]}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          <View style={[styles.flashingCardOperator, { marginRight: 16, marginBottom: 12 }]}>
             <Text style={[styles.flashingCardOperatorText, { color: opColor, textShadowColor: opColor }]}>{currentTerm.op || '+'}</Text>
           </View>
           <Text style={[styles.flashingCardNumber, { marginBottom: 0 }]}>{currentTerm.num}</Text>
-        </View>
-        <Text style={styles.flashingCardText}>{t.rememberNumber}</Text>
-        <View style={styles.flashingCardDots}>
-          {renderDots()}
         </View>
       </View>
     );
