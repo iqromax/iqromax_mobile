@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { Search, Edit2, Trash2, Loader2, AlertTriangle } from 'lucide-react';
 import { getCountryFullName } from '../utils/countryNames';
+import { getAdminAvatarUrl } from '../utils/avatar';
 
 // Define the User type matching backend schema
 interface User {
@@ -187,7 +188,7 @@ const Users = () => {
                           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 p-[1px] shrink-0 overflow-hidden">
                             <div className="w-full h-full rounded-full bg-[#050510] flex items-center justify-center relative overflow-hidden">
                               <img 
-                                src={user.character ? `/avatars/${user.character.toLowerCase()}.png` : (user.avatar || '/admin-logo.png')} 
+                                src={getAdminAvatarUrl(user.character, user.avatar)} 
                                 alt={user.name} 
                                 className="w-full h-full object-cover scale-[1.3] mt-1" 
                                 onError={(e) => { e.currentTarget.src = '/admin-logo.png'; }}

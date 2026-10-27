@@ -17,7 +17,8 @@ import { Character3DViewer } from '../components/Character3DViewer';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Polygon, Line, Circle, Text as SvgText, Path, G } from 'react-native-svg';
 import { calculateUserRank } from '../src/utils/rankUtils';
-import { isSkinVisibleForGender } from '../src/utils/avatars';
+import * as ImagePicker from 'expo-image-picker';
+import { isSkinVisibleForGender, getAvatarByName, getUserAvatarSource } from '../src/utils/avatars';
 import { useEnergy } from '../src/hooks/useEnergy';
 import { MYSTERY_TRANSLATIONS } from './MysteryBoxScreen';
 
@@ -164,19 +165,7 @@ const EXERCISE_TYPES_TRANSLATIONS = {
 
 
 
-const getAvatarByName = (name) => {
-  if (!name) return require('../assets/avatar_maks.png');
-  const lower = name.toLowerCase();
-  if (lower.includes('alex')) return require('../assets/avatar_alex.jpg');
-  if (lower.includes('maks')) return require('../assets/avatar_maks.png');
-  if (lower.includes('david')) return require('../assets/avatar_david.jpg');
-  if (lower.includes('kevin')) return require('../assets/avatar_kevin.png');
-  if (lower.includes('lily')) return require('../assets/avatar_lily.jpg');
-  if (lower.includes('maya')) return require('../assets/avatar_maya.jpg');
-  if (lower.includes('sophia')) return require('../assets/avatar_sophia.png');
-  if (lower.includes('emma')) return require('../assets/avatar_emma.jpg');
-  return require('../assets/avatar_maks.png');
-};
+
 
 export const FRIENDS_MODAL_TRANSLATIONS = {
   uz: { title: "Do'stlar", requests: "Arizalar", chats: "Chatlar", noRequests: "Arizalar yo'q", noChats: "Sizda hali suhbatlar yo'q", chatStarted: "Chat boshlandi", noFriends: "Do'stlaringiz yo'q" },
@@ -732,6 +721,146 @@ export default function StudentDashboardScreen({ navigation, route }) {
     setPurchaseSuccessItem(null);
   };
 
+  // User Avatar Upload State & Handler
+  const [avatarPickerModalVisible, setAvatarPickerModalVisible] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handlePickAvatar = async (useCamera = false) => {
+    try {
+      setAvatarPickerModalVisible(false);
+      
+      const permResult = useCamera 
+        ? await ImagePicker.requestCameraPermissionsAsync()
+        : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permResult.granted) {
+        Alert.alert(
+          'Ruxsat kerak', 
+          useCamera ? 'Kameradan foydalanish uchun ruxsat bering.' : 'Galereyaga kirish uchun ruxsat bering.'
+        );
+        return;
+      }
+
+      const result = useCamera
+        ? await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+            base64: true,
+          })
+        : await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.8,
+            base64: true,
+          });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      const selectedAsset = result.assets[0];
+      setIsUploadingAvatar(true);
+
+      const userId = user?.id || user?.customId;
+      if (!userId) {
+        Alert.alert('Xatolik', 'Foydalanuvchi aniqlanmadi');
+        setIsUploadingAvatar(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('userId', String(userId));
+      if (user?.customId) formData.append('customId', String(user.customId));
+
+      const filename = selectedAsset.fileName || `avatar_${Date.now()}.jpg`;
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image/jpeg`;
+
+      formData.append('avatar', {
+        uri: selectedAsset.uri,
+        name: filename,
+        type: type,
+      });
+
+      if (selectedAsset.base64) {
+        formData.append('avatarBase64', `data:image/jpeg;base64,${selectedAsset.base64}`);
+      }
+
+      const uploadRes = await fetch(`${API_URL}/user/avatar`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: formData,
+      });
+
+      const resData = await uploadRes.json();
+
+      if (resData.success && resData.user) {
+        const updated = resData.user;
+        setUser(prev => ({
+          ...prev,
+          ...updated,
+          avatar: updated.character || resData.avatarUrl,
+          character: updated.character || resData.avatarUrl,
+        }));
+
+        try {
+          const storedStr = await AsyncStorage.getItem('user_data');
+          if (storedStr) {
+            const cur = JSON.parse(storedStr);
+            cur.character = updated.character;
+            cur.avatar = updated.character;
+            await AsyncStorage.setItem('user_data', JSON.stringify(cur));
+          }
+        } catch (e) {
+          console.log('AsyncStorage save error:', e);
+        }
+
+        Alert.alert('Muvaffaqiyat', 'Avatar rasmingiz muvaffaqiyatli saqlandi!');
+      } else {
+        if (selectedAsset.base64) {
+          const fallbackRes = await fetch(`${API_URL}/user/avatar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              customId: user?.customId,
+              avatarBase64: `data:image/jpeg;base64,${selectedAsset.base64}`
+            })
+          });
+          const fbData = await fallbackRes.json();
+          if (fbData.success && fbData.user) {
+            setUser(prev => ({
+              ...prev,
+              ...fbData.user,
+              avatar: fbData.user.character || fbData.avatarUrl,
+              character: fbData.user.character || fbData.avatarUrl,
+            }));
+            const storedStr = await AsyncStorage.getItem('user_data');
+            if (storedStr) {
+              const cur = JSON.parse(storedStr);
+              cur.character = fbData.user.character;
+              cur.avatar = fbData.user.character;
+              await AsyncStorage.setItem('user_data', JSON.stringify(cur));
+            }
+            Alert.alert('Muvaffaqiyat', 'Avatar rasmingiz muvaffaqiyatli saqlandi!');
+            return;
+          }
+        }
+        Alert.alert('Xatolik', resData.error || 'Rasmni yuklashda xatolik yuz berdi');
+      }
+    } catch (err) {
+      console.error('Avatar upload error:', err);
+      Alert.alert('Xatolik', err.message || 'Avatar rasmini yuklashda xatolik');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   const [backendSkins, setBackendSkins] = useState([]);
   
   const dynamicCharacters = backendSkins.filter(s => s.category === 'personajlar');
@@ -972,7 +1101,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 rank: index + 1,
                 name: u.name || '---',
                 xp: u.xp || 0,
-                avatar: u.avatar && u.avatar.startsWith('http') ? { uri: u.avatar } : getAvatarByName(u.avatar)
+                avatar: getAvatarByName(u.character || u.avatar)
               }));
               setLeaderboardData(rankedData);
             } else {
@@ -1624,7 +1753,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
           <ImageBackground source={require('../assets/character_bg.png')} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 16, overflow: 'hidden', marginHorizontal: 10, marginVertical: 5 }} imageStyle={{ borderRadius: 16, transform: [{ translateY: -40 }, { scale: 1.1 }] }}>
             <View style={{ width: 160, height: 160, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-               <Image source={selectedAvatarObj && selectedAvatarObj.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.imageUrl}` } : require('../assets/avatar_maks.png')} style={{ width: 110, height: 110, borderRadius: 55 }} />
+               <Image source={getUserAvatarSource(user, selectedAvatarObj)} style={{ width: 110, height: 110, borderRadius: 55 }} />
                <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 160, height: 160 }} contentFit="contain" />
                <View style={{ position: 'absolute', bottom: -20, width: 180, height: 40, borderRadius: 90, borderWidth: 1, borderColor: '#3B82F6', transform: [{ scaleY: 0.3 }], shadowColor: '#3B82F6', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.8, shadowRadius: 10 }} />
                <View style={{ position: 'absolute', bottom: -20, width: 140, height: 30, borderRadius: 70, borderWidth: 2, borderColor: '#60A5FA', transform: [{ scaleY: 0.3 }], shadowColor: '#60A5FA', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 1, shadowRadius: 15 }} />
@@ -3574,7 +3703,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               ) : (
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(10, 15, 30, 0.5)', borderRadius: 12, padding: 8, paddingRight: 32, paddingLeft: 10 }}>
                   <View style={{ width: 60, height: 60, justifyContent: 'center', alignItems: 'center', marginRight: 10 }}>
-                    <Image source={selectedAvatarObj && selectedAvatarObj.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.imageUrl}` } : require('../assets/avatar_maks.png')} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
+                    <Image source={getUserAvatarSource(user, selectedAvatarObj)} style={{ width: 42, height: 42, borderRadius: 21, zIndex: 1 }} />
                     <Image source={require('../assets/gold_frame.png')} style={{ position: 'absolute', width: 60, height: 60, zIndex: 2 }} contentFit="contain" />
                   </View>
                   <View>
@@ -4199,13 +4328,48 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
             {/* Avatar & Main Info Card */}
             <View style={styles.proCardGlass}>
-              <View style={styles.proAvatarContainer}>
+              <TouchableOpacity 
+                activeOpacity={0.85} 
+                onPress={() => setAvatarPickerModalVisible(true)}
+                style={styles.proAvatarContainer}
+              >
                 <View style={styles.proAvatarGlow} />
-                <Image source={selectedAvatarObj && selectedAvatarObj.imageUrl ? { uri: `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.imageUrl}` } : require('../assets/avatar_maks.png')} style={styles.proAvatarImg} />
+                <Image source={getUserAvatarSource(user, selectedAvatarObj)} style={styles.proAvatarImg} />
+                {isUploadingAvatar ? (
+                  <View style={[styles.proAvatarImg, { position: 'absolute', top: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', zIndex: 5 }]}>
+                    <ActivityIndicator size="small" color="#C084FC" />
+                  </View>
+                ) : null}
                 <View style={styles.proAvatarBadge}>
                   <Text style={styles.proAvatarBadgeText}>{user?.level || 12}</Text>
                 </View>
-              </View>
+                <View style={styles.proAvatarEditBadge}>
+                  <LinearGradient
+                    colors={['#A855F7', '#6366F1']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.proAvatarEditGradient}
+                  >
+                    <Feather name="camera" size={13} color="#FFFFFF" />
+                  </LinearGradient>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                activeOpacity={0.75}
+                onPress={() => setAvatarPickerModalVisible(true)}
+                style={styles.proChangeAvatarBtn}
+              >
+                <LinearGradient
+                  colors={['rgba(168, 85, 247, 0.25)', 'rgba(99, 102, 241, 0.25)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.proChangeAvatarGradient}
+                >
+                  <Feather name="upload-cloud" size={13} color="#C084FC" style={{ marginRight: 6 }} />
+                  <Text style={styles.proChangeAvatarText}>Rasmni o'zgartirish</Text>
+                </LinearGradient>
+              </TouchableOpacity>
               <Text style={styles.proUserName} numberOfLines={1}>{user?.name || 'IQROMAX CHAMPION'}</Text>
               <Text style={styles.proUserTag} numberOfLines={1}>#{String(user?.customId || '0000').replace(/^#+/, '')} | {user?.email || "No Email"}</Text>
               
@@ -6534,6 +6698,138 @@ export default function StudentDashboardScreen({ navigation, route }) {
             </View>
           </View>
         </View>
+      </Modal>
+
+      {/* AVATAR PICKER MODAL */}
+      <Modal 
+        visible={avatarPickerModalVisible} 
+        transparent 
+        animationType="fade" 
+        onRequestClose={() => setAvatarPickerModalVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setAvatarPickerModalVisible(false)}
+        >
+          <TouchableOpacity 
+            activeOpacity={1} 
+            style={[
+              styles.modalContent,
+              {
+                backgroundColor: '#0D0D1A',
+                borderWidth: 1.5,
+                borderColor: '#A855F7',
+                padding: 24,
+                borderRadius: 24,
+                width: '88%',
+                maxWidth: 380,
+                shadowColor: '#A855F7',
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: 0.35,
+                shadowRadius: 16,
+                elevation: 12,
+              }
+            ]}
+          >
+            {/* Header Icon & Title */}
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <View style={{
+                width: 64,
+                height: 64,
+                borderRadius: 32,
+                backgroundColor: 'rgba(168,85,247,0.15)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: 12,
+                borderWidth: 1.5,
+                borderColor: '#A855F7'
+              }}>
+                <Feather name="camera" size={28} color="#C084FC" />
+              </View>
+              <Text style={{ color: '#FFF', fontSize: 20, fontFamily: 'Inter_700Bold', textAlign: 'center', marginBottom: 4 }}>
+                Avatar Rasmini O'zgartirish
+              </Text>
+              <Text style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'Inter_500Medium', textAlign: 'center' }}>
+                O'z qurilmangizdan shaxsiy rasmingizni yuklang
+              </Text>
+            </View>
+
+            {/* Options */}
+            <View style={{ width: '100%', gap: 12, marginBottom: 20 }}>
+              {/* Option 1: Gallery */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => handlePickAvatar(false)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(168, 85, 247, 0.3)',
+                  padding: 14,
+                  borderRadius: 16,
+                }}
+              >
+                <LinearGradient
+                  colors={['#8B5CF6', '#6366F1']}
+                  style={{ width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 14 }}
+                >
+                  <Ionicons name="images" size={22} color="#FFF" />
+                </LinearGradient>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>Galereyadan tanlash</Text>
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 12, marginTop: 2 }}>Mavjud fotosuratlardan yuklash</Text>
+                </View>
+                <Feather name="chevron-right" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+
+              {/* Option 2: Camera */}
+              <TouchableOpacity
+                activeOpacity={0.85}
+                onPress={() => handlePickAvatar(true)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderWidth: 1,
+                  borderColor: 'rgba(168, 85, 247, 0.3)',
+                  padding: 14,
+                  borderRadius: 16,
+                }}
+              >
+                <LinearGradient
+                  colors={['#EC4899', '#8B5CF6']}
+                  style={{ width: 44, height: 44, borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginRight: 14 }}
+                >
+                  <Ionicons name="camera" size={22} color="#FFF" />
+                </LinearGradient>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: '#FFF', fontFamily: 'Inter_700Bold', fontSize: 15 }}>Kameradan suratga olish</Text>
+                  <Text style={{ color: '#9CA3AF', fontFamily: 'Inter_500Medium', fontSize: 12, marginTop: 2 }}>Yangi rasm tushirib joylash</Text>
+                </View>
+                <Feather name="chevron-right" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Cancel Button */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setAvatarPickerModalVisible(false)}
+              style={{
+                width: '100%',
+                paddingVertical: 13,
+                borderRadius: 14,
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: '#D1D5DB', fontFamily: 'Inter_600SemiBold', fontSize: 15 }}>
+                Bekor qilish
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
       {/* Friends Modal */}
@@ -9304,6 +9600,42 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 12,
     fontFamily: 'Inter_700Bold',
+  },
+  proAvatarEditBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -4,
+    zIndex: 4,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: '#05050C',
+    elevation: 5,
+  },
+  proAvatarEditGradient: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  proChangeAvatarBtn: {
+    marginBottom: 14,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.4)',
+  },
+  proChangeAvatarGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+  },
+  proChangeAvatarText: {
+    color: '#E9D5FF',
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 12,
   },
   proUserName: {
     color: '#FFF',

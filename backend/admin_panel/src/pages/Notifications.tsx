@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Users, AlertCircle, CheckCircle2, Bell, Sparkles, MessageSquare, Search, Check, ChevronDown, Plus, X, Clock } from 'lucide-react';
 import AdminLayout from '../components/AdminLayout';
+import { getAdminAvatarUrl } from '../utils/avatar';
 
 const Notifications = () => {
   const [title, setTitle] = useState('');
@@ -335,7 +336,7 @@ const Notifications = () => {
                                   <div className="flex items-center gap-2.5">
                                     <div className="w-8 h-8 rounded-full overflow-hidden bg-[#0B0B19]">
                                       <img 
-                                        src={user.character ? `/avatars/${user.character.toLowerCase()}.png` : (user.avatar || '/admin-logo.png')} 
+                                        src={getAdminAvatarUrl(user.character, user.avatar)} 
                                         alt={user.name} 
                                         className="w-full h-full object-cover" 
                                         onError={(e) => { e.currentTarget.src = '/admin-logo.png'; }}

@@ -10,6 +10,7 @@ import fs from 'fs';
 import { Server } from 'socket.io';
 
 import adVideoRoutes from './adVideoRoutes.js';
+import multer from 'multer';
 
 
 const __dirname = path.dirname(__filename);
@@ -41,9 +42,32 @@ app.use('/api', shopRoutes);
 app.use('/api', inventorySkinRoutes);
 app.use('/api', courseRoutes);
 
-// Serve the uploads directory for files and shop images
+// Serve the uploads directory for files, shop images and avatars
 app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
 app.use('/api/uploads', express.static(path.join(__dirname, '../../public/uploads')));
+
+// Storage setup for custom user avatars
+const avatarUploadDir = path.join(__dirname, '../../public/uploads/avatars');
+if (!fs.existsSync(avatarUploadDir)) {
+  fs.mkdirSync(avatarUploadDir, { recursive: true });
+}
+
+const avatarStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(avatarUploadDir)) {
+      fs.mkdirSync(avatarUploadDir, { recursive: true });
+    }
+    cb(null, avatarUploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.jpg';
+    cb(null, `avatar_${Date.now()}_${Math.random().toString(36).substring(2, 7)}${ext}`);
+  }
+});
+const avatarUpload = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }
+});
 
 // Nodemailer Config
 const transporter = nodemailer.createTransport({
@@ -842,11 +866,91 @@ app.put('/api/user/character', async (req, res) => {
     });
 
     io.emit('user_updated', updatedUser);
+    io.emit('user_avatar_updated', {
+      customId: updatedUser.customId,
+      character: updatedUser.character,
+      avatar: updatedUser.character
+    });
 
     res.json({ message: 'Character updated successfully', character: updatedUser.character });
   } catch (error) {
     console.error('Update character error:', error);
     res.status(500).json({ error: 'Failed to update character' });
+  }
+});
+
+// Upload User Avatar (Device file or Base64)
+app.post('/api/user/avatar', (req, res, next) => {
+  avatarUpload.single('avatar')(req, res, (err) => {
+    if (err) {
+      console.error('Avatar upload multer error:', err);
+      return res.status(400).json({ error: err.message || 'File upload error' });
+    }
+    next();
+  });
+}, async (req, res) => {
+  try {
+    const customId = req.body.customId;
+    if (!customId) {
+      return res.status(400).json({ error: 'customId talab qilinadi' });
+    }
+
+    let avatarPath = '';
+    if (req.file) {
+      avatarPath = `/uploads/avatars/${req.file.filename}`;
+    } else if (req.body.avatarBase64) {
+      const base64Data = req.body.avatarBase64.replace(/^data:image\/\w+;base64,/, '');
+      if (!fs.existsSync(avatarUploadDir)) {
+        fs.mkdirSync(avatarUploadDir, { recursive: true });
+      }
+      const filename = `avatar_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.jpg`;
+      fs.writeFileSync(path.join(avatarUploadDir, filename), Buffer.from(base64Data, 'base64'));
+      avatarPath = `/uploads/avatars/${filename}`;
+    } else if (req.body.character || req.body.avatarUrl) {
+      avatarPath = req.body.character || req.body.avatarUrl;
+    } else {
+      return res.status(400).json({ error: 'Rasm fayli (avatar) yoki avatarBase64 talab qilinadi' });
+    }
+
+    const cleanId = String(customId).replace(/^#+/, '');
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { customId: customId.toUpperCase() },
+          { customId: `#${cleanId.toUpperCase()}` },
+          { customId: cleanId.toUpperCase() },
+          { customId: `#${cleanId}` },
+          { customId: cleanId }
+        ]
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Foydalanuvchi topilmadi' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { character: avatarPath }
+    });
+
+    // Realtime broadcast to mobile apps, teacher dashboard and admin panel
+    io.emit('user_updated', updatedUser);
+    io.emit('user_avatar_updated', {
+      customId: updatedUser.customId,
+      character: updatedUser.character,
+      avatar: updatedUser.character
+    });
+
+    res.json({
+      message: 'Avatar muvaffaqiyatli saqlandi',
+      avatarUrl: avatarPath,
+      character: avatarPath,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Upload avatar error:', error);
+    res.status(500).json({ error: 'Avatar saqlashda xatolik yuz berdi' });
   }
 });
 
@@ -875,6 +979,7 @@ app.get('/api/ranking', async (req, res) => {
       coin: u.coin || 0,
       level: (u as any).level || 1,
       avatar: u.character || null,
+      character: u.character || null,
     }));
     
     res.json(rankingData);
@@ -911,7 +1016,8 @@ app.get('/api/users/search/:customId', async (req, res) => {
       rating: 1000, // Default rating
       xp: user.xp || 0,
       energy: user.energy || 0,
-      avatar: user.character || 'https://api.dicebear.com/7.x/avataaars/png?seed=' + user.name
+      avatar: user.character || 'https://api.dicebear.com/7.x/avataaars/png?seed=' + user.name,
+      character: user.character || null
     });
   } catch (error) {
     console.error('Error searching user:', error);

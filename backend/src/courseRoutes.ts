@@ -8,12 +8,11 @@ import { fileURLToPath } from 'url';
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// Define __dirname for ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Define upload directory safely for CommonJS & ESM
+const currentDir = typeof __dirname !== 'undefined' ? __dirname : path.resolve();
 
 // Ensure upload directory exists
-const uploadDir = path.join(__dirname, '../../public/uploads/courses');
+const uploadDir = path.join(currentDir, '../../public/uploads/courses');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -328,7 +327,7 @@ router.put(
     }
 
     const updatedVideo = await prisma.courseVideo.update({
-      where: { id: req.params.id },
+      where: { id: String(req.params.id) },
       data: {
         moduleId,
         name,
