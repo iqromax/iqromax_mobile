@@ -13,14 +13,26 @@ export const resolveAvatarUrl = (avatar) => {
     trimmed.startsWith('https://') || 
     trimmed.startsWith('data:') ||
     trimmed.startsWith('file://') ||
+    trimmed.startsWith('file:/') ||
     trimmed.startsWith('ph://') ||
-    trimmed.startsWith('content://')
+    trimmed.startsWith('content://') ||
+    trimmed.startsWith('assets-library://')
   ) {
     return trimmed;
   }
-  if (trimmed.startsWith('/') || trimmed.includes('/')) {
+  // Local filesystem path on device (e.g. /data/user/0/... or /storage/emulated/0/...)
+  if (trimmed.startsWith('/data/') || trimmed.startsWith('/storage/') || trimmed.startsWith('/var/mobile/')) {
+    return `file://${trimmed}`;
+  }
+  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('uploads/') || trimmed.startsWith('/api/uploads/') || trimmed.startsWith('api/uploads/')) {
     let cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-    // Ensure all uploads paths go through /api/uploads because Nginx only proxies /api to Express
+    if (cleanPath.startsWith('/uploads/')) {
+      cleanPath = `/api${cleanPath}`;
+    }
+    return `${SERVER_BASE}${cleanPath}`;
+  }
+  if (trimmed.startsWith('/') && !trimmed.startsWith('/data/') && !trimmed.startsWith('/storage/')) {
+    let cleanPath = trimmed;
     if (cleanPath.startsWith('/uploads/')) {
       cleanPath = `/api${cleanPath}`;
     }

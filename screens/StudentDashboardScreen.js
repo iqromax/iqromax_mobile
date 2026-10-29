@@ -768,12 +768,10 @@ export default function StudentDashboardScreen({ navigation, route }) {
       setUser(prev => ({
         ...prev,
         avatar: instantUri,
-        character: instantUri,
       }));
       AsyncStorage.getItem('user_data').then(str => {
         if (str) {
           const cur = JSON.parse(str);
-          cur.character = instantUri;
           cur.avatar = instantUri;
           AsyncStorage.setItem('user_data', JSON.stringify(cur)).catch(() => {});
         }

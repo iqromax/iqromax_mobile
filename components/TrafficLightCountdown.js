@@ -417,3 +417,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.14)',
   },
 });
+
+export const TrafficLightFullscreenOverlay = () => null;
+
