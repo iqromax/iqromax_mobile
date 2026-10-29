@@ -245,14 +245,16 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   useEffect(() => {
     if (phase === 'countdown') {
       let step = 1;
-      setLightState(1); // Sariq (Yellow)
-      playSound('traffic_light');
+      setLightState(1); // Red (Qizil - ovozsiz)
       
       const interval = setInterval(() => {
         step++;
         if (step === 2) {
-          setLightState(2); // Yashil (Green)
-        } else if (step > 2) {
+          setLightState(2); // Yellow (Sariq - ovoz boshlanadi)
+          playSound('traffic_light');
+        } else if (step === 3) {
+          setLightState(3); // Green (Yashil)
+        } else if (step > 3) {
           clearInterval(interval);
           setStartTime(Date.now()); // reset timer at start of flashing
           playSound('tick', sequence[0]?.op || '+');
@@ -720,11 +722,13 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     if (phase === 'countdown') {
       return (
         <View style={[styles.flashingCard, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316', justifyContent: 'center', alignItems: 'center' }]}>
-          <View style={{ flexDirection: 'row', width: 230, height: 120, backgroundColor: '#16161E', borderRadius: 24, borderWidth: 3.5, borderColor: '#2D2D3D', justifyContent: 'space-evenly', alignItems: 'center', paddingHorizontal: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 16, elevation: 8 }}>
-            {/* Yellow Light (Sariq) */}
-            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState === 1 ? '#FFD000' : '#3A2E00', borderWidth: 2.5, borderColor: '#111', shadowColor: '#FFD000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState === 1 ? 0.95 : 0, shadowRadius: 24, elevation: lightState === 1 ? 12 : 0 }} />
-            {/* Green Light (Yashil) */}
-            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState === 2 ? '#22C55E' : '#0B3318', borderWidth: 2.5, borderColor: '#111', shadowColor: '#22C55E', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState === 2 ? 0.95 : 0, shadowRadius: 24, elevation: lightState === 2 ? 12 : 0 }} />
+          <View style={{ width: 120, height: 320, backgroundColor: '#1a1a1a', borderRadius: 20, borderWidth: 4, borderColor: '#333', justifyContent: 'space-evenly', alignItems: 'center', paddingVertical: 10 }}>
+            {/* Red Light */}
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 1 ? '#ff3333' : '#4a1111', borderWidth: 2, borderColor: '#111', shadowColor: '#ff0000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 1 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 1 ? 10 : 0 }} />
+            {/* Yellow Light */}
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 2 ? '#ffcc00' : '#4a3b00', borderWidth: 2, borderColor: '#111', shadowColor: '#ffcc00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 2 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 2 ? 10 : 0 }} />
+            {/* Green Light */}
+            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 3 ? '#33ff33' : '#114a11', borderWidth: 2, borderColor: '#111', shadowColor: '#00ff00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 3 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 3 ? 10 : 0 }} />
           </View>
         </View>
       );
