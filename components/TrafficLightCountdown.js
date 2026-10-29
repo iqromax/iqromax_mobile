@@ -129,9 +129,9 @@ export function TrafficLightCountdown({ lightState = 0, style }) {
     }
   }, [lightState]);
 
-  const isRedActive = lightState >= 1;
-  const isYellowActive = lightState >= 2;
-  const isGreenActive = lightState >= 3;
+  const isRedActive = lightState === 1;
+  const isYellowActive = lightState === 2;
+  const isGreenActive = lightState === 3;
 
   // Determine dynamic housing aura color
   const chassisShadowColor = isGreenActive

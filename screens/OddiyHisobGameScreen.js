@@ -29,23 +29,7 @@ const TRANSLATIONS = {
 
 const { width, height } = Dimensions.get('window');
 
-// oddiy_hisob_bg_new.png o'lchami: 472 x 1024
-const BG_ASPECT = 472 / 1024;
-const SCREEN_ASPECT = width / height;
 
-let bgImageDisplayWidth = width;
-let bgImageDisplayHeight = height;
-
-if (SCREEN_ASPECT > BG_ASPECT) {
-  bgImageDisplayHeight = height;
-  bgImageDisplayWidth = height * BG_ASPECT;
-} else {
-  bgImageDisplayWidth = width;
-  bgImageDisplayHeight = width / BG_ASPECT;
-}
-
-const bgImageOffsetTop = (height - bgImageDisplayHeight) / 2;
-const bgImageOffsetLeft = (width - bgImageDisplayWidth) / 2;
 
 export default function OddiyHisobGameScreen({ navigation, route }) {
   const { energy: currentEnergy, consumeEnergy, formattedTime } = useEnergy();
@@ -758,13 +742,19 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         style={[
           styles.flashingCard, 
           { 
-            justifyContent: isTop ? 'flex-start' : 'flex-end',
-            paddingTop: isTop ? 36 : 0,
-            paddingBottom: !isTop ? 36 : 0,
+            justifyContent: 'center',
+            alignItems: 'center',
           }
         ]}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+        <View 
+          style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            transform: [{ translateY: isTop ? -32 : 32 }],
+          }}
+        >
           <View style={[styles.flashingCardOperator, { marginRight: 16, marginBottom: 12 }]}>
             <Text style={[styles.flashingCardOperatorText, { color: opColor, textShadowColor: opColor }]}>{currentTerm.op || '+'}</Text>
           </View>
@@ -1132,29 +1122,6 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     <View style={{ flex: 1, backgroundColor: '#050510' }}>
       {phase !== 'feedback' && phase !== 'summary' ? (
         <ImageBackground source={require('../assets/oddiy_hisob_bg_new.png')} style={styles.bgImage} contentFit="contain">
-          {/* Svetafor chiroqlari yonganida aynan background image razmeri bilan bir xil to'rtburchak shaffof rang */}
-          {phase === 'countdown' && lightState > 0 && (
-            <View
-              pointerEvents="none"
-              style={[
-                styles.bgImageLightOverlay,
-                {
-                  top: bgImageOffsetTop,
-                  left: bgImageOffsetLeft,
-                  width: bgImageDisplayWidth,
-                  height: bgImageDisplayHeight,
-                  backgroundColor:
-                    lightState === 1
-                      ? 'rgba(239, 68, 68, 0.22)'
-                      : lightState === 2
-                      ? 'rgba(245, 158, 11, 0.22)'
-                      : lightState === 3
-                      ? 'rgba(16, 185, 129, 0.24)'
-                      : 'transparent',
-                },
-              ]}
-            />
-          )}
           {ScreenContent}
         </ImageBackground>
       ) : (
@@ -1172,10 +1139,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  bgImageLightOverlay: {
-    position: 'absolute',
-    zIndex: 1,
-  },
+
   container: {
     flex: 1,
     backgroundColor: 'transparent',
