@@ -142,23 +142,6 @@ export function TrafficLightCountdown({ lightState = 0, style }) {
     ? '#EF4444'
     : '#000000';
 
-  const statusText =
-    lightState === 1
-      ? 'DIQQAT!'
-      : lightState === 2
-      ? 'TAYYORLANING!'
-      : lightState === 3
-      ? 'BOSHLADIK!'
-      : '...';
-
-  const statusColor =
-    lightState === 1
-      ? '#EF4444'
-      : lightState === 2
-      ? '#F59E0B'
-      : lightState === 3
-      ? '#10B981'
-      : '#6B7280';
 
   return (
     <View style={[styles.wrapper, style]}>
@@ -336,23 +319,6 @@ export function TrafficLightCountdown({ lightState = 0, style }) {
           </View>
         </View>
       </View>
-
-      {/* Futuristic Status Pill */}
-      {lightState > 0 && (
-        <View
-          style={[
-            styles.statusPill,
-            {
-              borderColor: statusColor,
-              shadowColor: statusColor,
-            },
-          ]}
-        >
-          <Text style={[styles.statusText, { color: statusColor }]}>
-            {statusText}
-          </Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -449,22 +415,5 @@ const styles = StyleSheet.create({
     height: 7,
     borderRadius: 5,
     backgroundColor: 'rgba(255, 255, 255, 0.14)',
-  },
-  statusPill: {
-    marginTop: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 14,
-    backgroundColor: 'rgba(10, 12, 22, 0.85)',
-    borderWidth: 1.5,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  statusText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 13,
-    letterSpacing: 1.5,
   },
 });
