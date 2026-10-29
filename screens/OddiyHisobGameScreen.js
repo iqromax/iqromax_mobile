@@ -11,7 +11,7 @@ import { useEnergy } from '../src/hooks/useEnergy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DeviceEventEmitter } from 'react-native';
 import { API_URL } from '../src/config/api';
-import { TrafficLightCountdown, TrafficLightFullscreenOverlay } from '../components/TrafficLightCountdown';
+import { TrafficLightCountdown } from '../components/TrafficLightCountdown';
 
 const TRANSLATIONS = {
   en: { getReady: "GET READY", rememberNumber: "REMEMBER THE NUMBER!", correctAnswer: "Correct answer!", incorrectAnswer: "Incorrect answer", awesome: "Awesome!", oops: "Oops...", exerciseCompleted: "Exercise completed successfully", tryAgainFeedback: "Try again!", correctLabel: "Correct answer:", yourAnswer: "Your answer:", answerTime: "Answer time:", sequence: "Sequence of examples:", iqromaxRecommendation: "IQROMAX recommendation", championText: "Great job!\nYou are a real IQROMAX champion!", rushText: "Don't rush!\nFocus and try again.", back: "Back", nextExercise: "Next exercise", retry: "Try again", newExercise: "New exercise", enterAnswer: "Enter answer...", timeLabel: "Time", accuracy: "ACCURACY", averageTime: "AVERAGE TIME", gameTitle: "SIMPLE MATH", speedGameTitle: "MULTIPLICATION & DIVISION", tipTitle: "Tip", tipDesc: "Helps in the next question", countdown3: "Focus your mind...", countdown2: "Get ready...", countdown1: "Let's go!", summaryTitle: "RESULTS SUMMARY", accuracyLabel: "Accuracy", correctTasksLabel: "correct tasks", earnedXPLabel: "EARNED XP" },
@@ -28,6 +28,24 @@ const TRANSLATIONS = {
 };
 
 const { width, height } = Dimensions.get('window');
+
+// oddiy_hisob_bg_new.png o'lchami: 472 x 1024
+const BG_ASPECT = 472 / 1024;
+const SCREEN_ASPECT = width / height;
+
+let bgImageDisplayWidth = width;
+let bgImageDisplayHeight = height;
+
+if (SCREEN_ASPECT > BG_ASPECT) {
+  bgImageDisplayHeight = height;
+  bgImageDisplayWidth = height * BG_ASPECT;
+} else {
+  bgImageDisplayWidth = width;
+  bgImageDisplayHeight = width / BG_ASPECT;
+}
+
+const bgImageOffsetTop = (height - bgImageDisplayHeight) / 2;
+const bgImageOffsetLeft = (width - bgImageDisplayWidth) / 2;
 
 export default function OddiyHisobGameScreen({ navigation, route }) {
   const { energy: currentEnergy, consumeEnergy, formattedTime } = useEnergy();
@@ -1114,17 +1132,35 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
     <View style={{ flex: 1, backgroundColor: '#050510' }}>
       {phase !== 'feedback' && phase !== 'summary' ? (
         <ImageBackground source={require('../assets/oddiy_hisob_bg_new.png')} style={styles.bgImage} contentFit="contain">
+          {/* Svetafor chiroqlari yonganida aynan background image razmeri bilan bir xil to'rtburchak shaffof rang */}
+          {phase === 'countdown' && lightState > 0 && (
+            <View
+              pointerEvents="none"
+              style={[
+                styles.bgImageLightOverlay,
+                {
+                  top: bgImageOffsetTop,
+                  left: bgImageOffsetLeft,
+                  width: bgImageDisplayWidth,
+                  height: bgImageDisplayHeight,
+                  backgroundColor:
+                    lightState === 1
+                      ? 'rgba(239, 68, 68, 0.22)'
+                      : lightState === 2
+                      ? 'rgba(245, 158, 11, 0.22)'
+                      : lightState === 3
+                      ? 'rgba(16, 185, 129, 0.24)'
+                      : 'transparent',
+                },
+              ]}
+            />
+          )}
           {ScreenContent}
         </ImageBackground>
       ) : (
         <View style={styles.bgImage}>
           {ScreenContent}
         </View>
-      )}
-
-      {/* Fullscreen Traffic Light Translucent Ambient Overlay */}
-      {phase === 'countdown' && (
-        <TrafficLightFullscreenOverlay lightState={lightState} />
       )}
     </View>
   );
@@ -1135,6 +1171,10 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
+  },
+  bgImageLightOverlay: {
+    position: 'absolute',
+    zIndex: 1,
   },
   container: {
     flex: 1,

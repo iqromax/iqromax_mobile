@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from '../src/utils/safeAudio';
-import { TrafficLightCountdown, TrafficLightFullscreenOverlay } from '../components/TrafficLightCountdown';
+import { TrafficLightCountdown } from '../components/TrafficLightCountdown';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateUserRank } from '../src/utils/rankUtils';
@@ -440,8 +440,7 @@ export default function BattleGameScreen({ navigation, route }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#050510' }}>
-      <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { marginTop: Platform.OS === 'android' ? 10 : 0 }]}>
         <View style={styles.headerCenter}>
@@ -583,12 +582,6 @@ export default function BattleGameScreen({ navigation, route }) {
         </View>
       </Modal>
     </SafeAreaView>
-
-      {/* Fullscreen Traffic Light Translucent Ambient Overlay */}
-      {phase === 'countdown' && (
-        <TrafficLightFullscreenOverlay lightState={lightState} />
-      )}
-    </View>
   );
 }
 
