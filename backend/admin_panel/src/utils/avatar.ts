@@ -1,5 +1,5 @@
 export const getAdminAvatarUrl = (character?: string, avatar?: string): string => {
-  const val = (character || avatar || '').trim();
+  const val = (avatar || character || '').trim();
   if (!val) return '/admin-logo.png';
   if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:')) {
     return val;

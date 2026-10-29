@@ -36,6 +36,8 @@ export const resolveAvatarUrl = (avatar) => {
  */
 export const getAvatarByName = (name) => {
   if (!name) return require('../../assets/avatar_maks.png');
+  if (typeof name === 'number') return name;
+  if (typeof name === 'object' && name.uri) return name;
   
   if (typeof name === 'string') {
     const resolved = resolveAvatarUrl(name);
@@ -59,14 +61,27 @@ export const getAvatarByName = (name) => {
 /**
  * Gets user's active avatar source, prioritizing custom uploaded avatar,
  * then equipped 3D skin preview image, then fallback character.
+ * Character avatar is ONLY shown if user has NOT uploaded an avatar from gallery.
  */
 export const getUserAvatarSource = (user, selectedAvatarObj = null) => {
-  // 1. Check user custom uploaded avatar or character URL
-  const userAvatar = user?.avatar || user?.character;
-  if (userAvatar && typeof userAvatar === 'string') {
-    const resolved = resolveAvatarUrl(userAvatar);
-    if (resolved) {
-      return { uri: resolved };
+  // 1. Check user custom uploaded avatar from gallery
+  const userAvatar = user?.avatar;
+  if (userAvatar) {
+    if (typeof userAvatar === 'number') return userAvatar;
+    if (typeof userAvatar === 'object' && userAvatar.uri) return userAvatar;
+    if (typeof userAvatar === 'string') {
+      const resolved = resolveAvatarUrl(userAvatar);
+      if (resolved) {
+        return { uri: resolved };
+      }
+    }
+  }
+
+  // 1b. Backwards compatibility: check if character field holds an uploaded image URL
+  if (user?.character && typeof user.character === 'string') {
+    const resolvedChar = resolveAvatarUrl(user.character);
+    if (resolvedChar) {
+      return { uri: resolvedChar };
     }
   }
 
@@ -78,7 +93,7 @@ export const getUserAvatarSource = (user, selectedAvatarObj = null) => {
     }
   }
 
-  // 3. Fallback to character name
+  // 3. Fallback to character name (maks, alex, david, etc.) for users without gallery avatar
   return getAvatarByName(user?.character || 'maks');
 };
 

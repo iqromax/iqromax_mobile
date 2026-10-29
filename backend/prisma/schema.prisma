@@ -18,6 +18,7 @@ model User {
   country   String?
   language  String?
   character String?
+  avatar    String?
   status    String   @default("Faol")
   energy    Int      @default(10)
   xp               Int       @default(0)

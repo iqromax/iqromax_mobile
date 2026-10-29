@@ -637,7 +637,7 @@ export default function TeacherDashboardScreen({ navigation, route }) {
             speed: u.speed || (1.2 + (index % 5) * 0.2).toFixed(1),
             avatar: (u.avatar && u.avatar.startsWith('http')) 
               ? { uri: u.avatar } 
-              : getAvatarByName(u.character || u.avatar || u.characterName || u.name)
+              : getAvatarByName(u.avatar || u.character || u.characterName || u.name)
           }));
 
           setLeaderboardData(rankedData);

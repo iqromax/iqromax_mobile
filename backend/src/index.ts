@@ -866,14 +866,20 @@ app.put('/api/user/character', async (req, res) => {
       data: { character }
     });
 
+    // Effective avatar: agar user galereyadan rasm yuklagan bo'lsa (avatar),
+    // personaj o'zgarganda avatar O'ZGARMASIN! O'sha yuklangan rasm qoladi!
+    // Faqat hali galereyadan rasm yuklamaganlar uchungina personaj avatari ko'rsatiladi.
+    const effectiveAvatar = updatedUser.avatar || updatedUser.character || 'maks';
+
     io.emit('user_updated', updatedUser);
     io.emit('user_avatar_updated', {
       customId: updatedUser.customId,
       character: updatedUser.character,
-      avatar: updatedUser.character
+      avatar: effectiveAvatar
     });
+    io.emit('ranking_updated');
 
-    res.json({ message: 'Character updated successfully', character: updatedUser.character });
+    res.json({ message: 'Character updated successfully', character: updatedUser.character, user: updatedUser });
   } catch (error) {
     console.error('Update character error:', error);
     res.status(500).json({ error: 'Failed to update character' });
@@ -1054,22 +1060,32 @@ app.post('/api/user/avatar', (req, res, next) => {
 
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
-      data: { character: avatarPath }
+      data: { 
+        avatar: avatarPath,
+        character: user.character || 'maks'
+      }
     });
+
+    const effectiveAvatar = updatedUser.avatar || updatedUser.character || 'maks';
 
     // Realtime broadcast to mobile apps, teacher dashboard and admin panel
     io.emit('user_updated', updatedUser);
     io.emit('user_avatar_updated', {
       customId: updatedUser.customId,
+      id: updatedUser.id,
+      name: updatedUser.name,
       character: updatedUser.character,
-      avatar: updatedUser.character
+      avatar: effectiveAvatar,
+      effectiveAvatar: effectiveAvatar
     });
+    io.emit('ranking_updated');
 
     res.json({
       success: true,
       message: 'Avatar muvaffaqiyatli saqlandi',
       avatarUrl: avatarPath,
-      character: avatarPath,
+      avatar: avatarPath,
+      character: updatedUser.character,
       user: updatedUser
     });
   } catch (error) {
@@ -1096,15 +1112,19 @@ app.get('/api/ranking', async (req, res) => {
       }
     });
     
-    const rankingData = users.map((u, index) => ({
-      id: u.customId,
-      name: u.name,
-      xp: u.xp || 0,
-      coin: u.coin || 0,
-      level: (u as any).level || 1,
-      avatar: u.character || null,
-      character: u.character || null,
-    }));
+    const rankingData = users.map((u, index) => {
+      const effectiveAvatar = u.avatar || u.character || 'maks';
+      return {
+        id: u.customId,
+        customId: u.customId,
+        name: u.name,
+        xp: u.xp || 0,
+        coin: u.coin || 0,
+        level: (u as any).level || 1,
+        avatar: effectiveAvatar,
+        character: u.character || 'maks',
+      };
+    });
     
     res.json(rankingData);
   } catch (error) {
@@ -1140,7 +1160,7 @@ app.get('/api/users/search/:customId', async (req, res) => {
       rating: 1000, // Default rating
       xp: user.xp || 0,
       energy: user.energy || 0,
-      avatar: user.character || 'https://api.dicebear.com/7.x/avataaars/png?seed=' + user.name,
+      avatar: user.avatar || user.character || 'https://api.dicebear.com/7.x/avataaars/png?seed=' + user.name,
       character: user.character || null
     });
   } catch (error) {
@@ -1217,7 +1237,7 @@ app.get('/api/admin/dashboard-stats', async (req, res) => {
       level: Math.floor((u.xp || 0) / 1000) + 1,
       xp: `${(u.xp || 0).toLocaleString()} XP`,
       customId: u.customId,
-      avatar: u.character || '/admin-logo.png'
+      avatar: u.avatar || u.character || '/admin-logo.png'
     }));
 
     // Recent 5 Registered Users for Activities
@@ -2236,7 +2256,7 @@ app.get('/api/user/friend-requests/:customId', async (req, res) => {
         id: r.id,
         senderId: r.senderId,
         senderName: sender?.name || 'Noma\'lum',
-        senderAvatar: sender?.character || '',
+        senderAvatar: sender?.avatar || sender?.character || '',
         senderXp: sender?.xp || 0
       };
     }));
@@ -2318,7 +2338,7 @@ app.get('/api/user/friends/:customId', async (req, res) => {
       return {
         customId: fId,
         name: u?.name || 'Noma\'lum',
-        avatar: u?.character || '',
+        avatar: u?.avatar || u?.character || '',
         xp: u?.xp || 0
       };
     }));

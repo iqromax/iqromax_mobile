@@ -834,24 +834,39 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
       if ((resData.success || resData.user) && resData.user) {
         const updated = resData.user;
+        const newAvatar = updated.avatar || resData.avatarUrl || resData.avatar || updated.character;
         setUser(prev => ({
           ...prev,
           ...updated,
-          avatar: updated.character || resData.avatarUrl,
-          character: updated.character || resData.avatarUrl,
+          avatar: newAvatar,
+          character: updated.character || prev?.character || 'maks',
         }));
 
         try {
           const storedStr = await AsyncStorage.getItem('user_data');
           if (storedStr) {
             const cur = JSON.parse(storedStr);
-            cur.character = updated.character;
-            cur.avatar = updated.character;
+            cur.avatar = newAvatar;
+            if (updated.character) cur.character = updated.character;
             await AsyncStorage.setItem('user_data', JSON.stringify(cur));
           }
         } catch (e) {
           console.log('AsyncStorage save error:', e);
         }
+
+        // Real-time update in local leaderboardData as well
+        setLeaderboardData(prev => {
+          if (!prev || prev.length === 0) return prev;
+          return prev.map(u => {
+            if (user?.customId && u.customId && String(u.customId).toUpperCase() === String(user.customId).toUpperCase()) {
+              return {
+                ...u,
+                avatar: getAvatarByName(newAvatar)
+              };
+            }
+            return u;
+          });
+        });
       } else {
         Alert.alert('Xatolik', resData.error || 'Rasmni yuklashda xatolik yuz berdi');
       }
@@ -1209,7 +1224,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 rank: index + 1,
                 name: u.name || '---',
                 xp: u.xp || 0,
-                avatar: getAvatarByName(u.character || u.avatar)
+                avatar: getAvatarByName(u.avatar || u.character)
               }));
               setLeaderboardData(rankedData);
             } else {
@@ -1583,7 +1598,12 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
     socket.on('user_updated', (data) => {
       if (String(data.id) === String(user?.id) || (data.customId && user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase())) {
-        setUser(data);
+        setUser(prev => ({
+          ...prev,
+          ...data,
+          avatar: data.avatar || prev?.avatar,
+          character: data.character || prev?.character,
+        }));
         if (typeof data.coin === 'number') {
           setUserCoin(data.coin);
         }
@@ -1593,15 +1613,68 @@ export default function StudentDashboardScreen({ navigation, route }) {
         if (!prev || prev.length === 0) return prev;
         return prev.map(u => {
           if (data.customId && u.customId && String(u.customId).toUpperCase() === String(data.customId).toUpperCase()) {
+            const effectiveAvatar = data.avatar || u.avatar || data.character;
             return {
               ...u,
               name: data.name || u.name,
-              avatar: data.character ? getAvatarByName(data.character) : u.avatar
+              avatar: getAvatarByName(effectiveAvatar)
             };
           }
           return u;
         });
       });
+    });
+
+    socket.on('user_avatar_updated', (data) => {
+      const targetAvatar = data.avatar || data.effectiveAvatar;
+      if (String(data.id) === String(user?.id) || (data.customId && user?.customId && String(data.customId).toUpperCase() === String(user.customId).toUpperCase())) {
+        setUser(prev => ({
+          ...prev,
+          avatar: targetAvatar || prev?.avatar,
+          character: data.character || prev?.character,
+        }));
+        AsyncStorage.getItem('user_data').then(str => {
+          if (str) {
+            const cur = JSON.parse(str);
+            if (targetAvatar) cur.avatar = targetAvatar;
+            if (data.character) cur.character = data.character;
+            AsyncStorage.setItem('user_data', JSON.stringify(cur)).catch(console.error);
+          }
+        });
+      }
+
+      setLeaderboardData(prev => {
+        if (!prev || prev.length === 0) return prev;
+        return prev.map(u => {
+          if (data.customId && u.customId && String(u.customId).toUpperCase() === String(data.customId).toUpperCase()) {
+            return {
+              ...u,
+              name: data.name || u.name,
+              avatar: getAvatarByName(targetAvatar || data.character || u.avatar)
+            };
+          }
+          return u;
+        });
+      });
+    });
+
+    socket.on('ranking_updated', () => {
+      fetch(`${API_URL}/ranking?t=${Date.now()}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            const rankedData = data.map((u, index) => ({
+              ...u,
+              customId: u.id || u.customId,
+              rank: index + 1,
+              name: u.name || '---',
+              xp: u.xp || 0,
+              avatar: getAvatarByName(u.avatar || u.character)
+            }));
+            setLeaderboardData(rankedData);
+          }
+        })
+        .catch(err => console.log('Realtime ranking update error:', err));
     });
 
     socket.on('receive_battle_invite', (data) => {
