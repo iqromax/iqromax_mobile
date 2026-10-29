@@ -486,4 +486,123 @@ const styles = StyleSheet.create({
     fontSize: 13,
     letterSpacing: 1.5,
   },
+  fullscreenOverlayRoot: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullscreenCenterGlow: {
+    position: 'absolute',
+    width: '85%',
+    height: '50%',
+    borderRadius: 200,
+    opacity: 0.8,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 60,
+    shadowOpacity: 0.9,
+  },
+  fullscreenEdgeBorder: {
+    ...StyleSheet.absoluteFillObject,
+    borderWidth: 2,
+    opacity: 0.7,
+  },
 });
+
+export function TrafficLightFullscreenOverlay({ lightState = 0 }) {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (lightState > 0) {
+      fadeAnim.setValue(0.2);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 220,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }).start();
+
+      pulseAnim.setValue(0.97);
+      Animated.spring(pulseAnim, {
+        toValue: 1,
+        friction: 5,
+        tension: 80,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [lightState]);
+
+  if (!lightState || lightState <= 0) return null;
+
+  // 1: Red, 2: Yellow, 3: Green
+  let gradientColors = [
+    'rgba(239, 68, 68, 0.32)',
+    'rgba(239, 68, 68, 0.12)',
+    'rgba(239, 68, 68, 0.28)',
+  ];
+  let glowColor = 'rgba(239, 68, 68, 0.22)';
+  let borderColor = 'rgba(239, 68, 68, 0.45)';
+
+  if (lightState === 2) {
+    gradientColors = [
+      'rgba(245, 158, 11, 0.32)',
+      'rgba(245, 158, 11, 0.12)',
+      'rgba(245, 158, 11, 0.28)',
+    ];
+    glowColor = 'rgba(245, 158, 11, 0.22)';
+    borderColor = 'rgba(245, 158, 11, 0.45)';
+  } else if (lightState === 3) {
+    gradientColors = [
+      'rgba(16, 185, 129, 0.35)',
+      'rgba(16, 185, 129, 0.14)',
+      'rgba(16, 185, 129, 0.32)',
+    ];
+    glowColor = 'rgba(16, 185, 129, 0.25)';
+    borderColor = 'rgba(16, 185, 129, 0.50)';
+  }
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.fullscreenOverlayRoot,
+        {
+          opacity: fadeAnim,
+          transform: [{ scale: pulseAnim }],
+        },
+      ]}
+    >
+      <LinearGradient
+        colors={gradientColors}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+      {/* Central soft ambient glow */}
+      <View
+        style={[
+          styles.fullscreenCenterGlow,
+          {
+            backgroundColor: glowColor,
+          },
+        ]}
+      />
+      {/* Subtle edge neon border rim */}
+      <View
+        style={[
+          styles.fullscreenEdgeBorder,
+          {
+            borderColor: borderColor,
+          },
+        ]}
+      />
+    </Animated.View>
+  );
+}

@@ -11,7 +11,7 @@ import { useEnergy } from '../src/hooks/useEnergy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DeviceEventEmitter } from 'react-native';
 import { API_URL } from '../src/config/api';
-import { TrafficLightCountdown } from '../components/TrafficLightCountdown';
+import { TrafficLightCountdown, TrafficLightFullscreenOverlay } from '../components/TrafficLightCountdown';
 
 const TRANSLATIONS = {
   en: { getReady: "GET READY", rememberNumber: "REMEMBER THE NUMBER!", correctAnswer: "Correct answer!", incorrectAnswer: "Incorrect answer", awesome: "Awesome!", oops: "Oops...", exerciseCompleted: "Exercise completed successfully", tryAgainFeedback: "Try again!", correctLabel: "Correct answer:", yourAnswer: "Your answer:", answerTime: "Answer time:", sequence: "Sequence of examples:", iqromaxRecommendation: "IQROMAX recommendation", championText: "Great job!\nYou are a real IQROMAX champion!", rushText: "Don't rush!\nFocus and try again.", back: "Back", nextExercise: "Next exercise", retry: "Try again", newExercise: "New exercise", enterAnswer: "Enter answer...", timeLabel: "Time", accuracy: "ACCURACY", averageTime: "AVERAGE TIME", gameTitle: "SIMPLE MATH", speedGameTitle: "MULTIPLICATION & DIVISION", tipTitle: "Tip", tipDesc: "Helps in the next question", countdown3: "Focus your mind...", countdown2: "Get ready...", countdown1: "Let's go!", summaryTitle: "RESULTS SUMMARY", accuracyLabel: "Accuracy", correctTasksLabel: "correct tasks", earnedXPLabel: "EARNED XP" },
@@ -1120,6 +1120,11 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
         <View style={styles.bgImage}>
           {ScreenContent}
         </View>
+      )}
+
+      {/* Fullscreen Traffic Light Translucent Ambient Overlay */}
+      {phase === 'countdown' && (
+        <TrafficLightFullscreenOverlay lightState={lightState} />
       )}
     </View>
   );
