@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ImageBackground, Image } from 'expo-image';
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Audio } from '../src/utils/safeAudio';
+import { TrafficLightCountdown } from '../components/TrafficLightCountdown';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateUserRank } from '../src/utils/rankUtils';
@@ -503,15 +504,8 @@ export default function BattleGameScreen({ navigation, route }) {
       <View style={[styles.gameAreaWrapper, { justifyContent: phase === 'input' ? 'flex-end' : 'center', paddingBottom: phase === 'input' ? 20 : 0 }]}>
 
         {phase === 'countdown' ? (
-          <View style={[styles.gameArea, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316', justifyContent: 'center', alignItems: 'center' }]}>
-            <View style={{ width: 120, height: 320, backgroundColor: '#1a1a1a', borderRadius: 20, borderWidth: 4, borderColor: '#333', justifyContent: 'space-evenly', alignItems: 'center', paddingVertical: 10 }}>
-              {/* Red Light */}
-              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 1 ? '#ff3333' : '#4a1111', borderWidth: 2, borderColor: '#111', shadowColor: '#ff0000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 1 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 1 ? 10 : 0 }} />
-              {/* Yellow Light */}
-              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 2 ? '#ffcc00' : '#4a3b00', borderWidth: 2, borderColor: '#111', shadowColor: '#ffcc00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 2 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 2 ? 10 : 0 }} />
-              {/* Green Light */}
-              <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 3 ? '#33ff33' : '#114a11', borderWidth: 2, borderColor: '#111', shadowColor: '#00ff00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 3 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 3 ? 10 : 0 }} />
-            </View>
+          <View style={[styles.gameArea, { padding: 0, borderWidth: 0, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }]}>
+            <TrafficLightCountdown lightState={lightState} />
           </View>
         ) : phase === 'flashing' ? (
           <View style={styles.gameArea}>

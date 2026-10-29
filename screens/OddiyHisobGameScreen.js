@@ -11,6 +11,7 @@ import { useEnergy } from '../src/hooks/useEnergy';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DeviceEventEmitter } from 'react-native';
 import { API_URL } from '../src/config/api';
+import { TrafficLightCountdown } from '../components/TrafficLightCountdown';
 
 const TRANSLATIONS = {
   en: { getReady: "GET READY", rememberNumber: "REMEMBER THE NUMBER!", correctAnswer: "Correct answer!", incorrectAnswer: "Incorrect answer", awesome: "Awesome!", oops: "Oops...", exerciseCompleted: "Exercise completed successfully", tryAgainFeedback: "Try again!", correctLabel: "Correct answer:", yourAnswer: "Your answer:", answerTime: "Answer time:", sequence: "Sequence of examples:", iqromaxRecommendation: "IQROMAX recommendation", championText: "Great job!\nYou are a real IQROMAX champion!", rushText: "Don't rush!\nFocus and try again.", back: "Back", nextExercise: "Next exercise", retry: "Try again", newExercise: "New exercise", enterAnswer: "Enter answer...", timeLabel: "Time", accuracy: "ACCURACY", averageTime: "AVERAGE TIME", gameTitle: "SIMPLE MATH", speedGameTitle: "MULTIPLICATION & DIVISION", tipTitle: "Tip", tipDesc: "Helps in the next question", countdown3: "Focus your mind...", countdown2: "Get ready...", countdown1: "Let's go!", summaryTitle: "RESULTS SUMMARY", accuracyLabel: "Accuracy", correctTasksLabel: "correct tasks", earnedXPLabel: "EARNED XP" },
@@ -721,15 +722,8 @@ export default function OddiyHisobGameScreen({ navigation, route }) {
   const renderFlashingArea = () => {
     if (phase === 'countdown') {
       return (
-        <View style={[styles.flashingCard, { padding: 0, overflow: 'hidden', borderWidth: 1, borderColor: '#f97316', justifyContent: 'center', alignItems: 'center' }]}>
-          <View style={{ width: 120, height: 320, backgroundColor: '#1a1a1a', borderRadius: 20, borderWidth: 4, borderColor: '#333', justifyContent: 'space-evenly', alignItems: 'center', paddingVertical: 10 }}>
-            {/* Red Light */}
-            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 1 ? '#ff3333' : '#4a1111', borderWidth: 2, borderColor: '#111', shadowColor: '#ff0000', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 1 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 1 ? 10 : 0 }} />
-            {/* Yellow Light */}
-            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 2 ? '#ffcc00' : '#4a3b00', borderWidth: 2, borderColor: '#111', shadowColor: '#ffcc00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 2 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 2 ? 10 : 0 }} />
-            {/* Green Light */}
-            <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: lightState >= 3 ? '#33ff33' : '#114a11', borderWidth: 2, borderColor: '#111', shadowColor: '#00ff00', shadowOffset: { width: 0, height: 0 }, shadowOpacity: lightState >= 3 ? 0.8 : 0, shadowRadius: 20, elevation: lightState >= 3 ? 10 : 0 }} />
-          </View>
+        <View style={[styles.flashingCard, { padding: 0, borderWidth: 0, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center' }]}>
+          <TrafficLightCountdown lightState={lightState} />
         </View>
       );
     }
