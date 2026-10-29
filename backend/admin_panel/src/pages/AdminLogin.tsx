@@ -18,12 +18,15 @@ const AdminLogin = () => {
     setIsLoading(true);
     setError('');
     
-    // Simulate API call and validation error
+    // Validate credentials
     setTimeout(() => {
       setIsLoading(false);
-      if (formData.username !== 'doniyor' || formData.password !== 'doniyor') {
+      const cleanUsername = formData.username.trim().toLowerCase();
+      const cleanPassword = formData.password.trim();
+      if (cleanUsername !== 'iqromax' || cleanPassword !== 'muhammadusmon2026') {
         setError('Login yoki parol noto\'g\'ri! Qaytadan urinib ko\'ring.');
       } else {
+        localStorage.setItem('admin_auth', 'true');
         navigate('/dashboard');
       }
     }, 1500);

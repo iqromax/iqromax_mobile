@@ -10,6 +10,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
+    localStorage.removeItem('admin_auth');
     navigate('/login');
   };
 
