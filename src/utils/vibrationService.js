@@ -1,99 +1,48 @@
 import { Platform, Vibration } from 'react-native';
-
-let Haptics = null;
-try {
-  Haptics = require('expo-haptics');
-} catch (e) {
-  Haptics = null;
-}
+import * as Haptics from 'expo-haptics';
 
 /**
- * Multi-stage tactile vibration for entering Clan portal.
- * Works seamlessly across Android (Vibrator & HapticEngine) and iOS (Taptic Engine).
+ * Triggers exactly ONE single crisp, premium haptic vibration.
+ * Works reliably on iOS (iPhone Taptic Engine) and Android (Vibrator).
  */
-export const triggerPortalWarpHaptics = () => {
-  // 1. Expo Haptics (Taptic Engine / Native Haptic Generator)
-  try {
-    if (Haptics) {
-      if (Haptics.impactAsync && Haptics.ImpactFeedbackStyle) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
-      }
-      setTimeout(() => {
-        if (Haptics && Haptics.impactAsync && Haptics.ImpactFeedbackStyle) {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
-        }
-      }, 220);
-      setTimeout(() => {
-        if (Haptics && Haptics.notificationAsync && Haptics.NotificationFeedbackType) {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-        } else if (Haptics && Haptics.impactAsync && Haptics.ImpactFeedbackStyle) {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
-        }
-      }, 530);
-    }
-  } catch (e) {}
+export const triggerSingleVibration = () => {
+  let hapticsTriggered = false;
 
-  // 2. React Native Native Vibration Engine
+  // 1. Primary: Expo Haptics (Directly drives Apple Taptic Engine on iOS and Android HapticFeedback)
+  try {
+    if (Haptics && typeof Haptics.impactAsync === 'function') {
+      const style = Haptics.ImpactFeedbackStyle?.Heavy ?? Haptics.ImpactFeedbackStyle?.Medium;
+      Haptics.impactAsync(style).catch(() => {});
+      hapticsTriggered = true;
+    }
+  } catch (e) {
+    hapticsTriggered = false;
+  }
+
+  // 2. Fallback / Complement via React Native Vibration API
   try {
     if (Platform.OS === 'ios') {
-      // iOS Vibration requires no arguments to vibrate for default 400ms
-      Vibration.vibrate();
-      setTimeout(() => {
-        try {
-          Vibration.vibrate();
-        } catch (e) {}
-      }, 530);
+      // On iOS, if Haptics didn't trigger, trigger system vibration
+      if (!hapticsTriggered) {
+        Vibration.vibrate();
+      }
     } else {
-      // Android: Strong multi-burst pattern (non-zero start to prevent driver drop)
-      Vibration.vibrate([0, 180, 90, 220, 70, 320]);
-      setTimeout(() => {
-        try {
-          Vibration.vibrate(280);
-        } catch (e) {}
-      }, 530);
+      // On Android, trigger exactly ONE single short vibration pulse (100ms)
+      Vibration.vibrate(100);
     }
   } catch (e) {}
 };
 
 /**
- * Multi-stage tactile vibration for returning to IQROMAX main system.
+ * Exactly one vibration for entering Clan portal
+ */
+export const triggerPortalWarpHaptics = () => {
+  triggerSingleVibration();
+};
+
+/**
+ * Exactly one vibration for returning to IQROMAX main system
  */
 export const triggerReturnPortalHaptics = () => {
-  // 1. Expo Haptics
-  try {
-    if (Haptics) {
-      if (Haptics.impactAsync && Haptics.ImpactFeedbackStyle) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
-      }
-      setTimeout(() => {
-        if (Haptics && Haptics.impactAsync && Haptics.ImpactFeedbackStyle) {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-        }
-      }, 200);
-      setTimeout(() => {
-        if (Haptics && Haptics.notificationAsync && Haptics.NotificationFeedbackType) {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-        }
-      }, 510);
-    }
-  } catch (e) {}
-
-  // 2. React Native Vibration
-  try {
-    if (Platform.OS === 'ios') {
-      Vibration.vibrate();
-      setTimeout(() => {
-        try {
-          Vibration.vibrate();
-        } catch (e) {}
-      }, 510);
-    } else {
-      Vibration.vibrate([0, 160, 80, 200, 60, 280]);
-      setTimeout(() => {
-        try {
-          Vibration.vibrate(260);
-        } catch (e) {}
-      }, 510);
-    }
-  } catch (e) {}
+  triggerSingleVibration();
 };
