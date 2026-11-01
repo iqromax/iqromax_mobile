@@ -12,6 +12,7 @@ import {
   Alert,
   Easing,
   BackHandler,
+  Vibration,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -200,6 +201,17 @@ export default function ClanHomeScreen({ navigation, route }) {
     exitFlashAnim.setValue(0);
     exitProgressAnim.setValue(0);
 
+    // Haptic Vibration for reverse portal return
+    try {
+      Vibration.vibrate([0, 45, 60, 80, 40, 120]);
+    } catch (e) {}
+
+    setTimeout(() => {
+      try {
+        Vibration.vibrate(80);
+      } catch (e) {}
+    }, 520);
+
     Animated.parallel([
       Animated.timing(exitOpacityAnim, {
         toValue: 1,
@@ -350,65 +362,143 @@ export default function ClanHomeScreen({ navigation, route }) {
           contentContainerStyle={[styles.scrollInner, { paddingBottom: insets.bottom + 90 }]}
           showsVerticalScrollIndicator={false}
         >
-          {/* 1. HERO CARD: "Hali hech qanday clanga a'zo emassiz" */}
+          {/* 1. HERO CARD: "Hali hech qanday clanga a'zo emassiz" (Holographic Gateway & Perks) */}
           <View style={styles.heroCard}>
-            {/* Hero Artwork on the Right with Gradient Overlay */}
-            <View style={styles.heroArtWrapper}>
-              <Image
-                source={require('../assets/clan_hero_banner.jpg')}
-                style={styles.heroArtImage}
-                contentFit="cover"
-              />
-              <LinearGradient
-                colors={['#101124', 'rgba(16, 17, 36, 0.75)', 'transparent']}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 0.7, y: 0.5 }}
-                style={StyleSheet.absoluteFillObject}
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(16, 17, 36, 0.95)', '#101124']}
-                start={{ x: 0.5, y: 0.3 }}
-                end={{ x: 0.5, y: 1 }}
-                style={StyleSheet.absoluteFillObject}
-              />
+            {/* Mesh Gradient Card Backdrop */}
+            <LinearGradient
+              colors={['#17113E', '#100E2B', '#090A1A']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+            />
+
+            {/* Ambient Corner Glow Orbs */}
+            <View style={styles.heroAmbientGlowTop} />
+            <View style={styles.heroAmbientGlowBottom} />
+
+            {/* Top Row: Content & Holographic Shield Sanctum */}
+            <View style={styles.heroTopRow}>
+              {/* Left Column: Text & Perks */}
+              <View style={styles.heroLeftCol}>
+                {/* Status Indicator Pill */}
+                <View style={styles.heroStatusBadge}>
+                  <View style={styles.heroStatusDotPulse}>
+                    <View style={styles.heroStatusDot} />
+                  </View>
+                  <Text style={styles.heroStatusBadgeText}>STATUS: ERKIN O'YINCHI</Text>
+                </View>
+
+                <Text style={styles.heroTitle}>
+                  Hali hech qanday{'\n'}
+                  <Text style={styles.heroTitleHighlight}>clanga a'zo emassiz</Text>
+                </Text>
+
+                <Text style={styles.heroDesc}>
+                  Clanga qo'shiling yoki o'z clangingizni yarating va jamoa bilan katta natijalarga erishing!
+                </Text>
+
+                {/* Clan Perks Preview Chips */}
+                <View style={styles.heroPerksRow}>
+                  <View style={styles.heroPerkChip}>
+                    <Text style={styles.heroPerkIcon}>⚡</Text>
+                    <Text style={styles.heroPerkText}>+15% XP</Text>
+                  </View>
+                  <View style={styles.heroPerkChip}>
+                    <Text style={styles.heroPerkIcon}>🛡️</Text>
+                    <Text style={styles.heroPerkText}>Jamoa missiyalari</Text>
+                  </View>
+                  <View style={styles.heroPerkChip}>
+                    <Text style={styles.heroPerkIcon}>🏆</Text>
+                    <Text style={styles.heroPerkText}>Mavsum kubogi</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Right Column: Holographic Cyber-Shield Sanctum */}
+              <View style={styles.hologramSanctum}>
+                <LinearGradient
+                  colors={['rgba(168, 85, 247, 0.45)', 'rgba(59, 130, 246, 0.2)', 'transparent']}
+                  style={styles.hologramGlow}
+                />
+                <Svg width={105} height={105} viewBox="0 0 100 100">
+                  <Defs>
+                    <SvgGradient id="holoShieldGrad" x1="0" y1="0" x2="1" y2="1">
+                      <Stop offset="0%" stopColor="#C084FC" />
+                      <Stop offset="50%" stopColor="#8B5CF6" />
+                      <Stop offset="100%" stopColor="#4C1D95" />
+                    </SvgGradient>
+                    <SvgGradient id="holoCrownGrad" x1="0" y1="0" x2="1" y2="1">
+                      <Stop offset="0%" stopColor="#FDE68A" />
+                      <Stop offset="100%" stopColor="#F59E0B" />
+                    </SvgGradient>
+                  </Defs>
+                  {/* Outer dashed energy ring */}
+                  <Circle
+                    cx="50"
+                    cy="50"
+                    r="44"
+                    fill="none"
+                    stroke="#A855F7"
+                    strokeWidth="1.2"
+                    strokeDasharray="4 4"
+                    opacity={0.65}
+                  />
+                  {/* Inner geometric hex */}
+                  <Polygon
+                    points="50,14 82,30 82,70 50,86 18,70 18,30"
+                    fill="none"
+                    stroke="#7C3AED"
+                    strokeWidth="1.2"
+                    opacity={0.4}
+                  />
+                  {/* Stylized Clan Shield */}
+                  <Path
+                    d="M50 20L28 32v22c0 14 9.5 27 22 30 12.5-3 22-16 22-30V32L50 20z"
+                    fill="url(#holoShieldGrad)"
+                    stroke="#E9D5FF"
+                    strokeWidth="1.8"
+                  />
+                  {/* Golden Crown on Shield */}
+                  <Path
+                    d="M38 46l3.5 12h17l3.5-12-6 5-6-9-6 9-6-5z"
+                    fill="url(#holoCrownGrad)"
+                  />
+                  {/* Center Star Core */}
+                  <Circle cx="50" cy="53" r="3" fill="#FFFFFF" />
+                </Svg>
+                <View style={styles.holoBadgePill}>
+                  <MaterialCommunityIcons name="shield-lock-outline" size={11} color="#C084FC" />
+                  <Text style={styles.holoBadgeText}>CLAN ZALI</Text>
+                </View>
+              </View>
             </View>
 
-            {/* Hero Content */}
-            <View style={styles.heroContent}>
-              <Text style={styles.heroTitle}>
-                Hali hech qanday{'\n'}clanga a'zo emassiz
-              </Text>
-              <Text style={styles.heroDesc}>
-                Clanga qo'shiling yoki o'z clangingizni yarating va jamoa bilan katta natijalarga erishing!
-              </Text>
-
-              {/* Action Buttons Row */}
-              <View style={styles.heroButtonsRow}>
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  style={styles.heroBtnPrimary}
-                  onPress={handleCreateClan}
+            {/* Action Buttons Row */}
+            <View style={styles.heroButtonsRow}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={styles.heroBtnPrimary}
+                onPress={handleCreateClan}
+              >
+                <LinearGradient
+                  colors={['#9333EA', '#7C3AED']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.heroBtnGradient}
                 >
-                  <LinearGradient
-                    colors={['#9333EA', '#7C3AED']}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.heroBtnGradient}
-                  >
-                    <Feather name="plus" size={17} color="#FFFFFF" />
-                    <Text style={styles.heroBtnPrimaryText}>Clan yaratish</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+                  <Feather name="plus" size={17} color="#FFFFFF" />
+                  <Text style={styles.heroBtnPrimaryText}>Clan yaratish</Text>
+                </LinearGradient>
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  style={styles.heroBtnSecondary}
-                  onPress={handleSearchClan}
-                >
-                  <Feather name="search" size={16} color="#FFFFFF" />
-                  <Text style={styles.heroBtnSecondaryText}>Clan izlash</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={styles.heroBtnSecondary}
+                onPress={handleSearchClan}
+              >
+                <Feather name="search" size={16} color="#FFFFFF" />
+                <Text style={styles.heroBtnSecondaryText}>Clan izlash</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -1065,64 +1155,162 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
 
-  /* Hero Card */
+  /* Hero Card (Holographic Gateway & Perks) */
   heroCard: {
-    backgroundColor: '#101124',
+    backgroundColor: '#100E2B',
     borderRadius: 24,
     borderWidth: 1.2,
-    borderColor: 'rgba(168, 85, 247, 0.22)',
+    borderColor: 'rgba(168, 85, 247, 0.28)',
     overflow: 'hidden',
     position: 'relative',
-    padding: 20,
-    minHeight: 220,
-    justifyContent: 'center',
+    padding: 18,
+    shadowColor: '#9333EA',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  heroArtWrapper: {
+  heroAmbientGlowTop: {
     position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    width: '65%',
-    overflow: 'hidden',
+    top: -40,
+    right: -40,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(168, 85, 247, 0.18)',
   },
-  heroArtImage: {
-    width: '100%',
-    height: '100%',
-    opacity: 0.85,
+  heroAmbientGlowBottom: {
+    position: 'absolute',
+    bottom: -30,
+    left: -30,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
   },
-  heroContent: {
-    position: 'relative',
-    zIndex: 2,
+  heroTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  heroLeftCol: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  heroStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.3)',
+    borderRadius: 12,
+    paddingHorizontal: 9,
+    paddingVertical: 3.5,
+    marginBottom: 8,
+  },
+  heroStatusDotPulse: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(192, 132, 252, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 5,
+  },
+  heroStatusDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: '#C084FC',
+  },
+  heroStatusBadgeText: {
+    fontSize: 9.5,
+    fontFamily: 'Inter_700Bold',
+    color: '#E9D5FF',
+    letterSpacing: 0.6,
   },
   heroTitle: {
-    fontSize: 21,
-    fontFamily: 'Inter_700Bold',
+    fontSize: 19.5,
+    fontFamily: 'Inter_800ExtraBold',
     color: '#FFFFFF',
-    lineHeight: 27,
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    lineHeight: 25,
+  },
+  heroTitleHighlight: {
+    color: '#C084FC',
   },
   heroDesc: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontFamily: 'Inter_500Medium',
-    color: 'rgba(224, 231, 255, 0.75)',
-    lineHeight: 18,
-    marginTop: 8,
-    maxWidth: '68%',
-    textShadowColor: 'rgba(0, 0, 0, 0.8)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: 'rgba(224, 231, 255, 0.72)',
+    lineHeight: 17,
+    marginTop: 6,
+  },
+  heroPerksRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 10,
+  },
+  heroPerkChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+  },
+  heroPerkIcon: {
+    fontSize: 10,
+    marginRight: 4,
+  },
+  heroPerkText: {
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#E0E7FF',
+  },
+  hologramSanctum: {
+    width: 105,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  hologramGlow: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    opacity: 0.8,
+  },
+  holoBadgePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(20, 16, 45, 0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.4)',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginTop: -4,
+  },
+  holoBadgeText: {
+    fontSize: 8.5,
+    fontFamily: 'Inter_800ExtraBold',
+    color: '#E9D5FF',
+    letterSpacing: 0.6,
+    marginLeft: 3,
   },
   heroButtonsRow: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 20,
+    marginTop: 16,
   },
   heroBtnPrimary: {
     flex: 1,
-    height: 44,
-    borderRadius: 22,
+    height: 42,
+    borderRadius: 21,
     overflow: 'hidden',
     shadowColor: '#9333EA',
     shadowOffset: { width: 0, height: 4 },
@@ -1135,28 +1323,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
   },
   heroBtnPrimaryText: {
-    fontSize: 13.5,
-    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    fontFamily: 'Inter_700Bold',
     color: '#FFFFFF',
     marginLeft: 6,
   },
   heroBtnSecondary: {
     flex: 1,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(12, 13, 28, 0.85)',
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: 'rgba(15, 16, 35, 0.85)',
     borderWidth: 1.2,
-    borderColor: 'rgba(255, 255, 255, 0.22)',
+    borderColor: 'rgba(168, 85, 247, 0.45)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
   },
   heroBtnSecondaryText: {
-    fontSize: 13.5,
+    fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
     color: '#FFFFFF',
     marginLeft: 6,

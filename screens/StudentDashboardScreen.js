@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator, Share, DeviceEventEmitter } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, Animated, ScrollView, Platform, UIManager, LayoutAnimation, TextInput, Alert, Modal, Easing, KeyboardAvoidingView, ActivityIndicator, Share, DeviceEventEmitter, Vibration } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, ImageBackground } from 'expo-image';
@@ -693,6 +693,17 @@ export default function StudentDashboardScreen({ navigation, route }) {
       portalOpacityAnim.setValue(0);
       portalFlashAnim.setValue(0);
       portalProgressAnim.setValue(0);
+
+      // Haptic Vibration for portal warp entry
+      try {
+        Vibration.vibrate([0, 50, 70, 90, 50, 140]);
+      } catch (e) {}
+
+      setTimeout(() => {
+        try {
+          Vibration.vibrate(80);
+        } catch (e) {}
+      }, 540);
 
       Animated.parallel([
         Animated.timing(portalOpacityAnim, {
