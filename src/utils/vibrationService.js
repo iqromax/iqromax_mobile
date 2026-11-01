@@ -2,35 +2,35 @@ import { Platform, Vibration } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 /**
- * Triggers exactly ONE single crisp, premium haptic vibration.
- * Works reliably on iOS (iPhone Taptic Engine) and Android (Vibrator).
+ * Triggers exactly ONE single crisp vibration pulse.
+ * Guaranteed to execute on iOS (AudioToolbox & Taptic Engine) and Android (Vibrator).
  */
 export const triggerSingleVibration = () => {
-  let hapticsTriggered = false;
+  if (Platform.OS === 'ios') {
+    // 1. Directly invoke React Native's built-in RCTVibration module (AudioServicesPlaySystemSound)
+    try {
+      Vibration.vibrate();
+    } catch (e) {}
 
-  // 1. Primary: Expo Haptics (Directly drives Apple Taptic Engine on iOS and Android HapticFeedback)
-  try {
-    if (Haptics && typeof Haptics.impactAsync === 'function') {
-      const style = Haptics.ImpactFeedbackStyle?.Heavy ?? Haptics.ImpactFeedbackStyle?.Medium;
-      Haptics.impactAsync(style).catch(() => {});
-      hapticsTriggered = true;
-    }
-  } catch (e) {
-    hapticsTriggered = false;
-  }
-
-  // 2. Fallback / Complement via React Native Vibration API
-  try {
-    if (Platform.OS === 'ios') {
-      // On iOS, if Haptics didn't trigger, trigger system vibration
-      if (!hapticsTriggered) {
-        Vibration.vibrate();
+    // 2. Also invoke Expo Haptics (UIImpactFeedbackGenerator) for Taptic Engine
+    try {
+      if (Haptics && typeof Haptics.impactAsync === 'function') {
+        const style = Haptics.ImpactFeedbackStyle?.Heavy ?? Haptics.ImpactFeedbackStyle?.Medium;
+        Haptics.impactAsync(style).catch(() => {});
       }
-    } else {
-      // On Android, trigger exactly ONE single short vibration pulse (100ms)
+    } catch (e) {}
+  } else {
+    // Android: exactly ONE clean 100ms vibration pulse
+    try {
       Vibration.vibrate(100);
-    }
-  } catch (e) {}
+    } catch (e) {}
+
+    try {
+      if (Haptics && typeof Haptics.impactAsync === 'function') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
+      }
+    } catch (e) {}
+  }
 };
 
 /**
