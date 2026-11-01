@@ -583,7 +583,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={styles.activeActionCard}
-                  onPress={() => Alert.alert("Clan statistikasi", "Haftalik g'alabalar: 24\nMissiyalar: 86 ta bajarildi\nClan XP: +12,000")}
+                  onPress={() => navigation.navigate('ClanStatisticsScreen')}
                 >
                   <View style={styles.activeActionIconBox}>
                     <Feather name="bar-chart-2" size={22} color="#38BDF8" />
