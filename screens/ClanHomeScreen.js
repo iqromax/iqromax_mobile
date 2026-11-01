@@ -595,10 +595,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={styles.activeActionCard}
-                  onPress={() => {
-                    setActiveBottomTab('Season');
-                    Alert.alert("Leaderboard", "Wolf Legends hozirda turnirda 3-o'rinda!");
-                  }}
+                  onPress={() => navigation.navigate('ClanLeaderboardScreen')}
                 >
                   <View style={styles.activeActionIconBox}>
                     <Ionicons name="trophy-outline" size={22} color="#FBBF24" />
