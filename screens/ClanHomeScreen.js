@@ -451,7 +451,7 @@ export default function ClanHomeScreen({ navigation, route }) {
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.headerIconBtn}
-              onPress={() => Alert.alert("Bildirishnomalar", "Clan bo'yicha yangi bildirishnomalar yo'q")}
+              onPress={() => navigation.navigate('ClanNotificationsScreen')}
             >
               <Feather name="bell" size={20} color="#FFFFFF" />
               <View style={styles.notifDot} />
@@ -607,7 +607,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={styles.activeActionCard}
-                  onPress={() => Alert.alert("Notifications", "Yangi a'zo Lily qo'shildi!\nClan sandig'i 2-bosqichga yetdi (+500 XP)")}
+                  onPress={() => navigation.navigate('ClanNotificationsScreen')}
                 >
                   <View style={styles.activeActionIconBox}>
                     <Feather name="mail" size={22} color="#C084FC" />

@@ -54,6 +54,7 @@ import ClanHomeScreen from './screens/ClanHomeScreen';
 import ClanActivityScreen from './screens/ClanActivityScreen';
 import ClanStatisticsScreen from './screens/ClanStatisticsScreen';
 import ClanLeaderboardScreen from './screens/ClanLeaderboardScreen';
+import ClanNotificationsScreen from './screens/ClanNotificationsScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 import { SoundPlayerBridge } from './src/utils/soundPlayer';
 import { ModelPreloader } from './src/utils/ModelPreloader';
@@ -590,6 +591,7 @@ export default function App() {
           <Stack.Screen name="ClanActivityScreen" component={ClanActivityScreen} />
           <Stack.Screen name="ClanStatisticsScreen" component={ClanStatisticsScreen} />
           <Stack.Screen name="ClanLeaderboardScreen" component={ClanLeaderboardScreen} />
+          <Stack.Screen name="ClanNotificationsScreen" component={ClanNotificationsScreen} />
         </Stack.Navigator>
 
         {/* Global Admin Action (Delete/Block) Alert Modal */}
