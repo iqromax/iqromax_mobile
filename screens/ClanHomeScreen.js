@@ -10,6 +10,8 @@ import {
   Platform,
   Animated,
   Alert,
+  Easing,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -135,24 +137,127 @@ export default function ClanHomeScreen({ navigation, route }) {
   const [joinedClans, setJoinedClans] = useState([]);
   const [requestedClans, setRequestedClans] = useState([]);
 
-  // Fade-in animation when entering screen
+  // Arrival animation when entering screen from dimensional portal
+  const arrivalFlashAnim = useRef(new Animated.Value(1)).current;
+  const arrivalScaleAnim = useRef(new Animated.Value(1.08)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
+  const slideAnim = useRef(new Animated.Value(25)).current;
+
+  // Exit Dimension Warp Animation (Clan -> IQROMAX Main System)
+  const [isExitPortalActive, setIsExitPortalActive] = useState(false);
+  const exitScaleAnim = useRef(new Animated.Value(0.01)).current;
+  const exitRotateAnim = useRef(new Animated.Value(0)).current;
+  const exitCounterRotateAnim = useRef(new Animated.Value(0)).current;
+  const exitRaysScaleAnim = useRef(new Animated.Value(0.2)).current;
+  const exitOpacityAnim = useRef(new Animated.Value(0)).current;
+  const exitFlashAnim = useRef(new Animated.Value(0)).current;
+  const exitProgressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Arrival sequence: portal warp flash dissolves and screen content settles into place
     Animated.parallel([
+      Animated.timing(arrivalFlashAnim, {
+        toValue: 0,
+        duration: 450,
+        useNativeDriver: true,
+      }),
+      Animated.timing(arrivalScaleAnim, {
+        toValue: 1,
+        duration: 500,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 400,
+        duration: 450,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 400,
+        duration: 450,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
+
+    // Android hardware back press listener
+    const onBackPress = () => {
+      handleExitToMainSystem();
+      return true;
+    };
+    const backSub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => backSub.remove();
   }, []);
+
+  const handleExitToMainSystem = () => {
+    if (isExitPortalActive) return;
+    setIsExitPortalActive(true);
+    exitScaleAnim.setValue(0.01);
+    exitRotateAnim.setValue(0);
+    exitCounterRotateAnim.setValue(0);
+    exitRaysScaleAnim.setValue(0.2);
+    exitOpacityAnim.setValue(0);
+    exitFlashAnim.setValue(0);
+    exitProgressAnim.setValue(0);
+
+    Animated.parallel([
+      Animated.timing(exitOpacityAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(exitScaleAnim, {
+        toValue: 26,
+        duration: 920,
+        easing: Easing.bezier(0.18, 0.9, 0.25, 1),
+        useNativeDriver: true,
+      }),
+      Animated.timing(exitRaysScaleAnim, {
+        toValue: 4.8,
+        duration: 920,
+        easing: Easing.bezier(0.16, 1, 0.3, 1),
+        useNativeDriver: true,
+      }),
+      Animated.timing(exitRotateAnim, {
+        toValue: 1,
+        duration: 920,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(exitCounterRotateAnim, {
+        toValue: 1,
+        duration: 920,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(exitProgressAnim, {
+        toValue: 1,
+        duration: 750,
+        easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+        useNativeDriver: false,
+      }),
+      Animated.sequence([
+        Animated.delay(520),
+        Animated.timing(exitFlashAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start(() => {
+      navigation.goBack();
+      setTimeout(() => {
+        setIsExitPortalActive(false);
+        exitScaleAnim.setValue(0.01);
+        exitRotateAnim.setValue(0);
+        exitCounterRotateAnim.setValue(0);
+        exitRaysScaleAnim.setValue(0.2);
+        exitOpacityAnim.setValue(0);
+        exitFlashAnim.setValue(0);
+        exitProgressAnim.setValue(0);
+      }, 500);
+    });
+  };
 
   const handleJoinClan = (clanName) => {
     if (joinedClans.includes(clanName)) return;
@@ -197,10 +302,12 @@ export default function ClanHomeScreen({ navigation, route }) {
           <View style={styles.headerLeft}>
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => navigation.goBack()}
+              onPress={handleExitToMainSystem}
               style={styles.backBreadcrumb}
             >
-              <Feather name="chevron-left" size={16} color="#A8AABD" />
+              <View style={styles.backArrowBadge}>
+                <Feather name="chevron-left" size={16} color="#C084FC" />
+              </View>
               <Text style={styles.headerSubtitle}>IQROMAX Clan</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Home</Text>
@@ -234,7 +341,10 @@ export default function ClanHomeScreen({ navigation, route }) {
             styles.scrollContent,
             {
               opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
+              transform: [
+                { translateY: slideAnim },
+                { scale: arrivalScaleAnim },
+              ],
             },
           ]}
           contentContainerStyle={[styles.scrollInner, { paddingBottom: insets.bottom + 90 }]}
@@ -615,6 +725,259 @@ export default function ClanHomeScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
+
+      {/* Reverse Dimensional Portal Overlay (Clan -> IQROMAX Main System) */}
+      {isExitPortalActive && (
+        <Animated.View
+          pointerEvents="auto"
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              zIndex: 999999,
+              backgroundColor: '#040714',
+              justifyContent: 'center',
+              alignItems: 'center',
+              opacity: exitOpacityAnim,
+            },
+          ]}
+        >
+          {/* Hyperspace Light Streaks (Golden & Cyan IQROMAX aura) */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              width: 380,
+              height: 380,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transform: [
+                { scale: exitRaysScaleAnim },
+                {
+                  rotate: exitRotateAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg'],
+                  }),
+                },
+              ],
+            }}
+          >
+            {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+              <View
+                key={deg}
+                style={{
+                  position: 'absolute',
+                  width: 3,
+                  height: 480,
+                  transform: [{ rotate: `${deg}deg` }],
+                  opacity: 0.7,
+                }}
+              >
+                <LinearGradient
+                  colors={['transparent', '#F59E0B', '#38BDF8', 'transparent']}
+                  style={{ flex: 1 }}
+                />
+              </View>
+            ))}
+          </Animated.View>
+
+          {/* Outer Swirling Warp Vortex (IQROMAX Gold & Blue) */}
+          <Animated.View
+            style={{
+              width: 250,
+              height: 250,
+              borderRadius: 125,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transform: [
+                { scale: exitScaleAnim },
+                {
+                  rotate: exitRotateAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '720deg'],
+                  }),
+                },
+              ],
+            }}
+          >
+            {/* Outer Vortex Gradient Glow */}
+            <LinearGradient
+              colors={['#F59E0B', '#3B82F6', '#06B6D4', '#10B981', '#F59E0B']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                width: 250,
+                height: 250,
+                borderRadius: 125,
+                position: 'absolute',
+                opacity: 0.92,
+              }}
+            />
+
+            {/* Counter-Rotating Rune Ring */}
+            <Animated.View
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 100,
+                borderWidth: 2,
+                borderColor: '#FDE68A',
+                borderStyle: 'dashed',
+                position: 'absolute',
+                transform: [
+                  {
+                    rotate: exitCounterRotateAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '-1080deg'],
+                    }),
+                  },
+                ],
+              }}
+            />
+
+            {/* Inner Dark Eye */}
+            <View
+              style={{
+                width: 150,
+                height: 150,
+                borderRadius: 75,
+                backgroundColor: '#050B1C',
+                borderWidth: 3,
+                borderColor: '#F59E0B',
+                justifyContent: 'center',
+                alignItems: 'center',
+                shadowColor: '#F59E0B',
+                shadowOpacity: 1,
+                shadowRadius: 22,
+                elevation: 15,
+              }}
+            >
+              <MaterialCommunityIcons name="home-variant" size={56} color="#FBBF24" />
+            </View>
+          </Animated.View>
+
+          {/* Hyperdrive Sci-Fi HUD Label & Progress */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              bottom: 110,
+              alignItems: 'center',
+              paddingHorizontal: 24,
+              opacity: exitFlashAnim.interpolate({
+                inputRange: [0, 0.4, 1],
+                outputRange: [1, 0.6, 0],
+              }),
+            }}
+          >
+            {/* Top Holo Pill */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(245, 158, 11, 0.22)',
+                borderWidth: 1,
+                borderColor: 'rgba(245, 158, 11, 0.5)',
+                borderRadius: 12,
+                paddingHorizontal: 12,
+                paddingVertical: 4,
+                marginBottom: 10,
+              }}
+            >
+              <View
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: '#F59E0B',
+                  marginRight: 6,
+                }}
+              />
+              <Text
+                style={{
+                  color: '#FDE68A',
+                  fontSize: 10,
+                  fontFamily: 'Inter_700Bold',
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                }}
+              >
+                DIMENSIYA QAYTISHI | REVERSE WARP
+              </Text>
+            </View>
+
+            <Text
+              style={{
+                color: '#FFFFFF',
+                fontSize: 16,
+                fontFamily: 'Inter_900Black',
+                letterSpacing: 2,
+                textTransform: 'uppercase',
+                textAlign: 'center',
+              }}
+            >
+              IQROMAX TIZIMIGA QAYTILMOQDA...
+            </Text>
+            <Text
+              style={{
+                color: '#93C5FD',
+                fontSize: 11,
+                fontFamily: 'Inter_500Medium',
+                marginTop: 4,
+                textAlign: 'center',
+              }}
+            >
+              Bosh sahifa, mashg'ulotlar va shaxsiy kabinet ochilmoqda
+            </Text>
+
+            {/* Glowing Golden Charging Progress Bar */}
+            <View
+              style={{
+                width: 200,
+                height: 4,
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                borderRadius: 2,
+                marginTop: 14,
+                overflow: 'hidden',
+              }}
+            >
+              <Animated.View
+                style={{
+                  height: '100%',
+                  width: exitProgressAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                  backgroundColor: '#F59E0B',
+                  borderRadius: 2,
+                }}
+              />
+            </View>
+          </Animated.View>
+
+          {/* Golden / White Flash Burst at Teleport */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                backgroundColor: '#FFFBEB',
+                opacity: exitFlashAnim,
+              },
+            ]}
+          />
+        </Animated.View>
+      )}
+
+      {/* Arrival Dissipating Flash */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFillObject,
+          {
+            backgroundColor: '#FFFFFF',
+            opacity: arrivalFlashAnim,
+            zIndex: 99998,
+          },
+        ]}
+      />
     </View>
   );
 }
@@ -642,7 +1005,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 2,
-    marginLeft: -4,
+    marginLeft: -2,
+  },
+  backArrowBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(168, 85, 247, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
   },
   headerSubtitle: {
     fontSize: 13,

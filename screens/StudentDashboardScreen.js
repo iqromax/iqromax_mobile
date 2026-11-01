@@ -673,44 +673,68 @@ export default function StudentDashboardScreen({ navigation, route }) {
     return true;
   };
 
-  // Clan Portal Dimension Warp Animation
+  // Clan Portal Dimension Warp Animation (Cinematic Multi-Layer Teleport)
   const [isPortalActive, setIsPortalActive] = useState(false);
   const portalScaleAnim = useRef(new Animated.Value(0.01)).current;
   const portalRotateAnim = useRef(new Animated.Value(0)).current;
+  const portalCounterRotateAnim = useRef(new Animated.Value(0)).current;
+  const portalRaysScaleAnim = useRef(new Animated.Value(0.2)).current;
   const portalOpacityAnim = useRef(new Animated.Value(0)).current;
   const portalFlashAnim = useRef(new Animated.Value(0)).current;
+  const portalProgressAnim = useRef(new Animated.Value(0)).current;
 
   const handleOpenClanWithPortal = () => {
     checkGuestAuth(() => {
       setIsPortalActive(true);
       portalScaleAnim.setValue(0.01);
       portalRotateAnim.setValue(0);
+      portalCounterRotateAnim.setValue(0);
+      portalRaysScaleAnim.setValue(0.2);
       portalOpacityAnim.setValue(0);
       portalFlashAnim.setValue(0);
+      portalProgressAnim.setValue(0);
 
       Animated.parallel([
         Animated.timing(portalOpacityAnim, {
           toValue: 1,
-          duration: 350,
+          duration: 320,
           useNativeDriver: true,
         }),
         Animated.timing(portalScaleAnim, {
-          toValue: 24,
-          duration: 900,
+          toValue: 26,
+          duration: 950,
+          easing: Easing.bezier(0.18, 0.9, 0.25, 1),
+          useNativeDriver: true,
+        }),
+        Animated.timing(portalRaysScaleAnim, {
+          toValue: 4.8,
+          duration: 950,
           easing: Easing.bezier(0.16, 1, 0.3, 1),
           useNativeDriver: true,
         }),
         Animated.timing(portalRotateAnim, {
           toValue: 1,
-          duration: 900,
+          duration: 950,
           easing: Easing.inOut(Easing.cubic),
           useNativeDriver: true,
         }),
+        Animated.timing(portalCounterRotateAnim, {
+          toValue: 1,
+          duration: 950,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(portalProgressAnim, {
+          toValue: 1,
+          duration: 780,
+          easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+          useNativeDriver: false,
+        }),
         Animated.sequence([
-          Animated.delay(500),
+          Animated.delay(540),
           Animated.timing(portalFlashAnim, {
             toValue: 1,
-            duration: 350,
+            duration: 410,
             useNativeDriver: true,
           }),
         ]),
@@ -723,8 +747,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
           setIsPortalActive(false);
           portalScaleAnim.setValue(0.01);
           portalRotateAnim.setValue(0);
+          portalCounterRotateAnim.setValue(0);
+          portalRaysScaleAnim.setValue(0.2);
           portalOpacityAnim.setValue(0);
           portalFlashAnim.setValue(0);
+          portalProgressAnim.setValue(0);
         }, 500);
       });
     });
@@ -7506,7 +7533,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
       </Modal>
 
-      {/* Portal Warp Overlay (Clan Transition Animation) */}
+      {/* Portal Warp Overlay (Clan Transition Animation - Upgraded Cinematic Teleport) */}
       {isPortalActive && (
         <Animated.View
           pointerEvents="auto"
@@ -7521,12 +7548,50 @@ export default function StudentDashboardScreen({ navigation, route }) {
             },
           ]}
         >
-          {/* Swirling Warp Rings */}
+          {/* Hyperspace Light Streaks */}
           <Animated.View
             style={{
-              width: 220,
-              height: 220,
-              borderRadius: 110,
+              position: 'absolute',
+              width: 380,
+              height: 380,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transform: [
+                { scale: portalRaysScaleAnim },
+                {
+                  rotate: portalRotateAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '360deg'],
+                  }),
+                },
+              ],
+            }}
+          >
+            {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+              <View
+                key={deg}
+                style={{
+                  position: 'absolute',
+                  width: 3,
+                  height: 480,
+                  transform: [{ rotate: `${deg}deg` }],
+                  opacity: 0.65,
+                }}
+              >
+                <LinearGradient
+                  colors={['transparent', '#A855F7', '#38BDF8', 'transparent']}
+                  style={{ flex: 1 }}
+                />
+              </View>
+            ))}
+          </Animated.View>
+
+          {/* Outer Swirling Warp Vortex */}
+          <Animated.View
+            style={{
+              width: 250,
+              height: 250,
+              borderRadius: 125,
               justifyContent: 'center',
               alignItems: 'center',
               transform: [
@@ -7540,71 +7605,158 @@ export default function StudentDashboardScreen({ navigation, route }) {
               ],
             }}
           >
-            {/* Outer Vortex Glow */}
+            {/* Outer Vortex Gradient Glow */}
             <LinearGradient
-              colors={['#8B5CF6', '#3B82F6', '#EC4899', '#7C3AED']}
+              colors={['#8B5CF6', '#3B82F6', '#06B6D4', '#EC4899', '#7C3AED']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{
-                width: 220,
-                height: 220,
-                borderRadius: 110,
+                width: 250,
+                height: 250,
+                borderRadius: 125,
                 position: 'absolute',
-                opacity: 0.85,
+                opacity: 0.9,
+              }}
+            />
+
+            {/* Counter-Rotating Rune Ring */}
+            <Animated.View
+              style={{
+                width: 200,
+                height: 200,
+                borderRadius: 100,
+                borderWidth: 2,
+                borderColor: '#E9D5FF',
+                borderStyle: 'dashed',
+                position: 'absolute',
+                transform: [
+                  {
+                    rotate: portalCounterRotateAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '-1080deg'],
+                    }),
+                  },
+                ],
               }}
             />
 
             {/* Inner Dark Eye */}
             <View
               style={{
-                width: 140,
-                height: 140,
-                borderRadius: 70,
-                backgroundColor: '#070518',
+                width: 150,
+                height: 150,
+                borderRadius: 75,
+                backgroundColor: '#05021A',
                 borderWidth: 3,
                 borderColor: '#C084FC',
-                borderStyle: 'dashed',
                 justifyContent: 'center',
                 alignItems: 'center',
+                shadowColor: '#C084FC',
+                shadowOpacity: 1,
+                shadowRadius: 20,
+                elevation: 15,
               }}
             >
-              <MaterialCommunityIcons name="shield-crown" size={54} color="#F5D061" />
+              <MaterialCommunityIcons name="shield-crown" size={58} color="#F5D061" />
             </View>
           </Animated.View>
 
-          {/* Hyperdrive Text Label */}
+          {/* Hyperdrive Sci-Fi HUD Label & Progress */}
           <Animated.View
             style={{
               position: 'absolute',
-              bottom: 120,
+              bottom: 110,
               alignItems: 'center',
+              paddingHorizontal: 24,
               opacity: portalFlashAnim.interpolate({
                 inputRange: [0, 0.4, 1],
-                outputRange: [1, 0.5, 0],
+                outputRange: [1, 0.6, 0],
               }),
             }}
           >
+            {/* Top Holo Pill */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(168, 85, 247, 0.25)',
+                borderWidth: 1,
+                borderColor: 'rgba(192, 132, 252, 0.5)',
+                borderRadius: 12,
+                paddingHorizontal: 12,
+                paddingVertical: 4,
+                marginBottom: 10,
+              }}
+            >
+              <View
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: '#A855F7',
+                  marginRight: 6,
+                }}
+              />
+              <Text
+                style={{
+                  color: '#E9D5FF',
+                  fontSize: 10,
+                  fontFamily: 'Inter_700Bold',
+                  letterSpacing: 1,
+                  textTransform: 'uppercase',
+                }}
+              >
+                KVANT PORTAL AKTIVLASHTIRILDI
+              </Text>
+            </View>
+
+            <Text
+              style={{
+                color: '#FFFFFF',
+                fontSize: 16,
+                fontFamily: 'Inter_900Black',
+                letterSpacing: 2.5,
+                textTransform: 'uppercase',
+                textAlign: 'center',
+              }}
+            >
+              CLAN OLAMIGA O'TILMOQDA...
+            </Text>
             <Text
               style={{
                 color: '#C084FC',
-                fontSize: 14,
-                fontFamily: 'Inter_900Black',
-                letterSpacing: 3,
-                textTransform: 'uppercase',
-              }}
-            >
-              CLAN DUNYOSIGA O'TILMOQDA...
-            </Text>
-            <Text
-              style={{
-                color: '#94A3B8',
                 fontSize: 11,
                 fontFamily: 'Inter_500Medium',
                 marginTop: 4,
+                textAlign: 'center',
               }}
             >
-              Tayyorlaning, jamoalar olami ochilmoqda!
+              Jamoalar va reyting tizimi yuklanmoqda
             </Text>
+
+            {/* Glowing Warp Charging Progress Bar */}
+            <View
+              style={{
+                width: 200,
+                height: 4,
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                borderRadius: 2,
+                marginTop: 14,
+                overflow: 'hidden',
+              }}
+            >
+              <Animated.View
+                style={{
+                  height: '100%',
+                  width: portalProgressAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                  backgroundColor: '#A855F7',
+                  borderRadius: 2,
+                }}
+              />
+            </View>
           </Animated.View>
 
           {/* White / Violet Flash Burst at Teleport */}
