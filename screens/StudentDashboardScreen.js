@@ -21,6 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { isSkinVisibleForGender, getAvatarByName, getUserAvatarSource } from '../src/utils/avatars';
 import { useEnergy } from '../src/hooks/useEnergy';
 import { MYSTERY_TRANSLATIONS } from './MysteryBoxScreen';
+import { triggerPortalWarpHaptics } from '../src/utils/vibrationService';
 
 const COIN_TRANSLATIONS = {
   en: 'Coin',
@@ -694,16 +695,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
       portalFlashAnim.setValue(0);
       portalProgressAnim.setValue(0);
 
-      // Haptic Vibration for portal warp entry
-      try {
-        Vibration.vibrate([0, 50, 70, 90, 50, 140]);
-      } catch (e) {}
-
-      setTimeout(() => {
-        try {
-          Vibration.vibrate(80);
-        } catch (e) {}
-      }, 540);
+      // Cross-platform Haptic & Native Vibrator Trigger
+      triggerPortalWarpHaptics();
 
       Animated.parallel([
         Animated.timing(portalOpacityAnim, {

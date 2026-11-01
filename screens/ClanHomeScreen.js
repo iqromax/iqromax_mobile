@@ -31,6 +31,7 @@ import Svg, {
   Polygon,
   Circle,
 } from 'react-native-svg';
+import { triggerReturnPortalHaptics } from '../src/utils/vibrationService';
 
 const { width } = Dimensions.get('window');
 
@@ -201,16 +202,8 @@ export default function ClanHomeScreen({ navigation, route }) {
     exitFlashAnim.setValue(0);
     exitProgressAnim.setValue(0);
 
-    // Haptic Vibration for reverse portal return
-    try {
-      Vibration.vibrate([0, 45, 60, 80, 40, 120]);
-    } catch (e) {}
-
-    setTimeout(() => {
-      try {
-        Vibration.vibrate(80);
-      } catch (e) {}
-    }, 520);
+    // Cross-platform Haptic & Native Vibrator Trigger
+    triggerReturnPortalHaptics();
 
     Animated.parallel([
       Animated.timing(exitOpacityAnim, {
