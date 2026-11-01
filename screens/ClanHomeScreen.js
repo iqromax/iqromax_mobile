@@ -501,7 +501,7 @@ export default function ClanHomeScreen({ navigation, route }) {
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.featureCard}
-              onPress={() => handleFeaturePress("Jamoa bilan rivojlaning")}
+              onPress={() => navigation.navigate('ClanActivityScreen')}
             >
               <View style={[styles.featureIconWrap, { backgroundColor: 'rgba(192, 132, 252, 0.12)' }]}>
                 <Feather name="users" size={22} color="#C084FC" />
