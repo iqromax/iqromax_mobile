@@ -16,7 +16,6 @@ import {
   Feather,
   MaterialCommunityIcons,
   Ionicons,
-  FontAwesome5,
 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -24,7 +23,7 @@ const { width } = Dimensions.get('window');
 
 export default function ClanLeaderboardScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
-  const [activeScope, setActiveScope] = useState('Global'); // Global | O'zbekiston | Viloyat | Do'stlar
+  const [activeScope, setActiveScope] = useState('Global'); // Global | O'zbekiston | Do'stlar
   const [activePeriod, setActivePeriod] = useState('Umumiy'); // Umumiy | Haftalik | Oylik | Season
   const [userClan, setUserClan] = useState(null);
 
@@ -42,7 +41,7 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
     loadClan();
   }, []);
 
-  // Top 3 Podium Clans (customizable per period)
+  // Top 3 Podium Clans per period
   const getPodiumData = () => {
     switch (activePeriod) {
       case 'Haftalik':
@@ -132,19 +131,14 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* Scrollable Content */}
-        <ScrollView
-          style={styles.scrollContent}
-          contentContainerStyle={[styles.scrollInner, { paddingBottom: insets.bottom + 90 }]}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* 1. SCOPE FILTER PILLS ROW (Global, O'zbekiston, Viloyat, Do'stlar) */}
+        {/* Fixed Top Container (Scope Filter + 3D Podium + Time Period Bar) */}
+        <View style={styles.topFixedContainer}>
+          {/* 1. SCOPE FILTER PILLS ROW (Global, O'zbekiston, Do'stlar - Viloyat removed) */}
           <View style={styles.scopeFilterRow}>
             {[
-              { id: 'Global', label: 'Global', icon: 'globe' },
-              { id: "O'zbekiston", label: "O'zbekiston", icon: 'flag' },
-              { id: 'Viloyat', label: 'Viloyat', icon: 'map-pin' },
-              { id: "Do'stlar", label: "Do'stlar", icon: 'users' },
+              { id: 'Global', label: 'Global' },
+              { id: "O'zbekiston", label: "O'zbekiston" },
+              { id: "Do'stlar", label: "Do'stlar" },
             ].map((tab) => {
               const isActive = activeScope === tab.id;
               return (
@@ -163,7 +157,6 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
                     >
                       {tab.id === 'Global' && <Feather name="globe" size={13} color="#FFFFFF" style={{ marginRight: 5 }} />}
                       {tab.id === "O'zbekiston" && <MaterialCommunityIcons name="flag-variant" size={14} color="#FFFFFF" style={{ marginRight: 4 }} />}
-                      {tab.id === 'Viloyat' && <Ionicons name="location-sharp" size={13} color="#FFFFFF" style={{ marginRight: 4 }} />}
                       {tab.id === "Do'stlar" && <Ionicons name="people" size={13} color="#FFFFFF" style={{ marginRight: 4 }} />}
                       <Text style={styles.scopeTextActive}>{tab.label}</Text>
                     </LinearGradient>
@@ -171,7 +164,6 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
                     <View style={styles.scopeInactiveContent}>
                       {tab.id === 'Global' && <Feather name="globe" size={13} color="#94A3B8" style={{ marginRight: 5 }} />}
                       {tab.id === "O'zbekiston" && <MaterialCommunityIcons name="flag-variant" size={14} color="#94A3B8" style={{ marginRight: 4 }} />}
-                      {tab.id === 'Viloyat' && <Ionicons name="location-outline" size={13} color="#94A3B8" style={{ marginRight: 4 }} />}
                       {tab.id === "Do'stlar" && <Ionicons name="people-outline" size={13} color="#94A3B8" style={{ marginRight: 4 }} />}
                       <Text style={styles.scopeTextInactive}>{tab.label}</Text>
                     </View>
@@ -183,14 +175,13 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
 
           {/* 2. TOP 3 PODIUM SHOWCASE */}
           <View style={styles.podiumContainer}>
-            {/* Visual 1:1 Podium Graphic Backdrop with Interactive Hit Areas */}
             <Image
               source={require('../assets/clan_leaderboard_podium.png')}
               style={styles.podiumImage}
               contentFit="contain"
             />
 
-            {/* Interactive Press Overlays for each pedestal */}
+            {/* Interactive Press Overlays */}
             <TouchableOpacity
               activeOpacity={0.8}
               style={styles.podiumHitRank2}
@@ -209,6 +200,7 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
           </View>
 
           {/* 3. TIME FILTER SEGMENT BAR (Umumiy, Haftalik, Oylik, Season) */}
+          {/* As the user scrolls the clans list below, rows slide underneath this bar */}
           <View style={styles.periodSegmentRow}>
             {['Umumiy', 'Haftalik', 'Oylik', 'Season'].map((period) => {
               const isActive = activePeriod === period;
@@ -235,70 +227,80 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
               );
             })}
           </View>
+        </View>
 
-          {/* 4. CLANS LIST (RANKS 4 TO 10) */}
-          <View style={styles.clansListWrap}>
-            {clansList.map((clan) => (
-              <TouchableOpacity
-                key={clan.rank}
-                activeOpacity={0.85}
-                style={styles.clanRowCard}
-                onPress={() => handleClanPress(clan)}
+        {/* 4. SCROLLABLE CLANS LIST (RANKS 4 TO 10) */}
+        {/* The rows scroll up and slide directly underneath the period segment bar */}
+        <ScrollView
+          style={styles.clansScrollView}
+          contentContainerStyle={[
+            styles.clansScrollInner,
+            { paddingBottom: Math.max(insets.bottom, 12) + 90 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {clansList.map((clan) => (
+            <TouchableOpacity
+              key={clan.rank}
+              activeOpacity={0.85}
+              style={styles.clanRowCard}
+              onPress={() => handleClanPress(clan)}
+            >
+              {/* Rank Number */}
+              <Text style={styles.clanRankNumber}>{clan.rank}</Text>
+
+              {/* Shield Emblem */}
+              <Image
+                source={clan.emblem}
+                style={styles.clanEmblem}
+                contentFit="contain"
+              />
+
+              {/* Clan Info */}
+              <View style={styles.clanInfoCol}>
+                <Text style={styles.clanName}>{clan.name}</Text>
+                <Text style={styles.clanMeta}>
+                  Lv. {clan.level} · {clan.xp}
+                </Text>
+              </View>
+
+              {/* Trend Badge */}
+              <View
+                style={[
+                  styles.trendBadgePill,
+                  clan.trendType === 'up' && styles.trendBadgeUp,
+                  clan.trendType === 'down' && styles.trendBadgeDown,
+                  clan.trendType === 'same' && styles.trendBadgeSame,
+                ]}
               >
-                {/* Rank Number */}
-                <Text style={styles.clanRankNumber}>{clan.rank}</Text>
-
-                {/* Shield Emblem */}
-                <Image
-                  source={clan.emblem}
-                  style={styles.clanEmblem}
-                  contentFit="contain"
-                />
-
-                {/* Clan Info */}
-                <View style={styles.clanInfoCol}>
-                  <Text style={styles.clanName}>{clan.name}</Text>
-                  <Text style={styles.clanMeta}>
-                    Lv. {clan.level} · {clan.xp}
-                  </Text>
-                </View>
-
-                {/* Trend Badge */}
-                <View
+                <Text
                   style={[
-                    styles.trendBadgePill,
-                    clan.trendType === 'up' && styles.trendBadgeUp,
-                    clan.trendType === 'down' && styles.trendBadgeDown,
-                    clan.trendType === 'same' && styles.trendBadgeSame,
+                    styles.trendBadgeText,
+                    clan.trendType === 'up' && { color: '#34D399' },
+                    clan.trendType === 'down' && { color: '#F87171' },
+                    clan.trendType === 'same' && { color: '#94A3B8' },
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.trendBadgeText,
-                      clan.trendType === 'up' && { color: '#34D399' },
-                      clan.trendType === 'down' && { color: '#F87171' },
-                      clan.trendType === 'same' && { color: '#94A3B8' },
-                    ]}
-                  >
-                    {clan.trendType === 'up' && '↑ '}
-                    {clan.trendType === 'down' && '↓ '}
-                    {clan.trend}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
+                  {clan.trendType === 'up' && '↑ '}
+                  {clan.trendType === 'down' && '↓ '}
+                  {clan.trend}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
 
         {/* 5. USER'S CLAN FLOATING BOTTOM BAR (#14 IQROMAX Clan) */}
+        {/* Solid, non-transparent background so scrolling list is hidden behind it */}
         <View style={[styles.bottomStickyWrap, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           <TouchableOpacity
             activeOpacity={0.88}
             style={styles.userClanStickyCard}
             onPress={() => Alert.alert("Sizning Claningiz", `Clan: ${userClan?.name || 'IQROMAX Clan'}\nReyting: #14\nDaraja: Lv. 12\nXP: 64,320 XP`)}
           >
+            {/* 100% Solid opaque background gradient */}
             <LinearGradient
-              colors={['#1E1345', '#110D28']}
+              colors={['#241552', '#140D30']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFillObject}
@@ -349,51 +351,50 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingTop: 6,
+    paddingBottom: 8,
   },
   backCircleBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
   headerTextCol: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: 21,
+    fontSize: 20,
     fontFamily: 'Inter_900Black',
     color: '#FFFFFF',
     letterSpacing: 0.2,
   },
   headerSubtitle: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontFamily: 'Inter_500Medium',
     color: '#94A3B8',
-    marginTop: 2,
+    marginTop: 1,
   },
 
-  /* Scrollable Content */
-  scrollContent: {
-    flex: 1,
-  },
-  scrollInner: {
+  /* Fixed Top Container (Scope + Podium + Time Period) */
+  topFixedContainer: {
     paddingHorizontal: 16,
-    paddingTop: 6,
+    backgroundColor: '#070814',
+    zIndex: 10,
   },
 
-  /* Scope Filter Tabs */
+  /* Scope Filter Tabs (3 tabs now) */
   scopeFilterRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#110F24',
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 3,
@@ -401,7 +402,7 @@ const styles = StyleSheet.create({
   },
   scopeBtn: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 18,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -412,8 +413,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 7,
-    paddingHorizontal: 8,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    borderRadius: 18,
     width: '100%',
   },
   scopeInactiveContent: {
@@ -421,15 +422,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 7,
-    paddingHorizontal: 6,
+    paddingHorizontal: 10,
   },
   scopeTextActive: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontFamily: 'Inter_700Bold',
     color: '#FFFFFF',
   },
   scopeTextInactive: {
-    fontSize: 11.5,
+    fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
     color: '#94A3B8',
   },
@@ -437,10 +438,10 @@ const styles = StyleSheet.create({
   /* Top 3 Podium */
   podiumContainer: {
     width: '100%',
-    height: 228,
-    marginTop: 14,
+    height: Math.min(width * 0.44, 195),
+    marginTop: 10,
     position: 'relative',
-    borderRadius: 20,
+    borderRadius: 18,
     overflow: 'hidden',
   },
   podiumImage: {
@@ -475,15 +476,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#110F24',
-    borderRadius: 24,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 3,
-    marginTop: 14,
+    marginTop: 10,
+    marginBottom: 8,
   },
   periodBtn: {
     flex: 1,
-    borderRadius: 20,
+    borderRadius: 18,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -491,8 +493,8 @@ const styles = StyleSheet.create({
   periodBtnActive: {},
   periodGradient: {
     paddingVertical: 7,
-    paddingHorizontal: 12,
-    borderRadius: 20,
+    paddingHorizontal: 10,
+    borderRadius: 18,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -509,9 +511,14 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
 
-  /* Clans List */
-  clansListWrap: {
-    marginTop: 14,
+  /* Scrollable Clans List (Ranks 4-10) */
+  clansScrollView: {
+    flex: 1,
+    zIndex: 1,
+  },
+  clansScrollInner: {
+    paddingHorizontal: 16,
+    paddingTop: 2,
   },
   clanRowCard: {
     flexDirection: 'row',
@@ -574,14 +581,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
   },
 
-  /* Bottom User Clan Sticky Bar */
+  /* Bottom User Clan Sticky Bar - 100% Solid, Non-Transparent */
   bottomStickyWrap: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
     paddingHorizontal: 16,
-    backgroundColor: 'transparent',
+    paddingTop: 10,
+    backgroundColor: '#070814', // Solid opaque black/dark background matching the screen!
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    zIndex: 99,
   },
   userClanStickyCard: {
     flexDirection: 'row',
@@ -591,10 +602,11 @@ const styles = StyleSheet.create({
     borderColor: '#8B5CF6',
     paddingVertical: 12,
     paddingHorizontal: 16,
+    backgroundColor: '#160F38', // Solid opaque base color!
     overflow: 'hidden',
     shadowColor: '#9333EA',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
+    shadowOpacity: 0.5,
     shadowRadius: 14,
     elevation: 8,
   },
