@@ -672,6 +672,63 @@ export default function StudentDashboardScreen({ navigation, route }) {
     if (actionCallback) actionCallback();
     return true;
   };
+
+  // Clan Portal Dimension Warp Animation
+  const [isPortalActive, setIsPortalActive] = useState(false);
+  const portalScaleAnim = useRef(new Animated.Value(0.01)).current;
+  const portalRotateAnim = useRef(new Animated.Value(0)).current;
+  const portalOpacityAnim = useRef(new Animated.Value(0)).current;
+  const portalFlashAnim = useRef(new Animated.Value(0)).current;
+
+  const handleOpenClanWithPortal = () => {
+    checkGuestAuth(() => {
+      setIsPortalActive(true);
+      portalScaleAnim.setValue(0.01);
+      portalRotateAnim.setValue(0);
+      portalOpacityAnim.setValue(0);
+      portalFlashAnim.setValue(0);
+
+      Animated.parallel([
+        Animated.timing(portalOpacityAnim, {
+          toValue: 1,
+          duration: 350,
+          useNativeDriver: true,
+        }),
+        Animated.timing(portalScaleAnim, {
+          toValue: 24,
+          duration: 900,
+          easing: Easing.bezier(0.16, 1, 0.3, 1),
+          useNativeDriver: true,
+        }),
+        Animated.timing(portalRotateAnim, {
+          toValue: 1,
+          duration: 900,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.sequence([
+          Animated.delay(500),
+          Animated.timing(portalFlashAnim, {
+            toValue: 1,
+            duration: 350,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start(() => {
+        navigation.navigate('ClanHomeScreen', {
+          user: user,
+          language: language,
+        });
+        setTimeout(() => {
+          setIsPortalActive(false);
+          portalScaleAnim.setValue(0.01);
+          portalRotateAnim.setValue(0);
+          portalOpacityAnim.setValue(0);
+          portalFlashAnim.setValue(0);
+        }, 500);
+      });
+    });
+  };
   
   const [realStats, setRealStats] = useState({ logic: 0, speedTime: '0.0', accuracy: 0 });
   const [battleBestStats, setBattleBestStats] = useState({ victories: 0, bestStreak: 0, fastestTime: '0.0' });
@@ -2801,6 +2858,29 @@ export default function StudentDashboardScreen({ navigation, route }) {
                   </Text>
                 </View>
               </View>
+
+              {/* Card 4: Clan Button */}
+              <TouchableOpacity
+                style={[
+                  styles.rightStatBlock,
+                  {
+                    backgroundColor: 'rgba(124, 58, 237, 0.22)',
+                    borderColor: '#8B5CF6',
+                    shadowColor: '#8B5CF6',
+                    shadowOpacity: 0.7,
+                    shadowRadius: 5,
+                    elevation: 6,
+                  }
+                ]}
+                activeOpacity={0.8}
+                onPress={handleOpenClanWithPortal}
+              >
+                <MaterialCommunityIcons name="shield-crown" size={20} color="#C084FC" />
+                <View style={styles.rightStatTextCol}>
+                  <Text style={[styles.rightStatTopLabel, { color: '#C084FC', letterSpacing: 0.8 }]} numberOfLines={1}>CLAN</Text>
+                  <Text style={[styles.rightStatNumber, { color: '#FFF', fontSize: 11 }]} numberOfLines={1}>JAMOALAR</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -7426,6 +7506,121 @@ export default function StudentDashboardScreen({ navigation, route }) {
         </View>
       </Modal>
 
+      {/* Portal Warp Overlay (Clan Transition Animation) */}
+      {isPortalActive && (
+        <Animated.View
+          pointerEvents="auto"
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              zIndex: 999999,
+              backgroundColor: '#030014',
+              justifyContent: 'center',
+              alignItems: 'center',
+              opacity: portalOpacityAnim,
+            },
+          ]}
+        >
+          {/* Swirling Warp Rings */}
+          <Animated.View
+            style={{
+              width: 220,
+              height: 220,
+              borderRadius: 110,
+              justifyContent: 'center',
+              alignItems: 'center',
+              transform: [
+                { scale: portalScaleAnim },
+                {
+                  rotate: portalRotateAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '720deg'],
+                  }),
+                },
+              ],
+            }}
+          >
+            {/* Outer Vortex Glow */}
+            <LinearGradient
+              colors={['#8B5CF6', '#3B82F6', '#EC4899', '#7C3AED']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                width: 220,
+                height: 220,
+                borderRadius: 110,
+                position: 'absolute',
+                opacity: 0.85,
+              }}
+            />
+
+            {/* Inner Dark Eye */}
+            <View
+              style={{
+                width: 140,
+                height: 140,
+                borderRadius: 70,
+                backgroundColor: '#070518',
+                borderWidth: 3,
+                borderColor: '#C084FC',
+                borderStyle: 'dashed',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <MaterialCommunityIcons name="shield-crown" size={54} color="#F5D061" />
+            </View>
+          </Animated.View>
+
+          {/* Hyperdrive Text Label */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              bottom: 120,
+              alignItems: 'center',
+              opacity: portalFlashAnim.interpolate({
+                inputRange: [0, 0.4, 1],
+                outputRange: [1, 0.5, 0],
+              }),
+            }}
+          >
+            <Text
+              style={{
+                color: '#C084FC',
+                fontSize: 14,
+                fontFamily: 'Inter_900Black',
+                letterSpacing: 3,
+                textTransform: 'uppercase',
+              }}
+            >
+              CLAN DUNYOSIGA O'TILMOQDA...
+            </Text>
+            <Text
+              style={{
+                color: '#94A3B8',
+                fontSize: 11,
+                fontFamily: 'Inter_500Medium',
+                marginTop: 4,
+              }}
+            >
+              Tayyorlaning, jamoalar olami ochilmoqda!
+            </Text>
+          </Animated.View>
+
+          {/* White / Violet Flash Burst at Teleport */}
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                backgroundColor: '#FFFFFF',
+                opacity: portalFlashAnim,
+              },
+            ]}
+          />
+        </Animated.View>
+      )}
+
     </SafeAreaView>
   );
 }
@@ -7698,16 +7893,16 @@ const styles = StyleSheet.create({
   rightSideStatsPanel: {
     position: 'absolute',
     right: 12,
-    top: 110,
+    top: 92,
     width: 112,
     zIndex: 10,
-    gap: 10,
+    gap: 7,
   },
   rightStatBlock: {
     backgroundColor: 'rgba(7, 7, 22, 0.88)',
     borderWidth: 1.5,
     borderRadius: 12,
-    paddingVertical: 7,
+    paddingVertical: 5.5,
     paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',
