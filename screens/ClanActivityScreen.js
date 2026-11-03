@@ -67,15 +67,18 @@ export default function ClanActivityScreen({ navigation, route }) {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         {/* Top Header */}
         <View style={styles.headerRow}>
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={() => navigation.goBack()}
-            style={styles.backBtn}
-          >
-            <Feather name="arrow-left" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-
           <View style={styles.headerTitlesCol}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.backBreadcrumb}
+              onPress={() => navigation.goBack()}
+            >
+              <View style={styles.backArrowBadge}>
+                <Feather name="chevron-left" size={16} color="#C084FC" />
+              </View>
+              <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
+            </TouchableOpacity>
+
             <Text style={styles.screenTitle}>Clan Activity</Text>
             <Text style={styles.screenSubtitle}>Claningizdagi so'nggi faoliyatlar</Text>
           </View>
@@ -514,27 +517,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'android' ? 12 : 4,
-    paddingBottom: 12,
-  },
-  backBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
+    paddingBottom: 10,
   },
   headerTitlesCol: {
     flex: 1,
+  },
+  backBreadcrumb: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    marginLeft: -2,
+  },
+  backArrowBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(168, 85, 247, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  headerSubtitleBadge: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#A8AABD',
   },
   screenTitle: {
     fontSize: 22,
     fontFamily: 'Inter_900Black',
     color: '#FFFFFF',
     letterSpacing: -0.3,
+    marginTop: 2,
   },
   screenSubtitle: {
     fontSize: 12.5,

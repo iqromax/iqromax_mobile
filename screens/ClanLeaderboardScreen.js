@@ -117,16 +117,19 @@ export default function ClanLeaderboardScreen({ navigation, route }) {
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         {/* Top Header */}
         <View style={styles.headerRow}>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            style={styles.backCircleBtn}
-            onPress={() => navigation.goBack()}
-          >
-            <Feather name="arrow-left" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerTitle}>Clan Leaderboard</Text>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.backBreadcrumb}
+              onPress={() => navigation.goBack()}
+            >
+              <View style={styles.backArrowBadge}>
+                <Feather name="chevron-left" size={16} color="#C084FC" />
+              </View>
+              <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.headerTitle}>Season</Text>
             <Text style={styles.headerSubtitle}>Eng kuchli clanlar reytingi</Text>
           </View>
         </View>
@@ -354,25 +357,37 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 8,
   },
-  backCircleBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
   headerTextCol: {
     flex: 1,
   },
+  backBreadcrumb: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    marginLeft: -2,
+  },
+  backArrowBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(168, 85, 247, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  headerSubtitleBadge: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#A8AABD',
+  },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'Inter_900Black',
     color: '#FFFFFF',
     letterSpacing: 0.2,
+    marginTop: 2,
   },
   headerSubtitle: {
     fontSize: 12,

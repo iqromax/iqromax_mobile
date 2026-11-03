@@ -34,7 +34,9 @@ import Svg, {
   Polygon,
   Circle,
 } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
 import { triggerReturnPortalHaptics } from '../src/utils/vibrationService';
+import { MissionsTabContent } from './ClanMissionsScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -218,6 +220,12 @@ export default function ClanHomeScreen({ navigation, route }) {
     const backSub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => backSub.remove();
   }, []);
+
+  useEffect(() => {
+    if (route.params?.tab) {
+      setActiveBottomTab(route.params.tab);
+    }
+  }, [route.params?.tab]);
 
   const handleExitToMainSystem = () => {
     if (isExitPortalActive) return;
@@ -443,7 +451,12 @@ export default function ClanHomeScreen({ navigation, route }) {
               </View>
               <Text style={styles.headerSubtitle}>IQROMAX Clan</Text>
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Home</Text>
+            <Text style={styles.headerTitle}>
+              {activeBottomTab === 'Missions' ? 'Missions' : 'Home'}
+            </Text>
+            {activeBottomTab === 'Missions' && (
+              <Text style={styles.headerMissionsSub}>Jamoaviy vazifalar va mukofotlar</Text>
+            )}
           </View>
 
           <View style={styles.headerRight}>
@@ -457,27 +470,46 @@ export default function ClanHomeScreen({ navigation, route }) {
               <View style={styles.notifDot} />
             </TouchableOpacity>
 
-            {/* Profile Avatar / Icon */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={[styles.headerIconBtn, { marginLeft: 10 }]}
-              onPress={() => {
-                if (userClan) {
-                  handleClanProfileMenu();
-                } else {
-                  Alert.alert("Profil", "Erkin o'yinchi (Hali hech qanday clanga a'zo emassiz)");
-                }
-              }}
-            >
-              <Feather name="user" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
+            {/* Profile Avatar / Icon or Info Icon for Missions */}
+            {activeBottomTab === 'Missions' ? (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={[styles.headerIconBtn, { marginLeft: 10 }]}
+                onPress={() => {
+                  try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {}
+                  Alert.alert(
+                    "Clan Missions Qoidalari",
+                    "• Daily vazifalar har kuni 00:00 da yangilanadi. Ularni bajarib tezkor XP va tangalar yig'asiz.\n\n• Weekly vazifalar har dushanba yangilanadi va Clan sandig'ini ochish uchun kalit hisoblanadi.\n\n• Clan missiyalari barcha a'zolarning birgalikdagi faolligi orqali bajariladi."
+                  );
+                }}
+              >
+                <Feather name="info" size={19} color="#FFFFFF" />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={[styles.headerIconBtn, { marginLeft: 10 }]}
+                onPress={() => {
+                  if (userClan) {
+                    handleClanProfileMenu();
+                  } else {
+                    Alert.alert("Profil", "Erkin o'yinchi (Hali hech qanday clanga a'zo emassiz)");
+                  }
+                }}
+              >
+                <Feather name="user" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
         {/* Scrollable Content */}
-        <Animated.ScrollView
-          style={[
-            styles.scrollContent,
+        {activeBottomTab === 'Missions' ? (
+          <MissionsTabContent navigation={navigation} />
+        ) : (
+          <Animated.ScrollView
+            style={[
+              styles.scrollContent,
             {
               opacity: fadeAnim,
               transform: [
@@ -1143,13 +1175,17 @@ export default function ClanHomeScreen({ navigation, route }) {
             </>
           )}
         </Animated.ScrollView>
+        )}
 
         {/* 5. BOTTOM NAVIGATION BAR (Home, Missions, Season, Clan) */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           {/* Tab 1: Home */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setActiveBottomTab('Home')}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {}
+              setActiveBottomTab('Home');
+            }}
             style={styles.navTabItem}
           >
             {activeBottomTab === 'Home' ? (
@@ -1171,7 +1207,10 @@ export default function ClanHomeScreen({ navigation, route }) {
           {/* Tab 2: Missions */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => navigation.navigate('ClanMissionsScreen')}
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {}
+              setActiveBottomTab('Missions');
+            }}
             style={styles.navTabItem}
           >
             {activeBottomTab === 'Missions' ? (
@@ -1194,8 +1233,8 @@ export default function ClanHomeScreen({ navigation, route }) {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
-              setActiveBottomTab('Season');
-              Alert.alert("Season", "Mavsumiy League va turnirlar bo'limi!");
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {}
+              navigation.navigate('ClanLeaderboardScreen');
             }}
             style={styles.navTabItem}
           >
@@ -1219,8 +1258,8 @@ export default function ClanHomeScreen({ navigation, route }) {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
-              setActiveBottomTab('Clan');
-              Alert.alert("Clan", "Clan profili, a'zolar va baza boshqaruvi!");
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {}
+              navigation.navigate('ClanActivityScreen');
             }}
             style={styles.navTabItem}
           >
@@ -1678,6 +1717,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     color: '#A8AABD',
     marginLeft: 2,
+  },
+  headerMissionsSub: {
+    fontSize: 12,
+    fontFamily: 'Inter_500Medium',
+    color: '#94A3B8',
+    marginTop: 1,
   },
   headerTitle: {
     fontSize: 28,

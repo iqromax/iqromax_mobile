@@ -17,7 +17,6 @@ import {
   Feather,
   MaterialCommunityIcons,
   Ionicons,
-  FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -41,7 +40,7 @@ const DAILY_TASKS = [
     subtitle: "Har qanday bo'limdan 10 ta masalani yeching.",
     xp: 100,
     coins: 20,
-    status: 'completed', // completed | in_progress
+    status: 'completed',
     current: 10,
     target: 10,
     icon: 'book-open',
@@ -188,27 +187,12 @@ const CLAN_TASKS = [
   },
 ];
 
-export default function ClanMissionsScreen({ navigation }) {
+// Reusable Missions Content for both ClanHomeScreen tab and Standalone Screen
+export function MissionsTabContent({ navigation }) {
   const insets = useSafeAreaInsets();
-  const [activeFeatureTab, setActiveFeatureTab] = useState('vazifalar'); // vazifalar | progress | mukofotlar | streak | reyting
-  const [activePeriod, setActivePeriod] = useState('Daily'); // Daily | Weekly | Clan
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [activeFeatureTab, setActiveFeatureTab] = useState('vazifalar');
+  const [activePeriod, setActivePeriod] = useState('Daily');
   const [tasks, setTasks] = useState(DAILY_TASKS);
-  const [userClan, setUserClan] = useState(null);
-
-  useEffect(() => {
-    const loadClan = async () => {
-      try {
-        const stored = await AsyncStorage.getItem('@iqromax_user_clan');
-        if (stored) {
-          setUserClan(JSON.parse(stored));
-        }
-      } catch (e) {
-        console.log('Error loading clan:', e);
-      }
-    };
-    loadClan();
-  }, []);
 
   const triggerHaptic = (type = 'light') => {
     try {
@@ -292,6 +276,369 @@ export default function ClanMissionsScreen({ navigation }) {
   };
 
   return (
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) + 75 }]}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* 1. CLAN MISSIONS HERO CARD */}
+      <View style={styles.heroCard}>
+        <LinearGradient
+          colors={['#23154E', '#130D30', '#0E0922']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFillObject}
+        />
+
+        {/* Left Content */}
+        <View style={styles.heroLeftCol}>
+          {/* Concentric Golden Target Badge */}
+          <View style={styles.heroTargetBadge}>
+            <View style={styles.heroTargetOuterRing}>
+              <View style={styles.heroTargetInnerRing}>
+                <MaterialCommunityIcons name="bullseye-arrow" size={32} color="#FBBF24" />
+              </View>
+            </View>
+          </View>
+
+          <Text style={styles.heroTitle}>Clan Missions</Text>
+          <Text style={styles.heroSubtitle}>
+            Jamoa bo'lib vazifalarni bajaring{'\n'}va katta mukofotlar oling!
+          </Text>
+        </View>
+
+        {/* Right 3D Purple Treasure Chest */}
+        <View style={styles.heroChestWrap}>
+          <View style={styles.chestGlowBehind} />
+          <Image
+            source={require('../assets/clan_chest_purple.jpg')}
+            style={styles.heroChestImage}
+            contentFit="contain"
+          />
+        </View>
+      </View>
+
+      {/* 2. HORIZONTAL FEATURE TABS (5 ITEMS) */}
+      <View style={styles.featureTabsRow}>
+        {FEATURE_TABS.map((tab) => {
+          const isSelected = activeFeatureTab === tab.id;
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              activeOpacity={0.8}
+              style={[
+                styles.featureTabBox,
+                isSelected ? styles.featureTabBoxActive : styles.featureTabBoxInactive,
+              ]}
+              onPress={() => handleFeatureTabPress(tab.id)}
+            >
+              {isSelected && (
+                <LinearGradient
+                  colors={['rgba(139, 92, 246, 0.28)', 'rgba(109, 40, 217, 0.12)']}
+                  style={StyleSheet.absoluteFillObject}
+                />
+              )}
+
+              {tab.family === 'materialCommunity' ? (
+                <MaterialCommunityIcons
+                  name={tab.icon}
+                  size={21}
+                  color={isSelected ? '#C084FC' : '#94A3B8'}
+                />
+              ) : tab.family === 'ionicons' ? (
+                <Ionicons
+                  name={tab.icon}
+                  size={21}
+                  color={isSelected ? '#C084FC' : '#94A3B8'}
+                />
+              ) : (
+                <Feather
+                  name={tab.icon}
+                  size={21}
+                  color={isSelected ? '#C084FC' : '#94A3B8'}
+                />
+              )}
+              <Text
+                style={[
+                  styles.featureTabLabel,
+                  isSelected ? styles.featureTabLabelActive : styles.featureTabLabelInactive,
+                ]}
+                numberOfLines={1}
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* 3. PERIOD FILTER TABS (Daily / Weekly / Clan) */}
+      <View style={styles.periodFilterWrap}>
+        {/* Daily */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.periodBtn}
+          onPress={() => handlePeriodChange('Daily')}
+        >
+          {activePeriod === 'Daily' ? (
+            <LinearGradient
+              colors={['#8B5CF6', '#6D28D9']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.periodActiveGradient}
+            >
+              <Feather name="calendar" size={14} color="#FFFFFF" />
+              <Text style={styles.periodTextActive}>Daily</Text>
+            </LinearGradient>
+          ) : (
+            <View style={styles.periodInactiveInner}>
+              <Feather name="calendar" size={14} color="#94A3B8" />
+              <Text style={styles.periodTextInactive}>Daily</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Weekly */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.periodBtn}
+          onPress={() => handlePeriodChange('Weekly')}
+        >
+          {activePeriod === 'Weekly' ? (
+            <LinearGradient
+              colors={['#8B5CF6', '#6D28D9']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.periodActiveGradient}
+            >
+              <Feather name="calendar" size={14} color="#FFFFFF" />
+              <Text style={styles.periodTextActive}>Weekly</Text>
+            </LinearGradient>
+          ) : (
+            <View style={styles.periodInactiveInner}>
+              <Feather name="calendar" size={14} color="#94A3B8" />
+              <Text style={styles.periodTextInactive}>Weekly</Text>
+              <View style={styles.periodUnreadDot} />
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Clan */}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.periodBtn}
+          onPress={() => handlePeriodChange('Clan')}
+        >
+          {activePeriod === 'Clan' ? (
+            <LinearGradient
+              colors={['#8B5CF6', '#6D28D9']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.periodActiveGradient}
+            >
+              <Feather name="users" size={14} color="#FFFFFF" />
+              <Text style={styles.periodTextActive}>Clan</Text>
+            </LinearGradient>
+          ) : (
+            <View style={styles.periodInactiveInner}>
+              <Feather name="users" size={14} color="#94A3B8" />
+              <Text style={styles.periodTextInactive}>Clan</Text>
+              <View style={styles.periodUnreadDot} />
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* 4. SUMMARY PROGRESS CARD */}
+      <View style={styles.summaryCard}>
+        <View style={styles.summaryTopRow}>
+          {/* Purple calendar-check badge */}
+          <View style={styles.summaryIconBox}>
+            <MaterialCommunityIcons name="calendar-check" size={24} color="#C084FC" />
+          </View>
+
+          {/* Title & Count */}
+          <View style={styles.summaryTextCol}>
+            <Text style={styles.summaryTitle}>
+              {activePeriod === 'Daily'
+                ? 'Bugungi vazifalar'
+                : activePeriod === 'Weekly'
+                ? 'Haftalik vazifalar'
+                : 'Clan jamoaviy vazifalar'}
+            </Text>
+            <Text style={styles.summarySubtitle}>
+              {activePeriod === 'Daily'
+                ? '4 / 6 ta bajarildi'
+                : activePeriod === 'Weekly'
+                ? '2 / 4 ta bajarildi'
+                : '1 / 3 ta bajarildi'}
+            </Text>
+          </View>
+
+          {/* Remaining Time Badge */}
+          <View style={styles.countdownBadge}>
+            <Feather name="clock" size={13} color="#FBBF24" />
+            <Text style={styles.countdownText}>
+              {activePeriod === 'Daily'
+                ? '12 soat 18 daqiqa'
+                : activePeriod === 'Weekly'
+                ? '4 kun qoldi'
+                : 'Mavsum oxirigacha'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Progress Bar & Percentage */}
+        <View style={styles.summaryProgressRow}>
+          <View style={styles.progressTrack}>
+            <LinearGradient
+              colors={['#8B5CF6', '#C084FC']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[
+                styles.progressFill,
+                {
+                  width:
+                    activePeriod === 'Daily'
+                      ? '67%'
+                      : activePeriod === 'Weekly'
+                      ? '50%'
+                      : '33%',
+                },
+              ]}
+            />
+          </View>
+          <Text style={styles.percentageText}>
+            {activePeriod === 'Daily'
+              ? '67%'
+              : activePeriod === 'Weekly'
+              ? '50%'
+              : '33%'}
+          </Text>
+        </View>
+      </View>
+
+      {/* 5. SECTION HEADER */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={styles.sectionTitle}>
+          {activePeriod === 'Daily'
+            ? 'Bugungi vazifalar'
+            : activePeriod === 'Weekly'
+            ? 'Haftalik vazifalar'
+            : 'Clan missiyalari'}
+        </Text>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => {
+            triggerHaptic();
+            Alert.alert(
+              "Barcha vazifalar",
+              "Vazifalarni bajarib umumiy Clan sandig'i darajasini ko'taring va ko'proq mukofotlarga ega bo'ling!"
+            );
+          }}
+        >
+          <Text style={styles.sectionSeeAll}>Barchasini ko'rish ›</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* 6. TASK CARDS LIST */}
+      <View style={styles.tasksList}>
+        {tasks.map((task) => {
+          const isCompleted = task.status === 'completed';
+          return (
+            <TouchableOpacity
+              key={task.id}
+              activeOpacity={0.85}
+              style={[
+                styles.taskCard,
+                isCompleted ? styles.taskCardCompleted : styles.taskCardInProgress,
+              ]}
+              onPress={() => handleTaskPress(task)}
+            >
+              {/* Left Circular Icon Box */}
+              <View
+                style={[
+                  styles.taskIconBox,
+                  isCompleted && styles.taskIconBoxCompleted,
+                ]}
+              >
+                {renderTaskIcon(task)}
+              </View>
+
+              {/* Center Text Info */}
+              <View style={styles.taskCenterCol}>
+                <Text style={styles.taskTitle}>{task.title}</Text>
+                <Text style={styles.taskSubtitle} numberOfLines={2}>
+                  {task.subtitle}
+                </Text>
+
+                {/* Reward Badges */}
+                <View style={styles.taskRewardsRow}>
+                  <View style={styles.rewardXpBadge}>
+                    <MaterialCommunityIcons name="shield-star" size={12} color="#C084FC" />
+                    <Text style={styles.rewardXpText}>+{task.xp} XP</Text>
+                  </View>
+
+                  <View style={styles.rewardCoinBadge}>
+                    <MaterialCommunityIcons name="circle-multiple" size={12} color="#FBBF24" />
+                    <Text style={styles.rewardCoinText}>+{task.coins}</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Right Status or Mini Progress */}
+              {isCompleted ? (
+                <View style={styles.completedBadgePill}>
+                  <Feather name="check" size={13} color="#FFFFFF" />
+                  <Text style={styles.completedBadgeText}>Bajarildi</Text>
+                </View>
+              ) : (
+                <View style={styles.inProgressCol}>
+                  <Text style={styles.progressFraction}>
+                    {task.current} / {task.target}
+                  </Text>
+                  <View style={styles.miniProgressTrack}>
+                    <LinearGradient
+                      colors={['#8B5CF6', '#C084FC']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={[
+                        styles.miniProgressFill,
+                        {
+                          width: `${Math.min(
+                            100,
+                            Math.round((task.current / task.target) * 100)
+                          )}%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </ScrollView>
+  );
+}
+
+// Standalone Screen Export (matches ClanHomeScreen style 1:1)
+export default function ClanMissionsScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+
+  const triggerHaptic = (type = 'light') => {
+    try {
+      if (type === 'medium') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (e) {}
+  };
+
+  return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
@@ -304,12 +651,24 @@ export default function ClanMissionsScreen({ navigation }) {
       />
 
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        {/* TOP HEADER */}
+        {/* TOP HEADER: EXACT IQROMAX CLAN BUTTON MATCHING HOME */}
         <View style={styles.headerRow}>
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerOverline}>
-              {userClan?.name || 'IQROMAX Clan'}
-            </Text>
+            {/* The standard IQROMAX Clan back button */}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                triggerHaptic();
+                navigation.goBack();
+              }}
+              style={styles.backBreadcrumb}
+            >
+              <View style={styles.backArrowBadge}>
+                <Feather name="chevron-left" size={16} color="#C084FC" />
+              </View>
+              <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
+            </TouchableOpacity>
+
             <Text style={styles.headerTitle}>Missions</Text>
             <Text style={styles.headerSubtitle}>Jamoaviy vazifalar va mukofotlar</Text>
           </View>
@@ -342,353 +701,10 @@ export default function ClanMissionsScreen({ navigation }) {
           </View>
         </View>
 
-        {/* MAIN SCROLLABLE CONTENT */}
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) + 70 }]}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* 1. CLAN MISSIONS HERO CARD */}
-          <View style={styles.heroCard}>
-            <LinearGradient
-              colors={['#23154E', '#130D30', '#0E0922']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
-            />
+        {/* MISSIONS MAIN CONTENT */}
+        <MissionsTabContent navigation={navigation} />
 
-            {/* Left Content */}
-            <View style={styles.heroLeftCol}>
-              {/* Concentric Golden Target Badge */}
-              <View style={styles.heroTargetBadge}>
-                <View style={styles.heroTargetOuterRing}>
-                  <View style={styles.heroTargetInnerRing}>
-                    <MaterialCommunityIcons name="bullseye-arrow" size={32} color="#FBBF24" />
-                  </View>
-                </View>
-              </View>
-
-              <Text style={styles.heroTitle}>Clan Missions</Text>
-              <Text style={styles.heroSubtitle}>
-                Jamoa bo'lib vazifalarni bajaring{'\n'}va katta mukofotlar oling!
-              </Text>
-            </View>
-
-            {/* Right 3D Purple Treasure Chest */}
-            <View style={styles.heroChestWrap}>
-              <View style={styles.chestGlowBehind} />
-              <Image
-                source={require('../assets/clan_chest_purple.jpg')}
-                style={styles.heroChestImage}
-                contentFit="contain"
-              />
-            </View>
-          </View>
-
-          {/* 2. HORIZONTAL FEATURE TABS (5 ITEMS) */}
-          <View style={styles.featureTabsRow}>
-            {FEATURE_TABS.map((tab) => {
-              const isSelected = activeFeatureTab === tab.id;
-              return (
-                <TouchableOpacity
-                  key={tab.id}
-                  activeOpacity={0.8}
-                  style={[
-                    styles.featureTabBox,
-                    isSelected ? styles.featureTabBoxActive : styles.featureTabBoxInactive,
-                  ]}
-                  onPress={() => handleFeatureTabPress(tab.id)}
-                >
-                  {isSelected && (
-                    <LinearGradient
-                      colors={['rgba(139, 92, 246, 0.28)', 'rgba(109, 40, 217, 0.12)']}
-                      style={StyleSheet.absoluteFillObject}
-                    />
-                  )}
-
-                  {tab.family === 'materialCommunity' ? (
-                    <MaterialCommunityIcons
-                      name={tab.icon}
-                      size={21}
-                      color={isSelected ? '#C084FC' : '#94A3B8'}
-                    />
-                  ) : tab.family === 'ionicons' ? (
-                    <Ionicons
-                      name={tab.icon}
-                      size={21}
-                      color={isSelected ? '#C084FC' : '#94A3B8'}
-                    />
-                  ) : (
-                    <Feather
-                      name={tab.icon}
-                      size={21}
-                      color={isSelected ? '#C084FC' : '#94A3B8'}
-                    />
-                  )}
-                  <Text
-                    style={[
-                      styles.featureTabLabel,
-                      isSelected ? styles.featureTabLabelActive : styles.featureTabLabelInactive,
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {tab.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          {/* 3. PERIOD FILTER TABS (Daily / Weekly / Clan) */}
-          <View style={styles.periodFilterWrap}>
-            {/* Daily */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.periodBtn}
-              onPress={() => handlePeriodChange('Daily')}
-            >
-              {activePeriod === 'Daily' ? (
-                <LinearGradient
-                  colors={['#8B5CF6', '#6D28D9']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.periodActiveGradient}
-                >
-                  <Feather name="calendar" size={14} color="#FFFFFF" />
-                  <Text style={styles.periodTextActive}>Daily</Text>
-                </LinearGradient>
-              ) : (
-                <View style={styles.periodInactiveInner}>
-                  <Feather name="calendar" size={14} color="#94A3B8" />
-                  <Text style={styles.periodTextInactive}>Daily</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            {/* Weekly */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.periodBtn}
-              onPress={() => handlePeriodChange('Weekly')}
-            >
-              {activePeriod === 'Weekly' ? (
-                <LinearGradient
-                  colors={['#8B5CF6', '#6D28D9']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.periodActiveGradient}
-                >
-                  <Feather name="calendar" size={14} color="#FFFFFF" />
-                  <Text style={styles.periodTextActive}>Weekly</Text>
-                </LinearGradient>
-              ) : (
-                <View style={styles.periodInactiveInner}>
-                  <Feather name="calendar" size={14} color="#94A3B8" />
-                  <Text style={styles.periodTextInactive}>Weekly</Text>
-                  <View style={styles.periodUnreadDot} />
-                </View>
-              )}
-            </TouchableOpacity>
-
-            {/* Clan */}
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={styles.periodBtn}
-              onPress={() => handlePeriodChange('Clan')}
-            >
-              {activePeriod === 'Clan' ? (
-                <LinearGradient
-                  colors={['#8B5CF6', '#6D28D9']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.periodActiveGradient}
-                >
-                  <Feather name="users" size={14} color="#FFFFFF" />
-                  <Text style={styles.periodTextActive}>Clan</Text>
-                </LinearGradient>
-              ) : (
-                <View style={styles.periodInactiveInner}>
-                  <Feather name="users" size={14} color="#94A3B8" />
-                  <Text style={styles.periodTextInactive}>Clan</Text>
-                  <View style={styles.periodUnreadDot} />
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {/* 4. SUMMARY PROGRESS CARD */}
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryTopRow}>
-              {/* Purple calendar-check badge */}
-              <View style={styles.summaryIconBox}>
-                <MaterialCommunityIcons name="calendar-check" size={24} color="#C084FC" />
-              </View>
-
-              {/* Title & Count */}
-              <View style={styles.summaryTextCol}>
-                <Text style={styles.summaryTitle}>
-                  {activePeriod === 'Daily'
-                    ? 'Bugungi vazifalar'
-                    : activePeriod === 'Weekly'
-                    ? 'Haftalik vazifalar'
-                    : 'Clan jamoaviy vazifalar'}
-                </Text>
-                <Text style={styles.summarySubtitle}>
-                  {activePeriod === 'Daily'
-                    ? '4 / 6 ta bajarildi'
-                    : activePeriod === 'Weekly'
-                    ? '2 / 4 ta bajarildi'
-                    : '1 / 3 ta bajarildi'}
-                </Text>
-              </View>
-
-              {/* Remaining Time Badge */}
-              <View style={styles.countdownBadge}>
-                <Feather name="clock" size={13} color="#FBBF24" />
-                <Text style={styles.countdownText}>
-                  {activePeriod === 'Daily'
-                    ? '12 soat 18 daqiqa'
-                    : activePeriod === 'Weekly'
-                    ? '4 kun qoldi'
-                    : 'Mavsum oxirigacha'}
-                </Text>
-              </View>
-            </View>
-
-            {/* Progress Bar & Percentage */}
-            <View style={styles.summaryProgressRow}>
-              <View style={styles.progressTrack}>
-                <LinearGradient
-                  colors={['#8B5CF6', '#C084FC']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={[
-                    styles.progressFill,
-                    {
-                      width:
-                        activePeriod === 'Daily'
-                          ? '67%'
-                          : activePeriod === 'Weekly'
-                          ? '50%'
-                          : '33%',
-                    },
-                  ]}
-                />
-              </View>
-              <Text style={styles.percentageText}>
-                {activePeriod === 'Daily'
-                  ? '67%'
-                  : activePeriod === 'Weekly'
-                  ? '50%'
-                  : '33%'}
-              </Text>
-            </View>
-          </View>
-
-          {/* 5. SECTION HEADER */}
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>
-              {activePeriod === 'Daily'
-                ? 'Bugungi vazifalar'
-                : activePeriod === 'Weekly'
-                ? 'Haftalik vazifalar'
-                : 'Clan missiyalari'}
-            </Text>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => {
-                triggerHaptic();
-                Alert.alert(
-                  "Barcha vazifalar",
-                  "Vazifalarni bajarib umumiy Clan sandig'i darajasini ko'taring va ko'proq mukofotlarga ega bo'ling!"
-                );
-              }}
-            >
-              <Text style={styles.sectionSeeAll}>Barchasini ko'rish ›</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* 6. TASK CARDS LIST */}
-          <View style={styles.tasksList}>
-            {tasks.map((task) => {
-              const isCompleted = task.status === 'completed';
-              return (
-                <TouchableOpacity
-                  key={task.id}
-                  activeOpacity={0.85}
-                  style={[
-                    styles.taskCard,
-                    isCompleted ? styles.taskCardCompleted : styles.taskCardInProgress,
-                  ]}
-                  onPress={() => handleTaskPress(task)}
-                >
-                  {/* Left Circular Icon Box */}
-                  <View
-                    style={[
-                      styles.taskIconBox,
-                      isCompleted && styles.taskIconBoxCompleted,
-                    ]}
-                  >
-                    {renderTaskIcon(task)}
-                  </View>
-
-                  {/* Center Text Info */}
-                  <View style={styles.taskCenterCol}>
-                    <Text style={styles.taskTitle}>{task.title}</Text>
-                    <Text style={styles.taskSubtitle} numberOfLines={2}>
-                      {task.subtitle}
-                    </Text>
-
-                    {/* Reward Badges */}
-                    <View style={styles.taskRewardsRow}>
-                      <View style={styles.rewardXpBadge}>
-                        <MaterialCommunityIcons name="shield-star" size={12} color="#C084FC" />
-                        <Text style={styles.rewardXpText}>+{task.xp} XP</Text>
-                      </View>
-
-                      <View style={styles.rewardCoinBadge}>
-                        <MaterialCommunityIcons name="circle-multiple" size={12} color="#FBBF24" />
-                        <Text style={styles.rewardCoinText}>+{task.coins}</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Right Status or Mini Progress */}
-                  {isCompleted ? (
-                    <View style={styles.completedBadgePill}>
-                      <Feather name="check" size={13} color="#FFFFFF" />
-                      <Text style={styles.completedBadgeText}>Bajarildi</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.inProgressCol}>
-                      <Text style={styles.progressFraction}>
-                        {task.current} / {task.target}
-                      </Text>
-                      <View style={styles.miniProgressTrack}>
-                        <LinearGradient
-                          colors={['#8B5CF6', '#C084FC']}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          style={[
-                            styles.miniProgressFill,
-                            {
-                              width: `${Math.min(
-                                100,
-                                Math.round((task.current / task.target) * 100)
-                              )}%`,
-                            },
-                          ]}
-                        />
-                      </View>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
-
-        {/* 7. BOTTOM NAVIGATION BAR (Home, Missions, Season, Clan) */}
+        {/* BOTTOM NAVIGATION BAR: VERTICAL ACTIVE PILL MATCHING HOME 1:1 */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           {/* Tab 1: Home */}
           <TouchableOpacity
@@ -700,18 +716,18 @@ export default function ClanMissionsScreen({ navigation }) {
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
-              <Feather name="home" size={20} color="#94A3B8" />
+              <Ionicons name="home-outline" size={21} color="#94A3B8" />
               <Text style={styles.inactiveTabLabel}>Home</Text>
             </View>
           </TouchableOpacity>
 
-          {/* Tab 2: Missions (ACTIVE) */}
+          {/* Tab 2: Missions (ACTIVE - VERTICAL PILL LIKE HOME) */}
           <TouchableOpacity
             activeOpacity={0.8}
             style={styles.navTabItem}
           >
             <LinearGradient
-              colors={['rgba(168, 85, 247, 0.45)', 'rgba(99, 102, 241, 0.25)']}
+              colors={['rgba(168, 85, 247, 0.35)', 'rgba(99, 102, 241, 0.22)']}
               style={styles.activeTabPill}
             >
               <MaterialCommunityIcons name="target" size={20} color="#FFFFFF" />
@@ -729,7 +745,7 @@ export default function ClanMissionsScreen({ navigation }) {
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
-              <Ionicons name="trophy-outline" size={21} color="#94A3B8" />
+              <MaterialCommunityIcons name="trophy-outline" size={22} color="#94A3B8" />
               <Text style={styles.inactiveTabLabel}>Season</Text>
             </View>
           </TouchableOpacity>
@@ -744,7 +760,7 @@ export default function ClanMissionsScreen({ navigation }) {
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
-              <Feather name="shield" size={20} color="#94A3B8" />
+              <MaterialCommunityIcons name="shield-outline" size={22} color="#94A3B8" />
               <Text style={styles.inactiveTabLabel}>Clan</Text>
             </View>
           </TouchableOpacity>
@@ -823,18 +839,34 @@ const styles = StyleSheet.create({
   headerTitleCol: {
     flex: 1,
   },
-  headerOverline: {
-    fontSize: 12.5,
+  backBreadcrumb: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    marginLeft: -2,
+  },
+  backArrowBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(168, 85, 247, 0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  headerSubtitleBadge: {
+    fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
-    color: '#94A3B8',
-    letterSpacing: 0.1,
+    color: '#A8AABD',
   },
   headerTitle: {
     fontSize: 25,
     fontFamily: 'Inter_900Black',
     color: '#FFFFFF',
     letterSpacing: 0.2,
-    marginTop: 1,
+    marginTop: 2,
   },
   headerSubtitle: {
     fontSize: 12.5,
@@ -943,7 +975,6 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 45,
     backgroundColor: 'rgba(168, 85, 247, 0.35)',
-    filter: 'blur(20px)',
   },
   heroChestImage: {
     width: '100%',
@@ -1266,42 +1297,38 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
 
-  /* 7. Bottom Navigation Bar */
+  /* 7. Bottom Navigation Bar - Identical to ClanHomeScreen */
   bottomNavBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#070814',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+    backgroundColor: '#090A17',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
     paddingTop: 8,
-    paddingHorizontal: 16,
-    zIndex: 99,
+    paddingHorizontal: 12,
   },
   navTabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    height: 52,
   },
   activeTabPill: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 7,
-    paddingHorizontal: 18,
-    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 22,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: 'rgba(168, 85, 247, 0.5)',
-    gap: 6,
   },
   activeTabLabel: {
-    fontSize: 12,
+    fontSize: 10.5,
     fontFamily: 'Inter_700Bold',
     color: '#FFFFFF',
+    marginTop: 2,
   },
   inactiveTabCol: {
     alignItems: 'center',
