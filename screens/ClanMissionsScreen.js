@@ -241,29 +241,7 @@ export function MissionsTabContent({ navigation }) {
 
   const handleTaskPress = (task) => {
     triggerHaptic();
-    if (task.status === 'completed') {
-      Alert.alert("Bajarildi! 🎉", `"${task.title}" vazifasi muvaffaqiyatli bajarilgan.\nMukofot: +${task.xp} XP va +${task.coins} tanga berildi.`);
-    } else {
-      Alert.alert(
-        task.title,
-        `${task.subtitle}\n\nHozirgi natija: ${task.current} / ${task.target}\nMukofot: +${task.xp} XP, +${task.coins} Coin`,
-        [
-          { text: "Yopish", style: "cancel" },
-          {
-            text: "Bajarishga o'tish",
-            onPress: () => {
-              if (task.title.includes('masala') || task.title.includes('dars')) {
-                navigation.navigate('TeacherCourseLessonsScreen');
-              } else if (task.title.includes('jang')) {
-                navigation.navigate('BattleMatchmakingScreen');
-              } else {
-                navigation.navigate('ClanActivityScreen');
-              }
-            },
-          },
-        ]
-      );
-    }
+    navigation.navigate('ClanMissionDetailScreen', { task });
   };
 
   const renderTaskIcon = (task) => {
