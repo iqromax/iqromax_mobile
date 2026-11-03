@@ -20,6 +20,7 @@ import {
   Ionicons,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -161,8 +162,10 @@ const CATEGORIES = [
   { id: 'system', label: 'Tizim', icon: 'layers', family: 'feather' },
 ];
 
-export default function ClanNotificationsScreen({ navigation }) {
+export default function ClanNotificationsScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const language = route?.params?.language || 'uz';
+  const t = getClanTranslations(language);
   const [activeCategory, setActiveCategory] = useState('all');
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
@@ -306,7 +309,7 @@ export default function ClanNotificationsScreen({ navigation }) {
 
           {/* Title & Subtitle */}
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitle}>Notifications</Text>
+            <Text style={styles.headerTitle}>{t.notifications || 'Xabarnomalar'}</Text>
             <Text style={styles.headerSubtitle}>Clan bilan bog'liq barcha xabarlar</Text>
           </View>
 

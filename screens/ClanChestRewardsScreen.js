@@ -31,6 +31,7 @@ import Svg, {
   G,
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -167,8 +168,10 @@ function ChestAnimatedDisplay({ style }) {
   );
 }
 
-export default function ClanChestRewardsScreen({ navigation }) {
+export default function ClanChestRewardsScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const language = route?.params?.language || 'uz';
+  const t = getClanTranslations(language);
   const [activeTab, setActiveTab] = useState('chest');
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [selectedReward, setSelectedReward] = useState(null);
@@ -484,7 +487,7 @@ export default function ClanChestRewardsScreen({ navigation }) {
         </TouchableOpacity>
 
         <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>Clan Chest & Rewards</Text>
+          <Text style={styles.headerTitle}>{t.seasonRewardsTitle || "Clan Sandig'i va Mukofotlar"}</Text>
           <Text style={styles.headerSubtitle}>Jamoaviy sandiq va mukofotlar</Text>
         </View>
 

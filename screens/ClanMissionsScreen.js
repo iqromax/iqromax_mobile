@@ -273,7 +273,7 @@ export function MissionsTabContent({ navigation, user, language }) {
             </View>
           </View>
 
-          <Text style={styles.heroTitle}>Clan Missions</Text>
+          <Text style={styles.heroTitle}>{t.tabMissions || 'Klan Vazifalari'}</Text>
           <Text style={styles.heroSubtitle}>
             Jamoa bo'lib vazifalarni bajaring{'\n'}va katta mukofotlar oling!
           </Text>
@@ -367,12 +367,12 @@ export function MissionsTabContent({ navigation, user, language }) {
               style={styles.periodActiveGradient}
             >
               <Feather name="calendar" size={14} color="#FFFFFF" />
-              <Text style={styles.periodTextActive}>Daily</Text>
+              <Text style={styles.periodTextActive}>{t.daily || 'Kunlik'}</Text>
             </LinearGradient>
           ) : (
             <View style={styles.periodInactiveInner}>
               <Feather name="calendar" size={14} color="#94A3B8" />
-              <Text style={styles.periodTextInactive}>Daily</Text>
+              <Text style={styles.periodTextInactive}>{t.daily || 'Kunlik'}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -391,12 +391,12 @@ export function MissionsTabContent({ navigation, user, language }) {
               style={styles.periodActiveGradient}
             >
               <Feather name="calendar" size={14} color="#FFFFFF" />
-              <Text style={styles.periodTextActive}>Weekly</Text>
+              <Text style={styles.periodTextActive}>{t.weekly || 'Haftalik'}</Text>
             </LinearGradient>
           ) : (
             <View style={styles.periodInactiveInner}>
               <Feather name="calendar" size={14} color="#94A3B8" />
-              <Text style={styles.periodTextInactive}>Weekly</Text>
+              <Text style={styles.periodTextInactive}>{t.weekly || 'Haftalik'}</Text>
               <View style={styles.periodUnreadDot} />
             </View>
           )}
@@ -416,12 +416,12 @@ export function MissionsTabContent({ navigation, user, language }) {
               style={styles.periodActiveGradient}
             >
               <Feather name="users" size={14} color="#FFFFFF" />
-              <Text style={styles.periodTextActive}>Clan</Text>
+              <Text style={styles.periodTextActive}>{t.tabClan || 'Klan'}</Text>
             </LinearGradient>
           ) : (
             <View style={styles.periodInactiveInner}>
               <Feather name="users" size={14} color="#94A3B8" />
-              <Text style={styles.periodTextInactive}>Clan</Text>
+              <Text style={styles.periodTextInactive}>{t.tabClan || 'Klan'}</Text>
               <View style={styles.periodUnreadDot} />
             </View>
           )}

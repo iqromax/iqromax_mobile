@@ -600,11 +600,11 @@ export default function ClanHomeScreen({ navigation, route }) {
                       {userClan?.name || 'Wolf Legends'}
                     </Text>
                     <Text style={styles.activeClanSubtitle}>
-                      Lv. {userClan?.level || 12} · {userClan?.membersCount || 8}/{userClan?.maxMembers || 10} Members
+                      Lv. {userClan?.level || 12} · {userClan?.membersCount || 8}/{userClan?.maxMembers || 10} {t.membersCount || "A'zolar"}
                     </Text>
                     <View style={styles.activeStatusPill}>
                       <View style={styles.activeGreenDot} />
-                      <Text style={styles.activeStatusText}>Active Clan</Text>
+                      <Text style={styles.activeStatusText}>{t.activeClan || 'Faol Klan'}</Text>
                     </View>
                   </View>
 
@@ -628,7 +628,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 {/* Bottom: Clan XP Progress */}
                 <View style={styles.activeXpSection}>
                   <View style={styles.activeXpLabelsRow}>
-                    <Text style={styles.activeXpTitle}>Clan XP</Text>
+                    <Text style={styles.activeXpTitle}>{t.clanXp || 'Klan XP'}</Text>
                     <Text style={styles.activeXpValue}>7,250 / 10,000</Text>
                   </View>
                   <View style={styles.activeXpProgressBarTrack}>
@@ -653,7 +653,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                   <View style={styles.activeActionIconBox}>
                     <Feather name="flag" size={22} color="#C084FC" />
                   </View>
-                  <Text style={styles.activeActionLabel}>Activity</Text>
+                  <Text style={styles.activeActionLabel}>{t.activity || 'Faollik'}</Text>
                 </TouchableOpacity>
 
                 {/* 2: Statistics */}
@@ -665,7 +665,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                   <View style={styles.activeActionIconBox}>
                     <Feather name="bar-chart-2" size={22} color="#38BDF8" />
                   </View>
-                  <Text style={styles.activeActionLabel}>Statistics</Text>
+                  <Text style={styles.activeActionLabel}>{t.statistics || 'Statistika'}</Text>
                 </TouchableOpacity>
 
                 {/* 3: Leaderboard */}
@@ -677,7 +677,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                   <View style={styles.activeActionIconBox}>
                     <Ionicons name="trophy-outline" size={22} color="#FBBF24" />
                   </View>
-                  <Text style={styles.activeActionLabel}>Leaderboard</Text>
+                  <Text style={styles.activeActionLabel}>{t.leaderboard || 'Reyting'}</Text>
                 </TouchableOpacity>
 
                 {/* 4: Notifications (with unread dot) */}
@@ -690,19 +690,19 @@ export default function ClanHomeScreen({ navigation, route }) {
                     <Feather name="mail" size={22} color="#C084FC" />
                     <View style={styles.actionNotifDot} />
                   </View>
-                  <Text style={styles.activeActionLabel}>Notifications</Text>
+                  <Text style={styles.activeActionLabel}>{t.notifications || 'Xabarnomalar'}</Text>
                 </TouchableOpacity>
               </View>
 
               {/* THIS WEEK SECTION */}
               <View style={styles.activeSectionHeaderRow}>
-                <Text style={styles.activeSectionTitle}>This Week</Text>
+                <Text style={styles.activeSectionTitle}>{t.thisWeek || 'Shu hafta'}</Text>
                 <TouchableOpacity
                   activeOpacity={0.7}
-                  onPress={() => Alert.alert("Weekly Overview", "Bu haftadagi barcha janglar va faolliklar")}
+                  onPress={() => Alert.alert(t.weeklyOverview || "Haftalik hisobot", t.weeklyOverviewDesc || "Bu haftadagi barcha janglar va faolliklar")}
                   style={{ flexDirection: 'row', alignItems: 'center' }}
                 >
-                  <Text style={styles.activeSeeAllLink}>Weekly Overview</Text>
+                  <Text style={styles.activeSeeAllLink}>{t.weeklyOverview || 'Haftalik hisobot'}</Text>
                   <Feather name="chevron-right" size={14} color="#A855F7" style={{ marginLeft: 2 }} />
                 </TouchableOpacity>
               </View>
@@ -712,7 +712,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <View style={styles.thisWeekCol}>
                   <MaterialCommunityIcons name="sword-cross" size={24} color="#EC4899" />
                   <Text style={styles.thisWeekValue}>24</Text>
-                  <Text style={styles.thisWeekLabel}>Battles</Text>
+                  <Text style={styles.thisWeekLabel}>{t.battles || 'Janglar'}</Text>
                 </View>
 
                 <View style={styles.thisWeekDivider} />
@@ -721,7 +721,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <View style={styles.thisWeekCol}>
                   <MaterialCommunityIcons name="target" size={24} color="#10B981" />
                   <Text style={styles.thisWeekValue}>86</Text>
-                  <Text style={styles.thisWeekLabel}>Missions</Text>
+                  <Text style={styles.thisWeekLabel}>{t.missions || 'Vazifalar'}</Text>
                 </View>
 
                 <View style={styles.thisWeekDivider} />
@@ -730,7 +730,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <View style={styles.thisWeekCol}>
                   <Ionicons name="layers" size={24} color="#FBBF24" />
                   <Text style={styles.thisWeekValue}>12K</Text>
-                  <Text style={styles.thisWeekLabel}>Clan XP</Text>
+                  <Text style={styles.thisWeekLabel}>{t.clanXp || 'Klan XP'}</Text>
                 </View>
               </View>
 
@@ -756,13 +756,13 @@ export default function ClanHomeScreen({ navigation, route }) {
                     contentFit="contain"
                   />
                   <View style={styles.seasonMetaCol}>
-                    <Text style={styles.seasonTitle}>Season 5</Text>
-                    <Text style={styles.seasonSubtitle}>Clan Competition</Text>
+                    <Text style={styles.seasonTitle}>{t.season5 || 'Season 5'}</Text>
+                    <Text style={styles.seasonSubtitle}>{t.clanCompetition || 'Klan musobaqasi'}</Text>
                   </View>
 
                   <View style={styles.seasonBadgePill}>
                     <Feather name="clock" size={11} color="#FDE047" />
-                    <Text style={styles.seasonBadgeText}> 18d 12h left</Text>
+                    <Text style={styles.seasonBadgeText}> 18d 12h {t.daysHoursLeft || 'qoldi'}</Text>
                   </View>
 
                   <Feather name="chevron-right" size={16} color="#64748B" style={{ marginLeft: 8 }} />
@@ -784,13 +784,13 @@ export default function ClanHomeScreen({ navigation, route }) {
 
               {/* MEMBERS SECTION */}
               <View style={styles.activeSectionHeaderRow}>
-                <Text style={styles.activeSectionTitle}>Members (10/10)</Text>
+                <Text style={styles.activeSectionTitle}>{t.membersCount || "A'zolar"} (10/10)</Text>
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => navigation.navigate('ClanMembersScreen')}
                   style={{ flexDirection: 'row', alignItems: 'center' }}
                 >
-                  <Text style={styles.activeSeeAllLink}>View All</Text>
+                  <Text style={styles.activeSeeAllLink}>{t.viewAll || 'Barchasi'}</Text>
                   <Feather name="chevron-right" size={14} color="#A855F7" style={{ marginLeft: 2 }} />
                 </TouchableOpacity>
               </View>
@@ -889,16 +889,15 @@ export default function ClanHomeScreen({ navigation, route }) {
                       <View style={styles.heroStatusDotPulse}>
                         <View style={styles.heroStatusDot} />
                       </View>
-                      <Text style={styles.heroStatusBadgeText}>STATUS: ERKIN O'YINCHI</Text>
+                      <Text style={styles.heroStatusBadgeText}>{t.statusFreeAgent || "STATUS: ERKIN O'YINCHI"}</Text>
                     </View>
 
                     <Text style={styles.heroTitle}>
-                      Hali hech qanday{'\n'}
-                      <Text style={styles.heroTitleHighlight}>clanga a'zo emassiz</Text>
+                      {t.notInClanTitle || "Hali hech qanday klanga a'zo emassiz"}
                     </Text>
 
                     <Text style={styles.heroDesc}>
-                      Clanga qo'shiling yoki o'z clangingizni yarating va jamoa bilan katta natijalarga erishing!
+                      {t.notInClanDesc || "Clanga qo'shiling yoki o'z clangingizni yarating va jamoa bilan katta natijalarga erishing!"}
                     </Text>
 
                     {/* Clan Perks Preview Chips */}
@@ -909,11 +908,11 @@ export default function ClanHomeScreen({ navigation, route }) {
                       </View>
                       <View style={styles.heroPerkChip}>
                         <Text style={styles.heroPerkIcon}>🛡️</Text>
-                        <Text style={styles.heroPerkText}>Jamoa missiyalari</Text>
+                        <Text style={styles.heroPerkText}>{t.teamMissions || 'Jamoa missiyalari'}</Text>
                       </View>
                       <View style={styles.heroPerkChip}>
                         <Text style={styles.heroPerkIcon}>🏆</Text>
-                        <Text style={styles.heroPerkText}>Mavsum kubogi</Text>
+                        <Text style={styles.heroPerkText}>{t.seasonCup || 'Mavsum kubogi'}</Text>
                       </View>
                     </View>
                   </View>
@@ -972,7 +971,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                     </Svg>
                     <View style={styles.holoBadgePill}>
                       <MaterialCommunityIcons name="shield-lock-outline" size={11} color="#C084FC" />
-                      <Text style={styles.holoBadgeText}>CLAN ZALI</Text>
+                      <Text style={styles.holoBadgeText}>{t.clanSanctum || 'KLAN ZALI'}</Text>
                     </View>
                   </View>
                 </View>
@@ -991,7 +990,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                       style={styles.heroBtnGradient}
                     >
                       <Feather name="plus" size={17} color="#FFFFFF" />
-                      <Text style={styles.heroBtnPrimaryText}>Clan yaratish</Text>
+                      <Text style={styles.heroBtnPrimaryText}>{t.createClan || 'Clan yaratish'}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
 
@@ -1001,26 +1000,26 @@ export default function ClanHomeScreen({ navigation, route }) {
                     onPress={handleSearchClan}
                   >
                     <Feather name="search" size={16} color="#FFFFFF" />
-                    <Text style={styles.heroBtnSecondaryText}>Clan izlash</Text>
+                    <Text style={styles.heroBtnSecondaryText}>{t.searchClan || 'Clan izlash'}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
               {/* 2. 4 FEATURE CARDS GRID */}
               <View style={styles.featuresRow}>
-                {/* Card 1: Jamoa bilan rivojlaning (Does NOT open Activity screen anymore!) */}
+                {/* Card 1: Jamoa bilan rivojlaning */}
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={styles.featureCard}
                   onPress={() => Alert.alert(
-                    "Jamoa bilan rivojlaning",
+                    t.teamGrow || "Jamoa bilan rivojlaning",
                     "Clan faoliyatini kuzatish uchun avval biror clanga qo'shiling yoki o'z clangingizni yarating!"
                   )}
                 >
                   <View style={[styles.featureIconWrap, { backgroundColor: 'rgba(192, 132, 252, 0.12)' }]}>
                     <Feather name="users" size={22} color="#C084FC" />
                   </View>
-                  <Text style={styles.featureLabel}>Jamoa bilan{'\n'}rivojlaning</Text>
+                  <Text style={styles.featureLabel}>{t.teamGrow || 'Jamoa bilan\nrivojlaning'}</Text>
                 </TouchableOpacity>
 
                 {/* Card 2: Clan vazifalari */}
@@ -1032,7 +1031,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                   <View style={[styles.featureIconWrap, { backgroundColor: 'rgba(56, 189, 248, 0.12)' }]}>
                     <MaterialCommunityIcons name="target" size={24} color="#38BDF8" />
                   </View>
-                  <Text style={styles.featureLabel}>Clan{'\n'}vazifalari</Text>
+                  <Text style={styles.featureLabel}>{t.clanTasks || 'Clan\nvazifalari'}</Text>
                 </TouchableOpacity>
 
                 {/* Card 3: Season reytingi */}
@@ -1044,32 +1043,32 @@ export default function ClanHomeScreen({ navigation, route }) {
                   <View style={[styles.featureIconWrap, { backgroundColor: 'rgba(251, 191, 36, 0.12)' }]}>
                     <MaterialCommunityIcons name="trophy-outline" size={23} color="#FBBF24" />
                   </View>
-                  <Text style={styles.featureLabel}>Season{'\n'}reytingi</Text>
+                  <Text style={styles.featureLabel}>{t.seasonRank || 'Season\nreytingi'}</Text>
                 </TouchableOpacity>
 
                 {/* Card 4: Clan bazasi */}
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={styles.featureCard}
-                  onPress={() => handleFeaturePress("Clan bazasi")}
+                  onPress={() => handleFeaturePress(t.clanBase || "Clan bazasi")}
                 >
                   <View style={[styles.featureIconWrap, { backgroundColor: 'rgba(244, 114, 182, 0.12)' }]}>
                     <MaterialCommunityIcons name="castle" size={23} color="#F472B6" />
                   </View>
-                  <Text style={styles.featureLabel}>Clan{'\n'}bazasi</Text>
+                  <Text style={styles.featureLabel}>{t.clanBase || 'Clan\nbazasi'}</Text>
                 </TouchableOpacity>
               </View>
 
               {/* 3. TAVSIYA ETILGAN CLANLAR SECTION */}
               <View style={styles.recSectionCard}>
                 <View style={styles.recSectionHeader}>
-                  <Text style={styles.recSectionTitle}>Tavsiya etilgan clanlar</Text>
+                  <Text style={styles.recSectionTitle}>{t.recommendedClans || 'Tavsiya etilgan clanlar'}</Text>
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => Alert.alert("Clanlar", "Barcha mavjud clanlar ro'yxati")}
+                    onPress={() => Alert.alert(t.recommendedClans || "Clanlar", "Barcha mavjud clanlar ro'yxati")}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
-                    <Text style={styles.recSeeAllText}>Barchasini ko'rish</Text>
+                    <Text style={styles.recSeeAllText}>{t.viewAll || "Barchasini ko'rish"}</Text>
                     <Feather name="chevron-right" size={14} color="#A855F7" style={{ marginLeft: 2 }} />
                   </TouchableOpacity>
                 </View>
@@ -1110,7 +1109,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                       style={styles.clanActionBtnGradient}
                     >
                       <Text style={styles.clanActionBtnText}>
-                        {joinedClans.includes('Wolf Legends') ? "A'zo" : "Qo'shilish"}
+                        {joinedClans.includes('Wolf Legends') ? (t.joined || "A'zo") : (t.joinClan || "Qo'shilish")}
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -1152,7 +1151,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                       style={styles.clanActionBtnGradient}
                     >
                       <Text style={styles.clanActionBtnText}>
-                        {joinedClans.includes('Math Warriors') ? "A'zo" : "Qo'shilish"}
+                        {joinedClans.includes('Math Warriors') ? (t.joined || "A'zo") : (t.joinClan || "Qo'shilish")}
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -1189,7 +1188,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                         requestedClans.includes('IQROMAX Elite') && { color: '#FBBF24' },
                       ]}
                     >
-                      {requestedClans.includes('IQROMAX Elite') ? "Yuborilgan" : "So'rov yuborish"}
+                      {requestedClans.includes('IQROMAX Elite') ? (t.requestSent || "Yuborilgan") : (t.sendRequest || "So'rov yuborish")}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -1199,7 +1198,7 @@ export default function ClanHomeScreen({ navigation, route }) {
               <TouchableOpacity
                 activeOpacity={0.88}
                 style={styles.rewardBannerCard}
-                onPress={() => Alert.alert("Clan Mukofotlari", "Har haftalik jamoaviy Clan Chest va maxsus sovrinlar!")}
+                onPress={() => Alert.alert(t.clanChestBanner || "Clan Mukofotlari", "Har haftalik jamoaviy Clan Chest va maxsus sovrinlar!")}
               >
                 {/* Glowing Chest Graphic */}
                 <View style={styles.chestImageWrap}>
@@ -1213,7 +1212,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 {/* Text description */}
                 <View style={styles.rewardBannerTextWrap}>
                   <Text style={styles.rewardBannerTitle}>
-                    Clanga qo'shiling va{'\n'}maxsus mukofotlarga ega bo'ling!
+                    {t.clanChestBanner || "Klanga qo'shiling va maxsus mukofotlarga ega bo'ling!"}
                   </Text>
                 </View>
 
@@ -1340,9 +1339,9 @@ export default function ClanHomeScreen({ navigation, route }) {
               {/* Modal Header */}
               <View style={styles.createModalHeader}>
                 <View style={{ flex: 1, marginRight: 8 }}>
-                  <Text style={styles.createModalTitle}>Yangi Clan Yaratish</Text>
+                  <Text style={styles.createModalTitle}>{t.createModalTitle || 'Yangi Klan Yaratish'}</Text>
                   <Text style={styles.createModalSubtitle}>
-                    O'z jamoangizni shakllantiring va birgalikda o'sing!
+                    {t.createModalSubtitle || "O'z jamoangizni shakllantiring va birgalikda o'sing!"}
                   </Text>
                 </View>
                 <TouchableOpacity

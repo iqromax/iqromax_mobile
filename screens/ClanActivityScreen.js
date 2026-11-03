@@ -26,6 +26,7 @@ import Svg, {
   Stop,
   Circle,
 } from 'react-native-svg';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -40,6 +41,8 @@ const FILTER_TABS = [
 
 export default function ClanActivityScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const language = route?.params?.language || 'uz';
+  const t = getClanTranslations(language);
   const [activeFilter, setActiveFilter] = useState('all');
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -84,7 +87,7 @@ export default function ClanActivityScreen({ navigation, route }) {
               <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
             </TouchableOpacity>
 
-            <Text style={styles.screenTitle}>Clan Activity</Text>
+            <Text style={styles.screenTitle}>{t.activity || 'Faollik'}</Text>
             <Text style={styles.screenSubtitle}>Claningizdagi so'nggi faoliyatlar</Text>
           </View>
         </View>
@@ -168,12 +171,12 @@ export default function ClanActivityScreen({ navigation, route }) {
 
               <View style={styles.clanBannerTextCol}>
                 <Text style={styles.clanNameTitle}>Wolf Legends</Text>
-                <Text style={styles.clanMetaText}>Lv. 12  ·  8/10 Members</Text>
+                <Text style={styles.clanMetaText}>Lv. 12  ·  8/10 {t.membersCount || "A'zolar"}</Text>
 
                 {/* Active Clan Pill Badge */}
                 <View style={styles.activeClanPill}>
                   <View style={styles.activeGreenDot} />
-                  <Text style={styles.activeClanText}>Active Clan</Text>
+                  <Text style={styles.activeClanText}>{t.activeClan || 'Faol Klan'}</Text>
                 </View>
               </View>
             </View>

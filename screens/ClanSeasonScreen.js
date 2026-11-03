@@ -292,9 +292,9 @@ export function SeasonTabContent({ navigation, user, language }) {
 
             {/* Season 5 Title & Competition Pill */}
             <View style={styles.seasonTitleWrap}>
-              <Text style={styles.seasonTitleText}>Season 5</Text>
+              <Text style={styles.seasonTitleText}>{t.season5 || 'Season 5'}</Text>
               <View style={styles.competitionPill}>
-                <Text style={styles.competitionPillText}>Clan Competition</Text>
+                <Text style={styles.competitionPillText}>{t.clanCompetition || 'Klan musobaqasi'}</Text>
               </View>
             </View>
 
@@ -501,7 +501,7 @@ export function SeasonTabContent({ navigation, user, language }) {
                 <View style={styles.quickNavIconWrap}>
                   <FontAwesome5 name="crown" size={16} color="#FBBF24" />
                 </View>
-                <Text style={styles.quickNavCardTitle}>League Ranking</Text>
+                <Text style={styles.quickNavCardTitle}>{t.leagueRanking || 'Liga reytingi'}</Text>
                 <Text style={styles.quickNavCardSub}>Reyting va ligalar</Text>
                 <Feather name="chevron-right" size={14} color="#94A3B8" style={styles.quickNavChevron} />
               </TouchableOpacity>
@@ -518,7 +518,7 @@ export function SeasonTabContent({ navigation, user, language }) {
                 <View style={styles.quickNavIconWrap}>
                   <Feather name="gift" size={16} color="#C084FC" />
                 </View>
-                <Text style={styles.quickNavCardTitle}>Season Rewards</Text>
+                <Text style={styles.quickNavCardTitle}>{t.seasonRewardsTitle || 'Mavsum mukofotlari'}</Text>
                 <Text style={styles.quickNavCardSub}>Mavsum mukofotlari</Text>
                 <Feather name="chevron-right" size={14} color="#94A3B8" style={styles.quickNavChevron} />
               </TouchableOpacity>
@@ -535,7 +535,7 @@ export function SeasonTabContent({ navigation, user, language }) {
                 <View style={styles.quickNavIconWrap}>
                   <MaterialCommunityIcons name="sword-cross" size={18} color="#C084FC" />
                 </View>
-                <Text style={styles.quickNavCardTitle}>Tournament</Text>
+                <Text style={styles.quickNavCardTitle}>{t.tournamentTitle || 'Turnir'}</Text>
                 <Text style={styles.quickNavCardSub}>Mavsum turniri</Text>
                 <Feather name="chevron-right" size={14} color="#94A3B8" style={styles.quickNavChevron} />
               </TouchableOpacity>

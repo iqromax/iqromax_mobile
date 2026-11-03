@@ -27,6 +27,7 @@ import Svg, {
   Circle,
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -86,8 +87,10 @@ const PROGRESS_TABS = [
   { id: 'analytics', label: 'Tahlil', icon: 'bar-chart-2', family: 'feather' },
 ];
 
-export default function ClanMissionProgressScreen({ navigation }) {
+export default function ClanMissionProgressScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const language = route?.params?.language || 'uz';
+  const t = getClanTranslations(language);
   const [activeTab, setActiveTab] = useState('members');
   const [members] = useState(INITIAL_MEMBERS);
 
@@ -193,7 +196,7 @@ export default function ClanMissionProgressScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerTitle}>Mission Progress</Text>
+            <Text style={styles.headerTitle}>{t.tabMissions || 'Vazifa jarayoni'}</Text>
             <Text style={styles.headerSubtitle}>Jamoaviy vazifaning umumiy va a'zolar hissasi</Text>
           </View>
         </View>
@@ -246,7 +249,7 @@ export default function ClanMissionProgressScreen({ navigation }) {
               <View style={styles.heroTextCol}>
                 <View style={styles.clanMissionPill}>
                   <Feather name="users" size={11} color="#DDD6FE" />
-                  <Text style={styles.clanMissionPillText}>Clan Mission</Text>
+                  <Text style={styles.clanMissionPillText}>{t.tabClan || 'Klan'} {t.missions || 'Vazifasi'}</Text>
                 </View>
                 <Text style={styles.heroTitle}>Jamoaviy 1,000 ta masala yechish</Text>
                 <Text style={styles.heroSubtitle}>

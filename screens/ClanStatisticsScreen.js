@@ -28,11 +28,14 @@ import Svg, {
   Line,
 } from 'react-native-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
 export default function ClanStatisticsScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const language = route?.params?.language || 'uz';
+  const t = getClanTranslations(language);
   const [selectedFilter, setSelectedFilter] = useState('Hafta'); // Hafta | Oy | Season | Barchasi
   const [userClan, setUserClan] = useState(null);
 
@@ -227,7 +230,7 @@ export default function ClanStatisticsScreen({ navigation, route }) {
           </TouchableOpacity>
 
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerTitle}>Clan Statistics</Text>
+            <Text style={styles.headerTitle}>{t.clanStats || 'Klan statistikasi'}</Text>
             <Text style={styles.headerSubtitle}>Claningizning batafsil ko'rsatkichlari</Text>
           </View>
         </View>
@@ -266,11 +269,11 @@ export default function ClanStatisticsScreen({ navigation, route }) {
                   {userClan?.name || 'Wolf Legends'}
                 </Text>
                 <Text style={styles.clanSubText}>
-                  Lv. {userClan?.level || 12} · {userClan?.membersCount || 8}/{userClan?.maxMembers || 10} Members
+                  Lv. {userClan?.level || 12} · {userClan?.membersCount || 8}/{userClan?.maxMembers || 10} {t.membersCount || "A'zolar"}
                 </Text>
                 <View style={styles.clanStatusPill}>
                   <View style={styles.clanGreenDot} />
-                  <Text style={styles.clanStatusText}>Active Clan</Text>
+                  <Text style={styles.clanStatusText}>{t.activeClan || 'Faol Klan'}</Text>
                 </View>
               </View>
 

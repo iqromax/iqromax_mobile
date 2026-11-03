@@ -24,11 +24,14 @@ import Svg, {
   Polygon,
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
 export default function ClanMissionDetailScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const language = route?.params?.language || 'uz';
+  const t = getClanTranslations(language);
 
   // Task data passed via navigation or fallback default matching mockup 1:1
   const task = route.params?.task || {
@@ -125,7 +128,7 @@ export default function ClanMissionDetailScreen({ navigation, route }) {
           </TouchableOpacity>
 
           <View style={styles.headerTextCol}>
-            <Text style={styles.headerTitle}>Mission Details</Text>
+            <Text style={styles.headerTitle}>{t.tabMissions || 'Vazifa tafsilotlari'}</Text>
             <Text style={styles.headerSubtitle}>Vazifa haqida batafsil ma'lumot</Text>
           </View>
         </View>

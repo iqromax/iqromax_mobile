@@ -30,6 +30,7 @@ import Svg, {
   G,
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -100,8 +101,10 @@ const ACTIVE_MEMBERS = [
   { id: 8, name: 'Nilufar', avatar: require('../assets/avatar_lily.jpg') },
 ];
 
-export default function ClanStreakScreen({ navigation }) {
+export default function ClanStreakScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const language = route?.params?.language || 'uz';
+  const t = getClanTranslations(language);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [selectedMilestone, setSelectedMilestone] = useState(null);
 
@@ -256,7 +259,7 @@ export default function ClanStreakScreen({ navigation }) {
         </TouchableOpacity>
 
         <View style={styles.headerTitleWrap}>
-          <Text style={styles.headerTitle}>Clan Streak</Text>
+          <Text style={styles.headerTitle}>{t.clanStreak || 'Klan seriyasi'}</Text>
           <Text style={styles.headerSubtitle}>Jamoaning ketma-ket faol kunlari</Text>
         </View>
 
