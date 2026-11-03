@@ -9,9 +9,10 @@ import {
   Dimensions,
   Alert,
   Modal,
+  Image as RNImage,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
+import { Image as ExpoImage } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   Feather,
@@ -135,6 +136,36 @@ const PAST_CHEST_HISTORY = [
     status: "Ochilgan va bo'lingan",
   },
 ];
+
+// Dedicated animated chest component for maximum compatibility and smoothness
+function ChestAnimatedDisplay({ style }) {
+  const [useRNFallback, setUseRNFallback] = useState(false);
+  const gifSource = require('../assets/sirli_sandiq_high_quality_nurli.gif');
+
+  if (useRNFallback) {
+    return (
+      <RNImage
+        source={gifSource}
+        style={style}
+        resizeMode="contain"
+      />
+    );
+  }
+
+  return (
+    <ExpoImage
+      source={gifSource}
+      style={style}
+      contentFit="contain"
+      autoplay={true}
+      priority="high"
+      cachePolicy="memory-disk"
+      onError={() => {
+        setUseRNFallback(true);
+      }}
+    />
+  );
+}
 
 export default function ClanChestRewardsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -541,19 +572,7 @@ export default function ClanChestRewardsScreen({ navigation }) {
 
               {/* Center 3D Royal Purple Chest */}
               <View style={styles.centerChestContainer}>
-                {/* Glowing crystal rocks at ground */}
-                <Svg width={240} height={40} viewBox="0 0 240 40" style={styles.crystalFloorSvg}>
-                  <Polygon points="15,40 28,18 42,40" fill="#9333EA" opacity="0.65" />
-                  <Polygon points="26,40 38,24 50,40" fill="#A855F7" opacity="0.8" />
-                  <Polygon points="190,40 202,22 216,40" fill="#9333EA" opacity="0.65" />
-                  <Polygon points="204,40 218,16 228,40" fill="#C084FC" opacity="0.85" />
-                </Svg>
-
-                <Image
-                  source={require('../assets/sirli_sandiq_high_quality_nurli.gif')}
-                  style={styles.heroChestImage}
-                  contentFit="contain"
-                />
+                <ChestAnimatedDisplay style={styles.heroChestImage} />
               </View>
 
               {/* Hero Title & Subtitle */}
@@ -694,9 +713,9 @@ export default function ClanChestRewardsScreen({ navigation }) {
               <View key={item.id} style={styles.historyCard}>
                 <View style={styles.historyCardHeader}>
                   <View style={styles.historyChestIcon}>
-                    <Image
-                      source={require('../assets/sirli_sandiq_high_quality_nurli.gif')}
-                      style={{ width: 36, height: 36 }}
+                    <ExpoImage
+                      source={require('../assets/clan_chest_purple.jpg')}
+                      style={{ width: 34, height: 30 }}
                       contentFit="contain"
                     />
                   </View>
@@ -935,15 +954,12 @@ const styles = StyleSheet.create({
   },
   heroSunburstGlow: {
     position: 'absolute',
-    top: 10,
-    width: 220,
-    height: 200,
-    borderRadius: 110,
-    backgroundColor: 'rgba(168, 85, 247, 0.22)',
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 50,
+    top: 15,
+    width: 260,
+    height: 240,
+    borderRadius: 130,
+    backgroundColor: 'rgba(168, 85, 247, 0.16)',
+    pointerEvents: 'none',
   },
   bannerContainer: {
     position: 'absolute',
@@ -956,21 +972,16 @@ const styles = StyleSheet.create({
     right: 20,
   },
   centerChestContainer: {
-    width: 220,
-    height: 180,
+    width: 290,
+    height: 250,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-  },
-  crystalFloorSvg: {
-    position: 'absolute',
-    bottom: -6,
-    zIndex: 1,
+    marginVertical: 4,
   },
   heroChestImage: {
-    width: 210,
-    height: 175,
-    zIndex: 2,
+    width: 280,
+    height: 240,
   },
   heroTitleWrap: {
     alignItems: 'center',
