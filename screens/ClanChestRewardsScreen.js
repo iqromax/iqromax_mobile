@@ -550,7 +550,7 @@ export default function ClanChestRewardsScreen({ navigation }) {
                 </Svg>
 
                 <Image
-                  source={require('../assets/clan_chest_purple.jpg')}
+                  source={require('../assets/sirli_sandiq_high_quality_nurli.gif')}
                   style={styles.heroChestImage}
                   contentFit="contain"
                 />
@@ -695,8 +695,8 @@ export default function ClanChestRewardsScreen({ navigation }) {
                 <View style={styles.historyCardHeader}>
                   <View style={styles.historyChestIcon}>
                     <Image
-                      source={require('../assets/clan_chest_purple.jpg')}
-                      style={{ width: 34, height: 30 }}
+                      source={require('../assets/sirli_sandiq_high_quality_nurli.gif')}
+                      style={{ width: 36, height: 36 }}
                       contentFit="contain"
                     />
                   </View>
@@ -956,8 +956,8 @@ const styles = StyleSheet.create({
     right: 20,
   },
   centerChestContainer: {
-    width: 200,
-    height: 155,
+    width: 220,
+    height: 180,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
@@ -968,8 +968,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   heroChestImage: {
-    width: 175,
-    height: 145,
+    width: 210,
+    height: 175,
     zIndex: 2,
   },
   heroTitleWrap: {
@@ -1462,3 +1462,4 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 });
+
