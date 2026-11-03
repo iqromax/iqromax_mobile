@@ -20,6 +20,7 @@ import {
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -188,8 +189,10 @@ const CLAN_TASKS = [
 ];
 
 // Reusable Missions Content for both ClanHomeScreen tab and Standalone Screen
-export function MissionsTabContent({ navigation }) {
+export function MissionsTabContent({ navigation, user, language }) {
   const insets = useSafeAreaInsets();
+  const currentLang = language || user?.language || 'uz';
+  const t = getClanTranslations(currentLang);
   const [activeFeatureTab, setActiveFeatureTab] = useState('vazifalar');
   const [activePeriod, setActivePeriod] = useState('Daily');
   const [tasks, setTasks] = useState(DAILY_TASKS);
@@ -600,8 +603,11 @@ export function MissionsTabContent({ navigation }) {
 }
 
 // Standalone Screen Export (matches ClanHomeScreen style 1:1)
-export default function ClanMissionsScreen({ navigation }) {
+export default function ClanMissionsScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
 
   const triggerHaptic = (type = 'light') => {
@@ -638,6 +644,7 @@ export default function ClanMissionsScreen({ navigation }) {
                 navigation.navigate('ClanTransitionScreen', {
                   type: 'toIqromax',
                   target: 'StudentDashboard',
+                  params: { user, language },
                 });
               }}
               style={styles.backBreadcrumb}
@@ -648,7 +655,7 @@ export default function ClanMissionsScreen({ navigation }) {
               <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
             </TouchableOpacity>
 
-            <Text style={styles.headerTitle}>Missions</Text>
+            <Text style={styles.headerTitle}>{t.tabMissions}</Text>
             <Text style={styles.headerSubtitle}>Jamoaviy vazifalar va mukofotlar</Text>
           </View>
 
@@ -659,7 +666,7 @@ export default function ClanMissionsScreen({ navigation }) {
               style={styles.headerActionBtn}
               onPress={() => {
                 triggerHaptic();
-                navigation.navigate('ClanNotificationsScreen');
+                navigation.navigate('ClanNotificationsScreen', { user, language });
               }}
             >
               <Feather name="bell" size={20} color="#FFFFFF" />
@@ -681,7 +688,7 @@ export default function ClanMissionsScreen({ navigation }) {
         </View>
 
         {/* MISSIONS MAIN CONTENT */}
-        <MissionsTabContent navigation={navigation} />
+        <MissionsTabContent navigation={navigation} user={user} language={language} />
 
         {/* BOTTOM NAVIGATION BAR: VERTICAL ACTIVE PILL MATCHING HOME 1:1 */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -690,13 +697,13 @@ export default function ClanMissionsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Home' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Home', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <Ionicons name="home-outline" size={21} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Home</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabHome}</Text>
             </View>
           </TouchableOpacity>
 
@@ -710,7 +717,7 @@ export default function ClanMissionsScreen({ navigation }) {
               style={styles.activeTabPill}
             >
               <MaterialCommunityIcons name="target" size={20} color="#FFFFFF" />
-              <Text style={styles.activeTabLabel}>Missions</Text>
+              <Text style={styles.activeTabLabel}>{t.tabMissions}</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -719,13 +726,13 @@ export default function ClanMissionsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Season' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Season', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <MaterialCommunityIcons name="trophy-outline" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Season</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabSeason}</Text>
             </View>
           </TouchableOpacity>
 
@@ -734,15 +741,16 @@ export default function ClanMissionsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Clan' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Clan', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <MaterialCommunityIcons name="shield-outline" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Clan</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabClan}</Text>
             </View>
           </TouchableOpacity>
+        </View>
         </View>
 
         {/* INFO MODAL */}

@@ -30,11 +30,14 @@ import Svg, {
   G,
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
-export function SeasonTabContent({ navigation }) {
+export function SeasonTabContent({ navigation, user, language }) {
   const insets = useSafeAreaInsets();
+  const currentLang = language || user?.language || 'uz';
+  const t = getClanTranslations(currentLang);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [tournamentModalVisible, setTournamentModalVisible] = useState(false);
 
@@ -617,6 +620,9 @@ export function SeasonTabContent({ navigation }) {
 
 export default function ClanSeasonScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
 
   const triggerHaptic = (type = 'light') => {
     try {
@@ -651,6 +657,7 @@ export default function ClanSeasonScreen({ navigation, route }) {
                 navigation.navigate('ClanTransitionScreen', {
                   type: 'toIqromax',
                   target: 'StudentDashboard',
+                  params: { user, language },
                 });
               }}
               style={styles.backBreadcrumb}
@@ -671,7 +678,7 @@ export default function ClanSeasonScreen({ navigation, route }) {
               style={styles.iconCircleButton}
               onPress={() => {
                 triggerHaptic();
-                navigation.navigate('ClanNotificationsScreen');
+                navigation.navigate('ClanNotificationsScreen', { user, language });
               }}
             >
               <Feather name="bell" size={19} color="#FFFFFF" />
@@ -681,7 +688,7 @@ export default function ClanSeasonScreen({ navigation, route }) {
         </View>
 
         {/* REUSABLE SEASON TAB CONTENT */}
-        <SeasonTabContent navigation={navigation} />
+        <SeasonTabContent navigation={navigation} user={user} language={language} />
 
         {/* 8. BOTTOM NAVIGATION BAR */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -690,13 +697,13 @@ export default function ClanSeasonScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Home' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Home', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <Ionicons name="home-outline" size={21} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Home</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabHome}</Text>
             </View>
           </TouchableOpacity>
 
@@ -705,13 +712,13 @@ export default function ClanSeasonScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Missions' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Missions', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <MaterialCommunityIcons name="target" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Missions</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabMissions}</Text>
             </View>
           </TouchableOpacity>
 
@@ -722,7 +729,7 @@ export default function ClanSeasonScreen({ navigation, route }) {
               style={styles.activeTabPill}
             >
               <MaterialCommunityIcons name="trophy" size={20} color="#FFFFFF" />
-              <Text style={styles.activeTabLabel}>Season</Text>
+              <Text style={styles.activeTabLabel}>{t.tabSeason}</Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -731,13 +738,13 @@ export default function ClanSeasonScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Clan' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Clan', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <MaterialCommunityIcons name="shield-outline" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Clan</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabClan}</Text>
             </View>
           </TouchableOpacity>
         </View>

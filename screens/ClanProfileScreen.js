@@ -21,6 +21,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -48,8 +49,10 @@ const CLAN_MEMBERS = [
   { id: '10', name: 'Zilola', role: "A'zo", xp: '45,800 XP', active: false },
 ];
 
-export function ClanProfileTabContent({ navigation }) {
+export function ClanProfileTabContent({ navigation, user, language }) {
   const insets = useSafeAreaInsets();
+  const currentLang = language || user?.language || 'uz';
+  const t = getClanTranslations(currentLang);
 
   // Modals state
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -340,7 +343,7 @@ export function ClanProfileTabContent({ navigation }) {
               }}
             >
               <Feather name="edit-2" size={12} color="#FFFFFF" style={{ marginRight: 4 }} />
-              <Text style={styles.descEditText}>Tahrirlash</Text>
+              <Text style={styles.descEditText}>{t.editClan}</Text>
             </TouchableOpacity>
           </View>
 
@@ -351,29 +354,29 @@ export function ClanProfileTabContent({ navigation }) {
               style={styles.infoCol}
               onPress={() => {
                 triggerHaptic();
-                navigation.navigate('ClanMembersScreen');
+                navigation.navigate('ClanMembersScreen', { user, language: currentLang });
               }}
             >
               <Ionicons name="people-outline" size={18} color="#C084FC" />
-              <Text style={styles.infoColLabel}>A'zolar</Text>
+              <Text style={styles.infoColLabel}>{t.members}</Text>
               <Text style={styles.infoColValue}>10 / 10</Text>
             </TouchableOpacity>
 
             <View style={styles.infoCol}>
               <Ionicons name="calendar-outline" size={18} color="#C084FC" />
-              <Text style={styles.infoColLabel}>Yaratilgan sana</Text>
+              <Text style={styles.infoColLabel}>{t.createdAt}</Text>
               <Text style={styles.infoColValue}>15 Sen, 2026</Text>
             </View>
 
             <View style={styles.infoCol}>
               <Ionicons name="location-outline" size={18} color="#C084FC" />
-              <Text style={styles.infoColLabel}>Region</Text>
+              <Text style={styles.infoColLabel}>{t.region}</Text>
               <Text style={styles.infoColValue}>{clanRegion}</Text>
             </View>
 
             <View style={styles.infoCol}>
               <Feather name="lock" size={16} color="#C084FC" />
-              <Text style={styles.infoColLabel}>Kirish turi</Text>
+              <Text style={styles.infoColLabel}>{t.entryType}</Text>
               <Text style={styles.infoColValueGreen}>{clanEntryType}</Text>
             </View>
           </View>
@@ -420,7 +423,7 @@ export function ClanProfileTabContent({ navigation }) {
           <View style={styles.sectionHeaderRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <MaterialCommunityIcons name="chart-box-outline" size={18} color="#C084FC" style={{ marginRight: 6 }} />
-              <Text style={styles.sectionTitle}>Clan statistikasi</Text>
+              <Text style={styles.sectionTitle}>{t.clanStats}</Text>
             </View>
 
             <TouchableOpacity
@@ -444,28 +447,28 @@ export function ClanProfileTabContent({ navigation }) {
                 </View>
               </View>
               <Text style={styles.statValueText}>#12</Text>
-              <Text style={styles.statLabelText}>Liga reytingi</Text>
+              <Text style={styles.statLabelText}>{t.rank}</Text>
             </View>
 
             {/* Stat 2: Clan Streak */}
             <View style={styles.statCard}>
               <Ionicons name="flash" size={18} color="#FBBF24" style={{ marginBottom: 4 }} />
-              <Text style={styles.statValueText}>21 kun</Text>
-              <Text style={styles.statLabelText}>Clan Streak</Text>
+              <Text style={styles.statValueText}>21 {t.streakDays}</Text>
+              <Text style={styles.statLabelText}>{t.clanStreak}</Text>
             </View>
 
             {/* Stat 3: Battle g'alaba */}
             <View style={styles.statCard}>
               <MaterialCommunityIcons name="sword-cross" size={18} color="#C084FC" style={{ marginBottom: 4 }} />
               <Text style={styles.statValueText}>48</Text>
-              <Text style={styles.statLabelText}>Battle g'alaba</Text>
+              <Text style={styles.statLabelText}>{t.battleWins}</Text>
             </View>
 
             {/* Stat 4: Mission faolligi */}
             <View style={styles.statCard}>
               <MaterialCommunityIcons name="target" size={18} color="#E879F9" style={{ marginBottom: 4 }} />
               <Text style={styles.statValueText}>85%</Text>
-              <Text style={styles.statLabelText}>Mission faolligi</Text>
+              <Text style={styles.statLabelText}>{t.missionActivity}</Text>
             </View>
           </View>
         </View>
@@ -475,7 +478,7 @@ export function ClanProfileTabContent({ navigation }) {
           <View style={styles.sectionHeaderRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <FontAwesome5 name="crown" size={14} color="#C084FC" style={{ marginRight: 6 }} />
-              <Text style={styles.sectionTitle}>Clan faoliyati (Season 5)</Text>
+              <Text style={styles.sectionTitle}>{t.clanActivitySeason}</Text>
             </View>
           </View>
 
@@ -486,28 +489,28 @@ export function ClanProfileTabContent({ navigation }) {
                 <Text style={styles.activityXpPillText}>XP</Text>
               </View>
               <Text style={styles.actValueTextSmall}>1,240,500 XP</Text>
-              <Text style={styles.statLabelText}>Jami XP</Text>
+              <Text style={styles.statLabelText}>{t.totalXp}</Text>
             </View>
 
             {/* Act 2: Bajarilgan vazifalar */}
             <View style={styles.statCard}>
               <Ionicons name="shield-checkmark" size={18} color="#34D399" style={{ marginBottom: 4 }} />
               <Text style={styles.statValueText}>128</Text>
-              <Text style={styles.statLabelText}>Bajarilgan vazifalar</Text>
+              <Text style={styles.statLabelText}>{t.completedTasks}</Text>
             </View>
 
             {/* Act 3: G'alaba (Battle) */}
             <View style={styles.statCard}>
               <MaterialCommunityIcons name="sword-cross" size={18} color="#C084FC" style={{ marginBottom: 4 }} />
               <Text style={styles.statValueText}>36</Text>
-              <Text style={styles.statLabelText}>G'alaba (Battle)</Text>
+              <Text style={styles.statLabelText}>{t.battleVictories}</Text>
             </View>
 
             {/* Act 4: Turnirlar */}
             <View style={styles.statCard}>
               <FontAwesome5 name="trophy" size={16} color="#FBBF24" style={{ marginBottom: 4 }} />
               <Text style={styles.statValueText}>8</Text>
-              <Text style={styles.statLabelText}>Turnirlar</Text>
+              <Text style={styles.statLabelText}>{t.tournaments}</Text>
             </View>
           </View>
         </View>
@@ -517,7 +520,7 @@ export function ClanProfileTabContent({ navigation }) {
           <View style={styles.sectionHeaderRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="flash" size={16} color="#FBBF24" style={{ marginRight: 6 }} />
-              <Text style={styles.sectionTitle}>Tezkor bo'limlar</Text>
+              <Text style={styles.sectionTitle}>{t.quickSections}</Text>
             </View>
           </View>
 
@@ -528,8 +531,77 @@ export function ClanProfileTabContent({ navigation }) {
               style={styles.quickGridCard}
               onPress={() => {
                 triggerHaptic();
-                navigation.navigate('ClanMembersScreen');
+                navigation.navigate('ClanMembersScreen', { user, language: currentLang });
               }}
+            >
+              <View style={styles.quickGridIconWrap}>
+                <Ionicons name="people-outline" size={22} color="#C084FC" />
+              </View>
+              <View style={styles.quickGridMeta}>
+                <Text style={styles.quickGridTitle}>{t.members}</Text>
+                <Text style={styles.quickGridSub}>{t.clanMembersDesc}</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color="#94A3B8" />
+            </TouchableOpacity>
+
+            {/* Card 2: Clan Base */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.quickGridCard}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanBaseScreen', { user, language: currentLang });
+              }}
+            >
+              <View style={styles.quickGridIconWrap}>
+                <FontAwesome5 name="fort-awesome" size={20} color="#C084FC" />
+              </View>
+              <View style={styles.quickGridMeta}>
+                <Text style={styles.quickGridTitle}>{t.clanBase}</Text>
+                <Text style={styles.quickGridSub}>Lvl. 5</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color="#94A3B8" />
+            </TouchableOpacity>
+
+            {/* Card 3: Clan Shop */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.quickGridCard}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanShopScreen', { user, language: currentLang });
+              }}
+            >
+              <View style={styles.quickGridIconWrap}>
+                <MaterialCommunityIcons name="storefront-outline" size={22} color="#C084FC" />
+              </View>
+              <View style={styles.quickGridMeta}>
+                <Text style={styles.quickGridTitle}>{t.clanShop}</Text>
+                <Text style={styles.quickGridSub}>{t.clanShopDesc}</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color="#94A3B8" />
+            </TouchableOpacity>
+
+            {/* Card 4: Sozlamalar */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.quickGridCard}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanSettingsScreen', { user, language: currentLang });
+              }}
+            >
+              <View style={styles.quickGridIconWrap}>
+                <Ionicons name="settings-outline" size={22} color="#C084FC" />
+              </View>
+              <View style={styles.quickGridMeta}>
+                <Text style={styles.quickGridTitle}>{t.clanSettings}</Text>
+                <Text style={styles.quickGridSub}>{t.clanSettingsDesc}</Text>
+              </View>
+              <Feather name="chevron-right" size={16} color="#94A3B8" />
+            </TouchableOpacity>
+          </View>
+        </View>
             >
               <View style={styles.quickGridIconWrap}>
                 <Ionicons name="people-outline" size={22} color="#C084FC" />
@@ -746,6 +818,9 @@ export function ClanProfileTabContent({ navigation }) {
 
 export default function ClanProfileScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
 
   const triggerHaptic = (type = 'light') => {
     try {
@@ -784,15 +859,15 @@ export default function ClanProfileScreen({ navigation, route }) {
             style={styles.headerIconButton}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Home' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Home', user, language });
             }}
           >
             <Feather name="arrow-left" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Clan Profile</Text>
-            <Text style={styles.headerSubtitleText}>Clan ma'lumotlari va statistikasi</Text>
+            <Text style={styles.headerTitleText}>{t.clanProfileTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.clanProfileSubtitle}</Text>
           </View>
 
           <View style={styles.headerRightButtonsRow}>
@@ -822,7 +897,7 @@ export default function ClanProfileScreen({ navigation, route }) {
         </View>
 
         {/* CLAN PROFILE CONTENT */}
-        <ClanProfileTabContent navigation={navigation} />
+        <ClanProfileTabContent navigation={navigation} user={user} language={language} />
 
         {/* BOTTOM NAVIGATION BAR */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -831,13 +906,13 @@ export default function ClanProfileScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Home' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Home', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <Ionicons name="home-outline" size={21} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Home</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabHome}</Text>
             </View>
           </TouchableOpacity>
 
@@ -846,13 +921,13 @@ export default function ClanProfileScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Missions' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Missions', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <MaterialCommunityIcons name="target" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Missions</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabMissions}</Text>
             </View>
           </TouchableOpacity>
 
@@ -861,13 +936,13 @@ export default function ClanProfileScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.replace('ClanHomeScreen', { initialTab: 'Season' });
+              navigation.replace('ClanHomeScreen', { initialTab: 'Season', user, language });
             }}
             style={styles.navTabItem}
           >
             <View style={styles.inactiveTabCol}>
               <MaterialCommunityIcons name="trophy-outline" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Season</Text>
+              <Text style={styles.inactiveTabLabel}>{t.tabSeason}</Text>
             </View>
           </TouchableOpacity>
 
@@ -878,7 +953,7 @@ export default function ClanProfileScreen({ navigation, route }) {
               style={styles.activeTabPill}
             >
               <MaterialCommunityIcons name="shield-outline" size={20} color="#FFFFFF" />
-              <Text style={styles.activeTabLabel}>Clan</Text>
+              <Text style={styles.activeTabLabel}>{t.tabClan}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

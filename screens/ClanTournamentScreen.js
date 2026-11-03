@@ -18,6 +18,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -40,8 +41,12 @@ const STAGES = [
   { id: 'final', label: 'Final', dates: '28 Okt', status: 'locked' },
 ];
 
-export default function ClanTournamentScreen({ navigation }) {
+export default function ClanTournamentScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
+
   const [activeTab, setActiveTab] = useState('umumiy'); // umumiy | jadval | ishtirokchilar | natijalar
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [clanDetailModalVisible, setClanDetailModalVisible] = useState(false);
@@ -211,8 +216,8 @@ export default function ClanTournamentScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Tournament</Text>
-            <Text style={styles.headerSubtitleText}>Mavsumiy klan turniri</Text>
+            <Text style={styles.headerTitleText}>{t.tournamentTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.tournamentSubtitle}</Text>
           </View>
 
           <TouchableOpacity
@@ -275,25 +280,25 @@ export default function ClanTournamentScreen({ navigation }) {
             <View style={styles.heroDatesBar}>
               <View style={styles.dateCol}>
                 <Ionicons name="calendar-outline" size={14} color="#94A3B8" style={{ marginBottom: 2 }} />
-                <Text style={styles.dateLabel}>Ro'yxatdan o'tish</Text>
+                <Text style={styles.dateLabel}>{t.regDates}</Text>
                 <Text style={styles.dateValue}>1 – 7 Okt</Text>
               </View>
 
               <View style={styles.dateCol}>
                 <FontAwesome5 name="crown" size={12} color="#94A3B8" style={{ marginBottom: 3 }} />
-                <Text style={styles.dateLabel}>Turnir boshlanishi</Text>
+                <Text style={styles.dateLabel}>{t.tournamentStart}</Text>
                 <Text style={styles.dateValue}>8 Okt</Text>
               </View>
 
               <View style={styles.dateCol}>
                 <Ionicons name="flag-outline" size={14} color="#94A3B8" style={{ marginBottom: 2 }} />
-                <Text style={styles.dateLabel}>Final</Text>
+                <Text style={styles.dateLabel}>{t.final}</Text>
                 <Text style={styles.dateValue}>28 Okt</Text>
               </View>
 
               <View style={styles.dateCol}>
                 <Ionicons name="time-outline" size={14} color="#FBBF24" style={{ marginBottom: 2 }} />
-                <Text style={styles.dateLabel}>Qolgan vaqt</Text>
+                <Text style={styles.dateLabel}>{t.remainingTime}</Text>
                 <Text style={styles.dateValueYellow}>6 kun 14 soat</Text>
               </View>
             </View>
@@ -316,12 +321,12 @@ export default function ClanTournamentScreen({ navigation }) {
                   style={styles.tabGradient}
                 >
                   <FontAwesome5 name="trophy" size={13} color="#FFFFFF" style={{ marginRight: 6 }} />
-                  <Text style={styles.tabTextActive}>Umumiy</Text>
+                  <Text style={styles.tabTextActive}>{t.tabOverview}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.tabInactiveContent}>
                   <FontAwesome5 name="trophy" size={13} color="#94A3B8" style={{ marginRight: 6 }} />
-                  <Text style={styles.tabTextInactive}>Umumiy</Text>
+                  <Text style={styles.tabTextInactive}>{t.tabOverview}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -341,12 +346,12 @@ export default function ClanTournamentScreen({ navigation }) {
                   style={styles.tabGradient}
                 >
                   <MaterialCommunityIcons name="tournament" size={15} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.tabTextActive}>Jadval</Text>
+                  <Text style={styles.tabTextActive}>{t.tabBracket}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.tabInactiveContent}>
                   <MaterialCommunityIcons name="tournament" size={15} color="#94A3B8" style={{ marginRight: 5 }} />
-                  <Text style={styles.tabTextInactive}>Jadval</Text>
+                  <Text style={styles.tabTextInactive}>{t.tabBracket}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -366,12 +371,12 @@ export default function ClanTournamentScreen({ navigation }) {
                   style={styles.tabGradient}
                 >
                   <Ionicons name="people-outline" size={15} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.tabTextActive}>Ishtirokchilar</Text>
+                  <Text style={styles.tabTextActive}>{t.tabParticipants}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.tabInactiveContent}>
                   <Ionicons name="people-outline" size={15} color="#94A3B8" style={{ marginRight: 5 }} />
-                  <Text style={styles.tabTextInactive}>Ishtirokchilar</Text>
+                  <Text style={styles.tabTextInactive}>{t.tabParticipants}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -391,12 +396,12 @@ export default function ClanTournamentScreen({ navigation }) {
                   style={styles.tabGradient}
                 >
                   <Ionicons name="time-outline" size={15} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.tabTextActive}>Natijalar</Text>
+                  <Text style={styles.tabTextActive}>{t.tabResults}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.tabInactiveContent}>
                   <Ionicons name="time-outline" size={15} color="#94A3B8" style={{ marginRight: 5 }} />
-                  <Text style={styles.tabTextInactive}>Natijalar</Text>
+                  <Text style={styles.tabTextInactive}>{t.tabResults}</Text>
                 </View>
               )}
             </TouchableOpacity>

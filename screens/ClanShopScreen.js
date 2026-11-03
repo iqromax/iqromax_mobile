@@ -19,6 +19,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -85,8 +86,12 @@ const SHOP_ITEMS = [
   },
 ];
 
-export default function ClanShopScreen({ navigation }) {
+export default function ClanShopScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
+
   const [activeCategory, setActiveCategory] = useState('all'); // all | emblem | banner | dekor | ramka
   const [clanCoins, setClanCoins] = useState(12450);
   const [purchasedItems, setPurchasedItems] = useState([]);
@@ -428,8 +433,8 @@ export default function ClanShopScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Clan Shop</Text>
-            <Text style={styles.headerSubtitleText}>Clan do'koni — maxsus buyumlar</Text>
+            <Text style={styles.headerTitleText}>{t.clanShopTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.clanShopSubtitle}</Text>
           </View>
 
           <View style={{ width: 40 }} />
@@ -455,8 +460,7 @@ export default function ClanShopScreen({ navigation }) {
 
               {/* Right User Coin Balance */}
               <View style={styles.coinsBalanceCol}>
-                <Text style={styles.coinsLabelText}>Sizning</Text>
-                <Text style={styles.coinsLabelSub}>Clan Coin'ngiz</Text>
+                <Text style={styles.coinsLabelSub}>{t.yourClanCoins}</Text>
 
                 <View style={styles.coinsRow}>
                   {/* Clan Coin Graphic */}
@@ -492,12 +496,12 @@ export default function ClanShopScreen({ navigation }) {
                   style={styles.catActivePill}
                 >
                   <FontAwesome5 name="star" size={12} color="#FFFFFF" style={{ marginRight: 6 }} />
-                  <Text style={styles.catActiveText}>Barchasi</Text>
+                  <Text style={styles.catActiveText}>{t.categoryAll}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.catInactivePill}>
                   <FontAwesome5 name="star" size={12} color="#94A3B8" style={{ marginRight: 6 }} />
-                  <Text style={styles.catInactiveText}>Barchasi</Text>
+                  <Text style={styles.catInactiveText}>{t.categoryAll}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -517,12 +521,12 @@ export default function ClanShopScreen({ navigation }) {
                   style={styles.catActivePill}
                 >
                   <MaterialCommunityIcons name="shield-outline" size={14} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.catActiveText}>Emblem</Text>
+                  <Text style={styles.catActiveText}>{t.categoryEmblem}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.catInactivePill}>
                   <MaterialCommunityIcons name="shield-outline" size={14} color="#94A3B8" style={{ marginRight: 5 }} />
-                  <Text style={styles.catInactiveText}>Emblem</Text>
+                  <Text style={styles.catInactiveText}>{t.categoryEmblem}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -542,12 +546,12 @@ export default function ClanShopScreen({ navigation }) {
                   style={styles.catActivePill}
                 >
                   <MaterialCommunityIcons name="flag-variant-outline" size={14} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.catActiveText}>Banner</Text>
+                  <Text style={styles.catActiveText}>{t.categoryBanner}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.catInactivePill}>
                   <MaterialCommunityIcons name="flag-variant-outline" size={14} color="#94A3B8" style={{ marginRight: 5 }} />
-                  <Text style={styles.catInactiveText}>Banner</Text>
+                  <Text style={styles.catInactiveText}>{t.categoryBanner}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -567,12 +571,12 @@ export default function ClanShopScreen({ navigation }) {
                   style={styles.catActivePill}
                 >
                   <MaterialCommunityIcons name="castle" size={14} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.catActiveText}>Dekor</Text>
+                  <Text style={styles.catActiveText}>{t.categoryDecor}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.catInactivePill}>
                   <MaterialCommunityIcons name="castle" size={14} color="#94A3B8" style={{ marginRight: 5 }} />
-                  <Text style={styles.catInactiveText}>Dekor</Text>
+                  <Text style={styles.catInactiveText}>{t.categoryDecor}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -592,12 +596,12 @@ export default function ClanShopScreen({ navigation }) {
                   style={styles.catActivePill}
                 >
                   <MaterialCommunityIcons name="hexagon-slice-6" size={14} color="#FFFFFF" style={{ marginRight: 5 }} />
-                  <Text style={styles.catActiveText}>Ramka</Text>
+                  <Text style={styles.catActiveText}>{t.categoryFrame}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.catInactivePill}>
                   <MaterialCommunityIcons name="hexagon-slice-6" size={14} color="#94A3B8" style={{ marginRight: 5 }} />
-                  <Text style={styles.catInactiveText}>Ramka</Text>
+                  <Text style={styles.catInactiveText}>{t.categoryFrame}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -654,7 +658,7 @@ export default function ClanShopScreen({ navigation }) {
                         isPurchased && styles.priceTextPurchased,
                       ]}
                     >
-                      {isPurchased ? 'Olingan' : item.price.toLocaleString()}
+                      {isPurchased ? t.purchased : item.price.toLocaleString()}
                     </Text>
                   </TouchableOpacity>
                 </TouchableOpacity>
@@ -743,8 +747,8 @@ export default function ClanShopScreen({ navigation }) {
                   >
                     <Text style={styles.modalBuyBtnText}>
                       {purchasedItems.includes(selectedItem.id)
-                        ? 'Sotib olingan (Faol)'
-                        : 'Sotib olish'}
+                        ? t.purchased
+                        : t.buyBtn}
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>

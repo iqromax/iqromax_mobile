@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import {
   IQROMAX_CLAN_BASE64,
   CLAN_IQROMAX_BASE64,
@@ -19,6 +20,8 @@ const { width, height } = Dimensions.get('window');
 
 export default function ClanTransitionScreen({ route, navigation }) {
   const { type = 'toClan', target, params } = route?.params || {};
+  const language = params?.language || params?.user?.language || 'uz';
+  const t = getClanTranslations(language);
   const isToClan = type === 'toClan';
   const finishedRef = useRef(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -160,7 +163,7 @@ export default function ClanTransitionScreen({ route, navigation }) {
           finishTransition();
         }}
       >
-        <Text style={styles.skipText}>O'tkazib yuborish ›</Text>
+        <Text style={styles.skipText}>{t.portalSkip}</Text>
       </TouchableOpacity>
     </View>
   );

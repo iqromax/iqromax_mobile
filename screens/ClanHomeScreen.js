@@ -40,6 +40,7 @@ import { triggerReturnPortalHaptics } from '../src/utils/vibrationService';
 import { MissionsTabContent } from './ClanMissionsScreen';
 import { SeasonTabContent } from './ClanSeasonScreen';
 import { ClanProfileTabContent } from './ClanProfileScreen';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -145,6 +146,33 @@ export default function ClanHomeScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const initialTab = route?.params?.initialTab || 'Home';
   const [activeBottomTab, setActiveBottomTab] = useState(initialTab);
+  const routeUser = route?.params?.user;
+  const [user, setUser] = useState(routeUser || null);
+  const [language, setLanguage] = useState(
+    route?.params?.language || routeUser?.language || 'uz'
+  );
+  const t = getClanTranslations(language);
+
+  useEffect(() => {
+    const loadStoredUserAndLang = async () => {
+      try {
+        if (!route?.params?.language) {
+          const storedLang = await AsyncStorage.getItem('user_language');
+          if (storedLang) {
+            setLanguage(storedLang);
+          } else {
+            const storedUser = await AsyncStorage.getItem('user_data');
+            if (storedUser) {
+              const parsed = JSON.parse(storedUser);
+              if (parsed?.language) setLanguage(parsed.language);
+              if (!user) setUser(parsed);
+            }
+          }
+        }
+      } catch (e) {}
+    };
+    loadStoredUserAndLang();
+  }, [route?.params?.language]);
 
   useEffect(() => {
     if (route?.params?.initialTab) {
@@ -244,6 +272,10 @@ export default function ClanHomeScreen({ navigation, route }) {
     navigation.navigate('ClanTransitionScreen', {
       type: 'toIqromax',
       target: 'StudentDashboard',
+      params: {
+        user: user,
+        language: language,
+      },
     });
   };
 
@@ -396,25 +428,25 @@ export default function ClanHomeScreen({ navigation, route }) {
               <View style={styles.backArrowBadge}>
                 <Feather name="chevron-left" size={16} color="#C084FC" />
               </View>
-              <Text style={styles.headerSubtitle}>IQROMAX Clan</Text>
+              <Text style={styles.headerSubtitle}>{t.returnToIqromax}</Text>
             </TouchableOpacity>
             <Text style={styles.headerTitle}>
               {activeBottomTab === 'Missions'
-                ? 'Missions'
+                ? t.tabMissions
                 : activeBottomTab === 'Season'
-                ? 'Season Overview'
+                ? t.tabSeason
                 : activeBottomTab === 'Clan'
-                ? 'Clan Profile'
-                : 'Home'}
+                ? t.clanProfileTitle
+                : t.tabHome}
             </Text>
             {activeBottomTab === 'Missions' && (
-              <Text style={styles.headerMissionsSub}>Jamoaviy vazifalar va mukofotlar</Text>
+              <Text style={styles.headerMissionsSub}>{t.clanBaseDesc}</Text>
             )}
             {activeBottomTab === 'Season' && (
-              <Text style={styles.headerMissionsSub}>Mavsum haqida umumiy ma'lumot</Text>
+              <Text style={styles.headerMissionsSub}>{t.seasonRewardsDesc}</Text>
             )}
             {activeBottomTab === 'Clan' && (
-              <Text style={styles.headerMissionsSub}>Clan ma'lumotlari va statistikasi</Text>
+              <Text style={styles.headerMissionsSub}>{t.clanProfileSubtitle}</Text>
             )}
           </View>
 
@@ -514,11 +546,11 @@ export default function ClanHomeScreen({ navigation, route }) {
 
         {/* Scrollable Content */}
         {activeBottomTab === 'Missions' ? (
-          <MissionsTabContent navigation={navigation} />
+          <MissionsTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
         ) : activeBottomTab === 'Season' ? (
-          <SeasonTabContent navigation={navigation} />
+          <SeasonTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
         ) : activeBottomTab === 'Clan' ? (
-          <ClanProfileTabContent navigation={navigation} />
+          <ClanProfileTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
         ) : (
           <Animated.ScrollView
             style={[
@@ -1210,12 +1242,12 @@ export default function ClanHomeScreen({ navigation, route }) {
                 style={styles.activeTabPill}
               >
                 <Ionicons name="home" size={20} color="#FFFFFF" />
-                <Text style={styles.activeTabLabel}>Home</Text>
+                <Text style={styles.activeTabLabel}>{t.tabHome}</Text>
               </LinearGradient>
             ) : (
               <View style={styles.inactiveTabCol}>
                 <Ionicons name="home-outline" size={21} color="#94A3B8" />
-                <Text style={styles.inactiveTabLabel}>Home</Text>
+                <Text style={styles.inactiveTabLabel}>{t.tabHome}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -1235,12 +1267,12 @@ export default function ClanHomeScreen({ navigation, route }) {
                 style={styles.activeTabPill}
               >
                 <MaterialCommunityIcons name="target" size={20} color="#FFFFFF" />
-                <Text style={styles.activeTabLabel}>Missions</Text>
+                <Text style={styles.activeTabLabel}>{t.tabMissions}</Text>
               </LinearGradient>
             ) : (
               <View style={styles.inactiveTabCol}>
                 <MaterialCommunityIcons name="target" size={22} color="#94A3B8" />
-                <Text style={styles.inactiveTabLabel}>Missions</Text>
+                <Text style={styles.inactiveTabLabel}>{t.tabMissions}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -1260,12 +1292,12 @@ export default function ClanHomeScreen({ navigation, route }) {
                 style={styles.activeTabPill}
               >
                 <MaterialCommunityIcons name="trophy" size={20} color="#FFFFFF" />
-                <Text style={styles.activeTabLabel}>Season</Text>
+                <Text style={styles.activeTabLabel}>{t.tabSeason}</Text>
               </LinearGradient>
             ) : (
               <View style={styles.inactiveTabCol}>
                 <MaterialCommunityIcons name="trophy-outline" size={22} color="#94A3B8" />
-                <Text style={styles.inactiveTabLabel}>Season</Text>
+                <Text style={styles.inactiveTabLabel}>{t.tabSeason}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -1285,12 +1317,12 @@ export default function ClanHomeScreen({ navigation, route }) {
                 style={styles.activeTabPill}
               >
                 <MaterialCommunityIcons name="shield-crown" size={20} color="#FFFFFF" />
-                <Text style={styles.activeTabLabel}>Clan</Text>
+                <Text style={styles.activeTabLabel}>{t.tabClan}</Text>
               </LinearGradient>
             ) : (
               <View style={styles.inactiveTabCol}>
                 <MaterialCommunityIcons name="shield-outline" size={22} color="#94A3B8" />
-                <Text style={styles.inactiveTabLabel}>Clan</Text>
+                <Text style={styles.inactiveTabLabel}>{t.tabClan}</Text>
               </View>
             )}
           </TouchableOpacity>

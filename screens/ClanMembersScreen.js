@@ -21,6 +21,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -182,8 +183,12 @@ const MEMBERS_DATA = [
   },
 ];
 
-export default function ClanMembersScreen({ navigation }) {
+export default function ClanMembersScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
+
   const [filterTab, setFilterTab] = useState('all'); // 'all' | 'online' | 'offline'
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [inviteModalVisible, setInviteModalVisible] = useState(false);
@@ -384,8 +389,8 @@ export default function ClanMembersScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Members</Text>
-            <Text style={styles.headerSubtitleText}>Clan a'zolari ro'yxati</Text>
+            <Text style={styles.headerTitleText}>{t.membersTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.membersSubtitle}</Text>
           </View>
 
           <TouchableOpacity
@@ -421,7 +426,7 @@ export default function ClanMembersScreen({ navigation }) {
               {/* Clan Info */}
               <View style={styles.clanBannerMeta}>
                 <Text style={styles.clanBannerTitle}>IQROMAX Clan</Text>
-                <Text style={styles.clanBannerSub}>10 / 10 a'zo</Text>
+                <Text style={styles.clanBannerSub}>10 / 10 {t.members.toLowerCase()}</Text>
               </View>
 
               {/* Taklif qilish Button */}
@@ -445,7 +450,7 @@ export default function ClanMembersScreen({ navigation }) {
                     color="#FFFFFF"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.inviteButtonText}>Taklif qilish</Text>
+                  <Text style={styles.inviteButtonText}>{t.inviteMember}</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </LinearGradient>
@@ -473,7 +478,7 @@ export default function ClanMembersScreen({ navigation }) {
                     color="#FFFFFF"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.filterTabActiveText}>Barcha (10)</Text>
+                  <Text style={styles.filterTabActiveText}>{t.all} ({MEMBERS_DATA.length})</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.filterTabInactivePill}>
@@ -483,7 +488,7 @@ export default function ClanMembersScreen({ navigation }) {
                     color="#94A3B8"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.filterTabInactiveText}>Barcha (10)</Text>
+                  <Text style={styles.filterTabInactiveText}>{t.all} ({MEMBERS_DATA.length})</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -508,7 +513,7 @@ export default function ClanMembersScreen({ navigation }) {
                     color="#10B981"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.filterTabActiveText}>Online ({onlineCount})</Text>
+                  <Text style={styles.filterTabActiveText}>{t.online} ({onlineCount})</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.filterTabInactivePill}>
@@ -518,7 +523,7 @@ export default function ClanMembersScreen({ navigation }) {
                     color="#10B981"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.filterTabInactiveText}>Online ({onlineCount})</Text>
+                  <Text style={styles.filterTabInactiveText}>{t.online} ({onlineCount})</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -543,7 +548,7 @@ export default function ClanMembersScreen({ navigation }) {
                     color="#FFFFFF"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.filterTabActiveText}>Offline ({offlineCount})</Text>
+                  <Text style={styles.filterTabActiveText}>{t.offline} ({offlineCount})</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.filterTabInactivePill}>
@@ -553,7 +558,7 @@ export default function ClanMembersScreen({ navigation }) {
                     color="#94A3B8"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.filterTabInactiveText}>Offline ({offlineCount})</Text>
+                  <Text style={styles.filterTabInactiveText}>{t.offline} ({offlineCount})</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -562,9 +567,9 @@ export default function ClanMembersScreen({ navigation }) {
           {/* 4. TABLE COLUMN HEADERS */}
           <View style={styles.tableHeaderRow}>
             <Text style={styles.colHeaderRank}>#</Text>
-            <Text style={styles.colHeaderMember}>A'zo</Text>
-            <Text style={styles.colHeaderRole}>Rol</Text>
-            <Text style={styles.colHeaderXp}>Clan XP</Text>
+            <Text style={styles.colHeaderMember}>{t.members}</Text>
+            <Text style={styles.colHeaderRole}>{t.clanRole}</Text>
+            <Text style={styles.colHeaderXp}>{t.totalClanXp}</Text>
           </View>
 
           {/* 5. MEMBERS LIST */}
@@ -577,7 +582,7 @@ export default function ClanMembersScreen({ navigation }) {
                   activeOpacity={0.7}
                   onPress={() => {
                     triggerHaptic();
-                    navigation.navigate('ClanMemberProfileScreen', { member: item });
+                    navigation.navigate('ClanMemberProfileScreen', { member: item, user, language });
                   }}
                   style={[
                     styles.memberRow,

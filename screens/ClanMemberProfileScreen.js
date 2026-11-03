@@ -22,6 +22,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -55,6 +56,9 @@ const DEFAULT_MEMBER = {
 export default function ClanMemberProfileScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const member = route?.params?.member || DEFAULT_MEMBER;
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
 
   // Modals state
   const [chatModalVisible, setChatModalVisible] = useState(false);
@@ -204,8 +208,8 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Member Profile</Text>
-            <Text style={styles.headerSubtitleText}>A'zo haqida batafsil ma'lumot</Text>
+            <Text style={styles.headerTitleText}>{t.memberProfileTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.memberProfileSubtitle}</Text>
           </View>
 
           <View style={styles.headerRightButtonsRow}>
@@ -301,7 +305,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
                   <Polygon points="12,7 13.5,10.5 17,10.5 14,12.5 15,16 12,14 9,16 10,12.5 7,10.5 10.5,10.5" fill="#E9D5FF" />
                 </Svg>
               </View>
-              <Text style={styles.statColLabel}>Clan XP (jami)</Text>
+              <Text style={styles.statColLabel}>{t.totalClanXp}</Text>
               <Text style={styles.statColValueGold}>
                 {member.xp || member.clanXp || '56,400 XP'}
               </Text>
@@ -314,7 +318,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
               <View style={styles.statIconWrap}>
                 <Ionicons name="calendar-outline" size={20} color="#C084FC" />
               </View>
-              <Text style={styles.statColLabel}>Clan'ga qo'shilgan</Text>
+              <Text style={styles.statColLabel}>{t.joinedClanDate}</Text>
               <Text style={styles.statColValueWhite}>
                 {member.joinDate || '15 Sen, 2026'}
               </Text>
@@ -327,7 +331,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
               <View style={styles.statIconWrap}>
                 <FontAwesome5 name="crown" size={17} color="#FBBF24" />
               </View>
-              <Text style={styles.statColLabel}>Clan ichidagi rol</Text>
+              <Text style={styles.statColLabel}>{t.clanRole}</Text>
               <Text style={styles.statColValueGold}>{member.role || 'Creator'}</Text>
             </View>
           </View>
@@ -342,7 +346,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
               />
             </View>
             <Text style={styles.sectionTitleText}>
-              Faollik statistikasi (Season 5)
+              {t.clanActivitySeason}
             </Text>
           </View>
 
@@ -359,7 +363,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
               <Text style={styles.activityCardValue}>
                 {member.battleWins || 48}
               </Text>
-              <Text style={styles.activityCardLabel}>Battle g'alaba</Text>
+              <Text style={styles.activityCardLabel}>{t.battleWins}</Text>
             </View>
 
             {/* Card 2: Bajarilgan vazifa */}
@@ -374,7 +378,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
               <Text style={styles.activityCardValue}>
                 {member.tasksCompleted || member.tasksDone || 36}
               </Text>
-              <Text style={styles.activityCardLabel}>Bajarilgan vazifa</Text>
+              <Text style={styles.activityCardLabel}>{t.completedTasks}</Text>
             </View>
 
             {/* Card 3: Clan Streak */}
@@ -385,7 +389,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
               <Text style={styles.activityCardValue}>
                 {member.clanStreak || '21 kun'}
               </Text>
-              <Text style={styles.activityCardLabel}>Clan Streak</Text>
+              <Text style={styles.activityCardLabel}>{t.clanStreak}</Text>
             </View>
 
             {/* Card 4: Faollik darajasi */}
@@ -396,7 +400,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
               <Text style={styles.activityCardValue}>
                 {member.activityRate || '92%'}
               </Text>
-              <Text style={styles.activityCardLabel}>Faollik darajasi</Text>
+              <Text style={styles.activityCardLabel}>{t.activityRate}</Text>
             </View>
           </View>
 
@@ -417,7 +421,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
                   color="#FBBF24"
                   style={{ marginRight: 8 }}
                 />
-                <Text style={styles.achievementsTitle}>Yutuqlar va nishonlar</Text>
+                <Text style={styles.achievementsTitle}>{t.achievementsAndBadges}</Text>
               </View>
               <Feather name="chevron-right" size={18} color="#94A3B8" />
             </View>
@@ -554,7 +558,7 @@ export default function ClanMemberProfileScreen({ navigation, route }) {
                 color="#FFFFFF"
                 style={{ marginRight: 8 }}
               />
-              <Text style={styles.messageButtonText}>Xabar yuborish</Text>
+              <Text style={styles.messageButtonText}>{t.sendMessage}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

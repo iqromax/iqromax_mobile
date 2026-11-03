@@ -21,6 +21,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -128,8 +129,11 @@ function ChestAnimatedDisplay({ style }) {
   );
 }
 
-export default function ClanSeasonRewardsScreen({ navigation }) {
+export default function ClanSeasonRewardsScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
   const [activeTab, setActiveTab] = useState('track'); // track | all | claimed
   const [milestones, setMilestones] = useState(REWARD_MILESTONES);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
@@ -353,8 +357,8 @@ export default function ClanSeasonRewardsScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Season Rewards</Text>
-            <Text style={styles.headerSubtitleText}>Mavsumiy mukofotlar va progress</Text>
+            <Text style={styles.headerTitleText}>{t.seasonRewards}</Text>
+            <Text style={styles.headerSubtitleText}>{t.seasonRewardsDesc}</Text>
           </View>
 
           <TouchableOpacity

@@ -22,6 +22,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
@@ -72,8 +73,12 @@ const INITIAL_INVITES = [
   },
 ];
 
-export default function ClanManagementScreen({ navigation }) {
+export default function ClanManagementScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
+
   const [activeTab, setActiveTab] = useState('arizalar'); // 'arizalar' | 'takliflar' | 'boshqaruv'
   const [applicants, setApplicants] = useState(INITIAL_APPLICANTS);
   const [invites, setInvites] = useState(INITIAL_INVITES);
@@ -167,9 +172,9 @@ export default function ClanManagementScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Clan Management</Text>
+            <Text style={styles.headerTitleText}>{t.clanManagementTitle}</Text>
             <Text style={styles.headerSubtitleText}>
-              Takliflar, arizalar va boshqaruv
+              {t.clanManagementSubtitle}
             </Text>
           </View>
 
@@ -199,7 +204,7 @@ export default function ClanManagementScreen({ navigation }) {
                   style={{ marginRight: 6 }}
                 />
                 <Text style={styles.tabActiveText}>
-                  Arizalar ({applicants.length})
+                  {t.tabApplications} ({applicants.length})
                 </Text>
               </LinearGradient>
             ) : (
@@ -211,7 +216,7 @@ export default function ClanManagementScreen({ navigation }) {
                   style={{ marginRight: 6 }}
                 />
                 <Text style={styles.tabInactiveText}>
-                  Arizalar ({applicants.length})
+                  {t.tabApplications} ({applicants.length})
                 </Text>
               </View>
             )}
@@ -238,7 +243,7 @@ export default function ClanManagementScreen({ navigation }) {
                   style={{ marginRight: 6 }}
                 />
                 <Text style={styles.tabActiveText}>
-                  Takliflar ({invites.length})
+                  {t.tabSentInvites} ({invites.length})
                 </Text>
               </LinearGradient>
             ) : (
@@ -250,7 +255,7 @@ export default function ClanManagementScreen({ navigation }) {
                   style={{ marginRight: 6 }}
                 />
                 <Text style={styles.tabInactiveText}>
-                  Takliflar ({invites.length})
+                  {t.tabSentInvites} ({invites.length})
                 </Text>
               </View>
             )}
@@ -276,7 +281,7 @@ export default function ClanManagementScreen({ navigation }) {
                   color="#FFFFFF"
                   style={{ marginRight: 6 }}
                 />
-                <Text style={styles.tabActiveText}>Boshqaruv</Text>
+                <Text style={styles.tabActiveText}>{t.tabSettingsManage}</Text>
               </LinearGradient>
             ) : (
               <View style={styles.tabInactivePill}>
@@ -286,7 +291,7 @@ export default function ClanManagementScreen({ navigation }) {
                   color="#94A3B8"
                   style={{ marginRight: 6 }}
                 />
-                <Text style={styles.tabInactiveText}>Boshqaruv</Text>
+                <Text style={styles.tabInactiveText}>{t.tabSettingsManage}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -314,7 +319,7 @@ export default function ClanManagementScreen({ navigation }) {
                       style={{ marginRight: 8 }}
                     />
                     <Text style={styles.sectionTitleText}>
-                      Clan'ga qo'shilish arizalari
+                      {t.incomingRequests}
                     </Text>
                   </View>
                   <View style={styles.countBadge}>
@@ -411,7 +416,7 @@ export default function ClanManagementScreen({ navigation }) {
                       style={{ marginRight: 8 }}
                     />
                     <Text style={styles.sectionTitleText}>
-                      Yuborilgan takliflar
+                      {t.sentInvites}
                     </Text>
                   </View>
                   <View style={styles.countBadge}>
@@ -459,7 +464,7 @@ export default function ClanManagementScreen({ navigation }) {
                           onPress={() => handleCancelInvite(item)}
                         >
                           <Text style={styles.cancelInviteText}>
-                            Bekor qilish
+                            {t.cancel}
                           </Text>
                         </TouchableOpacity>
                       </View>

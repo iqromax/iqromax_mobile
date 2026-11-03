@@ -19,6 +19,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -80,12 +81,61 @@ const BUILDINGS_DATA = [
   },
 ];
 
-export default function ClanBaseScreen({ navigation }) {
+export default function ClanBaseScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
+
   const [activeTab, setActiveTab] = useState('binolar'); // 'binolar' | 'upgrade' | 'bonuslar'
   const [selectedBuilding, setSelectedBuilding] = useState(null);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [buildings, setBuildings] = useState(BUILDINGS_DATA);
+  const [buildings, setBuildings] = useState([
+    {
+      id: 'hq',
+      name: t.headquarters,
+      level: 5,
+      subtitle: t.headquartersDesc,
+      type: 'castle',
+      currentPerk: "A'zolar sig'imi: 10 ta, barcha binolar uchun baza",
+      nextPerk: "A'zolar sig'imi: 12 ta, yangi turnir rejimi ochiladi",
+      upgradeCostXp: 15000,
+      upgradeCostCoin: 25000,
+    },
+    {
+      id: 'training',
+      name: t.trainingCenter,
+      level: 4,
+      subtitle: t.trainingCenterDesc,
+      type: 'training',
+      currentPerk: "Battle g'alabalarida +10% qo'shimcha XP",
+      nextPerk: "Battle g'alabalarida +15% qo'shimcha XP va +5% tanga",
+      upgradeCostXp: 12000,
+      upgradeCostCoin: 20000,
+    },
+    {
+      id: 'lab',
+      name: t.researchLab,
+      level: 3,
+      subtitle: t.researchLabDesc,
+      type: 'lab',
+      currentPerk: 'Kundalik vazifalar uchun +1 qo\'shimcha energiya',
+      nextPerk: 'Kundalik vazifalar uchun +2 energiya va tezkor tiklanish',
+      upgradeCostXp: 10000,
+      upgradeCostCoin: 18000,
+    },
+    {
+      id: 'treasury',
+      name: t.treasury,
+      level: 4,
+      subtitle: t.treasuryDesc,
+      type: 'treasury',
+      currentPerk: 'Haftalik Clan sandig\'ida +20% ko\'proq oltin tangalar',
+      nextPerk: 'Haftalik Clan sandig\'ida +35% oltin tangalar va sirli sovg\'alar',
+      upgradeCostXp: 12000,
+      upgradeCostCoin: 22000,
+    },
+  ]);
 
   const triggerHaptic = (type = 'light') => {
     try {
@@ -378,8 +428,8 @@ export default function ClanBaseScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Clan Base</Text>
-            <Text style={styles.headerSubtitleText}>Clan bazasi va rivojlanish</Text>
+            <Text style={styles.headerTitleText}>{t.clanBaseTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.clanBaseSubtitle}</Text>
           </View>
 
           <TouchableOpacity
@@ -450,7 +500,7 @@ export default function ClanBaseScreen({ navigation }) {
           {/* 3. RIVOJLANISH PROGRESSI CARD */}
           <View style={styles.progressCard}>
             <View style={styles.progressHeaderRow}>
-              <Text style={styles.progressTitle}>Rivojlanish progressi</Text>
+              <Text style={styles.progressTitle}>{t.baseProgress}</Text>
               <Text style={styles.progressRatio}>
                 <Text style={styles.progressRatioGold}>24,500</Text>
                 <Text style={styles.progressRatioMuted}> / 50,000 XP</Text>
@@ -495,7 +545,7 @@ export default function ClanBaseScreen({ navigation }) {
                     color="#FFFFFF"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.tabActiveText}>Binolar</Text>
+                  <Text style={styles.tabActiveText}>{t.tabBuildings}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.tabInactivePill}>
@@ -505,7 +555,7 @@ export default function ClanBaseScreen({ navigation }) {
                     color="#94A3B8"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.tabInactiveText}>Binolar</Text>
+                  <Text style={styles.tabInactiveText}>{t.tabBuildings}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -530,7 +580,7 @@ export default function ClanBaseScreen({ navigation }) {
                     color="#FFFFFF"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.tabActiveText}>Upgrade</Text>
+                  <Text style={styles.tabActiveText}>{t.tabUpgrade}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.tabInactivePill}>
@@ -540,7 +590,7 @@ export default function ClanBaseScreen({ navigation }) {
                     color="#94A3B8"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.tabInactiveText}>Upgrade</Text>
+                  <Text style={styles.tabInactiveText}>{t.tabUpgrade}</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -565,7 +615,7 @@ export default function ClanBaseScreen({ navigation }) {
                     color="#FFFFFF"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.tabActiveText}>Bonuslar</Text>
+                  <Text style={styles.tabActiveText}>{t.tabBonuses}</Text>
                 </LinearGradient>
               ) : (
                 <View style={styles.tabInactivePill}>
@@ -575,7 +625,7 @@ export default function ClanBaseScreen({ navigation }) {
                     color="#94A3B8"
                     style={{ marginRight: 6 }}
                   />
-                  <Text style={styles.tabInactiveText}>Bonuslar</Text>
+                  <Text style={styles.tabInactiveText}>{t.tabBonuses}</Text>
                 </View>
               )}
             </TouchableOpacity>

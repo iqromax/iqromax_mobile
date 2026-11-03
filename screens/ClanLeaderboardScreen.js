@@ -18,6 +18,7 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 import Svg, {
   Path,
   Defs,
@@ -40,8 +41,11 @@ const LEAGUES = [
   { id: 'diamond', name: 'Diamond', xpMin: 1500000, xpMax: 3000000, color: '#38BDF8' },
 ];
 
-export default function ClanLeaderboardScreen({ navigation }) {
+export default function ClanLeaderboardScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
   const [selectedLeague, setSelectedLeague] = useState('gold');
   const [activeTab, setActiveTab] = useState('umumiy'); // umumiy | ozbekiston | viloyat
   const [infoModalVisible, setInfoModalVisible] = useState(false);
@@ -460,8 +464,8 @@ export default function ClanLeaderboardScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>League Ranking</Text>
-            <Text style={styles.headerSubtitleText}>Clan'lar reytingi va ligalar</Text>
+            <Text style={styles.headerTitleText}>{t.leaderboard}</Text>
+            <Text style={styles.headerSubtitleText}>{t.leaderboardDesc}</Text>
           </View>
 
           <TouchableOpacity

@@ -20,11 +20,15 @@ import {
   FontAwesome5,
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
-export default function ClanSettingsScreen({ navigation }) {
+export default function ClanSettingsScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
+  const user = route?.params?.user;
+  const language = route?.params?.language || user?.language || 'uz';
+  const t = getClanTranslations(language);
 
   // Settings State
   const [clanName, setClanName] = useState('IQROMAX Clan');
@@ -123,8 +127,8 @@ export default function ClanSettingsScreen({ navigation }) {
           </TouchableOpacity>
 
           <View style={styles.headerTitleCol}>
-            <Text style={styles.headerTitleText}>Clan Settings</Text>
-            <Text style={styles.headerSubtitleText}>Clan sozlamalari va boshqaruv</Text>
+            <Text style={styles.headerTitleText}>{t.clanSettingsTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.clanSettingsSubtitle}</Text>
           </View>
 
           <View style={{ width: 40 }} />
@@ -154,8 +158,8 @@ export default function ClanSettingsScreen({ navigation }) {
               />
             </View>
             <View style={styles.settingMetaCol}>
-              <Text style={styles.settingTitle}>Clan ma'lumotlari</Text>
-              <Text style={styles.settingSubtitle}>Nomi, tavsif, logo va banner</Text>
+              <Text style={styles.settingTitle}>{t.infoSetting}</Text>
+              <Text style={styles.settingSubtitle}>{t.infoSettingDesc}</Text>
             </View>
             <Feather name="chevron-right" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -173,8 +177,8 @@ export default function ClanSettingsScreen({ navigation }) {
               <Feather name="lock" size={20} color="#C084FC" />
             </View>
             <View style={styles.settingMetaCol}>
-              <Text style={styles.settingTitle}>Kirish sozlamalari</Text>
-              <Text style={styles.settingSubtitle}>Clan'ga qo'shilish turi va ruxsatlar</Text>
+              <Text style={styles.settingTitle}>{t.entrySetting}</Text>
+              <Text style={styles.settingSubtitle}>{t.entrySettingDesc}</Text>
             </View>
             <Text style={styles.statusGreenText}>{entryType}</Text>
             <Feather name="chevron-right" size={18} color="#94A3B8" style={{ marginLeft: 6 }} />
@@ -193,8 +197,8 @@ export default function ClanSettingsScreen({ navigation }) {
               <Ionicons name="location-outline" size={22} color="#C084FC" />
             </View>
             <View style={styles.settingMetaCol}>
-              <Text style={styles.settingTitle}>Region va til</Text>
-              <Text style={styles.settingSubtitle}>Mamlakat va mintaqa</Text>
+              <Text style={styles.settingTitle}>{t.regionSetting}</Text>
+              <Text style={styles.settingSubtitle}>{t.regionSettingDesc}</Text>
             </View>
             <Text style={styles.statusGreenText}>{region}</Text>
             <Feather name="chevron-right" size={18} color="#94A3B8" style={{ marginLeft: 6 }} />
@@ -205,7 +209,7 @@ export default function ClanSettingsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.navigate('ClanManagementScreen');
+              navigation.navigate('ClanManagementScreen', { user, language });
             }}
             style={styles.settingCard}
           >
@@ -214,14 +218,14 @@ export default function ClanSettingsScreen({ navigation }) {
             </View>
             <View style={styles.settingMetaCol}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.settingTitle}>Arizalar va takliflar</Text>
+                <Text style={styles.settingTitle}>{t.requestsSetting}</Text>
                 {joinRequests.length > 0 && (
                   <View style={styles.requestCountBadge}>
                     <Text style={styles.requestCountText}>{joinRequests.length}</Text>
                   </View>
                 )}
               </View>
-              <Text style={styles.settingSubtitle}>A'zolik arizalari va takliflar</Text>
+              <Text style={styles.settingSubtitle}>{t.requestsSettingDesc}</Text>
             </View>
             <Feather name="chevron-right" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -243,8 +247,8 @@ export default function ClanSettingsScreen({ navigation }) {
               />
             </View>
             <View style={styles.settingMetaCol}>
-              <Text style={styles.settingTitle}>Rol va ruxsatlar</Text>
-              <Text style={styles.settingSubtitle}>A'zolar rollari va imkoniyatlari</Text>
+              <Text style={styles.settingTitle}>{t.rolesSetting}</Text>
+              <Text style={styles.settingSubtitle}>{t.rolesSettingDesc}</Text>
             </View>
             <Feather name="chevron-right" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -259,8 +263,8 @@ export default function ClanSettingsScreen({ navigation }) {
               <Feather name="log-out" size={20} color="#F87171" />
             </View>
             <View style={styles.settingMetaCol}>
-              <Text style={styles.dangerTitle}>Clan'dan chiqish</Text>
-              <Text style={styles.dangerSubtitle}>Clan a'zoligini tark etish</Text>
+              <Text style={styles.dangerTitle}>{t.leaveSetting}</Text>
+              <Text style={styles.dangerSubtitle}>{t.leaveSettingDesc}</Text>
             </View>
             <Feather name="chevron-right" size={18} color="#94A3B8" />
           </TouchableOpacity>
@@ -275,8 +279,8 @@ export default function ClanSettingsScreen({ navigation }) {
               <Feather name="trash-2" size={20} color="#EF4444" />
             </View>
             <View style={styles.settingMetaCol}>
-              <Text style={styles.criticalTitle}>Clan'ni tarqatib yuborish</Text>
-              <Text style={styles.criticalSubtitle}>Barcha ma'lumotlar o'chiriladi</Text>
+              <Text style={styles.criticalTitle}>{t.disbandSetting}</Text>
+              <Text style={styles.criticalSubtitle}>{t.disbandSettingDesc}</Text>
             </View>
             <Feather name="chevron-right" size={18} color="#94A3B8" />
           </TouchableOpacity>
