@@ -693,7 +693,7 @@ export default function ClanHomeScreen({ navigation, route }) {
               <TouchableOpacity
                 activeOpacity={0.88}
                 style={styles.seasonCard}
-                onPress={() => setActiveBottomTab('Season')}
+                onPress={() => navigation.navigate('ClanSeasonScreen')}
               >
                 <LinearGradient
                   colors={['#17123A', '#110E28']}
@@ -1234,7 +1234,7 @@ export default function ClanHomeScreen({ navigation, route }) {
             activeOpacity={0.8}
             onPress={() => {
               try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (e) {}
-              navigation.navigate('ClanLeaderboardScreen');
+              navigation.navigate('ClanSeasonScreen');
             }}
             style={styles.navTabItem}
           >

@@ -716,7 +716,7 @@ export default function ClanMissionsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.navigate('ClanLeaderboardScreen');
+              navigation.navigate('ClanSeasonScreen');
             }}
             style={styles.navTabItem}
           >
