@@ -245,7 +245,7 @@ export default function ClanNotificationsScreen({ navigation }) {
     }
 
     if (notif.category === 'missions') {
-      navigation.navigate('ClanActivityScreen');
+      navigation.navigate('ClanMissionsScreen');
     } else if (notif.category === 'season') {
       navigation.navigate('ClanLeaderboardScreen');
     } else if (notif.category === 'system' && notif.title.includes('Reyting')) {

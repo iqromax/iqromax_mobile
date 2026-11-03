@@ -947,7 +947,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={styles.featureCard}
-                  onPress={() => setActiveBottomTab('Missions')}
+                  onPress={() => navigation.navigate('ClanMissionsScreen')}
                 >
                   <View style={[styles.featureIconWrap, { backgroundColor: 'rgba(56, 189, 248, 0.12)' }]}>
                     <MaterialCommunityIcons name="target" size={24} color="#38BDF8" />
@@ -1171,10 +1171,7 @@ export default function ClanHomeScreen({ navigation, route }) {
           {/* Tab 2: Missions */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => {
-              setActiveBottomTab('Missions');
-              Alert.alert("Missions", "Clan Missions bo'limi keyingi bosqichda to'liq ochiladi!");
-            }}
+            onPress={() => navigation.navigate('ClanMissionsScreen')}
             style={styles.navTabItem}
           >
             {activeBottomTab === 'Missions' ? (
