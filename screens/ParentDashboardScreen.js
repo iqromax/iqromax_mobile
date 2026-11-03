@@ -361,6 +361,7 @@ export default function ParentDashboardScreen({ navigation, route }) {
   const handleReturnToHome = async () => {
     try {
       await AsyncStorage.removeItem('user_data');
+      await AsyncStorage.removeItem('user_gender');
     } catch (e) {}
     navigation.reset({
       index: 0,

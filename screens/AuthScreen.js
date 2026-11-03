@@ -302,12 +302,12 @@ export default function AuthScreen({ navigation, route }) {
         
         if (response.ok) {
           let charIndex = 0;
-          let gender = data.user?.gender || 'boys';
+          let gender = 'boys';
           const boysChars = ["Alex", "Maks", "David", "Kevin"];
           const girlsChars = ["Lily", "Maya", "Emma", "Sophia"];
           
           if (data.user && data.user.character) {
-             const charName = String(data.user.character);
+             const charName = String(data.user.character).trim();
              const bIdx = boysChars.findIndex(c => c.toLowerCase() === charName.toLowerCase());
              const gIdx = girlsChars.findIndex(c => c.toLowerCase() === charName.toLowerCase());
              if (bIdx !== -1) {
@@ -316,15 +316,14 @@ export default function AuthScreen({ navigation, route }) {
              } else if (gIdx !== -1) {
                charIndex = gIdx + 4;
                gender = 'girls';
+             } else if (data.user.gender) {
+               const g = String(data.user.gender).toLowerCase();
+               gender = (g.includes('girl') || g.includes('qiz') || g.includes('female')) ? 'girls' : 'boys';
              }
+          } else if (data.user && data.user.gender) {
+             const g = String(data.user.gender).toLowerCase();
+             gender = (g.includes('girl') || g.includes('qiz') || g.includes('female')) ? 'girls' : 'boys';
           }
-
-          try {
-            const savedGender = await AsyncStorage.getItem('user_gender');
-            if (savedGender && (!data.user?.gender && charIndex === 0)) {
-              gender = savedGender;
-            }
-          } catch (e) {}
 
           const finalLoggedUser = { ...data.user, gender };
 

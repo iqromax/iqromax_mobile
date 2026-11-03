@@ -449,6 +449,19 @@ export default function StudentDashboardScreen({ navigation, route }) {
   };
   const [activeAvatarIndex, setActiveAvatarIndex] = useState(() => getCharIndexFromUser(user, selectedChar));
 
+  // Sync activeAvatarIndex whenever the logged-in user changes
+  useEffect(() => {
+    if (user?.character) {
+      const charMap = { alex: 0, maks: 1, david: 2, kevin: 3, lily: 4, maya: 5, emma: 6, sophia: 7 };
+      const cName = String(user.character).toLowerCase().trim();
+      if (charMap[cName] !== undefined) {
+        setActiveAvatarIndex(charMap[cName]);
+      } else {
+        setActiveAvatarIndex(user.character);
+      }
+    }
+  }, [user?.character, user?.customId, user?.id]);
+
   const [persistedGender, setPersistedGender] = useState(null);
 
   useEffect(() => {
@@ -465,23 +478,23 @@ export default function StudentDashboardScreen({ navigation, route }) {
   }, []);
 
   const getCurrentUserGender = () => {
-    // 1. Direct explicit gender on user, route params, or persisted in AsyncStorage
-    let uGender = route.params?.gender || user?.gender || persistedGender;
+    // 1. Direct character name check on user (user's character is primary ground truth)
+    const charName = user?.character ? String(user.character).toLowerCase().trim() : '';
+    if (['lily', 'maya', 'sophia', 'emma'].includes(charName)) return 'girls';
+    if (['alex', 'maks', 'david', 'kevin'].includes(charName)) return 'boys';
+
+    // 2. Direct user.gender or route param gender
+    let uGender = user?.gender || route.params?.gender;
     if (uGender) {
       const g = String(uGender).toLowerCase().trim();
       if (g === 'qiz' || g === 'girl' || g === 'female' || g === 'girls') return 'girls';
       if (g === 'ogil' || g === 'o_gil' || g === "o'g'il" || g === 'boy' || g === 'male' || g === 'boys') return 'boys';
     }
 
-    // 2. Character name from static lists
-    const charName = user?.character ? String(user.character).toLowerCase() : '';
-    if (['lily', 'maya', 'sophia', 'emma'].includes(charName)) return 'girls';
-    if (['alex', 'maks', 'david', 'kevin'].includes(charName)) return 'boys';
-
-    // 3. Dynamic character check
-    const activeCharId = String(activeAvatarIndex || user?.character || '');
-    if (activeCharId && Array.isArray(backendSkins) && backendSkins.length > 0) {
-      const foundChar = backendSkins.find(c => c.category === 'personajlar' && (String(c.id) === activeCharId || String(c.name).toLowerCase() === activeCharId.toLowerCase()));
+    // 3. User's dynamic character from backendSkins
+    const userCharId = user?.character ? String(user.character) : '';
+    if (userCharId && Array.isArray(backendSkins) && backendSkins.length > 0) {
+      const foundChar = backendSkins.find(c => c.category === 'personajlar' && (String(c.id) === userCharId || String(c.name).toLowerCase() === userCharId.toLowerCase()));
       if (foundChar && foundChar.targetGender) {
         const tg = String(foundChar.targetGender).toLowerCase().trim();
         if (tg === 'girls' || tg === 'girl' || tg === 'qiz' || tg === 'female') return 'girls';
@@ -489,7 +502,14 @@ export default function StudentDashboardScreen({ navigation, route }) {
       }
     }
 
-    // 4. Static avatar index check (0-3: boys, 4-7: girls)
+    // 4. Persisted gender from storage
+    if (persistedGender) {
+      const g = String(persistedGender).toLowerCase().trim();
+      if (g === 'qiz' || g === 'girl' || g === 'female' || g === 'girls') return 'girls';
+      if (g === 'ogil' || g === 'o_gil' || g === "o'g'il" || g === 'boy' || g === 'male' || g === 'boys') return 'boys';
+    }
+
+    // 5. Static avatar index check (0-3: boys, 4-7: girls)
     if (typeof activeAvatarIndex === 'number') {
       if (activeAvatarIndex >= 4 && activeAvatarIndex <= 7) return 'girls';
       if (activeAvatarIndex >= 0 && activeAvatarIndex <= 3) return 'boys';
@@ -1012,13 +1032,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
   const [backendSkins, setBackendSkins] = useState([]);
   
   const dynamicCharacters = backendSkins.filter(s => s.category === 'personajlar');
-  const selectedAvatarObj = dynamicCharacters.find(a => String(a.id) === String(activeAvatarIndex) || (user?.character && String(a.id) === String(user.character))) 
-    || dynamicCharacters.find(a => isSkinVisibleForGender(a.targetGender, getCurrentUserGender())) 
+  const userGender = getCurrentUserGender();
+  const genderFilteredCharacters = dynamicCharacters.filter(a => isSkinVisibleForGender(a.targetGender, userGender));
+  const selectedAvatarObj = genderFilteredCharacters.find(a => String(a.id) === String(activeAvatarIndex) || (user?.character && (String(a.id) === String(user.character) || String(a.name).toLowerCase() === String(user.character).toLowerCase()))) 
+    || genderFilteredCharacters[0] 
+    || dynamicCharacters.find(a => isSkinVisibleForGender(a.targetGender, userGender)) 
     || dynamicCharacters[0];
   
   const avatarsList = selectedAvatarObj 
-    ? [selectedAvatarObj, ...dynamicCharacters.filter(a => String(a.id) !== String(selectedAvatarObj.id))]
-    : dynamicCharacters;
+    ? [selectedAvatarObj, ...genderFilteredCharacters.filter(a => String(a.id) !== String(selectedAvatarObj.id))]
+    : genderFilteredCharacters;
+
+  // Keep activeAvatarIndex aligned with current gender when dynamic characters are available
+  useEffect(() => {
+    if (genderFilteredCharacters.length > 0) {
+      const match = genderFilteredCharacters.find(a => String(a.id) === String(activeAvatarIndex) || (user?.character && (String(a.id) === String(user.character) || String(a.name).toLowerCase() === String(user.character).toLowerCase())));
+      if (!match) {
+        setActiveAvatarIndex(genderFilteredCharacters[0].id);
+      }
+    }
+  }, [userGender, backendSkins, user?.character]);
 
   const activeCharacterPath = selectedAvatarObj ? (selectedAvatarObj.modelUrl ? `${API_URL.replace(/\/api\/?$/, '')}${selectedAvatarObj.modelUrl}` : null) : null;
   const [skinPurchaseAlertItem, setSkinPurchaseAlertItem] = useState(null);
@@ -1141,18 +1174,26 @@ export default function StudentDashboardScreen({ navigation, route }) {
             if (parsedUserData.xp !== undefined) setUserXp(parsedUserData.xp);
           }
         }).catch(e => console.log(e));
+        setIsSkinsLoaded(false);
         AsyncStorage.getItem(`user_equipped_skins_${userIdKey}`).then(val => {
           if (val) {
             try {
               const parsed = JSON.parse(val);
-              if (parsed.accessories) setEquippedAccessories(parsed.accessories);
-              if (parsed.tops) setEquippedTopsState(parsed.tops);
-              if (parsed.headwears) setEquippedHeadwears(parsed.headwears);
-              if (parsed.pants) setEquippedPantsState(parsed.pants);
-              if (parsed.shoes) setEquippedShoesState(parsed.shoes);
-              if (parsed.backpacks) setEquippedBackpacksState(parsed.backpacks);
+              setEquippedAccessories(parsed.accessories || {});
+              setEquippedTopsState(parsed.tops || {});
+              setEquippedHeadwears(parsed.headwears || {});
+              setEquippedPantsState(parsed.pants || {});
+              setEquippedShoesState(parsed.shoes || {});
+              setEquippedBackpacksState(parsed.backpacks || {});
               if (parsed.avatarIndex !== undefined) setActiveAvatarIndex(parsed.avatarIndex);
             } catch (err) {}
+          } else {
+            setEquippedAccessories({});
+            setEquippedTopsState({});
+            setEquippedHeadwears({});
+            setEquippedPantsState({});
+            setEquippedShoesState({});
+            setEquippedBackpacksState({});
           }
           setIsSkinsLoaded(true);
         }).catch(e => {
@@ -1165,6 +1206,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
             try {
               setPurchasedSkins(JSON.parse(val));
             } catch(e) {}
+          } else {
+            setPurchasedSkins([]);
           }
           if (user?.customId) {
             fetch(`${API_URL}/user/purchases/${encodeURIComponent(user.customId)}`)
@@ -1192,6 +1235,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
     }, [user?.customId, user?.id, route.params])
   );
 
+  // Reset skins loaded state when user account switches to avoid cross-saving old equipment
+  useEffect(() => {
+    setIsSkinsLoaded(false);
+  }, [user?.customId, user?.id]);
+
   useEffect(() => {
     if (!isSkinsLoaded) return;
     const userIdKey = user?.customId || user?.id || 'guest';
@@ -1205,7 +1253,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       avatarIndex: activeAvatarIndex
     };
     AsyncStorage.setItem(`user_equipped_skins_${userIdKey}`, JSON.stringify(toSave)).catch(e => console.log(e));
-  }, [equippedAccessories, equippedTopsState, equippedHeadwears, equippedPantsState, equippedShoesState, equippedBackpacksState, activeAvatarIndex, user, isSkinsLoaded]);
+  }, [equippedAccessories, equippedTopsState, equippedHeadwears, equippedPantsState, equippedShoesState, equippedBackpacksState, activeAvatarIndex, user?.customId, user?.id, isSkinsLoaded]);
 
 
 
@@ -1389,9 +1437,11 @@ export default function StudentDashboardScreen({ navigation, route }) {
             if (localUser.xp !== undefined) setUserXp(localUser.xp);
             if (localUser.character) {
               const charMap = { alex: 0, maks: 1, david: 2, kevin: 3, lily: 4, maya: 5, emma: 6, sophia: 7 };
-              const cName = String(localUser.character).toLowerCase();
+              const cName = String(localUser.character).toLowerCase().trim();
               if (charMap[cName] !== undefined) {
                 setActiveAvatarIndex(charMap[cName]);
+              } else {
+                setActiveAvatarIndex(localUser.character);
               }
             }
             
@@ -2845,10 +2895,9 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 activeOpacity={0.8}
                 onPress={handleOpenClanWithPortal}
               >
-                <MaterialCommunityIcons name="shield-crown" size={20} color="#C084FC" />
-                <View style={styles.rightStatTextCol}>
-                  <Text style={[styles.rightStatTopLabel, { color: '#C084FC', letterSpacing: 0.8 }]} numberOfLines={1}>CLAN</Text>
-                  <Text style={[styles.rightStatNumber, { color: '#FFF', fontSize: 11 }]} numberOfLines={1}>JAMOALAR</Text>
+                <MaterialCommunityIcons name="shield-crown" size={22} color="#C084FC" />
+                <View style={[styles.rightStatTextCol, { justifyContent: 'center' }]}>
+                  <Text style={[styles.rightStatNumber, { color: '#C084FC', fontSize: 13, letterSpacing: 1 }]} numberOfLines={1}>CLAN</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -4832,6 +4881,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               onPress={async () => {
                 try {
                   await AsyncStorage.removeItem('user_data');
+                  await AsyncStorage.removeItem('user_gender');
                 } catch (e) {}
                 navigation.reset({ index: 0, routes: [{ name: 'AuthScreen' }] });
               }}
@@ -4911,6 +4961,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
               onPress={async () => {
                 try {
                   await AsyncStorage.removeItem('user_data');
+                  await AsyncStorage.removeItem('user_gender');
                 } catch (e) {}
                 navigation.reset({
                   index: 0,
