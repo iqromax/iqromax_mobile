@@ -222,10 +222,7 @@ export function MissionsTabContent({ navigation }) {
     if (tabId === 'progress') {
       navigation.navigate('ClanMissionProgressScreen');
     } else if (tabId === 'mukofotlar') {
-      Alert.alert(
-        "Clan Mukofotlari 🎁",
-        "1. Kichik Sandiq: 500 XP + 100 Coin\n2. Oltin Sandiq: 2,500 XP + 500 Coin\n3. Afsonaviy Sandiq: Maxsus Emblem + 5,000 XP"
-      );
+      navigation.navigate('ClanChestRewardsScreen');
     } else if (tabId === 'streak') {
       Alert.alert(
         "Clan Streak 🔥",
@@ -283,14 +280,21 @@ export function MissionsTabContent({ navigation }) {
         </View>
 
         {/* Right 3D Purple Treasure Chest */}
-        <View style={styles.heroChestWrap}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.heroChestWrap}
+          onPress={() => {
+            triggerHaptic();
+            navigation.navigate('ClanChestRewardsScreen');
+          }}
+        >
           <View style={styles.chestGlowBehind} />
           <Image
             source={require('../assets/clan_chest_purple.jpg')}
             style={styles.heroChestImage}
             contentFit="contain"
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* 2. HORIZONTAL FEATURE TABS (5 ITEMS) */}
