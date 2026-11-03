@@ -498,8 +498,10 @@ export default function ClanHomeScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor="#070814" />
 
       <SafeAreaView edges={['top']} style={styles.safeArea}>
-        {/* Top Header */}
-        <View style={styles.headerRow}>
+        {/* Upper Screen Area: Header + Content covered by Glossy Frosted Overlay */}
+        <View style={styles.upperScreenWrapper}>
+          {/* Top Header */}
+          <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             <TouchableOpacity
               activeOpacity={0.7}
@@ -625,15 +627,14 @@ export default function ClanHomeScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* Scrollable Content Container with Coming Soon Blur Overlay */}
-        <View style={styles.mainContentContainer}>
-          {activeBottomTab === 'Missions' ? (
-            <MissionsTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
-          ) : activeBottomTab === 'Season' ? (
-            <SeasonTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
-          ) : activeBottomTab === 'Clan' ? (
-            <ClanProfileTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
-          ) : (
+        {/* Scrollable Content */}
+        {activeBottomTab === 'Missions' ? (
+          <MissionsTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
+        ) : activeBottomTab === 'Season' ? (
+          <SeasonTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
+        ) : activeBottomTab === 'Clan' ? (
+          <ClanProfileTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
+        ) : (
             <Animated.ScrollView
               style={[
                 styles.scrollContent,
@@ -1261,8 +1262,12 @@ export default function ClanHomeScreen({ navigation, route }) {
         </Animated.ScrollView>
         )}
 
-          {/* Frosted Glass Coming Soon Overlay - Blurs main screen, navbar remains interactive! */}
-          <ClanComingSoonOverlay activeTab={activeBottomTab} language={language} />
+          {/* Full Upper Screen Glossy Frosted Overlay - Covers Header + Content */}
+          <ClanComingSoonOverlay
+            activeTab={activeBottomTab}
+            language={language}
+            onBack={handleExitToMainSystem}
+          />
         </View>
 
         {/* 5. BOTTOM NAVIGATION BAR (Home, Missions, Season, Clan) */}
@@ -2832,7 +2837,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     color: '#FFFFFF',
   },
-  mainContentContainer: {
+  upperScreenWrapper: {
     flex: 1,
     position: 'relative',
     overflow: 'hidden',

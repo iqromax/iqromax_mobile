@@ -4,28 +4,33 @@ import {
   Text,
   StyleSheet,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
-import Svg, { Circle, Path, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { getClanTranslations } from '../src/utils/clanTranslations';
 
 const { width } = Dimensions.get('window');
 
-export default function ClanComingSoonOverlay({ activeTab = 'Home', language = 'uz' }) {
+export default function ClanComingSoonOverlay({
+  activeTab = 'Home',
+  language = 'uz',
+  onBack,
+}) {
   const t = getClanTranslations(language);
 
   const getSectionTitle = () => {
     switch (activeTab) {
       case 'Missions':
-        return t.sectionMissions || 'Klan Vazifalari';
+        return t.tabMissions || 'Vazifalar';
       case 'Season':
-        return t.sectionSeason || 'Mavsum Musobaqasi';
+        return t.tabSeason || 'Mavsum';
       case 'Clan':
-        return t.sectionClan || 'Klan Profili va Baza';
+        return t.tabClan || 'Klan';
       case 'Home':
       default:
-        return t.sectionHome || 'Klan Asosiy Zali';
+        return t.tabHome || 'Asosiy';
     }
   };
 
@@ -34,140 +39,157 @@ export default function ClanComingSoonOverlay({ activeTab = 'Home', language = '
       case 'Missions':
         return 'target';
       case 'Season':
-        return 'trophy-award';
+        return 'trophy-outline';
       case 'Clan':
-        return 'shield-crown';
+        return 'shield-crown-outline';
       case 'Home':
       default:
-        return 'rocket-launch';
+        return 'rocket-launch-outline';
     }
   };
 
   return (
     <View style={styles.overlayRoot} pointerEvents="auto">
-      {/* Translucent Dim Gradient Layer */}
+      {/* 1. Translucent Frosted Glass Dark Backdrop */}
+      <View style={styles.frostedBackdrop} />
+
+      {/* 2. Glossy Diagonal Light Sheen */}
       <LinearGradient
         colors={[
-          'rgba(9, 7, 24, 0.74)',
-          'rgba(7, 8, 20, 0.86)',
-          'rgba(12, 9, 32, 0.92)',
+          'rgba(255, 255, 255, 0.09)',
+          'rgba(168, 85, 247, 0.05)',
+          'transparent',
+          'rgba(56, 189, 248, 0.06)',
+          'rgba(255, 255, 255, 0.03)',
         ]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
       />
 
-      {/* Ambient Neon Backlights */}
+      {/* 3. Ambient Diffused Neon Glow Orbs */}
       <View style={styles.ambientTopGlow} />
       <View style={styles.ambientBottomGlow} />
 
-      {/* Central Glassmorphic Hologram Card */}
-      <View style={styles.glassCard}>
-        {/* Card Gradient Background */}
-        <LinearGradient
-          colors={['rgba(28, 22, 64, 0.88)', 'rgba(16, 12, 38, 0.94)']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={StyleSheet.absoluteFillObject}
-        />
-
-        {/* Ambient Card Rim Light */}
-        <LinearGradient
-          colors={['rgba(168, 85, 247, 0.25)', 'transparent']}
-          style={styles.cardRimLight}
-        />
-
-        {/* Holographic Glowing Emblem */}
-        <View style={styles.emblemContainer}>
-          <Svg width={80} height={80} viewBox="0 0 80 80">
-            <Defs>
-              <SvgGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0%" stopColor="#C084FC" />
-                <Stop offset="50%" stopColor="#A855F7" />
-                <Stop offset="100%" stopColor="#6366F1" />
-              </SvgGradient>
-              <SvgGradient id="glowCore" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0%" stopColor="#F59E0B" />
-                <Stop offset="100%" stopColor="#EF4444" />
-              </SvgGradient>
-            </Defs>
-            {/* Outer dotted energy ring */}
-            <Circle
-              cx="40"
-              cy="40"
-              r="36"
-              fill="none"
-              stroke="#A855F7"
-              strokeWidth="1.5"
-              strokeDasharray="4 4"
-              opacity={0.6}
-            />
-            {/* Inner solid border ring */}
-            <Circle
-              cx="40"
-              cy="40"
-              r="30"
-              fill="rgba(147, 51, 234, 0.15)"
-              stroke="url(#ringGrad)"
-              strokeWidth="2"
-            />
-          </Svg>
-
-          <View style={styles.emblemCenterIcon}>
-            <MaterialCommunityIcons
-              name={getSectionIcon()}
-              size={34}
-              color="#FBBF24"
-            />
-          </View>
+      {/* 4. Top Back Navigation Button (Allows user to return to IQROMAX cleanly) */}
+      {onBack && (
+        <View style={styles.topNavRow}>
+          <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={onBack}
+            style={styles.topBackBtn}
+          >
+            <View style={styles.topBackArrow}>
+              <Feather name="chevron-left" size={16} color="#C084FC" />
+            </View>
+            <Text style={styles.topBackText}>{t.returnToIqromax || "IQROMAX ga qaytish"}</Text>
+          </TouchableOpacity>
         </View>
+      )}
 
-        {/* Status Badge */}
-        <View style={styles.statusBadge}>
-          <View style={styles.pulseDot} />
-          <Text style={styles.statusBadgeText}>
-            {t.comingSoonStatus || 'TEZ ORADA ISHGA TUSHADI'}
+      {/* 5. Center Glossy Glassmorphic Card */}
+      <View style={styles.glassCardWrap}>
+        <View style={styles.glassCard}>
+          {/* Frosted Liquid Glass Multi-stop Background */}
+          <LinearGradient
+            colors={[
+              'rgba(255, 255, 255, 0.12)',
+              'rgba(30, 22, 68, 0.78)',
+              'rgba(12, 10, 32, 0.92)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0.8, y: 1 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+
+          {/* Top Specular Edge Highlight (Polished Glass Rim Light) */}
+          <LinearGradient
+            colors={['rgba(255, 255, 255, 0.55)', 'rgba(192, 132, 252, 0.3)', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.glassTopRimHighlight}
+          />
+
+          {/* Holographic Glowing Glass Orb */}
+          <View style={styles.emblemContainer}>
+            <Svg width={76} height={76} viewBox="0 0 76 76">
+              <Defs>
+                <SvgGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                  <Stop offset="0%" stopColor="#C084FC" />
+                  <Stop offset="50%" stopColor="#A855F7" />
+                  <Stop offset="100%" stopColor="#38BDF8" />
+                </SvgGradient>
+              </Defs>
+              <Circle
+                cx="38"
+                cy="38"
+                r="34"
+                fill="none"
+                stroke="#A855F7"
+                strokeWidth="1.2"
+                strokeDasharray="4 4"
+                opacity={0.5}
+              />
+              <Circle
+                cx="38"
+                cy="38"
+                r="28"
+                fill="rgba(147, 51, 234, 0.18)"
+                stroke="url(#ringGrad)"
+                strokeWidth="1.8"
+              />
+            </Svg>
+
+            <View style={styles.emblemCenterIcon}>
+              <MaterialCommunityIcons
+                name={getSectionIcon()}
+                size={30}
+                color="#FBBF24"
+              />
+            </View>
+          </View>
+
+          {/* Status Badge Pill */}
+          <View style={styles.statusBadge}>
+            <View style={styles.livePulseDot} />
+            <Text style={styles.statusBadgeText}>
+              {t.comingSoonStatus || 'TEZ ORADA ISHGA TUSHADI'}
+            </Text>
+          </View>
+
+          {/* Active Tab Indicator Chip */}
+          <View style={styles.tabIndicatorChip}>
+            <Text style={styles.tabIndicatorText}>
+              {getSectionTitle()}
+            </Text>
+          </View>
+
+          {/* Card Title */}
+          <Text style={styles.mainTitle}>
+            {t.comingSoonTitle || 'Tez orada ishga tushadi!'}
           </Text>
-        </View>
 
-        {/* Active Section Chip */}
-        <View style={styles.sectionPill}>
-          <Text style={styles.sectionPillText}>
-            {getSectionTitle()}
+          {/* Card Description */}
+          <Text style={styles.description}>
+            {t.comingSoonDesc ||
+              "Ushbu bo'lim hozirda qizg'in tayyorlanmoqda va tez kunda to'liq foydalanishga topshiriladi. Klaningiz bilan yangi cho'qqilarni zabt etishga tayyor turing!"}
           </Text>
-        </View>
 
-        {/* Main Title */}
-        <Text style={styles.mainTitle}>
-          {t.comingSoonTitle || 'Tez orada ishga tushadi!'}
-        </Text>
-
-        {/* Description */}
-        <Text style={styles.description}>
-          {t.comingSoonDesc ||
-            "Ushbu bo'lim hozirda qizg'in tayyorlanmoqda va tez kunda to'liq foydalanishga topshiriladi. Klaningiz bilan yangi cho'qqilarni zabt etishga tayyor turing!"}
-        </Text>
-
-        {/* Feature Highlights Row */}
-        <View style={styles.perksRow}>
-          <View style={styles.perkChip}>
-            <Text style={styles.perkEmoji}>🛡️</Text>
-            <Text style={styles.perkText}>{t.perkTeams || 'Jamoalar'}</Text>
+          {/* Feature Highlights Row */}
+          <View style={styles.perksRow}>
+            <View style={styles.perkChip}>
+              <Text style={styles.perkEmoji}>🛡️</Text>
+              <Text style={styles.perkText}>{t.perkTeams || 'Jamoalar'}</Text>
+            </View>
+            <View style={styles.perkChip}>
+              <Text style={styles.perkEmoji}>⚔️</Text>
+              <Text style={styles.perkText}>{t.perkBattles || 'Bahslar'}</Text>
+            </View>
+            <View style={styles.perkChip}>
+              <Text style={styles.perkEmoji}>🎁</Text>
+              <Text style={styles.perkText}>{t.perkRewards || 'Sovrinlar'}</Text>
+            </View>
           </View>
-          <View style={styles.perkChip}>
-            <Text style={styles.perkEmoji}>⚔️</Text>
-            <Text style={styles.perkText}>{t.perkBattles || 'Bahslar'}</Text>
-          </View>
-          <View style={styles.perkChip}>
-            <Text style={styles.perkEmoji}>🎁</Text>
-            <Text style={styles.perkText}>{t.perkRewards || 'Sovrinlar'}</Text>
-          </View>
-        </View>
-
-        {/* Bottom Nav Hint */}
-        <View style={styles.hintWrap}>
-          <Feather name="navigation" size={12} color="#A855F7" style={{ marginRight: 6 }} />
-          <Text style={styles.hintText}>
-            {t.comingSoonHint || "Pastdagi menyu orqali boshqa bo'limlarni ko'rishingiz mumkin"}
-          </Text>
         </View>
       </View>
     </View>
@@ -177,46 +199,82 @@ export default function ClanComingSoonOverlay({ activeTab = 'Home', language = '
 const styles = StyleSheet.create({
   overlayRoot: {
     ...StyleSheet.absoluteFillObject,
+    zIndex: 999,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 99,
+  },
+  frostedBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(7, 8, 22, 0.84)',
   },
   ambientTopGlow: {
     position: 'absolute',
-    top: '20%',
-    left: '15%',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    backgroundColor: 'rgba(168, 85, 247, 0.16)',
-    filter: 'blur(50px)',
+    top: '15%',
+    left: '10%',
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    backgroundColor: 'rgba(168, 85, 247, 0.18)',
   },
   ambientBottomGlow: {
     position: 'absolute',
-    bottom: '22%',
-    right: '12%',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: 'rgba(56, 189, 248, 0.12)',
-    filter: 'blur(50px)',
+    bottom: '15%',
+    right: '10%',
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: 'rgba(56, 189, 248, 0.14)',
+  },
+  topNavRow: {
+    position: 'absolute',
+    top: 12,
+    left: 16,
+    zIndex: 1000,
+  },
+  topBackBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(25, 18, 54, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(168, 85, 247, 0.35)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  topBackArrow: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(168, 85, 247, 0.22)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 6,
+  },
+  topBackText: {
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
+    color: '#E9D5FF',
+  },
+  glassCardWrap: {
+    paddingHorizontal: 20,
+    alignItems: 'center',
   },
   glassCard: {
-    width: Math.min(width - 40, 360),
+    width: Math.min(width - 40, 350),
     borderRadius: 24,
-    paddingVertical: 26,
+    paddingVertical: 24,
     paddingHorizontal: 20,
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: 'rgba(168, 85, 247, 0.38)',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
     overflow: 'hidden',
     shadowColor: '#8B5CF6',
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 22,
-    elevation: 12,
+    shadowOpacity: 0.38,
+    shadowRadius: 24,
+    elevation: 14,
   },
-  cardRimLight: {
+  glassTopRimHighlight: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -224,11 +282,11 @@ const styles = StyleSheet.create({
     height: 2,
   },
   emblemContainer: {
-    width: 80,
-    height: 80,
+    width: 76,
+    height: 76,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   emblemCenterIcon: {
     position: 'absolute',
@@ -238,15 +296,15 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(168, 85, 247, 0.18)',
+    backgroundColor: 'rgba(168, 85, 247, 0.22)',
     borderWidth: 1,
-    borderColor: 'rgba(192, 132, 252, 0.32)',
+    borderColor: 'rgba(192, 132, 252, 0.38)',
     paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingVertical: 4.5,
     borderRadius: 20,
     marginBottom: 10,
   },
-  pulseDot: {
+  livePulseDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
@@ -254,55 +312,56 @@ const styles = StyleSheet.create({
     marginRight: 7,
   },
   statusBadgeText: {
-    fontSize: 11,
+    fontSize: 10.5,
     fontFamily: 'Inter_700Bold',
     color: '#E9D5FF',
     letterSpacing: 0.8,
   },
-  sectionPill: {
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  tabIndicatorChip: {
+    backgroundColor: 'rgba(255, 255, 255, 0.07)',
     paddingHorizontal: 12,
     paddingVertical: 3,
     borderRadius: 12,
-    marginBottom: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  sectionPillText: {
+  tabIndicatorText: {
     fontSize: 12,
     fontFamily: 'Inter_600SemiBold',
     color: '#C084FC',
   },
   mainTitle: {
-    fontSize: 20,
+    fontSize: 19,
     fontFamily: 'Inter_700Bold',
     color: '#FFFFFF',
     textAlign: 'center',
     marginBottom: 8,
   },
   description: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontFamily: 'Inter_400Regular',
     color: '#94A3B8',
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: 18,
+    marginBottom: 16,
     paddingHorizontal: 6,
   },
   perksRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
   },
   perkChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
-    marginHorizontal: 4,
+    marginHorizontal: 3.5,
   },
   perkEmoji: {
     fontSize: 12,
@@ -312,21 +371,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: 'Inter_500Medium',
     color: '#E2E8F0',
-  },
-  hintWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.25)',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(168, 85, 247, 0.15)',
-  },
-  hintText: {
-    fontSize: 11,
-    fontFamily: 'Inter_400Regular',
-    color: '#94A3B8',
-    textAlign: 'center',
   },
 });
