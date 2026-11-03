@@ -751,7 +751,6 @@ export default function ClanMissionsScreen({ navigation, route }) {
             </View>
           </TouchableOpacity>
         </View>
-        </View>
 
         {/* INFO MODAL */}
         <Modal
