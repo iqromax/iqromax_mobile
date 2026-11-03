@@ -13,6 +13,7 @@ import InventoryAdmin from './pages/InventoryAdmin';
 import AppDownloadingAdmin from './pages/AppDownloadingAdmin';
 import AppDownloadLanding from './pages/AppDownloadLanding';
 import TeacherTrainingAdmin from './pages/TeacherTrainingAdmin';
+import ClanDashboardHome from './pages/ClanDashboardHome';
 
 function App() {
   return (
@@ -22,6 +23,8 @@ function App() {
         <Route path="/downloading" element={<AppDownloadLanding />} />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/clan" element={<Navigate to="/clan/home" replace />} />
+        <Route path="/clan/home" element={<ClanDashboardHome />} />
         <Route path="/courses/teacher-training" element={<TeacherTrainingAdmin />} />
         <Route path="/app-downloading" element={<AppDownloadingAdmin />} />
         <Route path="/mystery-box" element={<MysteryBoxAdmin />} />

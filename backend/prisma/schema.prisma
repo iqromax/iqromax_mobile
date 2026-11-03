@@ -295,3 +295,101 @@ model CourseEnrollment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// ========================
+// CLAN SYSTEM MODELS
+// ========================
+
+model Clan {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  tag         String?  // e.g. "IQRO"
+  description String?
+  logo        String?  @default("shield_wolf")
+  banner      String?
+  badge       String?
+  level       Int      @default(1)
+  xp          Int      @default(0)
+  requiredXp  Int      @default(10000)
+  league      String   @default("Bronze") // Bronze, Silver, Gold, Platinum, Diamond, Master, Grandmaster
+  leagueRank  Int      @default(1)
+  region      String   @default("O'zbekiston")
+  entryType   String   @default("Open") // "Open" (Ochiq), "Request" (Arizali), "InviteOnly" (Faqat taklif), "Closed" (Yopiq)
+  minLevel    Int      @default(1)
+  minXp       Int      @default(0)
+  maxMembers  Int      @default(50)
+  streak      Int      @default(0)
+  
+  // Base & Buildings
+  baseLevel   Int      @default(1)
+  baseXp      Int      @default(0)
+  baseRequiredXp Int   @default(50000)
+  
+  // Activity stats
+  battleWins  Int      @default(0)
+  battleLosses Int     @default(0)
+  battlesCount Int     @default(0)
+  missionsCompleted Int @default(0)
+  seasonXp    Int      @default(0)
+  seasonTournaments Int @default(0)
+  
+  creatorId   String   // userId of creator
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, BANNED
+  
+  members      ClanMember[]
+  joinRequests ClanJoinRequest[]
+  activities   ClanActivity[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ClanMember {
+  id           String   @id @default(uuid())
+  clanId       String
+  clan         Clan     @relation(fields: [clanId], references: [id], onDelete: Cascade)
+  userId       String   // User id or customId
+  userName     String?
+  userAvatar   String?
+  role         String   @default("Member") // "Creator", "Co-Leader", "Elder", "Member"
+  clanXp       Int      @default(0)
+  seasonXp     Int      @default(0)
+  battleWins   Int      @default(0)
+  missionsCount Int     @default(0)
+  streakDays   Int      @default(0)
+  activityRate Int      @default(100) // %
+  isOnline     Boolean  @default(false)
+  lastActiveAt DateTime @default(now())
+  joinedAt     DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([clanId, userId])
+}
+
+model ClanJoinRequest {
+  id          String   @id @default(uuid())
+  clanId      String
+  clan        Clan     @relation(fields: [clanId], references: [id], onDelete: Cascade)
+  userId      String
+  userName    String?
+  userAvatar  String?
+  userLevel   Int      @default(1)
+  userXp      Int      @default(0)
+  type        String   @default("REQUEST") // "REQUEST" (User applying to clan), "INVITE" (Clan inviting user)
+  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED, CANCELLED
+  message     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ClanActivity {
+  id          String   @id @default(uuid())
+  clanId      String
+  clan        Clan     @relation(fields: [clanId], references: [id], onDelete: Cascade)
+  type        String   // "CLAN_CREATED", "MEMBER_JOINED", "MEMBER_LEFT", "LEVEL_UP", "BATTLE_WON", "LEAGUE_PROMOTED", "MISSION_COMPLETED"
+  title       String
+  description String?
+  metadata    String?  // JSON string for extra data
+  createdAt   DateTime @default(now())
+}
+

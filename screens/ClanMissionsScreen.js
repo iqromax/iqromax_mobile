@@ -690,7 +690,7 @@ export default function ClanMissionsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.navigate('ClanHomeScreen');
+              navigation.replace('ClanHomeScreen', { initialTab: 'Home' });
             }}
             style={styles.navTabItem}
           >
@@ -719,7 +719,7 @@ export default function ClanMissionsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.navigate('ClanSeasonScreen');
+              navigation.replace('ClanHomeScreen', { initialTab: 'Season' });
             }}
             style={styles.navTabItem}
           >
@@ -734,7 +734,7 @@ export default function ClanMissionsScreen({ navigation }) {
             activeOpacity={0.8}
             onPress={() => {
               triggerHaptic();
-              navigation.navigate('ClanActivityScreen');
+              navigation.replace('ClanHomeScreen', { initialTab: 'Clan' });
             }}
             style={styles.navTabItem}
           >

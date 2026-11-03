@@ -33,7 +33,7 @@ import * as Haptics from 'expo-haptics';
 
 const { width } = Dimensions.get('window');
 
-export default function ClanSeasonScreen({ navigation }) {
+export function SeasonTabContent({ navigation }) {
   const insets = useSafeAreaInsets();
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [tournamentModalVisible, setTournamentModalVisible] = useState(false);
@@ -257,76 +257,12 @@ export default function ClanSeasonScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#070514" />
-
-      {/* Atmospheric Background Gradient */}
-      <LinearGradient
-        colors={['#170F38', '#0A081C', '#070814']}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 0.45 }}
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        {/* 1. TOP HEADER: EXACT IQROMAX CLAN BUTTON MATCHING HOME & MISSIONS */}
-        <View style={styles.headerRow}>
-          <View style={styles.headerTitleCol}>
-            {/* The standard IQROMAX Clan back button */}
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => {
-                triggerHaptic();
-                navigation.navigate('ClanTransitionScreen', {
-                  type: 'toIqromax',
-                  target: 'StudentDashboard',
-                });
-              }}
-              style={styles.backBreadcrumb}
-            >
-              <View style={styles.backArrowBadge}>
-                <Feather name="chevron-left" size={16} color="#C084FC" />
-              </View>
-              <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.headerTitle}>Season Overview</Text>
-            <Text style={styles.headerSubtitle}>Mavsum haqida umumiy ma'lumot</Text>
-          </View>
-
-          <View style={styles.headerRightActions}>
-            {/* Notification Bell */}
-            <TouchableOpacity
-              activeOpacity={0.75}
-              style={styles.iconCircleButton}
-              onPress={() => {
-                triggerHaptic();
-                navigation.navigate('ClanNotificationsScreen');
-              }}
-            >
-              <Feather name="bell" size={19} color="#FFFFFF" />
-              <View style={styles.notificationDot} />
-            </TouchableOpacity>
-
-            {/* Info Circle */}
-            <TouchableOpacity
-              activeOpacity={0.75}
-              style={styles.iconCircleButton}
-              onPress={() => {
-                triggerHaptic();
-                setInfoModalVisible(true);
-              }}
-            >
-              <Feather name="info" size={19} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* MAIN SCROLLABLE CONTENT */}
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]}
-        >
+    <>
+      {/* MAIN SCROLLABLE CONTENT */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]}
+      >
           {/* 2. HERO CARD: SEASON 5 SHOWCASE */}
           <View style={styles.heroCard}>
             <LinearGradient
@@ -573,7 +509,7 @@ export default function ClanSeasonScreen({ navigation }) {
                 style={styles.quickNavCard}
                 onPress={() => {
                   triggerHaptic();
-                  navigation.navigate('ClanChestRewardsScreen');
+                  navigation.navigate('ClanSeasonRewardsScreen');
                 }}
               >
                 <View style={styles.quickNavIconWrap}>
@@ -590,7 +526,7 @@ export default function ClanSeasonScreen({ navigation }) {
                 style={styles.quickNavCard}
                 onPress={() => {
                   triggerHaptic();
-                  setTournamentModalVisible(true);
+                  navigation.navigate('ClanTournamentScreen');
                 }}
               >
                 <View style={styles.quickNavIconWrap}>
@@ -603,68 +539,6 @@ export default function ClanSeasonScreen({ navigation }) {
             </View>
           </View>
         </ScrollView>
-
-        {/* 8. BOTTOM NAVIGATION BAR (Home, Missions, Season, Clan) */}
-        <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
-          {/* Tab 1: Home */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              triggerHaptic();
-              navigation.navigate('ClanHomeScreen');
-            }}
-            style={styles.navTabItem}
-          >
-            <View style={styles.inactiveTabCol}>
-              <Ionicons name="home-outline" size={21} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Home</Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Tab 2: Missions */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              triggerHaptic();
-              navigation.navigate('ClanMissionsScreen');
-            }}
-            style={styles.navTabItem}
-          >
-            <View style={styles.inactiveTabCol}>
-              <MaterialCommunityIcons name="target" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Missions</Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Tab 3: Season (ACTIVE - VERTICAL GRADIENT PILL) */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            style={styles.navTabItem}
-          >
-            <LinearGradient
-              colors={['rgba(168, 85, 247, 0.35)', 'rgba(99, 102, 241, 0.22)']}
-              style={styles.activeTabPill}
-            >
-              <MaterialCommunityIcons name="trophy" size={20} color="#FFFFFF" />
-              <Text style={styles.activeTabLabel}>Season</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Tab 4: Clan */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => {
-              triggerHaptic();
-              navigation.navigate('ClanActivityScreen');
-            }}
-            style={styles.navTabItem}
-          >
-            <View style={styles.inactiveTabCol}>
-              <MaterialCommunityIcons name="shield-outline" size={22} color="#94A3B8" />
-              <Text style={styles.inactiveTabLabel}>Clan</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
 
         {/* 9. INFO MODAL */}
         <Modal
@@ -737,6 +611,136 @@ export default function ClanSeasonScreen({ navigation }) {
             </View>
           </View>
         </Modal>
+    </>
+  );
+}
+
+export default function ClanSeasonScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
+
+  const triggerHaptic = (type = 'light') => {
+    try {
+      if (type === 'medium') {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } else {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } catch (e) {}
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#070514" />
+
+      {/* Atmospheric Background Gradient */}
+      <LinearGradient
+        colors={['#170F38', '#0A081C', '#070814']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 0.45 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        {/* 1. TOP HEADER */}
+        <View style={styles.headerRow}>
+          <View style={styles.headerTitleCol}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanTransitionScreen', {
+                  type: 'toIqromax',
+                  target: 'StudentDashboard',
+                });
+              }}
+              style={styles.backBreadcrumb}
+            >
+              <View style={styles.backArrowBadge}>
+                <Feather name="chevron-left" size={16} color="#C084FC" />
+              </View>
+              <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.headerTitle}>Season Overview</Text>
+            <Text style={styles.headerSubtitle}>Mavsum haqida umumiy ma'lumot</Text>
+          </View>
+
+          <View style={styles.headerRightActions}>
+            <TouchableOpacity
+              activeOpacity={0.75}
+              style={styles.iconCircleButton}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanNotificationsScreen');
+              }}
+            >
+              <Feather name="bell" size={19} color="#FFFFFF" />
+              <View style={styles.notificationDot} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* REUSABLE SEASON TAB CONTENT */}
+        <SeasonTabContent navigation={navigation} />
+
+        {/* 8. BOTTOM NAVIGATION BAR */}
+        <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+          {/* Tab 1: Home */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              triggerHaptic();
+              navigation.replace('ClanHomeScreen', { initialTab: 'Home' });
+            }}
+            style={styles.navTabItem}
+          >
+            <View style={styles.inactiveTabCol}>
+              <Ionicons name="home-outline" size={21} color="#94A3B8" />
+              <Text style={styles.inactiveTabLabel}>Home</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Tab 2: Missions */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              triggerHaptic();
+              navigation.replace('ClanHomeScreen', { initialTab: 'Missions' });
+            }}
+            style={styles.navTabItem}
+          >
+            <View style={styles.inactiveTabCol}>
+              <MaterialCommunityIcons name="target" size={22} color="#94A3B8" />
+              <Text style={styles.inactiveTabLabel}>Missions</Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Tab 3: Season (ACTIVE) */}
+          <TouchableOpacity activeOpacity={0.8} style={styles.navTabItem}>
+            <LinearGradient
+              colors={['rgba(168, 85, 247, 0.35)', 'rgba(99, 102, 241, 0.22)']}
+              style={styles.activeTabPill}
+            >
+              <MaterialCommunityIcons name="trophy" size={20} color="#FFFFFF" />
+              <Text style={styles.activeTabLabel}>Season</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Tab 4: Clan */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              triggerHaptic();
+              navigation.replace('ClanHomeScreen', { initialTab: 'Clan' });
+            }}
+            style={styles.navTabItem}
+          >
+            <View style={styles.inactiveTabCol}>
+              <MaterialCommunityIcons name="shield-outline" size={22} color="#94A3B8" />
+              <Text style={styles.inactiveTabLabel}>Clan</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     </View>
   );

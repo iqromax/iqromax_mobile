@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle, Package, Download, ShoppingBag, Menu, BookOpen } from 'lucide-react';
+import { Home, Users, Bell, ChevronLeft, ChevronRight, LogOut, ChevronDown, User, UserCheck, UserPlus, PlayCircle, Package, Download, ShoppingBag, Menu, BookOpen, Shield, Target, Trophy } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
@@ -7,6 +7,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const [isUsersMenuOpen, setIsUsersMenuOpen] = useState(false);
   const [isCoursesMenuOpen, setIsCoursesMenuOpen] = useState(false);
   const location = useLocation();
+  const [isClanMenuOpen, setIsClanMenuOpen] = useState(location.pathname.startsWith('/clan'));
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -261,6 +262,95 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
               <Bell className={`w-5 h-5 ${location.pathname === '/notifications' ? 'text-purple-200' : ''}`} />
               {isSidebarOpen && <span>Xabarnomalar</span>}
             </Link>
+
+            {/* Clan System */}
+            <div className="pt-2">
+              <div className={`px-4 pb-1 text-[10px] font-semibold text-indigo-300/40 uppercase tracking-wider ${!isSidebarOpen && 'hidden'}`}>
+                O'yin Tizimi
+              </div>
+              <div className="space-y-1">
+                <button 
+                  onClick={() => {
+                    setIsClanMenuOpen(!isClanMenuOpen);
+                    if (!isSidebarOpen) setIsSidebarOpen(true);
+                  }}
+                  className={`w-full flex items-center justify-between ${isSidebarOpen ? 'px-4' : 'justify-center px-0'} py-3.5 rounded-xl transition-all ${
+                    location.pathname.startsWith('/clan')
+                      ? 'bg-gradient-to-r from-[#4A1D96] to-[#2B1B61] text-white font-medium shadow-[0_0_15px_rgba(74,29,150,0.3)] border border-[#5B21B6]/50' 
+                      : 'text-indigo-200/60 hover:text-white hover:bg-[#121223] border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Shield className={`w-5 h-5 ${location.pathname.startsWith('/clan') ? 'text-purple-300' : ''}`} />
+                    {isSidebarOpen && (
+                      <div className="flex items-center gap-2">
+                        <span>Clan System</span>
+                        <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          NEW
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {isSidebarOpen && (
+                    <ChevronDown className={`w-4 h-4 text-indigo-300/50 transition-transform duration-300 ${isClanMenuOpen ? 'rotate-180' : ''}`} />
+                  )}
+                </button>
+                
+                {/* Sub-menu */}
+                <div 
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    isSidebarOpen && isClanMenuOpen ? 'max-h-60 opacity-100 mt-1' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="pl-11 pr-2 space-y-1 py-1">
+                    <Link 
+                      to="/clan/home" 
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        location.pathname === '/clan/home' 
+                          ? 'text-white bg-[#1A1A2F]/80 font-medium text-purple-300' 
+                          : 'text-indigo-200/50 hover:text-white hover:bg-[#121223]'
+                      }`}
+                    >
+                      <Home className="w-4 h-4" />
+                      <span>Home</span>
+                    </Link>
+                    <Link 
+                      to="/clan/missions" 
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        location.pathname === '/clan/missions' 
+                          ? 'text-white bg-[#1A1A2F]/80 font-medium text-purple-300' 
+                          : 'text-indigo-200/50 hover:text-white hover:bg-[#121223]'
+                      }`}
+                    >
+                      <Target className="w-4 h-4" />
+                      <span>Missions</span>
+                    </Link>
+                    <Link 
+                      to="/clan/season" 
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        location.pathname === '/clan/season' 
+                          ? 'text-white bg-[#1A1A2F]/80 font-medium text-purple-300' 
+                          : 'text-indigo-200/50 hover:text-white hover:bg-[#121223]'
+                      }`}
+                    >
+                      <Trophy className="w-4 h-4" />
+                      <span>Season</span>
+                    </Link>
+                    <Link 
+                      to="/clan/clans" 
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        location.pathname === '/clan/clans' 
+                          ? 'text-white bg-[#1A1A2F]/80 font-medium text-purple-300' 
+                          : 'text-indigo-200/50 hover:text-white hover:bg-[#121223]'
+                      }`}
+                    >
+                      <Shield className="w-4 h-4" />
+                      <span>Clans</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
           </nav>
         </div>
 

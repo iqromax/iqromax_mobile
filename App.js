@@ -61,6 +61,15 @@ import ClanMissionProgressScreen from './screens/ClanMissionProgressScreen';
 import ClanChestRewardsScreen from './screens/ClanChestRewardsScreen';
 import ClanStreakScreen from './screens/ClanStreakScreen';
 import ClanSeasonScreen from './screens/ClanSeasonScreen';
+import ClanSeasonRewardsScreen from './screens/ClanSeasonRewardsScreen';
+import ClanTournamentScreen from './screens/ClanTournamentScreen';
+import ClanProfileScreen from './screens/ClanProfileScreen';
+import ClanMembersScreen from './screens/ClanMembersScreen';
+import ClanMemberProfileScreen from './screens/ClanMemberProfileScreen';
+import ClanBaseScreen from './screens/ClanBaseScreen';
+import ClanShopScreen from './screens/ClanShopScreen';
+import ClanSettingsScreen from './screens/ClanSettingsScreen';
+import ClanManagementScreen from './screens/ClanManagementScreen';
 import ClanTransitionScreen from './screens/ClanTransitionScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 import { SoundPlayerBridge } from './src/utils/soundPlayer';
@@ -604,7 +613,16 @@ export default function App() {
           <Stack.Screen name="ClanMissionProgressScreen" component={ClanMissionProgressScreen} />
           <Stack.Screen name="ClanChestRewardsScreen" component={ClanChestRewardsScreen} />
           <Stack.Screen name="ClanStreakScreen" component={ClanStreakScreen} />
-          <Stack.Screen name="ClanSeasonScreen" component={ClanSeasonScreen} />
+          <Stack.Screen name="ClanSeasonScreen" component={ClanSeasonScreen} options={{ animation: 'none' }} />
+          <Stack.Screen name="ClanSeasonRewardsScreen" component={ClanSeasonRewardsScreen} />
+          <Stack.Screen name="ClanTournamentScreen" component={ClanTournamentScreen} />
+          <Stack.Screen name="ClanProfileScreen" component={ClanProfileScreen} options={{ animation: 'none' }} />
+          <Stack.Screen name="ClanMembersScreen" component={ClanMembersScreen} />
+          <Stack.Screen name="ClanMemberProfileScreen" component={ClanMemberProfileScreen} />
+          <Stack.Screen name="ClanBaseScreen" component={ClanBaseScreen} />
+          <Stack.Screen name="ClanShopScreen" component={ClanShopScreen} />
+          <Stack.Screen name="ClanSettingsScreen" component={ClanSettingsScreen} />
+          <Stack.Screen name="ClanManagementScreen" component={ClanManagementScreen} />
           <Stack.Screen name="ClanTransitionScreen" component={ClanTransitionScreen} options={{ animation: 'fade' }} />
         </Stack.Navigator>
 
