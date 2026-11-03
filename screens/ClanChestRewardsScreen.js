@@ -559,11 +559,8 @@ export default function ClanChestRewardsScreen({ navigation }) {
       >
         {activeTab === 'chest' && (
           <>
-            {/* 3. HERO SECTION (Glowing Purple Chest + Banners + Crystals) */}
+            {/* 3. HERO SECTION (Glowing Purple Chest + Banners) */}
             <View style={styles.heroSection}>
-              {/* Radial Light Glow behind chest */}
-              <View style={styles.heroSunburstGlow} />
-
               {/* Left Medieval Banner */}
               {renderMedievalBanner('left')}
 
@@ -951,15 +948,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginTop: 6,
     paddingVertical: 12,
-  },
-  heroSunburstGlow: {
-    position: 'absolute',
-    top: 15,
-    width: 260,
-    height: 240,
-    borderRadius: 130,
-    backgroundColor: 'rgba(168, 85, 247, 0.16)',
-    pointerEvents: 'none',
   },
   bannerContainer: {
     position: 'absolute',
