@@ -14,6 +14,7 @@ import { Feather, MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/v
 import io from 'socket.io-client';
 import { SOCKET_URL, API_URL, getShopImageUrl } from '../src/config/api';
 import { Character3DViewer } from '../components/Character3DViewer';
+import { ClanAnimatedButton } from '../components/ClanAnimatedButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Polygon, Line, Circle, Text as SvgText, Path, G } from 'react-native-svg';
 import { calculateUserRank } from '../src/utils/rankUtils';
@@ -2879,27 +2880,8 @@ export default function StudentDashboardScreen({ navigation, route }) {
                 </View>
               </View>
 
-              {/* Card 4: Clan Button */}
-              <TouchableOpacity
-                style={[
-                  styles.rightStatBlock,
-                  {
-                    backgroundColor: 'rgba(124, 58, 237, 0.22)',
-                    borderColor: '#8B5CF6',
-                    shadowColor: '#8B5CF6',
-                    shadowOpacity: 0.7,
-                    shadowRadius: 5,
-                    elevation: 6,
-                  }
-                ]}
-                activeOpacity={0.8}
-                onPress={handleOpenClanWithPortal}
-              >
-                <MaterialCommunityIcons name="shield-crown" size={22} color="#C084FC" />
-                <View style={[styles.rightStatTextCol, { justifyContent: 'center' }]}>
-                  <Text style={[styles.rightStatNumber, { color: '#C084FC', fontSize: 13, letterSpacing: 1 }]} numberOfLines={1}>CLAN</Text>
-                </View>
-              </TouchableOpacity>
+              {/* Card 4: Clan Animated Button */}
+              <ClanAnimatedButton onPress={handleOpenClanWithPortal} />
             </View>
           </View>
         </View>
