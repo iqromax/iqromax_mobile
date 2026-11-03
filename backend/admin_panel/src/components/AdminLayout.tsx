@@ -266,7 +266,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             {/* Clan System */}
             <div className="pt-2">
               <div className={`px-4 pb-1 text-[10px] font-semibold text-indigo-300/40 uppercase tracking-wider ${!isSidebarOpen && 'hidden'}`}>
-                O'yin Tizimi
+                Jamoa Tizimi
               </div>
               <div className="space-y-1">
                 <button 
