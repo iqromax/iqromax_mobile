@@ -27,7 +27,10 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed md:sticky top-0 left-0 h-screen z-50 transition-all duration-300 flex-shrink-0 bg-[#05050C] border-r border-[#151528] flex flex-col justify-between overflow-y-auto ${isSidebarOpen ? 'translate-x-0 w-[260px]' : '-translate-x-full md:translate-x-0 w-[260px] md:w-[88px]'}`}>
+      <aside 
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className={`fixed md:sticky top-0 left-0 h-screen z-50 transition-all duration-300 flex-shrink-0 bg-[#05050C] border-r border-[#151528] flex flex-col justify-between overflow-y-auto no-scrollbar ${isSidebarOpen ? 'translate-x-0 w-[260px]' : '-translate-x-full md:translate-x-0 w-[260px] md:w-[88px]'}`}
+      >
         
         {/* Top Section */}
         <div>
