@@ -41,6 +41,8 @@ import { MissionsTabContent } from './ClanMissionsScreen';
 import { SeasonTabContent } from './ClanSeasonScreen';
 import { ClanProfileTabContent } from './ClanProfileScreen';
 import { getClanTranslations } from '../src/utils/clanTranslations';
+import { API_URL } from '../src/config/api';
+import { getAvatarByName } from '../src/utils/avatars';
 
 const { width } = Dimensions.get('window');
 
@@ -184,6 +186,8 @@ export default function ClanHomeScreen({ navigation, route }) {
 
   // Active Clan State (null = unassigned free agent; object = active clan member)
   const [userClan, setUserClan] = useState(null);
+  const [recommendedClansList, setRecommendedClansList] = useState([]);
+  const [loadingClans, setLoadingClans] = useState(false);
 
   // Clan Creation Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -208,20 +212,70 @@ export default function ClanHomeScreen({ navigation, route }) {
   const exitFlashAnim = useRef(new Animated.Value(0)).current;
   const exitProgressAnim = useRef(new Animated.Value(0)).current;
 
-  // Load user clan from storage
+  // Fetch recommended clans from backend
+  const fetchRecommendedClans = async () => {
+    try {
+      setLoadingClans(true);
+      const res = await fetch(`${API_URL}/clan/recommended`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.clans)) {
+          setRecommendedClansList(data.clans);
+        }
+      }
+    } catch (e) {
+      console.log('Error fetching recommended clans:', e);
+    } finally {
+      setLoadingClans(false);
+    }
+  };
+
+  // Load user clan from storage / backend
   useEffect(() => {
     const loadUserClan = async () => {
       try {
         const stored = await AsyncStorage.getItem('@iqromax_user_clan');
         if (stored) {
-          setUserClan(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          // Purge legacy mock clans (without isRealClan)
+          if (!parsed?.isRealClan) {
+            await AsyncStorage.removeItem('@iqromax_user_clan');
+            setUserClan(null);
+          } else {
+            setUserClan(parsed);
+          }
+        } else {
+          setUserClan(null);
+        }
+
+        // Check user active clan status from backend
+        const targetUserId = user?.id || user?.customId;
+        if (targetUserId) {
+          try {
+            const res = await fetch(`${API_URL}/clan/my-clan?userId=${targetUserId}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data?.clan) {
+                const realClan = { ...data.clan, isRealClan: true };
+                await AsyncStorage.setItem('@iqromax_user_clan', JSON.stringify(realClan));
+                setUserClan(realClan);
+              } else if (data?.isFreeAgent) {
+                await AsyncStorage.removeItem('@iqromax_user_clan');
+                setUserClan(null);
+              }
+            }
+          } catch (apiErr) {
+            console.log('API my-clan check skipped:', apiErr);
+          }
         }
       } catch (e) {
         console.log('Error loading clan:', e);
       }
     };
+
     loadUserClan();
-  }, []);
+    fetchRecommendedClans();
+  }, [user?.id, user?.customId]);
 
   useEffect(() => {
     // Arrival sequence: portal warp flash dissolves and screen content settles into place
@@ -279,38 +333,45 @@ export default function ClanHomeScreen({ navigation, route }) {
     });
   };
 
-  const handleJoinClan = async (clanName) => {
-    const clanObj = {
-      name: clanName,
-      level: clanName === 'Wolf Legends' ? 12 : 11,
-      membersCount: clanName === 'Wolf Legends' ? 8 : 7,
-      maxMembers: 10,
-      clanXp: 7250,
-      clanTargetXp: 10000,
-      weeklyBattles: 24,
-      weeklyMissions: 86,
-      weeklyXp: '12K',
-      seasonNumber: 5,
-      seasonTimeLeft: '18d 12h left',
-      seasonXp: 24500,
-      seasonTargetXp: 50000,
-      emblem: clanName === 'Wolf Legends' ? 'wolf' : 'eagle',
-      role: 'Member',
-      isActive: true,
-    };
+  const handleJoinClan = async (targetClan) => {
+    const clanName = typeof targetClan === 'string' ? targetClan : targetClan?.name;
+    const clanId = typeof targetClan === 'object' ? targetClan?.id : null;
 
     try {
-      await AsyncStorage.setItem('@iqromax_user_clan', JSON.stringify(clanObj));
-      setUserClan(clanObj);
-      if (!joinedClans.includes(clanName)) {
-        setJoinedClans((prev) => [...prev, clanName]);
+      const payload = {
+        clanId,
+        clanName,
+        userId: user?.id || user?.customId || `user_${Date.now()}`,
+        userName: user?.name || user?.firstName || "O'quvchi",
+        userAvatar: user?.avatar || 'alex',
+      };
+
+      const res = await fetch(`${API_URL}/clan/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const realClan = { ...data.clan, isRealClan: true };
+        await AsyncStorage.setItem('@iqromax_user_clan', JSON.stringify(realClan));
+        setUserClan(realClan);
+        if (!joinedClans.includes(clanName)) {
+          setJoinedClans((prev) => [...prev, clanName]);
+        }
+        Alert.alert(
+          "Muvaffaqiyatli! 🎉",
+          `Siz "${clanName}" klaniga muvaffaqiyatli qo'shildingiz!`
+        );
+        fetchRecommendedClans();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        Alert.alert("Xatolik", err.error || "Klanga qo'shilishda xatolik yuz berdi");
       }
-      Alert.alert(
-        "Muvaffaqiyatli! 🎉",
-        `Siz "${clanName}" claniga muvaffaqiyatli qo'shildingiz! Bosh sahifa yangilandi.`
-      );
     } catch (e) {
       console.log('Error joining clan:', e);
+      Alert.alert("Xatolik", "Server bilan bog'lanishda xatolik yuz berdi");
     }
   };
 
@@ -329,40 +390,48 @@ export default function ClanHomeScreen({ navigation, route }) {
   };
 
   const handleConfirmCreateClan = async () => {
-    const clanName = newClanName.trim() || 'Wolf Legends';
-    const newClanObj = {
-      name: clanName,
-      description: newClanDesc.trim() || 'Doimo birga va cho\'qqilar sari!',
-      level: 12,
-      membersCount: 8,
-      maxMembers: 10,
-      clanXp: 7250,
-      clanTargetXp: 10000,
-      weeklyBattles: 24,
-      weeklyMissions: 86,
-      weeklyXp: '12K',
-      seasonNumber: 5,
-      seasonTimeLeft: '18d 12h left',
-      seasonXp: 24500,
-      seasonTargetXp: 50000,
-      emblem: selectedEmblem,
-      role: 'Leader',
-      isOpen: isClanOpen,
-      isActive: true,
-    };
+    if (!newClanName.trim()) {
+      Alert.alert("Ogohlantirish", "Iltimos, clan nomini kiriting!");
+      return;
+    }
 
     try {
-      await AsyncStorage.setItem('@iqromax_user_clan', JSON.stringify(newClanObj));
-      setUserClan(newClanObj);
-      setIsCreateModalOpen(false);
-      setNewClanName('');
-      setNewClanDesc('');
-      Alert.alert(
-        "Tabriklaymiz! 🎉",
-        `"${newClanObj.name}" clani muvaffaqiyatli yaratildi! Siz clan yetakchisisiz.`
-      );
+      const payload = {
+        name: newClanName.trim(),
+        description: newClanDesc.trim() || 'Doimo birga va cho\'qqilar sari!',
+        emblem: selectedEmblem,
+        isOpen: isClanOpen,
+        userId: user?.id || user?.customId || `user_${Date.now()}`,
+        userName: user?.name || user?.firstName || 'Clan Leader',
+        userAvatar: user?.avatar || 'alex',
+      };
+
+      const res = await fetch(`${API_URL}/clan/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const createdClan = { ...data.clan, isRealClan: true };
+        await AsyncStorage.setItem('@iqromax_user_clan', JSON.stringify(createdClan));
+        setUserClan(createdClan);
+        setIsCreateModalOpen(false);
+        setNewClanName('');
+        setNewClanDesc('');
+        Alert.alert(
+          "Tabriklaymiz! 🎉",
+          `"${createdClan.name}" klani muvaffaqiyatli yaratildi! Siz klan yetakchisisiz.`
+        );
+        fetchRecommendedClans();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        Alert.alert("Xatolik", err.error || "Klan yaratishda xatolik yuz berdi");
+      }
     } catch (err) {
-      Alert.alert("Xatolik", "Clan yaratishda xatolik yuz berdi");
+      console.log('Error creating clan:', err);
+      Alert.alert("Xatolik", "Server bilan aloqada xatolik yuz berdi");
     }
   };
 
@@ -377,8 +446,19 @@ export default function ClanHomeScreen({ navigation, route }) {
           style: "destructive",
           onPress: async () => {
             try {
+              if (userClan?.id) {
+                await fetch(`${API_URL}/clan/leave`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    clanId: userClan.id,
+                    userId: user?.id || user?.customId,
+                  }),
+                }).catch(() => {});
+              }
               await AsyncStorage.removeItem('@iqromax_user_clan');
               setUserClan(null);
+              fetchRecommendedClans();
               Alert.alert("Muvaffaqiyatli", "Siz clandan chiqdingiz. Erkin o'yinchi holatiga qaytdingiz.");
             } catch (e) {
               console.log(e);
@@ -391,7 +471,7 @@ export default function ClanHomeScreen({ navigation, route }) {
 
   const handleClanProfileMenu = () => {
     Alert.alert(
-      userClan?.name || "Wolf Legends",
+      userClan?.name || "Mening Klanim",
       `Daraja: ${userClan?.level || 12}\nA'zolar: ${userClan?.membersCount || 8}/${userClan?.maxMembers || 10}\nHolat: Faol Clan\nRolingiz: ${userClan?.role || 'A\'zo'}`,
       [
         { text: "Yopish", style: "cancel" },
@@ -597,7 +677,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                   {/* Center: Clan Meta */}
                   <View style={styles.activeHeroMetaCol}>
                     <Text style={styles.activeClanName} numberOfLines={1}>
-                      {userClan?.name || 'Wolf Legends'}
+                      {userClan?.name || 'Mening Klanim'}
                     </Text>
                     <Text style={styles.activeClanSubtitle}>
                       Lv. {userClan?.level || 12} · {userClan?.membersCount || 8}/{userClan?.maxMembers || 10} {t.membersCount || "A'zolar"}
@@ -629,14 +709,21 @@ export default function ClanHomeScreen({ navigation, route }) {
                 <View style={styles.activeXpSection}>
                   <View style={styles.activeXpLabelsRow}>
                     <Text style={styles.activeXpTitle}>{t.clanXp || 'Klan XP'}</Text>
-                    <Text style={styles.activeXpValue}>7,250 / 10,000</Text>
+                    <Text style={styles.activeXpValue}>
+                      {(userClan?.xp || 0).toLocaleString()} / {(userClan?.requiredXp || 10000).toLocaleString()}
+                    </Text>
                   </View>
                   <View style={styles.activeXpProgressBarTrack}>
                     <LinearGradient
                       colors={['#8B5CF6', '#C084FC']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
-                      style={[styles.activeXpProgressBarFill, { width: '72.5%' }]}
+                      style={[
+                        styles.activeXpProgressBarFill,
+                        {
+                          width: `${Math.min(100, Math.max(0, Math.round(((userClan?.xp || 0) / (userClan?.requiredXp || 10000)) * 100)))}%`,
+                        },
+                      ]}
                     />
                   </View>
                 </View>
@@ -711,7 +798,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 {/* Battles */}
                 <View style={styles.thisWeekCol}>
                   <MaterialCommunityIcons name="sword-cross" size={24} color="#EC4899" />
-                  <Text style={styles.thisWeekValue}>24</Text>
+                  <Text style={styles.thisWeekValue}>{userClan?.battleWins || 0}</Text>
                   <Text style={styles.thisWeekLabel}>{t.battles || 'Janglar'}</Text>
                 </View>
 
@@ -720,7 +807,7 @@ export default function ClanHomeScreen({ navigation, route }) {
                 {/* Missions */}
                 <View style={styles.thisWeekCol}>
                   <MaterialCommunityIcons name="target" size={24} color="#10B981" />
-                  <Text style={styles.thisWeekValue}>86</Text>
+                  <Text style={styles.thisWeekValue}>{userClan?.completedTasks || 0}</Text>
                   <Text style={styles.thisWeekLabel}>{t.missions || 'Vazifalar'}</Text>
                 </View>
 
@@ -729,7 +816,13 @@ export default function ClanHomeScreen({ navigation, route }) {
                 {/* Clan XP */}
                 <View style={styles.thisWeekCol}>
                   <Ionicons name="layers" size={24} color="#FBBF24" />
-                  <Text style={styles.thisWeekValue}>12K</Text>
+                  <Text style={styles.thisWeekValue}>
+                    {userClan?.seasonXp && userClan.seasonXp >= 1000
+                      ? `${(userClan.seasonXp / 1000).toFixed(0)}K`
+                      : userClan?.xp && userClan.xp >= 1000
+                      ? `${(userClan.xp / 1000).toFixed(0)}K`
+                      : (userClan?.xp || 0)}
+                  </Text>
                   <Text style={styles.thisWeekLabel}>{t.clanXp || 'Klan XP'}</Text>
                 </View>
               </View>
@@ -775,16 +868,25 @@ export default function ClanHomeScreen({ navigation, route }) {
                       colors={['#8B5CF6', '#C084FC']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
-                      style={[styles.seasonProgressBarFill, { width: '49%' }]}
+                      style={[
+                        styles.seasonProgressBarFill,
+                        {
+                          width: `${Math.min(100, Math.max(0, Math.round(((userClan?.seasonXp || 0) / (userClan?.seasonTargetXp || 50000)) * 100)))}%`,
+                        },
+                      ]}
                     />
                   </View>
-                  <Text style={styles.seasonProgressXpText}>24,500 / 50,000 XP</Text>
+                  <Text style={styles.seasonProgressXpText}>
+                    {(userClan?.seasonXp || 0).toLocaleString()} / {(userClan?.seasonTargetXp || 50000).toLocaleString()} XP
+                  </Text>
                 </View>
               </TouchableOpacity>
 
               {/* MEMBERS SECTION */}
               <View style={styles.activeSectionHeaderRow}>
-                <Text style={styles.activeSectionTitle}>{t.membersCount || "A'zolar"} (10/10)</Text>
+                <Text style={styles.activeSectionTitle}>
+                  {t.membersCount || "A'zolar"} ({userClan?.members?.length || userClan?.membersCount || 1}/{userClan?.maxMembers || 50})
+                </Text>
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => navigation.navigate('ClanMembersScreen')}
@@ -797,67 +899,44 @@ export default function ClanHomeScreen({ navigation, route }) {
 
               <View style={styles.membersCard}>
                 <View style={styles.membersRow}>
-                  {/* Member 1: Leader (Alex) */}
-                  <View style={styles.memberAvatarWrap}>
-                    <View style={styles.memberLeaderCrown}>
-                      <FontAwesome5 name="crown" size={8} color="#F59E0B" />
+                  {(userClan?.members && userClan.members.length > 0
+                    ? userClan.members.slice(0, 5)
+                    : [
+                        {
+                          id: '1',
+                          role: userClan?.role || 'Creator',
+                          userName: user?.name || user?.firstName || 'Yetakchi',
+                          userAvatar: user?.avatar || 'alex',
+                          isOnline: true,
+                        },
+                      ]
+                  ).map((member, idx) => (
+                    <View key={member.id || idx} style={styles.memberAvatarWrap}>
+                      {member.role === 'Creator' || member.role === 'Leader' ? (
+                        <View style={styles.memberLeaderCrown}>
+                          <FontAwesome5 name="crown" size={8} color="#F59E0B" />
+                        </View>
+                      ) : null}
+                      <Image
+                        source={getAvatarByName(member.userAvatar || 'alex')}
+                        style={styles.memberAvatarImg}
+                        contentFit="cover"
+                      />
+                      {member.isOnline && <View style={styles.memberOnlineDot} />}
                     </View>
-                    <Image
-                      source={require('../assets/clan_avatar_1.png')}
-                      style={styles.memberAvatarImg}
-                      contentFit="cover"
-                    />
-                    <View style={styles.memberOnlineDot} />
-                  </View>
+                  ))}
 
-                  {/* Member 2: Sophia */}
-                  <View style={styles.memberAvatarWrap}>
-                    <Image
-                      source={require('../assets/clan_avatar_2.png')}
-                      style={styles.memberAvatarImg}
-                      contentFit="cover"
-                    />
-                    <View style={styles.memberOnlineDot} />
-                  </View>
-
-                  {/* Member 3: David */}
-                  <View style={styles.memberAvatarWrap}>
-                    <Image
-                      source={require('../assets/clan_avatar_3.png')}
-                      style={styles.memberAvatarImg}
-                      contentFit="cover"
-                    />
-                    <View style={styles.memberOnlineDot} />
-                  </View>
-
-                  {/* Member 4: Kevin */}
-                  <View style={styles.memberAvatarWrap}>
-                    <Image
-                      source={require('../assets/clan_avatar_4.png')}
-                      style={styles.memberAvatarImg}
-                      contentFit="cover"
-                    />
-                    <View style={styles.memberOnlineDot} />
-                  </View>
-
-                  {/* Member 5: Lily */}
-                  <View style={styles.memberAvatarWrap}>
-                    <Image
-                      source={require('../assets/clan_avatar_5.png')}
-                      style={styles.memberAvatarImg}
-                      contentFit="cover"
-                    />
-                    <View style={styles.memberOnlineDot} />
-                  </View>
-
-                  {/* Member 6: +3 remaining bubble */}
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={styles.memberMoreBubble}
-                    onPress={() => Alert.alert("Qolgan a'zolar", "3 nafar a'zo hozirda oflayn")}
-                  >
-                    <Text style={styles.memberMoreText}>+3</Text>
-                  </TouchableOpacity>
+                  {(userClan?.members?.length || userClan?.membersCount || 1) > 5 && (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      style={styles.memberMoreBubble}
+                      onPress={() => navigation.navigate('ClanMembersScreen')}
+                    >
+                      <Text style={styles.memberMoreText}>
+                        +{(userClan?.members?.length || userClan?.membersCount || 1) - 5}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             </View>
@@ -1065,133 +1144,89 @@ export default function ClanHomeScreen({ navigation, route }) {
                   <Text style={styles.recSectionTitle}>{t.recommendedClans || 'Tavsiya etilgan clanlar'}</Text>
                   <TouchableOpacity
                     activeOpacity={0.7}
-                    onPress={() => Alert.alert(t.recommendedClans || "Clanlar", "Barcha mavjud clanlar ro'yxati")}
+                    onPress={() => fetchRecommendedClans()}
                     style={{ flexDirection: 'row', alignItems: 'center' }}
                   >
-                    <Text style={styles.recSeeAllText}>{t.viewAll || "Barchasini ko'rish"}</Text>
-                    <Feather name="chevron-right" size={14} color="#A855F7" style={{ marginLeft: 2 }} />
+                    <Feather name="refresh-cw" size={13} color="#A855F7" style={{ marginRight: 4 }} />
+                    <Text style={styles.recSeeAllText}>{t.refresh || 'Yangilash'}</Text>
                   </TouchableOpacity>
                 </View>
 
-                {/* Clan 1: Wolf Legends */}
-                <View style={styles.clanRowItem}>
-                  <ClanShieldEmblem type="wolf" size={48} />
-                  <View style={styles.clanItemInfo}>
-                    <Text style={styles.clanItemName}>Wolf Legends</Text>
-                    <View style={styles.clanItemMetaRow}>
-                      <View style={styles.clanMetaPill}>
-                        <Feather name="users" size={12} color="#94A3B8" />
-                        <Text style={styles.clanMetaText}>8/10</Text>
-                      </View>
-                      <View style={[styles.clanMetaPill, { marginLeft: 12 }]}>
-                        <MaterialCommunityIcons name="chart-bar" size={13} color="#94A3B8" />
-                        <Text style={styles.clanMetaText}>Lv. 12</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity
-                    activeOpacity={0.85}
-                    style={[
-                      styles.clanActionBtn,
-                      joinedClans.includes('Wolf Legends') && styles.clanActionBtnJoined,
-                    ]}
-                    onPress={() => handleJoinClan('Wolf Legends')}
-                  >
-                    <LinearGradient
-                      colors={
-                        joinedClans.includes('Wolf Legends')
-                          ? ['#059669', '#10B981']
-                          : ['#8B5CF6', '#6D28D9']
-                      }
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.clanActionBtnGradient}
-                    >
-                      <Text style={styles.clanActionBtnText}>
-                        {joinedClans.includes('Wolf Legends') ? (t.joined || "A'zo") : (t.joinClan || "Qo'shilish")}
-                      </Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Clan 2: Math Warriors */}
-                <View style={styles.clanRowItem}>
-                  <ClanShieldEmblem type="eagle" size={48} />
-                  <View style={styles.clanItemInfo}>
-                    <Text style={styles.clanItemName}>Math Warriors</Text>
-                    <View style={styles.clanItemMetaRow}>
-                      <View style={styles.clanMetaPill}>
-                        <Feather name="users" size={12} color="#94A3B8" />
-                        <Text style={styles.clanMetaText}>7/10</Text>
-                      </View>
-                      <View style={[styles.clanMetaPill, { marginLeft: 12 }]}>
-                        <MaterialCommunityIcons name="chart-bar" size={13} color="#94A3B8" />
-                        <Text style={styles.clanMetaText}>Lv. 11</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity
-                    activeOpacity={0.85}
-                    style={[
-                      styles.clanActionBtn,
-                      joinedClans.includes('Math Warriors') && styles.clanActionBtnJoined,
-                    ]}
-                    onPress={() => handleJoinClan('Math Warriors')}
-                  >
-                    <LinearGradient
-                      colors={
-                        joinedClans.includes('Math Warriors')
-                          ? ['#059669', '#10B981']
-                          : ['#8B5CF6', '#6D28D9']
-                      }
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.clanActionBtnGradient}
-                    >
-                      <Text style={styles.clanActionBtnText}>
-                        {joinedClans.includes('Math Warriors') ? (t.joined || "A'zo") : (t.joinClan || "Qo'shilish")}
-                      </Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Clan 3: IQROMAX Elite */}
-                <View style={[styles.clanRowItem, { borderBottomWidth: 0, paddingBottom: 4 }]}>
-                  <ClanShieldEmblem type="elite" size={48} />
-                  <View style={styles.clanItemInfo}>
-                    <Text style={styles.clanItemName}>IQROMAX Elite</Text>
-                    <View style={styles.clanItemMetaRow}>
-                      <View style={styles.clanMetaPill}>
-                        <Feather name="users" size={12} color="#94A3B8" />
-                        <Text style={styles.clanMetaText}>9/10</Text>
-                      </View>
-                      <View style={[styles.clanMetaPill, { marginLeft: 12 }]}>
-                        <MaterialCommunityIcons name="chart-bar" size={13} color="#94A3B8" />
-                        <Text style={styles.clanMetaText}>Lv. 14</Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity
-                    activeOpacity={0.85}
-                    style={[
-                      styles.clanRequestBtn,
-                      requestedClans.includes('IQROMAX Elite') && styles.clanRequestBtnSent,
-                    ]}
-                    onPress={() => handleRequestClan('IQROMAX Elite')}
-                  >
-                    <Text
+                {recommendedClansList && recommendedClansList.length > 0 ? (
+                  recommendedClansList.map((clan, idx) => (
+                    <View
+                      key={clan.id || idx}
                       style={[
-                        styles.clanRequestBtnText,
-                        requestedClans.includes('IQROMAX Elite') && { color: '#FBBF24' },
+                        styles.clanRowItem,
+                        idx === recommendedClansList.length - 1 && { borderBottomWidth: 0, paddingBottom: 4 },
                       ]}
                     >
-                      {requestedClans.includes('IQROMAX Elite') ? (t.requestSent || "Yuborilgan") : (t.sendRequest || "So'rov yuborish")}
+                      <ClanShieldEmblem type={clan.emblem || clan.logo || 'wolf'} size={48} />
+                      <View style={styles.clanItemInfo}>
+                        <Text style={styles.clanItemName}>{clan.name}</Text>
+                        <View style={styles.clanItemMetaRow}>
+                          <View style={styles.clanMetaPill}>
+                            <Feather name="users" size={12} color="#94A3B8" />
+                            <Text style={styles.clanMetaText}>
+                              {clan.membersCount || clan.members?.length || 1}/{clan.maxMembers || 50}
+                            </Text>
+                          </View>
+                          <View style={[styles.clanMetaPill, { marginLeft: 12 }]}>
+                            <MaterialCommunityIcons name="chart-bar" size={13} color="#94A3B8" />
+                            <Text style={styles.clanMetaText}>Lv. {clan.level || 1}</Text>
+                          </View>
+                        </View>
+                      </View>
+
+                      <TouchableOpacity
+                        activeOpacity={0.85}
+                        style={[
+                          styles.clanActionBtn,
+                          joinedClans.includes(clan.name) && styles.clanActionBtnJoined,
+                        ]}
+                        onPress={() => handleJoinClan(clan)}
+                      >
+                        <LinearGradient
+                          colors={
+                            joinedClans.includes(clan.name)
+                              ? ['#059669', '#10B981']
+                              : ['#8B5CF6', '#6D28D9']
+                          }
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          style={styles.clanActionBtnGradient}
+                        >
+                          <Text style={styles.clanActionBtnText}>
+                            {joinedClans.includes(clan.name) ? (t.joined || "A'zo") : (t.joinClan || "Qo'shilish")}
+                          </Text>
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    </View>
+                  ))
+                ) : (
+                  <View style={styles.emptyClansBox}>
+                    <MaterialCommunityIcons name="shield-outline" size={38} color="#A855F7" style={{ marginBottom: 6, opacity: 0.85 }} />
+                    <Text style={styles.emptyClansTitle}>{t.noClansYet || "Hozircha faol clanlar mavjud emas"}</Text>
+                    <Text style={styles.emptyClansSubtitle}>
+                      {t.createFirstClanDesc || "Birinchi bo'lib o'z claningizga asos soling va jamoangiz bilan cho'qqilarni zabt eting!"}
                     </Text>
-                  </TouchableOpacity>
-                </View>
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      style={styles.emptyCreateBtn}
+                      onPress={handleCreateClan}
+                    >
+                      <LinearGradient
+                        colors={['#9333EA', '#7C3AED']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.emptyCreateGradient}
+                      >
+                        <Feather name="plus" size={15} color="#FFFFFF" style={{ marginRight: 5 }} />
+                        <Text style={styles.emptyCreateText}>{t.createClan || "Clan yaratish"}</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
 
               {/* 4. CLAN CHEST REWARDS BANNER */}
@@ -2751,6 +2786,44 @@ const styles = StyleSheet.create({
   createSubmitText: {
     fontSize: 14,
     fontFamily: 'Inter_700Bold',
+    color: '#FFFFFF',
+  },
+  emptyClansBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+  },
+  emptyClansTitle: {
+    fontSize: 14,
+    fontFamily: 'Inter_700Bold',
+    color: '#FFFFFF',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  emptyClansSubtitle: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    color: '#94A3B8',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 16,
+    lineHeight: 17,
+  },
+  emptyCreateBtn: {
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  emptyCreateGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  emptyCreateText: {
+    fontSize: 13,
+    fontFamily: 'Inter_600SemiBold',
     color: '#FFFFFF',
   },
 });

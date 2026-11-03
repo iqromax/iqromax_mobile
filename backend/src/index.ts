@@ -36,6 +36,7 @@ import shopRoutes from './shopRoutes.js';
 import inventorySkinRoutes from './inventorySkinRoutes.js';
 import courseRoutes from './courseRoutes.js';
 import clanAdminRoutes from './clanAdminRoutes.js';
+import clanRoutes from './clanRoutes.js';
 
 // Mount the ad video routes
 app.use('/api', adVideoRoutes);
@@ -44,6 +45,7 @@ app.use('/api', shopRoutes);
 app.use('/api', inventorySkinRoutes);
 app.use('/api', courseRoutes);
 app.use('/api', clanAdminRoutes);
+app.use('/api', clanRoutes);
 
 // Serve the uploads directory for files, shop images and avatars
 app.use('/uploads', express.static(path.join(__dirname, '../../public/uploads')));
