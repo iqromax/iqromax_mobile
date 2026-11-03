@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, StatusBar, Dimensions, Pressable } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 
 const videoSource = require('../assets/video/open.mp4');
@@ -7,6 +7,7 @@ const videoSource = require('../assets/video/open.mp4');
 export default function AdvancedSplashScreen({ isAppReady, onFinish }) {
   const hasFinishedRef = useRef(false);
   const [videoEnded, setVideoEnded] = useState(false);
+  const [screenDim, setScreenDim] = useState(() => Dimensions.get('screen'));
 
   const triggerFinish = () => {
     if (hasFinishedRef.current) return;
@@ -19,6 +20,23 @@ export default function AdvancedSplashScreen({ isAppReady, onFinish }) {
     p.muted = false;
     p.play();
   });
+
+  // Screen o'lchami o'zgarganda (masalan dinamik oriyentatsiya yoki status bar) yangilash
+  useEffect(() => {
+    const sub = Dimensions.addEventListener('change', ({ screen }) => {
+      setScreenDim(screen);
+    });
+    return () => sub?.remove();
+  }, []);
+
+  // Video boshlanishini kafolatlash
+  useEffect(() => {
+    try {
+      if (player && !player.playing) {
+        player.play();
+      }
+    } catch (e) {}
+  }, [player]);
 
   useEffect(() => {
     const playToEndSubscription = player.addListener('playToEnd', () => {
@@ -44,7 +62,7 @@ export default function AdvancedSplashScreen({ isAppReady, onFinish }) {
     }
   }, [videoEnded, isAppReady]);
 
-  // Xavfsizlik uchun zaxira taymer (agar video yuklanmasa ilova qotib qolmasligi uchun)
+  // Xavfsizlik zaxira taymeri: agar video yuklanmasa ilova qotib qolmasligi uchun
   useEffect(() => {
     const safetyTimer = setTimeout(() => {
       setVideoEnded(true);
@@ -54,21 +72,26 @@ export default function AdvancedSplashScreen({ isAppReady, onFinish }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" hidden={true} />
-      <TouchableOpacity
-        activeOpacity={1}
+      <StatusBar hidden={true} />
+      <VideoView
+        style={[
+          styles.video,
+          {
+            width: screenDim.width,
+            height: screenDim.height,
+          },
+        ]}
+        player={player}
+        nativeControls={false}
+        contentFit="cover"
+        allowsFullscreen={false}
+        allowsPictureInPicture={false}
+      />
+      {/* Ekranga bosilganda videoni o'tkazib yuborish imkoniyati (overlay) */}
+      <Pressable
         style={StyleSheet.absoluteFillObject}
         onPress={() => setVideoEnded(true)}
-      >
-        <VideoView
-          style={StyleSheet.absoluteFillObject}
-          player={player}
-          nativeControls={false}
-          contentFit="cover"
-          allowsFullscreen={false}
-          allowsPictureInPicture={false}
-        />
-      </TouchableOpacity>
+      />
     </View>
   );
 }
@@ -77,7 +100,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000000',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  video: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    flex: 1,
   },
 });
