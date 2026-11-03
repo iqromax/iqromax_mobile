@@ -43,7 +43,6 @@ import { ClanProfileTabContent } from './ClanProfileScreen';
 import { getClanTranslations } from '../src/utils/clanTranslations';
 import { API_URL } from '../src/config/api';
 import { getAvatarByName } from '../src/utils/avatars';
-import ClanComingSoonOverlay from '../components/ClanComingSoonOverlay';
 
 const { width } = Dimensions.get('window');
 
@@ -498,10 +497,8 @@ export default function ClanHomeScreen({ navigation, route }) {
       <StatusBar barStyle="light-content" backgroundColor="#070814" />
 
       <SafeAreaView edges={['top']} style={styles.safeArea}>
-        {/* Upper Screen Area: Header + Content covered by Glossy Frosted Overlay */}
-        <View style={styles.upperScreenWrapper}>
-          {/* Top Header */}
-          <View style={styles.headerRow}>
+        {/* Top Header */}
+        <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
             <TouchableOpacity
               activeOpacity={0.7}
@@ -635,20 +632,20 @@ export default function ClanHomeScreen({ navigation, route }) {
         ) : activeBottomTab === 'Clan' ? (
           <ClanProfileTabContent navigation={navigation} user={user} language={language} userClan={userClan} />
         ) : (
-            <Animated.ScrollView
-              style={[
-                styles.scrollContent,
-              {
-                opacity: fadeAnim,
-                transform: [
-                  { translateY: slideAnim },
-                  { scale: arrivalScaleAnim },
-                ],
-              },
-            ]}
-            contentContainerStyle={[styles.scrollInner, { paddingBottom: insets.bottom + 90 }]}
-            showsVerticalScrollIndicator={false}
-          >
+          <Animated.ScrollView
+            style={[
+              styles.scrollContent,
+            {
+              opacity: fadeAnim,
+              transform: [
+                { translateY: slideAnim },
+                { scale: arrivalScaleAnim },
+              ],
+            },
+          ]}
+          contentContainerStyle={[styles.scrollInner, { paddingBottom: insets.bottom + 90 }]}
+          showsVerticalScrollIndicator={false}
+        >
           {userClan ? (
             /* ======================================================== */
             /* 1. ACTIVE CLAN VIEW (MEMBER / LEADER VIEW - 1:1 TO MOCKUP) */
@@ -1261,14 +1258,6 @@ export default function ClanHomeScreen({ navigation, route }) {
           )}
         </Animated.ScrollView>
         )}
-
-          {/* Full Upper Screen Glossy Frosted Overlay - Covers Header + Content */}
-          <ClanComingSoonOverlay
-            activeTab={activeBottomTab}
-            language={language}
-            onBack={handleExitToMainSystem}
-          />
-        </View>
 
         {/* 5. BOTTOM NAVIGATION BAR (Home, Missions, Season, Clan) */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
@@ -2836,10 +2825,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Inter_600SemiBold',
     color: '#FFFFFF',
-  },
-  upperScreenWrapper: {
-    flex: 1,
-    position: 'relative',
-    overflow: 'hidden',
   },
 });

@@ -691,7 +691,7 @@ export default function StudentDashboardScreen({ navigation, route }) {
       } catch (e) {}
       navigation.navigate('ClanTransitionScreen', {
         type: 'toClan',
-        target: 'ClanHomeScreen',
+        target: 'StudentDashboard',
         params: {
           user: user,
           language: language,

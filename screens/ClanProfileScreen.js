@@ -22,7 +22,6 @@ import {
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { getClanTranslations } from '../src/utils/clanTranslations';
-import ClanComingSoonOverlay from '../components/ClanComingSoonOverlay';
 import Svg, {
   Path,
   Defs,
@@ -784,65 +783,52 @@ export default function ClanProfileScreen({ navigation, route }) {
       />
 
       <SafeAreaView edges={['top']} style={styles.safeArea}>
-        {/* UPPER SCREEN WRAPPER: HEADER + CONTENT COVERED BY GLOSSY OVERLAY */}
-        <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          {/* 1. TOP HEADER */}
-          <View style={styles.headerRow}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              style={styles.headerIconButton}
-              onPress={() => {
-                triggerHaptic();
-                navigation.replace('ClanHomeScreen', { initialTab: 'Home', user, language });
-              }}
-            >
-              <Feather name="arrow-left" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-
-            <View style={styles.headerTitleCol}>
-              <Text style={styles.headerTitleText}>{t.clanProfileTitle}</Text>
-              <Text style={styles.headerSubtitleText}>{t.clanProfileSubtitle}</Text>
-            </View>
-
-            <View style={styles.headerRightButtonsRow}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={styles.headerIconButton}
-                onPress={handleShareClan}
-              >
-                <Feather name="share-2" size={18} color="#FFFFFF" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                style={[styles.headerIconButton, { marginLeft: 8 }]}
-                onPress={() => {
-                  triggerHaptic();
-                  Alert.alert(
-                    'IQROMAX Clan',
-                    'Clan ID: #IQROMAX_777\nYaratilgan sana: 15.09.2026\nHolat: Faol',
-                    [{ text: 'Yopish', style: 'cancel' }]
-                  );
-                }}
-              >
-                <Feather name="more-vertical" size={18} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* CLAN PROFILE CONTENT */}
-          <ClanProfileTabContent navigation={navigation} user={user} language={language} />
-
-          {/* Full Upper Screen Glossy Frosted Overlay */}
-          <ClanComingSoonOverlay
-            activeTab="Clan"
-            language={language}
-            onBack={() => {
+        {/* 1. TOP HEADER */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.headerIconButton}
+            onPress={() => {
               triggerHaptic();
               navigation.replace('ClanHomeScreen', { initialTab: 'Home', user, language });
             }}
-          />
+          >
+            <Feather name="arrow-left" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <View style={styles.headerTitleCol}>
+            <Text style={styles.headerTitleText}>{t.clanProfileTitle}</Text>
+            <Text style={styles.headerSubtitleText}>{t.clanProfileSubtitle}</Text>
+          </View>
+
+          <View style={styles.headerRightButtonsRow}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={styles.headerIconButton}
+              onPress={handleShareClan}
+            >
+              <Feather name="share-2" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              style={[styles.headerIconButton, { marginLeft: 8 }]}
+              onPress={() => {
+                triggerHaptic();
+                Alert.alert(
+                  'IQROMAX Clan',
+                  'Clan ID: #IQROMAX_777\nYaratilgan sana: 15.09.2026\nHolat: Faol',
+                  [{ text: 'Yopish', style: 'cancel' }]
+                );
+              }}
+            >
+              <Feather name="more-vertical" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* CLAN PROFILE CONTENT */}
+        <ClanProfileTabContent navigation={navigation} user={user} language={language} />
 
         {/* BOTTOM NAVIGATION BAR */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>

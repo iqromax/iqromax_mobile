@@ -46,11 +46,8 @@ export default function ClanTransitionScreen({ route, navigation }) {
 
     triggerHaptic('light');
 
-    if (isToClan) {
-      navigation.replace(target || 'ClanHomeScreen', params || {});
-    } else {
-      navigation.replace(target || 'StudentDashboard', params || {});
-    }
+    // Hozircha Clan tizimi uxlatib turiladi: video tugashi bilan yana to'g'ridan-to'g'ri IQROMAX ochiladi
+    navigation.replace('StudentDashboard', params || {});
   };
 
   useEffect(() => {

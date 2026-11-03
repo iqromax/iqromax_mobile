@@ -31,7 +31,6 @@ import Svg, {
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { getClanTranslations } from '../src/utils/clanTranslations';
-import ClanComingSoonOverlay from '../components/ClanComingSoonOverlay';
 
 const { width } = Dimensions.get('window');
 
@@ -648,65 +647,48 @@ export default function ClanSeasonScreen({ navigation, route }) {
       />
 
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        {/* UPPER SCREEN WRAPPER: HEADER + CONTENT COVERED BY GLOSSY OVERLAY */}
-        <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          {/* 1. TOP HEADER */}
-          <View style={styles.headerRow}>
-            <View style={styles.headerTitleCol}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => {
-                  triggerHaptic();
-                  navigation.navigate('ClanTransitionScreen', {
-                    type: 'toIqromax',
-                    target: 'StudentDashboard',
-                    params: { user, language },
-                  });
-                }}
-                style={styles.backBreadcrumb}
-              >
-                <View style={styles.backArrowBadge}>
-                  <Feather name="chevron-left" size={16} color="#C084FC" />
-                </View>
-                <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
-              </TouchableOpacity>
+        {/* 1. TOP HEADER */}
+        <View style={styles.headerRow}>
+          <View style={styles.headerTitleCol}>
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanTransitionScreen', {
+                  type: 'toIqromax',
+                  target: 'StudentDashboard',
+                  params: { user, language },
+                });
+              }}
+              style={styles.backBreadcrumb}
+            >
+              <View style={styles.backArrowBadge}>
+                <Feather name="chevron-left" size={16} color="#C084FC" />
+              </View>
+              <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
+            </TouchableOpacity>
 
-              <Text style={styles.headerTitle}>Season Overview</Text>
-              <Text style={styles.headerSubtitle}>Mavsum haqida umumiy ma'lumot</Text>
-            </View>
-
-            <View style={styles.headerRightActions}>
-              <TouchableOpacity
-                activeOpacity={0.75}
-                style={styles.iconCircleButton}
-                onPress={() => {
-                  triggerHaptic();
-                  navigation.navigate('ClanNotificationsScreen', { user, language });
-                }}
-              >
-                <Feather name="bell" size={19} color="#FFFFFF" />
-                <View style={styles.notificationDot} />
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.headerTitle}>Season Overview</Text>
+            <Text style={styles.headerSubtitle}>Mavsum haqida umumiy ma'lumot</Text>
           </View>
 
-          {/* REUSABLE SEASON TAB CONTENT */}
-          <SeasonTabContent navigation={navigation} user={user} language={language} />
-
-          {/* Full Upper Screen Glossy Frosted Overlay */}
-          <ClanComingSoonOverlay
-            activeTab="Season"
-            language={language}
-            onBack={() => {
-              triggerHaptic();
-              navigation.navigate('ClanTransitionScreen', {
-                type: 'toIqromax',
-                target: 'StudentDashboard',
-                params: { user, language },
-              });
-            }}
-          />
+          <View style={styles.headerRightActions}>
+            <TouchableOpacity
+              activeOpacity={0.75}
+              style={styles.iconCircleButton}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanNotificationsScreen', { user, language });
+              }}
+            >
+              <Feather name="bell" size={19} color="#FFFFFF" />
+              <View style={styles.notificationDot} />
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* REUSABLE SEASON TAB CONTENT */}
+        <SeasonTabContent navigation={navigation} user={user} language={language} />
 
         {/* 8. BOTTOM NAVIGATION BAR */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>

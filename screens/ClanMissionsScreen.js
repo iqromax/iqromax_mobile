@@ -21,7 +21,6 @@ import {
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getClanTranslations } from '../src/utils/clanTranslations';
-import ClanComingSoonOverlay from '../components/ClanComingSoonOverlay';
 
 const { width } = Dimensions.get('window');
 
@@ -634,79 +633,62 @@ export default function ClanMissionsScreen({ navigation, route }) {
       />
 
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        {/* UPPER SCREEN WRAPPER: HEADER + CONTENT COVERED BY GLOSSY OVERLAY */}
-        <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          {/* TOP HEADER: EXACT IQROMAX CLAN BUTTON MATCHING HOME */}
-          <View style={styles.headerRow}>
-            <View style={styles.headerTitleCol}>
-              {/* The standard IQROMAX Clan back button */}
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() => {
-                  triggerHaptic();
-                  navigation.navigate('ClanTransitionScreen', {
-                    type: 'toIqromax',
-                    target: 'StudentDashboard',
-                    params: { user, language },
-                  });
-                }}
-                style={styles.backBreadcrumb}
-              >
-                <View style={styles.backArrowBadge}>
-                  <Feather name="chevron-left" size={16} color="#C084FC" />
-                </View>
-                <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
-              </TouchableOpacity>
+        {/* TOP HEADER: EXACT IQROMAX CLAN BUTTON MATCHING HOME */}
+        <View style={styles.headerRow}>
+          <View style={styles.headerTitleCol}>
+            {/* The standard IQROMAX Clan back button */}
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanTransitionScreen', {
+                  type: 'toIqromax',
+                  target: 'StudentDashboard',
+                  params: { user, language },
+                });
+              }}
+              style={styles.backBreadcrumb}
+            >
+              <View style={styles.backArrowBadge}>
+                <Feather name="chevron-left" size={16} color="#C084FC" />
+              </View>
+              <Text style={styles.headerSubtitleBadge}>IQROMAX Clan</Text>
+            </TouchableOpacity>
 
-              <Text style={styles.headerTitle}>{t.tabMissions}</Text>
-              <Text style={styles.headerSubtitle}>Jamoaviy vazifalar va mukofotlar</Text>
-            </View>
-
-            <View style={styles.headerRightActions}>
-              {/* Notification Bell */}
-              <TouchableOpacity
-                activeOpacity={0.75}
-                style={styles.headerActionBtn}
-                onPress={() => {
-                  triggerHaptic();
-                  navigation.navigate('ClanNotificationsScreen', { user, language });
-                }}
-              >
-                <Feather name="bell" size={20} color="#FFFFFF" />
-                <View style={styles.headerNotifDot} />
-              </TouchableOpacity>
-
-              {/* Info Button */}
-              <TouchableOpacity
-                activeOpacity={0.75}
-                style={[styles.headerActionBtn, { marginLeft: 10 }]}
-                onPress={() => {
-                  triggerHaptic();
-                  setInfoModalVisible(true);
-                }}
-              >
-                <Feather name="info" size={19} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.headerTitle}>{t.tabMissions}</Text>
+            <Text style={styles.headerSubtitle}>Jamoaviy vazifalar va mukofotlar</Text>
           </View>
 
-          {/* MISSIONS MAIN CONTENT */}
-          <MissionsTabContent navigation={navigation} user={user} language={language} />
+          <View style={styles.headerRightActions}>
+            {/* Notification Bell */}
+            <TouchableOpacity
+              activeOpacity={0.75}
+              style={styles.headerActionBtn}
+              onPress={() => {
+                triggerHaptic();
+                navigation.navigate('ClanNotificationsScreen', { user, language });
+              }}
+            >
+              <Feather name="bell" size={20} color="#FFFFFF" />
+              <View style={styles.headerNotifDot} />
+            </TouchableOpacity>
 
-          {/* Full Upper Screen Glossy Frosted Overlay */}
-          <ClanComingSoonOverlay
-            activeTab="Missions"
-            language={language}
-            onBack={() => {
-              triggerHaptic();
-              navigation.navigate('ClanTransitionScreen', {
-                type: 'toIqromax',
-                target: 'StudentDashboard',
-                params: { user, language },
-              });
-            }}
-          />
+            {/* Info Button */}
+            <TouchableOpacity
+              activeOpacity={0.75}
+              style={[styles.headerActionBtn, { marginLeft: 10 }]}
+              onPress={() => {
+                triggerHaptic();
+                setInfoModalVisible(true);
+              }}
+            >
+              <Feather name="info" size={19} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* MISSIONS MAIN CONTENT */}
+        <MissionsTabContent navigation={navigation} user={user} language={language} />
 
         {/* BOTTOM NAVIGATION BAR: VERTICAL ACTIVE PILL MATCHING HOME 1:1 */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
