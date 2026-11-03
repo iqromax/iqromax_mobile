@@ -1,42 +1,74 @@
-import React, { useEffect, useState } from 'react';
-import { View, Image, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, StyleSheet, StatusBar, TouchableOpacity } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
 
-const { height } = Dimensions.get('window');
+const videoSource = require('../assets/video/open.mp4');
 
 export default function AdvancedSplashScreen({ isAppReady, onFinish }) {
-  // Minimal kutish vaqti: Ilova juda tez yuklanib qolsa ham, 
-  // zagruzka ekrani kamida 1.5 soniya ko'rinib turishi uchun
-  const [minTimePassed, setMinTimePassed] = useState(false);
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinTimePassed(true);
-    }, 300); // Fast 300ms minimal delay
-    return () => clearTimeout(timer);
-  }, []);
+  const hasFinishedRef = useRef(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+
+  const triggerFinish = () => {
+    if (hasFinishedRef.current) return;
+    hasFinishedRef.current = true;
+    if (onFinish) onFinish();
+  };
+
+  const player = useVideoPlayer(videoSource, (p) => {
+    p.loop = false;
+    p.muted = false;
+    p.play();
+  });
 
   useEffect(() => {
-    if (isAppReady && minTimePassed) {
-      if (onFinish) onFinish();
+    const playToEndSubscription = player.addListener('playToEnd', () => {
+      setVideoEnded(true);
+    });
+
+    const statusSubscription = player.addListener('statusChange', ({ status, error }) => {
+      if (status === 'error') {
+        console.warn('Splash video playback error:', error);
+        setVideoEnded(true);
+      }
+    });
+
+    return () => {
+      playToEndSubscription.remove();
+      statusSubscription.remove();
+    };
+  }, [player]);
+
+  useEffect(() => {
+    if (videoEnded && isAppReady) {
+      triggerFinish();
     }
-  }, [isAppReady, minTimePassed, onFinish]);
+  }, [videoEnded, isAppReady]);
+
+  // Xavfsizlik uchun zaxira taymer (agar video yuklanmasa ilova qotib qolmasligi uchun)
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      setVideoEnded(true);
+    }, 10000);
+    return () => clearTimeout(safetyTimer);
+  }, []);
 
   return (
     <View style={styles.container}>
-      {/* 
-        DIQQAT: Siz yuborgan ikkinchi rasmni 'assets' papkasiga 
-        'splash_new.png' degan nom bilan saqlashingiz kerak!
-      */}
-      <Image 
-        source={require('../assets/splash_new.jpg')} 
-        style={styles.image} 
-        resizeMode="contain" 
-      />
-      
-      <View style={styles.loaderContainer}>
-        {/* Dumaloq aylanuvchi zagruzka (spinner) */}
-        <ActivityIndicator size="large" color="#FF9900" />
-      </View>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" hidden={true} />
+      <TouchableOpacity
+        activeOpacity={1}
+        style={StyleSheet.absoluteFillObject}
+        onPress={() => setVideoEnded(true)}
+      >
+        <VideoView
+          style={StyleSheet.absoluteFillObject}
+          player={player}
+          nativeControls={false}
+          contentFit="cover"
+          allowsFullscreen={false}
+          allowsPictureInPicture={false}
+        />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -44,19 +76,8 @@ export default function AdvancedSplashScreen({ isAppReady, onFinish }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#050414', // Rasmdagi to'q ko'k/qora fon
+    backgroundColor: '#000000',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  image: {
-    width: '85%',
-    height: '85%',
-    position: 'absolute',
-  },
-  loaderContainer: {
-    position: 'absolute',
-    bottom: height * 0.15, // Pastki qismdan 15% tepada (birinchi rasmdagidek)
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
 });

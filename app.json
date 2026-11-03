@@ -31,7 +31,8 @@
       "expo-image",
       "expo-sharing",
       "expo-status-bar",
-      "./plugins/withCustomSplash"
+      "./plugins/withCustomSplash",
+      "expo-video"
     ],
     "extra": {
       "eas": {
