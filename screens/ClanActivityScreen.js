@@ -71,7 +71,12 @@ export default function ClanActivityScreen({ navigation, route }) {
             <TouchableOpacity
               activeOpacity={0.7}
               style={styles.backBreadcrumb}
-              onPress={() => navigation.navigate('StudentDashboard')}
+              onPress={() => {
+                navigation.navigate('ClanTransitionScreen', {
+                  type: 'toIqromax',
+                  target: 'StudentDashboard',
+                });
+              }}
             >
               <View style={styles.backArrowBadge}>
                 <Feather name="chevron-left" size={16} color="#C084FC" />

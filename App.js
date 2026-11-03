@@ -61,6 +61,7 @@ import ClanMissionProgressScreen from './screens/ClanMissionProgressScreen';
 import ClanChestRewardsScreen from './screens/ClanChestRewardsScreen';
 import ClanStreakScreen from './screens/ClanStreakScreen';
 import ClanSeasonScreen from './screens/ClanSeasonScreen';
+import ClanTransitionScreen from './screens/ClanTransitionScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 import { SoundPlayerBridge } from './src/utils/soundPlayer';
 import { ModelPreloader } from './src/utils/ModelPreloader';
@@ -604,6 +605,7 @@ export default function App() {
           <Stack.Screen name="ClanChestRewardsScreen" component={ClanChestRewardsScreen} />
           <Stack.Screen name="ClanStreakScreen" component={ClanStreakScreen} />
           <Stack.Screen name="ClanSeasonScreen" component={ClanSeasonScreen} />
+          <Stack.Screen name="ClanTransitionScreen" component={ClanTransitionScreen} options={{ animation: 'fade' }} />
         </Stack.Navigator>
 
         {/* Global Admin Action (Delete/Block) Alert Modal */}

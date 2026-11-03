@@ -228,75 +228,12 @@ export default function ClanHomeScreen({ navigation, route }) {
   }, [route.params?.tab]);
 
   const handleExitToMainSystem = () => {
-    if (isExitPortalActive) return;
-    setIsExitPortalActive(true);
-    exitScaleAnim.setValue(0.01);
-    exitRotateAnim.setValue(0);
-    exitCounterRotateAnim.setValue(0);
-    exitRaysScaleAnim.setValue(0.2);
-    exitOpacityAnim.setValue(0);
-    exitFlashAnim.setValue(0);
-    exitProgressAnim.setValue(0);
-
-    // Cross-platform Haptic & Native Vibrator Trigger
-    triggerReturnPortalHaptics();
-
-    Animated.parallel([
-      Animated.timing(exitOpacityAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(exitScaleAnim, {
-        toValue: 26,
-        duration: 920,
-        easing: Easing.bezier(0.18, 0.9, 0.25, 1),
-        useNativeDriver: true,
-      }),
-      Animated.timing(exitRaysScaleAnim, {
-        toValue: 4.8,
-        duration: 920,
-        easing: Easing.bezier(0.16, 1, 0.3, 1),
-        useNativeDriver: true,
-      }),
-      Animated.timing(exitRotateAnim, {
-        toValue: 1,
-        duration: 920,
-        easing: Easing.inOut(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(exitCounterRotateAnim, {
-        toValue: 1,
-        duration: 920,
-        easing: Easing.inOut(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(exitProgressAnim, {
-        toValue: 1,
-        duration: 750,
-        easing: Easing.bezier(0.2, 0.8, 0.2, 1),
-        useNativeDriver: false,
-      }),
-      Animated.sequence([
-        Animated.delay(520),
-        Animated.timing(exitFlashAnim, {
-          toValue: 1,
-          duration: 400,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start(() => {
-      navigation.navigate('StudentDashboard');
-      setTimeout(() => {
-        setIsExitPortalActive(false);
-        exitScaleAnim.setValue(0.01);
-        exitRotateAnim.setValue(0);
-        exitCounterRotateAnim.setValue(0);
-        exitRaysScaleAnim.setValue(0.2);
-        exitOpacityAnim.setValue(0);
-        exitFlashAnim.setValue(0);
-        exitProgressAnim.setValue(0);
-      }, 500);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch (e) {}
+    navigation.navigate('ClanTransitionScreen', {
+      type: 'toIqromax',
+      target: 'StudentDashboard',
     });
   };
 

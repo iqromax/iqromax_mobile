@@ -277,7 +277,10 @@ export default function ClanSeasonScreen({ navigation }) {
               activeOpacity={0.7}
               onPress={() => {
                 triggerHaptic();
-                navigation.navigate('StudentDashboard');
+                navigation.navigate('ClanTransitionScreen', {
+                  type: 'toIqromax',
+                  target: 'StudentDashboard',
+                });
               }}
               style={styles.backBreadcrumb}
             >
@@ -1307,3 +1310,4 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
 });
+

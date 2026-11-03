@@ -686,77 +686,16 @@ export default function StudentDashboardScreen({ navigation, route }) {
 
   const handleOpenClanWithPortal = () => {
     checkGuestAuth(() => {
-      setIsPortalActive(true);
-      portalScaleAnim.setValue(0.01);
-      portalRotateAnim.setValue(0);
-      portalCounterRotateAnim.setValue(0);
-      portalRaysScaleAnim.setValue(0.2);
-      portalOpacityAnim.setValue(0);
-      portalFlashAnim.setValue(0);
-      portalProgressAnim.setValue(0);
-
-      // Cross-platform Haptic & Native Vibrator Trigger
-      triggerPortalWarpHaptics();
-
-      Animated.parallel([
-        Animated.timing(portalOpacityAnim, {
-          toValue: 1,
-          duration: 320,
-          useNativeDriver: true,
-        }),
-        Animated.timing(portalScaleAnim, {
-          toValue: 26,
-          duration: 950,
-          easing: Easing.bezier(0.18, 0.9, 0.25, 1),
-          useNativeDriver: true,
-        }),
-        Animated.timing(portalRaysScaleAnim, {
-          toValue: 4.8,
-          duration: 950,
-          easing: Easing.bezier(0.16, 1, 0.3, 1),
-          useNativeDriver: true,
-        }),
-        Animated.timing(portalRotateAnim, {
-          toValue: 1,
-          duration: 950,
-          easing: Easing.inOut(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(portalCounterRotateAnim, {
-          toValue: 1,
-          duration: 950,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(portalProgressAnim, {
-          toValue: 1,
-          duration: 780,
-          easing: Easing.bezier(0.2, 0.8, 0.2, 1),
-          useNativeDriver: false,
-        }),
-        Animated.sequence([
-          Animated.delay(540),
-          Animated.timing(portalFlashAnim, {
-            toValue: 1,
-            duration: 410,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start(() => {
-        navigation.navigate('ClanHomeScreen', {
+      try {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      } catch (e) {}
+      navigation.navigate('ClanTransitionScreen', {
+        type: 'toClan',
+        target: 'ClanHomeScreen',
+        params: {
           user: user,
           language: language,
-        });
-        setTimeout(() => {
-          setIsPortalActive(false);
-          portalScaleAnim.setValue(0.01);
-          portalRotateAnim.setValue(0);
-          portalCounterRotateAnim.setValue(0);
-          portalRaysScaleAnim.setValue(0.2);
-          portalOpacityAnim.setValue(0);
-          portalFlashAnim.setValue(0);
-          portalProgressAnim.setValue(0);
-        }, 500);
+        },
       });
     });
   };

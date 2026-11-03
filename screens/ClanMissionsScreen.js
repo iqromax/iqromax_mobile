@@ -635,7 +635,10 @@ export default function ClanMissionsScreen({ navigation }) {
               activeOpacity={0.7}
               onPress={() => {
                 triggerHaptic();
-                navigation.navigate('StudentDashboard');
+                navigation.navigate('ClanTransitionScreen', {
+                  type: 'toIqromax',
+                  target: 'StudentDashboard',
+                });
               }}
               style={styles.backBreadcrumb}
             >
