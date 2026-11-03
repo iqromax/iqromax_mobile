@@ -59,6 +59,7 @@ import ClanMissionsScreen from './screens/ClanMissionsScreen';
 import ClanMissionDetailScreen from './screens/ClanMissionDetailScreen';
 import ClanMissionProgressScreen from './screens/ClanMissionProgressScreen';
 import ClanChestRewardsScreen from './screens/ClanChestRewardsScreen';
+import ClanStreakScreen from './screens/ClanStreakScreen';
 import AdvancedSplashScreen from './components/AdvancedSplashScreen';
 import { SoundPlayerBridge } from './src/utils/soundPlayer';
 import { ModelPreloader } from './src/utils/ModelPreloader';
@@ -600,6 +601,7 @@ export default function App() {
           <Stack.Screen name="ClanMissionDetailScreen" component={ClanMissionDetailScreen} />
           <Stack.Screen name="ClanMissionProgressScreen" component={ClanMissionProgressScreen} />
           <Stack.Screen name="ClanChestRewardsScreen" component={ClanChestRewardsScreen} />
+          <Stack.Screen name="ClanStreakScreen" component={ClanStreakScreen} />
         </Stack.Navigator>
 
         {/* Global Admin Action (Delete/Block) Alert Modal */}

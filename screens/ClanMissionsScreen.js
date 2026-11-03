@@ -224,10 +224,7 @@ export function MissionsTabContent({ navigation }) {
     } else if (tabId === 'mukofotlar') {
       navigation.navigate('ClanChestRewardsScreen');
     } else if (tabId === 'streak') {
-      Alert.alert(
-        "Clan Streak 🔥",
-        "Sizning shaxsiy streakingiz: 7 kun!\nClan umumiy faollik streaki: 14 kun ketma-ket!"
-      );
+      navigation.navigate('ClanStreakScreen');
     } else if (tabId === 'reyting') {
       navigation.navigate('ClanLeaderboardScreen');
     }
