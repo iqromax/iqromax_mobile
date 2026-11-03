@@ -21,6 +21,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getClanTranslations } from '../src/utils/clanTranslations';
+import ClanComingSoonOverlay from '../components/ClanComingSoonOverlay';
 
 const { width } = Dimensions.get('window');
 
@@ -687,8 +688,11 @@ export default function ClanMissionsScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* MISSIONS MAIN CONTENT */}
-        <MissionsTabContent navigation={navigation} user={user} language={language} />
+        {/* MISSIONS MAIN CONTENT WITH COMING SOON OVERLAY */}
+        <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <MissionsTabContent navigation={navigation} user={user} language={language} />
+          <ClanComingSoonOverlay activeTab="Missions" language={language} />
+        </View>
 
         {/* BOTTOM NAVIGATION BAR: VERTICAL ACTIVE PILL MATCHING HOME 1:1 */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>

@@ -22,6 +22,7 @@ import {
 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { getClanTranslations } from '../src/utils/clanTranslations';
+import ClanComingSoonOverlay from '../components/ClanComingSoonOverlay';
 import Svg, {
   Path,
   Defs,
@@ -827,8 +828,11 @@ export default function ClanProfileScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* CLAN PROFILE CONTENT */}
-        <ClanProfileTabContent navigation={navigation} user={user} language={language} />
+        {/* CLAN PROFILE CONTENT WITH COMING SOON OVERLAY */}
+        <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <ClanProfileTabContent navigation={navigation} user={user} language={language} />
+          <ClanComingSoonOverlay activeTab="Clan" language={language} />
+        </View>
 
         {/* BOTTOM NAVIGATION BAR */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>

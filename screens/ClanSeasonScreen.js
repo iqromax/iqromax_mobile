@@ -31,6 +31,7 @@ import Svg, {
 } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { getClanTranslations } from '../src/utils/clanTranslations';
+import ClanComingSoonOverlay from '../components/ClanComingSoonOverlay';
 
 const { width } = Dimensions.get('window');
 
@@ -687,8 +688,11 @@ export default function ClanSeasonScreen({ navigation, route }) {
           </View>
         </View>
 
-        {/* REUSABLE SEASON TAB CONTENT */}
-        <SeasonTabContent navigation={navigation} user={user} language={language} />
+        {/* REUSABLE SEASON TAB CONTENT WITH COMING SOON OVERLAY */}
+        <View style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          <SeasonTabContent navigation={navigation} user={user} language={language} />
+          <ClanComingSoonOverlay activeTab="Season" language={language} />
+        </View>
 
         {/* 8. BOTTOM NAVIGATION BAR */}
         <View style={[styles.bottomNavBar, { paddingBottom: Math.max(insets.bottom, 12) }]}>
