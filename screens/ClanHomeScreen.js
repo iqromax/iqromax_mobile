@@ -286,7 +286,7 @@ export default function ClanHomeScreen({ navigation, route }) {
         }),
       ]),
     ]).start(() => {
-      navigation.goBack();
+      navigation.navigate('StudentDashboard');
       setTimeout(() => {
         setIsExitPortalActive(false);
         exitScaleAnim.setValue(0.01);

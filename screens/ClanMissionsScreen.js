@@ -659,7 +659,7 @@ export default function ClanMissionsScreen({ navigation }) {
               activeOpacity={0.7}
               onPress={() => {
                 triggerHaptic();
-                navigation.goBack();
+                navigation.navigate('StudentDashboard');
               }}
               style={styles.backBreadcrumb}
             >
