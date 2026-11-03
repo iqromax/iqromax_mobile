@@ -220,10 +220,7 @@ export function MissionsTabContent({ navigation }) {
     triggerHaptic();
     setActiveFeatureTab(tabId);
     if (tabId === 'progress') {
-      Alert.alert(
-        "Missions Progress",
-        "Bugun: 4/6 bajarildi (67%)\nHaftalik: 2/4 bajarildi (50%)\nClan: 1/3 bajarildi (33%)\n\nUmumiy to'plangan XP: +450 XP bugun!"
-      );
+      navigation.navigate('ClanMissionProgressScreen');
     } else if (tabId === 'mukofotlar') {
       Alert.alert(
         "Clan Mukofotlari 🎁",
