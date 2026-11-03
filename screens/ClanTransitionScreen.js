@@ -24,7 +24,7 @@ export default function ClanTransitionScreen({ route, navigation }) {
   const [videoEnded, setVideoEnded] = useState(false);
 
   const videoBase64 = isToClan ? IQROMAX_CLAN_BASE64 : CLAN_IQROMAX_BASE64;
-  const expectedDurationMs = isToClan ? 3300 : 3100;
+  const expectedDurationMs = 10200;
 
   const triggerHaptic = (style = 'medium') => {
     try {
